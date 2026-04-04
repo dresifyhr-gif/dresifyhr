@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:dresifyshop.com)",
+      "Bash(grep -r \"TODO\\\\|FIXME\\\\|XXX\\\\|HACK\" /c/Users/vampi/Desktop/dresify --include=*.tsx --include=*.ts --include=*.jsx --include=*.js)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(gh auth:*)",
+      "Bash(vercel --version)",
+      "Bash(npm install:*)",
+      "Bash(vercel whoami:*)",
+      "Bash(vercel --prod)",
+      "Bash(npm run:*)",
+      "Bash(cat C:/Users/vampi/Desktop/dresify/app/blog/[slug]/page.tsx)",
+      "Bash(dir \"C:\\\\Users\\\\vampi\\\\Desktop\\\\dresify\\\\public\\\\jerseys\" /b)",
+      "Read(//c/Users/vampi/**)",
+      "Bash(dir 'C:\\\\Users\\\\vampi\\\\katalog dresova' /b)",
+      "Bash(dir \"C:\\\\Users\\\\vampi\\\\Desktop\\\\dresify\\\\public\" /b /s)",
+      "Bash(copy \"C:\\\\Users\\\\vampi\\\\Desktop\\\\dresify slike\\\\djete hrvatski dres.png\" \"C:\\\\Users\\\\vampi\\\\Desktop\\\\dresify\\\\public\\\\hero\\\\djete-hrvatski-dres.png\")",
+      "Bash(py --version)",
+      "Bash(py \"C:/Users/vampi/Desktop/dresify/scripts/make_excel.py\")",
+      "Bash(py -c \"from PIL import Image, ImageDraw, ImageFont; print\\(''OK''\\)\")",
+      "Bash(sed -i 's|href=\"\"/kontakt\"\" onClick={closeAddModal}|href=\"\"/checkout\"\" onClick={closeAddModal}|g' \"C:/Users/vampi/Desktop/dresify/components/site/add-to-cart-modal.tsx\")",
+      "Bash(sed -i 's|href=\"\"/kontakt\"\" onClick={closeDrawer}|href=\"\"/checkout\"\" onClick={closeDrawer}|g' \"C:/Users/vampi/Desktop/dresify/components/site/cart-drawer.tsx\")",
+      "Bash(npx next:*)",
+      "Bash(curl -s http://localhost:3000/checkout)",
+      "Bash(curl -sL http://localhost:3000/checkout)",
+      "Bash(curl -v http://localhost:3000/checkout)",
+      "Bash(curl -sL http://localhost:3000/checkout/)",
+      "Bash(node -e \":*)",
+      "Bash(node -e \"require\\(''@next/third-parties/google''\\); console.log\\(''OK''\\)\")"
+    ]
+  }
+}

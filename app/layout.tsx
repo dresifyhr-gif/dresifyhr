@@ -1,0 +1,98 @@
+import type { Metadata } from "next";
+import { Barlow, Bebas_Neue } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
+
+import "@/app/globals.css";
+
+import { SiteProviders } from "@/components/providers/site-providers";
+import { AddToCartModal } from "@/components/site/add-to-cart-modal";
+import { AnnouncementBar } from "@/components/site/announcement-bar";
+import { CartDrawer } from "@/components/site/cart-drawer";
+import { ContentProtection } from "@/components/site/content-protection";
+import { FloatingWhatsAppButton } from "@/components/site/floating-whatsapp-button";
+import { Footer } from "@/components/site/footer";
+import { Navbar } from "@/components/site/navbar";
+import { SocialProofPopup } from "@/components/site/social-proof-popup";
+import { buildOrganizationSchema, buildWebsiteSchema, defaultMetadata } from "@/lib/seo";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+
+const bebas = Bebas_Neue({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-bebas"
+});
+
+const barlow = Barlow({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-barlow"
+});
+
+export const metadata: Metadata = {
+  ...defaultMetadata,
+  metadataBase: new URL(SITE_URL),
+  applicationName: SITE_NAME,
+  title: {
+    default: `${SITE_NAME} | Premium nogometni dresovi`,
+    template: `%s | ${SITE_NAME}`
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "dresovi",
+    "nogometni dresovi",
+    "dresovi hrvatska",
+    "kupiti dresove online",
+    "football dresovi",
+    "dresovi za odrasle",
+    "dječji dresovi",
+    "dječji nogometni dresovi",
+    "hrvatski dresovi",
+    "retro dresovi",
+    "Dresify",
+    "nogometni dresovi Hrvatska"
+  ],
+  verification: {
+    google: "eGjKM--fK6RTerhFtL_stwZKLX1PzO0jmobsShbUq9g"
+  },
+  icons: {
+    icon: "/favicon.svg"
+  }
+};
+
+export default function RootLayout({
+  children
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const organizationSchema = buildOrganizationSchema();
+  const websiteSchema = buildWebsiteSchema();
+
+  return (
+    <html lang="hr" suppressHydrationWarning>
+      <body className={`${bebas.variable} ${barlow.variable}`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <SiteProviders>
+          <div className="relative min-h-screen">
+            <AnnouncementBar />
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+            <CartDrawer />
+            <AddToCartModal />
+            <ContentProtection />
+          <FloatingWhatsAppButton />
+            <SocialProofPopup />
+          </div>
+        </SiteProviders>
+      </body>
+      <GoogleAnalytics gaId="G-NKPLWRWPN9" />
+    </html>
+  );
+}

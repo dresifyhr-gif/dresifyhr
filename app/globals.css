@@ -1,0 +1,208 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --accent: #e8ff3c;
+  --surface: #111111;
+  --surface-2: #0a0a0a;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(232, 255, 60, 0.28);
+  --muted: rgba(255, 255, 255, 0.5);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Content protection */
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Allow pointer events on interactive elements that contain images */
+a img, button img, a *, button * {
+  pointer-events: auto;
+}
+
+p, h1, h2, h3, h4, h5, h6, span, li {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(232, 255, 60, 0.12), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0, transparent 32%);
+  content: "";
+  pointer-events: none;
+}
+
+@keyframes tickerScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes heroFloatA {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-5deg);
+  }
+  50% {
+    transform: translate3d(0, -18px, 0) rotate(-3deg);
+  }
+}
+
+@keyframes heroFloatB {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(7deg);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0) rotate(9deg);
+  }
+}
+
+@keyframes heroFloatC {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-9deg);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0) rotate(-6deg);
+  }
+}
+
+* {
+  border-color: var(--line);
+}
+
+*::selection {
+  background: rgba(232, 255, 60, 0.8);
+  color: #050505;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid #0a0a0a;
+  border-radius: 999px;
+  background: rgba(232, 255, 60, 0.45);
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-bebas), sans-serif;
+    letter-spacing: 0.04em;
+  }
+
+  body,
+  input,
+  textarea,
+  button,
+  select {
+    font-family: var(--font-barlow), sans-serif;
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-[1440px] px-3 sm:px-6 lg:px-10;
+  }
+
+  .section-pad {
+    @apply py-10 sm:py-14 lg:py-20;
+  }
+
+  .panel {
+    @apply rounded-[16px] border border-white/10 bg-[#111111] sm:rounded-[18px] lg:rounded-[20px];
+  }
+
+  .section-kicker {
+    @apply mb-3 inline-flex items-center gap-2 rounded-[4px] border border-accent/30 bg-accent/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-accent sm:mb-4 sm:text-xs sm:tracking-[0.32em];
+  }
+
+  .section-title {
+    @apply text-3xl uppercase leading-none sm:text-5xl md:text-6xl;
+  }
+
+  .section-copy {
+    @apply max-w-2xl text-sm leading-7 text-white/60 sm:text-base;
+  }
+
+  .button-primary {
+    @apply inline-flex min-h-[54px] items-center justify-center rounded-[4px] bg-accent px-7 font-heading text-xl uppercase tracking-[0.16em] text-black transition-all duration-200 ease-out hover:bg-[#f0ff71];
+  }
+
+  .button-secondary {
+    @apply inline-flex min-h-[54px] items-center justify-center rounded-[4px] border border-white/20 bg-transparent px-7 font-heading text-xl uppercase tracking-[0.16em] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent;
+  }
+
+  .stat-pill {
+    @apply inline-flex items-center rounded-[999px] border border-white/10 px-4 py-2 text-sm font-medium text-white transition-all duration-200 ease-out;
+  }
+
+  .grain-overlay::after {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.06) 0.5px, transparent 0.5px);
+    background-size: 10px 10px;
+    content: "";
+    opacity: 0.04;
+    pointer-events: none;
+  }
+
+  .hero-parallax-layer {
+    will-change: transform;
+    transform: translate3d(
+      calc(var(--hero-parallax-x, 0) * var(--depth-x, 0px)),
+      calc(var(--hero-parallax-y, 0) * var(--depth-y, 0px)),
+      0
+    );
+    transition: transform 180ms ease-out;
+  }
+
+  .hero-float-a {
+    animation: heroFloatA 7.8s ease-in-out infinite;
+  }
+
+  .hero-float-b {
+    animation: heroFloatB 9.2s ease-in-out infinite;
+  }
+
+  .hero-float-c {
+    animation: heroFloatC 6.9s ease-in-out infinite;
+  }
+}

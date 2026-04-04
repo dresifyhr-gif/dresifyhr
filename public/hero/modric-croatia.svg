@@ -1,0 +1,36 @@
+<svg width="360" height="540" viewBox="0 0 360 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="shirt-modric">
+      <path d="M104 26H256L292 66L328 170L286 214V506H74V214L32 170L68 66L104 26Z" />
+    </clipPath>
+    <filter id="shadow-modric" x="8" y="10" width="344" height="522" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.32" />
+    </filter>
+    <linearGradient id="shine-modric" x1="92" y1="42" x2="278" y2="510" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.62" />
+      <stop offset="0.3" stop-color="#FFFFFF" stop-opacity="0.15" />
+      <stop offset="1" stop-color="#94A3B8" stop-opacity="0.16" />
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#shadow-modric)">
+    <path d="M104 26H256L292 66L328 170L286 214V506H74V214L32 170L68 66L104 26Z" fill="#F8FAFC" />
+    <g clip-path="url(#shirt-modric)">
+      <rect x="0" y="0" width="360" height="540" fill="#F8FAFC" />
+      <rect x="66" y="390" width="88" height="92" fill="#F3152F" />
+      <rect x="206" y="350" width="124" height="108" fill="#F3152F" />
+      <path d="M90 78H270" stroke="#CBD5E1" stroke-width="2" stroke-opacity="0.55" />
+      <path d="M180 92V502" stroke="#CBD5E1" stroke-opacity="0.16" stroke-width="2" />
+      <rect x="0" y="0" width="360" height="540" fill="url(#shine-modric)" />
+    </g>
+
+    <path d="M142 26H218V44C218 56 208 66 180 66C152 66 142 56 142 44V26Z" fill="#E2E8F0" />
+    <path d="M152 32H208V42C208 48 200 52 180 52C160 52 152 48 152 42V32Z" fill="#CBD5E1" />
+    <circle cx="180" cy="52" r="10" fill="#94A3B8" fill-opacity="0.32" />
+
+    <text x="180" y="118" text-anchor="middle" fill="#1D4ED8" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="42" font-weight="700" letter-spacing="2">MODRIC</text>
+    <text x="180" y="370" text-anchor="middle" fill="#1D4ED8" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="206" font-weight="700" letter-spacing="-8">10</text>
+
+    <path d="M104 26H256L292 66L328 170L286 214V506H74V214L32 170L68 66L104 26Z" stroke="#D1D5DB" stroke-width="2.5" />
+  </g>
+</svg>

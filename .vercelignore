@@ -1,0 +1,9 @@
+.git
+.next
+.next_cache_fix_wa
+.playwright-cli
+node_modules
+out
+output
+WhatsApp Image *.jpeg
+netlify.toml

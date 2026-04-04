@@ -1,0 +1,36 @@
+<svg width="360" height="540" viewBox="0 0 360 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="shirt-ronaldo">
+      <path d="M104 26H256L292 66L328 170L286 214V506H74V214L32 170L68 66L104 26Z" />
+    </clipPath>
+    <filter id="shadow-ronaldo" x="8" y="10" width="344" height="522" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.32" />
+    </filter>
+    <linearGradient id="shine-ronaldo" x1="92" y1="42" x2="280" y2="510" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.24" />
+      <stop offset="0.35" stop-color="#FFFFFF" stop-opacity="0.06" />
+      <stop offset="1" stop-color="#111827" stop-opacity="0.18" />
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#shadow-ronaldo)">
+    <path d="M104 26H256L292 66L328 170L286 214V506H74V214L32 170L68 66L104 26Z" fill="#C1121F" />
+    <g clip-path="url(#shirt-ronaldo)">
+      <rect x="0" y="0" width="360" height="540" fill="#C1121F" />
+      <path d="M-18 330L162 218L378 376V560H-18V330Z" fill="#14532D" />
+      <path d="M74 94L96 196L132 232L96 506H74V214L32 170L68 66L74 94Z" fill="#E11D2E" fill-opacity="0.22" />
+      <path d="M286 94L264 196L228 232L264 506H286V214L328 170L292 66L286 94Z" fill="#7F1D1D" fill-opacity="0.18" />
+      <rect x="70" y="126" width="32" height="16" rx="8" fill="#14532D" />
+      <rect x="258" y="126" width="32" height="16" rx="8" fill="#14532D" />
+      <rect x="0" y="0" width="360" height="540" fill="url(#shine-ronaldo)" />
+    </g>
+
+    <path d="M142 26H218V44C218 56 207 66 180 66C153 66 142 56 142 44V26Z" fill="#B91C1C" />
+    <path d="M142 38H218" stroke="#FACC15" stroke-width="5" stroke-linecap="round" />
+
+    <text x="180" y="116" text-anchor="middle" fill="#FACC15" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="44" font-weight="700" letter-spacing="2">RONALDO</text>
+    <text x="180" y="362" text-anchor="middle" fill="#FACC15" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="220" font-weight="700" letter-spacing="-12">7</text>
+
+    <path d="M104 26H256L292 66L328 170L286 214V506H74V214L32 170L68 66L104 26Z" stroke="#7F1D1D" stroke-width="2.5" />
+  </g>
+</svg>

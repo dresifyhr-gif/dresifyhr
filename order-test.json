@@ -1,0 +1,19 @@
+﻿{
+  "name": "Test Narudzba",
+  "phone": "0912345678",
+  "email": "",
+  "street": "Test Ulica 1",
+  "city": "Zagreb",
+  "postalCode": "10000",
+  "details": "1. Francuska - Zidane nr10, Dres, veličina S, cijena 20€",
+  "cartSummary": "1 artikl\n- Francuska / Zidane nr10 / S / 20€",
+  "contactChannel": "whatsapp",
+  "fulfillment": "delivery",
+  "payment": "Plaćanje pri preuzimanju",
+  "note": "SMTP test",
+  "subtotal": "20,00 €",
+  "shipping": "7,50 €",
+  "total": "27,50 €",
+  "itemCount": 1,
+  "createdAt": "2026-03-27T07:45:30.000Z"
+}

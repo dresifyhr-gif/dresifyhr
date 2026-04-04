@@ -1,0 +1,36 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="shirt-nightwave">
+      <path d="M260 72H640L712 150L790 360L702 462V1112H198V462L110 360L188 150L260 72Z" />
+    </clipPath>
+    <linearGradient id="night-base" x1="240" y1="92" x2="664" y2="1112" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#171C2A"/>
+      <stop offset="0.38" stop-color="#0C1220"/>
+      <stop offset="1" stop-color="#060913"/>
+    </linearGradient>
+    <linearGradient id="night-stripe-a" x1="266" y1="190" x2="698" y2="752" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#20C8FF"/>
+      <stop offset="1" stop-color="#123DFF"/>
+    </linearGradient>
+    <linearGradient id="night-stripe-b" x1="286" y1="256" x2="682" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#45D8FF"/>
+      <stop offset="1" stop-color="#1F59FF"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#shirt-nightwave)">
+    <path d="M260 72H640L712 150L790 360L702 462V1112H198V462L110 360L188 150L260 72Z" fill="url(#night-base)"/>
+    <path d="M302 168L694 224L670 312L268 264L302 168Z" fill="url(#night-stripe-a)" fill-opacity="0.92"/>
+    <path d="M224 472L680 296L714 374L246 562L224 472Z" fill="url(#night-stripe-b)" fill-opacity="0.82"/>
+    <path d="M288 780L714 568L742 642L338 864L288 780Z" fill="url(#night-stripe-a)" fill-opacity="0.82"/>
+    <path d="M224 612L696 772L648 854L208 698L224 612Z" fill="#152859" fill-opacity="0.55"/>
+    <path d="M188 120H712V176H188V120Z" fill="#111827"/>
+    <path d="M198 150L266 372L274 1112H198V462L110 360L188 150H198Z" fill="#0A0F1A" fill-opacity="0.42"/>
+    <path d="M702 150L634 372L626 1112H702V462L790 360L712 150H702Z" fill="#030712" fill-opacity="0.38"/>
+  </g>
+  <path d="M306 70H594V112C594 144 552 180 450 180C348 180 306 144 306 112V70Z" fill="#F8FAFC"/>
+  <path d="M332 82H568V104C568 124 534 146 450 146C366 146 332 124 332 104V82Z" fill="#0B1220"/>
+  <path d="M194 748H706" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="3"/>
+  <text x="450" y="430" text-anchor="middle" fill="#F8FAFC" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="112" font-weight="700">DRESIFY</text>
+  <text x="450" y="726" text-anchor="middle" fill="#F8FAFC" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="212" font-weight="700">20€</text>
+  <path d="M260 72H640L712 150L790 360L702 462V1112H198V462L110 360L188 150L260 72Z" stroke="#E5E7EB" stroke-opacity="0.12" stroke-width="4"/>
+</svg>

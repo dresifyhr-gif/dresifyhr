@@ -1,0 +1,50 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="shirt-croatia">
+      <path d="M260 72H640L712 150L790 360L702 462V1112H198V462L110 360L188 150L260 72Z" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#shirt-croatia)">
+    <rect x="110" y="72" width="680" height="1040" fill="#F8FAFC"/>
+    <g fill="#E11D2E">
+      <rect x="198" y="160" width="84" height="84"/>
+      <rect x="366" y="160" width="84" height="84"/>
+      <rect x="534" y="160" width="84" height="84"/>
+      <rect x="282" y="244" width="84" height="84"/>
+      <rect x="450" y="244" width="84" height="84"/>
+      <rect x="618" y="244" width="84" height="84"/>
+      <rect x="198" y="328" width="84" height="84"/>
+      <rect x="366" y="328" width="84" height="84"/>
+      <rect x="534" y="328" width="84" height="84"/>
+      <rect x="282" y="412" width="84" height="84"/>
+      <rect x="450" y="412" width="84" height="84"/>
+      <rect x="618" y="412" width="84" height="84"/>
+      <rect x="198" y="496" width="84" height="84"/>
+      <rect x="366" y="496" width="84" height="84"/>
+      <rect x="534" y="496" width="84" height="84"/>
+      <rect x="282" y="580" width="84" height="84"/>
+      <rect x="450" y="580" width="84" height="84"/>
+      <rect x="618" y="580" width="84" height="84"/>
+      <rect x="198" y="664" width="84" height="84"/>
+      <rect x="366" y="664" width="84" height="84"/>
+      <rect x="534" y="664" width="84" height="84"/>
+      <rect x="282" y="748" width="84" height="84"/>
+      <rect x="450" y="748" width="84" height="84"/>
+      <rect x="618" y="748" width="84" height="84"/>
+      <rect x="198" y="832" width="84" height="84"/>
+      <rect x="366" y="832" width="84" height="84"/>
+      <rect x="534" y="832" width="84" height="84"/>
+      <rect x="282" y="916" width="84" height="84"/>
+      <rect x="450" y="916" width="84" height="84"/>
+      <rect x="618" y="916" width="84" height="84"/>
+    </g>
+    <path d="M294 336H626V430H294V336Z" fill="#2947B8" fill-opacity="0.92"/>
+    <path d="M198 150L266 372L274 1112H198V462L110 360L188 150H198Z" fill="#0F172A" fill-opacity="0.06"/>
+    <path d="M702 150L634 372L626 1112H702V462L790 360L712 150H702Z" fill="#0F172A" fill-opacity="0.06"/>
+  </g>
+  <path d="M306 70H594V112C594 144 552 180 450 180C348 180 306 144 306 112V70Z" fill="#E5E7EB"/>
+  <path d="M326 82H574V110C574 130 538 148 450 148C362 148 326 130 326 110V82Z" fill="#1D4ED8"/>
+  <text x="450" y="408" text-anchor="middle" fill="#F8FAFC" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="108" font-weight="700">DRESIFY</text>
+  <text x="450" y="738" text-anchor="middle" fill="#1E3A8A" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="216" font-weight="700">10</text>
+  <path d="M260 72H640L712 150L790 360L702 462V1112H198V462L110 360L188 150L260 72Z" stroke="#E5E7EB" stroke-opacity="0.12" stroke-width="4"/>
+</svg>

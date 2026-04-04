@@ -1,0 +1,65 @@
+<svg width="420" height="620" viewBox="0 0 420 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="shirt-phantom">
+      <path d="M122 34H298L336 78L380 192L332 246V584H88V246L40 192L84 78L122 34Z" />
+    </clipPath>
+    <linearGradient id="base" x1="94" y1="52" x2="314" y2="588" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#111717" />
+      <stop offset="0.36" stop-color="#0B0F0F" />
+      <stop offset="0.72" stop-color="#070808" />
+      <stop offset="1" stop-color="#020303" />
+    </linearGradient>
+    <linearGradient id="edge" x1="210" y1="34" x2="210" y2="584" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F6FFD3" />
+      <stop offset="0.2" stop-color="#D5F53A" />
+      <stop offset="0.58" stop-color="#95B117" />
+      <stop offset="1" stop-color="#0A0A0A" />
+    </linearGradient>
+    <linearGradient id="lime" x1="100" y1="120" x2="316" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F0FF87" />
+      <stop offset="0.5" stop-color="#D9FF32" />
+      <stop offset="1" stop-color="#7EA414" />
+    </linearGradient>
+  </defs>
+
+  <path d="M122 34H298L336 78L380 192L332 246V584H88V246L40 192L84 78L122 34Z" fill="url(#base)" />
+
+  <g clip-path="url(#shirt-phantom)">
+    <rect x="0" y="0" width="420" height="620" fill="url(#base)" />
+    <rect x="198" y="78" width="24" height="506" fill="url(#edge)" fill-opacity="0.08" />
+    <path d="M86 102C130 132 144 198 146 246V584H88V246L40 192L84 78L86 102Z" fill="#D9FF32" fill-opacity="0.03" />
+    <path d="M334 102C290 132 276 198 274 246V584H332V246L380 192L336 78L334 102Z" fill="#D9FF32" fill-opacity="0.03" />
+    <path d="M126 48H294L316 92H104L126 48Z" fill="#0D0D0D" />
+    <path d="M126 48H294L306 76H114L126 48Z" fill="#E8FF3C" fill-opacity="0.14" />
+
+    <path d="M112 144L166 128" stroke="url(#lime)" stroke-opacity="0.24" stroke-width="2" />
+    <path d="M150 176L222 138" stroke="url(#lime)" stroke-opacity="0.18" stroke-width="2" />
+    <path d="M240 130L304 146" stroke="url(#lime)" stroke-opacity="0.18" stroke-width="2" />
+    <path d="M276 180L318 162" stroke="url(#lime)" stroke-opacity="0.18" stroke-width="2" />
+    <path d="M114 242L168 218L202 256L256 220L308 250" stroke="url(#lime)" stroke-opacity="0.2" stroke-width="2" />
+    <path d="M132 308L178 290L214 326L260 296L302 318" stroke="url(#lime)" stroke-opacity="0.16" stroke-width="2" />
+    <path d="M114 384L176 356L214 394L286 360" stroke="url(#lime)" stroke-opacity="0.18" stroke-width="2" />
+    <path d="M152 448L214 420L264 452" stroke="url(#lime)" stroke-opacity="0.16" stroke-width="2" />
+
+    <path d="M148 128H188L202 150H164L148 128Z" stroke="#D9FF32" stroke-opacity="0.22" stroke-width="1.6" />
+    <path d="M240 144H296L308 162H252L240 144Z" stroke="#D9FF32" stroke-opacity="0.22" stroke-width="1.6" />
+    <path d="M120 468H160L174 488H134L120 468Z" stroke="#D9FF32" stroke-opacity="0.18" stroke-width="1.6" />
+    <path d="M256 468H308L320 494H268L256 468Z" stroke="#D9FF32" stroke-opacity="0.16" stroke-width="1.6" />
+
+    <path d="M96 114C172 98 248 98 324 114" stroke="#E8FF3C" stroke-opacity="0.07" stroke-width="2" />
+    <path d="M88 580H332" stroke="#E8FF3C" stroke-opacity="0.12" stroke-width="2" />
+  </g>
+
+  <path d="M152 36H268V52C268 66 252 78 210 78C168 78 152 66 152 52V36Z" fill="#0B0D0D" />
+  <path d="M158 42H262V50C262 58 246 64 210 64C174 64 158 58 158 50V42Z" fill="#F1FFD1" fill-opacity="0.85" />
+
+  <circle cx="152" cy="136" r="26" fill="#0B0D0D" stroke="#E8FF3C" stroke-opacity="0.36" stroke-width="2" />
+  <text x="152" y="146" text-anchor="middle" fill="#F6FFCC" font-family="Barlow, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="1">DF</text>
+
+  <text x="210" y="190" text-anchor="middle" fill="#F5F5F5" fill-opacity="0.82" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="54" font-weight="700" letter-spacing="3">DRESIFY</text>
+  <text x="210" y="224" text-anchor="middle" fill="#F5F5F5" fill-opacity="0.48" font-family="Barlow, Arial, sans-serif" font-size="19" font-weight="600" letter-spacing="8">WEEKLY DROP</text>
+  <text x="298" y="520" text-anchor="middle" fill="#D9FF32" fill-opacity="0.24" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="118" font-weight="700" letter-spacing="-6">20</text>
+
+  <path d="M122 34H298L336 78L380 192L332 246V584H88V246L40 192L84 78L122 34Z" stroke="#E8FF3C" stroke-opacity="0.1" stroke-width="2.5" />
+  <path d="M210 100V584" stroke="#E8FF3C" stroke-opacity="0.07" stroke-width="1.8" />
+</svg>

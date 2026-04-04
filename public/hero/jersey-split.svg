@@ -1,0 +1,20 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="shirt-split">
+      <path d="M260 72H640L712 150L790 360L702 462V1112H198V462L110 360L188 150L260 72Z" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#shirt-split)">
+    <path d="M260 72H450V1112H198V462L110 360L188 150L260 72Z" fill="#1847C7"/>
+    <path d="M450 72H640L712 150L790 360L702 462V1112H450V72Z" fill="#F2D21E"/>
+    <path d="M198 150L266 372L274 1112H198V462L110 360L188 150H198Z" fill="#0F2373" fill-opacity="0.22"/>
+    <path d="M702 150L634 372L626 1112H702V462L790 360L712 150H702Z" fill="#C7A500" fill-opacity="0.18"/>
+    <path d="M188 120H712V176H188V120Z" fill="#0D1535" fill-opacity="0.4"/>
+    <path d="M294 358H622V456H294V358Z" fill="#1A3DA6" fill-opacity="0.9"/>
+  </g>
+  <path d="M306 70H594V112C594 144 552 180 450 180C348 180 306 144 306 112V70Z" fill="#0F1A46"/>
+  <path d="M328 82H572V108C572 130 536 146 450 146C364 146 328 130 328 108V82Z" fill="#E9CF24"/>
+  <text x="450" y="430" text-anchor="middle" fill="#F8FAFC" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="112" font-weight="700">DRESIFY</text>
+  <text x="450" y="740" text-anchor="middle" fill="#F8FAFC" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="212" font-weight="700">20€</text>
+  <path d="M260 72H640L712 150L790 360L702 462V1112H198V462L110 360L188 150L260 72Z" stroke="#F8FAFC" stroke-opacity="0.12" stroke-width="4"/>
+</svg>

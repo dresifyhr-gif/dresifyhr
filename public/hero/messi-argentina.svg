@@ -1,0 +1,39 @@
+<svg width="360" height="540" viewBox="0 0 360 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="shirt-messi">
+      <path d="M104 26H256L292 66L328 170L286 214V506H74V214L32 170L68 66L104 26Z" />
+    </clipPath>
+    <filter id="shadow-messi" x="8" y="10" width="344" height="522" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.32" />
+    </filter>
+    <linearGradient id="shine-messi" x1="86" y1="54" x2="270" y2="508" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.55" />
+      <stop offset="0.34" stop-color="#FFFFFF" stop-opacity="0.08" />
+      <stop offset="1" stop-color="#0F172A" stop-opacity="0.18" />
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#shadow-messi)">
+    <path d="M104 26H256L292 66L328 170L286 214V506H74V214L32 170L68 66L104 26Z" fill="#F8FAFC" />
+    <g clip-path="url(#shirt-messi)">
+      <rect x="0" y="0" width="360" height="540" fill="#F7FAFD" />
+      <rect x="92" y="0" width="42" height="540" fill="#8FD9FF" />
+      <rect x="159" y="0" width="42" height="540" fill="#92DBFF" />
+      <rect x="226" y="0" width="42" height="540" fill="#8FD9FF" />
+      <path d="M70 58C92 76 104 118 108 160V520H58L52 146L70 58Z" fill="#98DBFF" fill-opacity="0.55" />
+      <path d="M290 58C268 76 256 118 252 160V520H302L308 146L290 58Z" fill="#98DBFF" fill-opacity="0.55" />
+      <path d="M104 26H256L280 70H80L104 26Z" fill="#EFF6FF" />
+      <rect x="0" y="0" width="360" height="540" fill="url(#shine-messi)" />
+    </g>
+
+    <path d="M140 24H220V42C220 55 211 66 180 66C149 66 140 55 140 42V24Z" fill="#E5E7EB" />
+    <path d="M142 28H218V38C218 49 208 56 180 56C152 56 142 49 142 38V28Z" fill="#8FD9FF" />
+    <circle cx="180" cy="44" r="10" fill="#D9A441" fill-opacity="0.42" />
+
+    <text x="180" y="114" text-anchor="middle" fill="#101010" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="42" font-weight="700" letter-spacing="2">MESSI</text>
+    <text x="180" y="356" text-anchor="middle" fill="#111111" font-family="Bebas Neue, Arial Narrow, sans-serif" font-size="210" font-weight="700" letter-spacing="-10">10</text>
+
+    <path d="M104 26H256L292 66L328 170L286 214V506H74V214L32 170L68 66L104 26Z" stroke="#D1D5DB" stroke-width="2.5" />
+    <path d="M180 92V498" stroke="#94A3B8" stroke-opacity="0.22" stroke-width="2" />
+  </g>
+</svg>
