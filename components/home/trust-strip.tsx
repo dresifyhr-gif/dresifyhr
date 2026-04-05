@@ -1,25 +1,19 @@
+"use client";
+
 import { LifeBuoy, PackageCheck, RotateCcw, Truck } from "lucide-react";
 
-const trustItems = [
-  {
-    label: "Dostava po cijeloj HR (1-3 dana)",
-    Icon: Truck
-  },
-  {
-    label: "Odgovaramo u roku sat vremena",
-    Icon: LifeBuoy
-  },
-  {
-    label: "Jednostavan povrat",
-    Icon: RotateCcw
-  },
-  {
-    label: "Novo svaki tjedan",
-    Icon: PackageCheck
-  }
-] as const;
+import { useLanguage } from "@/contexts/language-context";
 
 export function TrustStrip() {
+  const { t } = useLanguage();
+
+  const trustItems = [
+    { label: t.trust.delivery, Icon: Truck },
+    { label: t.trust.response, Icon: LifeBuoy },
+    { label: t.trust.returns, Icon: RotateCcw },
+    { label: t.trust.newWeekly, Icon: PackageCheck },
+  ];
+
   return (
     <section className="bg-[#111111]">
       <div className="page-shell grid grid-cols-2 gap-0 border-x border-white/10 lg:grid-cols-4">

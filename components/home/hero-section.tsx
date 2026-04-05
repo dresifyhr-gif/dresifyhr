@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
+import { useLanguage } from "@/contexts/language-context";
+
 const TICKER_ITEMS = [
   "Real Madrid", "Barcelona", "PSG", "Bayern München", "Man United",
   "Atletico Madrid", "Dortmund", "Al-Nassr", "Inter Miami", "Santos",
@@ -12,6 +14,8 @@ const TICKER_ITEMS = [
 ];
 
 export function HeroSection() {
+  const { t } = useLanguage();
+
   return (
     <section className="relative overflow-hidden bg-[#0a0a0a]">
       {/* Background atmosphere — left accent glow */}
@@ -41,7 +45,7 @@ export function HeroSection() {
               transition={{ duration: 0.45, ease: "easeOut" }}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              Novi katalog · 100+ dresova
+              {t.hero.badge}
             </motion.div>
 
             <motion.h1
@@ -50,9 +54,9 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
-              <span className="block">DRESOVI.</span>
-              <span className="block">KLUBOVI &amp; REPREZENTACIJE.</span>
-              <span className="block text-accent">ZA DJECU I ODRASLE.</span>
+              <span className="block">{t.hero.line1}</span>
+              <span className="block">{t.hero.line2}</span>
+              <span className="block text-accent">{t.hero.line3}</span>
             </motion.h1>
 
             <motion.p
@@ -61,7 +65,7 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.08, ease: "easeOut" }}
             >
-              Dostava po cijeloj Hrvatskoj • Plaćanje pouzećem
+              {t.hero.subtitle}
             </motion.p>
 
             <motion.div
@@ -71,7 +75,7 @@ export function HeroSection() {
               transition={{ duration: 0.6, delay: 0.16, ease: "easeOut" }}
             >
               <Link href="/dresovi" className="button-primary">
-                POGLEDAJ DRESOVE
+                {t.hero.cta}
               </Link>
             </motion.div>
 
@@ -83,9 +87,9 @@ export function HeroSection() {
               transition={{ duration: 0.6, delay: 0.24, ease: "easeOut" }}
             >
               {[
-                { value: "100+", label: "dresova" },
-                { value: "20€", label: "fiksna cijena" },
-                { value: "1–3", label: "dana dostava" },
+                { value: "100+", label: t.hero.stats.jerseys },
+                { value: "20€", label: t.hero.stats.price },
+                { value: "1–3", label: t.hero.stats.delivery },
               ].map((stat) => (
                 <div key={stat.label} className="flex items-baseline gap-2">
                   <span className="font-heading text-2xl leading-none text-accent">{stat.value}</span>
@@ -102,10 +106,10 @@ export function HeroSection() {
               transition={{ duration: 0.6, delay: 0.24, ease: "easeOut" }}
             >
               {[
-                { icon: "🚚", label: "Dostava 1–3 dana" },
-                { icon: "⚡", label: "Odgovor u sat vremena" },
-                { icon: "↩️", label: "Jednostavan povrat" },
-                { icon: "📦", label: "Novo svaki tjedan" },
+                { icon: "🚚", label: t.hero.trust.delivery },
+                { icon: "⚡", label: t.hero.trust.response },
+                { icon: "↩️", label: t.hero.trust.returns },
+                { icon: "📦", label: t.hero.trust.newWeekly },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2 rounded-[6px] border border-white/8 bg-white/4 px-3 py-2.5">
                   <span className="text-base">{item.icon}</span>

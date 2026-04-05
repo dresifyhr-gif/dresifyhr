@@ -4,15 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
+import { useLanguage } from "@/contexts/language-context";
+
 const STORAGE_KEY = "dresify_announcement_hidden_until";
 const ANNOUNCEMENT_OFFSET = "40px";
-
-const messages = [
-  "🚚 Besplatna dostava unutar Zagreba!",
-  "⚡ Novo svaki tjedan — provjeri katalog",
-  "📦 Dostava pouzećem po cijeloj Hrvatskoj — 7,50€",
-  "💬 Naruči na WhatsApp — odgovaramo u sat vremena"
-];
 
 function getEndOfDayTimestamp() {
   const now = new Date();
@@ -22,6 +17,7 @@ function getEndOfDayTimestamp() {
 }
 
 export function AnnouncementBar() {
+  const { t } = useLanguage();
   const [isVisible, setIsVisible] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
 
@@ -47,13 +43,13 @@ export function AnnouncementBar() {
     }
 
     const interval = window.setInterval(() => {
-      setMessageIndex((current) => (current + 1) % messages.length);
+      setMessageIndex((current) => (current + 1) % t.announcement.length);
     }, 4000);
 
     return () => window.clearInterval(interval);
   }, [isVisible]);
 
-  const currentMessage = useMemo(() => messages[messageIndex], [messageIndex]);
+  const currentMessage = useMemo(() => t.announcement[messageIndex], [messageIndex, t.announcement]);
 
   const handleDismiss = () => {
     window.localStorage.setItem(STORAGE_KEY, String(getEndOfDayTimestamp()));

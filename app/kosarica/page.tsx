@@ -2,6 +2,7 @@ import { CartPageContent } from "@/components/site/cart-page";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { SectionHeading } from "@/components/site/section-heading";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
+import { getServerTranslations } from "@/lib/get-server-translations";
 
 export const metadata = buildMetadata({
   title: "Košarica",
@@ -10,10 +11,12 @@ export const metadata = buildMetadata({
   keywords: ["košarica dresovi", "narudžba dresovi", "dresify košarica"]
 });
 
-export default function CartPage() {
+export default async function CartPage() {
+  const { t } = await getServerTranslations();
+
   const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Početna", path: "/" },
-    { name: "Košarica", path: "/kosarica" }
+    { name: t.productPage.breadcrumb.home, path: "/" },
+    { name: t.cartPage.kicker, path: "/kosarica" }
   ]);
 
   return (
@@ -26,15 +29,15 @@ export default function CartPage() {
 
         <Breadcrumbs
           items={[
-            { label: "Početna", href: "/" },
-            { label: "Košarica" }
+            { label: t.productPage.breadcrumb.home, href: "/" },
+            { label: t.cartPage.kicker }
           ]}
         />
 
         <SectionHeading
-          kicker="Košarica"
-          title="Pregledaj odabrane dresove"
-          description="Provjeri artikle, ukloni što ne treba i nastavi na plaćanje."
+          kicker={t.cartPage.kicker}
+          title={t.cartPage.title}
+          description={t.cartPage.desc}
         />
 
         <CartPageContent />

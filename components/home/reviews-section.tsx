@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 
 import { SectionHeading } from "@/components/site/section-heading";
+import { useLanguage } from "@/contexts/language-context";
 
 const reviews = [
   {
@@ -29,13 +30,15 @@ const reviews = [
 ];
 
 export function ReviewsSection() {
+  const { t } = useLanguage();
+
   return (
     <section className="section-pad bg-[#0a0a0a]">
       <div className="page-shell">
         <SectionHeading
-          kicker="Recenzije"
-          title="Što kažu kupci"
-          description="Kratke poruke iz stvarnih narudžbi koje nam dolaze nakon isporuke."
+          kicker={t.reviews.kicker}
+          title={t.reviews.title}
+          description={t.reviews.desc}
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {reviews.map((review, index) => (
@@ -60,7 +63,7 @@ export function ReviewsSection() {
           ))}
         </div>
         <div className="mt-6 border border-white/10 bg-[#111111] px-5 py-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-white sm:px-6 sm:py-5 sm:text-sm sm:tracking-[0.24em]">
-          200+ narudžbi • Dostava 24-48h • WhatsApp podrška • Novo svaki tjedan
+          {t.reviews.bar}
         </div>
       </div>
     </section>

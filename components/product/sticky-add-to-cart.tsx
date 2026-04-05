@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/providers/cart-provider";
+import { useLanguage } from "@/contexts/language-context";
 import { repairText } from "@/lib/utils";
 import type { Jersey } from "@/lib/data/jerseys";
 
@@ -18,6 +19,7 @@ type Props = {
 
 export function StickyAddToCart({ product, selectedSize, segment, segmentLabel, imageSrc, mainButtonRef }: Props) {
   const { addItem } = useCart();
+  const { t } = useLanguage();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export function StickyAddToCart({ product, selectedSize, segment, segmentLabel, 
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold uppercase tracking-[0.15em] text-white">{repairText(product.klub)}</p>
-              <p className="text-accent font-heading text-xl leading-none">{selectedSize ? `Vel. ${selectedSize}` : "Odaberi veličinu"}</p>
+              <p className="text-accent font-heading text-xl leading-none">{selectedSize ? `Vel. ${selectedSize}` : t.stickyCart.selectSize}</p>
             </div>
             <button
               type="button"
@@ -56,7 +58,7 @@ export function StickyAddToCart({ product, selectedSize, segment, segmentLabel, 
               className="flex items-center gap-2 rounded-[4px] bg-accent px-5 py-3 font-heading text-sm uppercase tracking-[0.15em] text-black transition hover:bg-[#f0ff71] disabled:opacity-40"
             >
               <ShoppingBag className="h-4 w-4" />
-              DODAJ
+              {t.stickyCart.add}
             </button>
           </div>
         </motion.div>

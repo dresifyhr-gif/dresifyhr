@@ -174,10 +174,10 @@ export function ProductCard({ product }: { product: Jersey }) {
                     type="button"
                     onClick={handleAddToCart}
                     disabled={!selectedSize}
-                    className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-accent py-2.5 font-heading text-[13px] uppercase tracking-[0.18em] text-black transition-all duration-150 hover:bg-[#f0ff71] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-accent py-2.5 font-heading text-[11px] uppercase tracking-[0.14em] text-black transition-all duration-150 hover:bg-[#f0ff71] disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    <ShoppingBag className="h-3.5 w-3.5" />
-                    DODAJ U KOŠARICU
+                    <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
+                    <span className="pl-[0.14em]">DODAJ U KOŠARICU</span>
                   </button>
                 </div>
               </motion.div>

@@ -6,10 +6,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, ShoppingBag, X } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
+import { useLanguage } from "@/contexts/language-context";
 import { formatEuroAmount, repairText } from "@/lib/utils";
 
 export function AddToCartModal() {
   const { isAddModalOpen, recentlyAddedItem, closeAddModal } = useCart();
+  const { t } = useLanguage();
 
   if (!recentlyAddedItem) {
     return null;
@@ -21,7 +23,7 @@ export function AddToCartModal() {
         <>
           <motion.button
             type="button"
-            aria-label="Zatvori prozor"
+            aria-label={t.addedModal.closeOverlay}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -43,9 +45,9 @@ export function AddToCartModal() {
                     <CheckCircle2 className="h-6 w-6" />
                   </span>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-white/45">Košarica</p>
+                    <p className="text-xs uppercase tracking-[0.24em] text-white/45">{t.addedModal.label}</p>
                     <h2 className="mt-1 font-heading text-[2.15rem] uppercase leading-none text-white sm:text-[2.5rem]">
-                      Uspješno dodano u košaricu!
+                      {t.addedModal.title}
                     </h2>
                   </div>
                 </div>
@@ -54,7 +56,7 @@ export function AddToCartModal() {
                   type="button"
                   onClick={closeAddModal}
                   className="inline-flex h-10 w-10 items-center justify-center rounded-[4px] border border-white/10 bg-[#0a0a0a] text-white/70 transition duration-200 ease-out hover:border-accent hover:text-accent"
-                  aria-label="Zatvori"
+                  aria-label={t.addedModal.close}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -91,15 +93,15 @@ export function AddToCartModal() {
 
                     <div className="mt-5 grid gap-3 sm:grid-cols-3">
                       <div className="rounded-[8px] border border-white/10 bg-[#111111] px-4 py-3.5">
-                        <span className="block text-[11px] uppercase tracking-[0.2em] text-white/40">Veličina</span>
+                        <span className="block text-[11px] uppercase tracking-[0.2em] text-white/40">{t.addedModal.size}</span>
                         <span className="mt-1 block text-base font-semibold text-white">{recentlyAddedItem.size}</span>
                       </div>
                       <div className="rounded-[8px] border border-white/10 bg-[#111111] px-4 py-3.5">
-                        <span className="block text-[11px] uppercase tracking-[0.2em] text-white/40">Količina</span>
+                        <span className="block text-[11px] uppercase tracking-[0.2em] text-white/40">{t.addedModal.qty}</span>
                         <span className="mt-1 block text-base font-semibold text-white">1</span>
                       </div>
                       <div className="rounded-[8px] border border-accent/20 bg-accent/10 px-4 py-3.5">
-                        <span className="block text-[11px] uppercase tracking-[0.2em] text-accent/70">Ukupno</span>
+                        <span className="block text-[11px] uppercase tracking-[0.2em] text-accent/70">{t.addedModal.total}</span>
                         <span className="mt-1 block text-base font-semibold text-accent">
                           {formatEuroAmount(recentlyAddedItem.price)}
                         </span>
@@ -111,17 +113,17 @@ export function AddToCartModal() {
 
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
                 <button type="button" onClick={closeAddModal} className="button-secondary w-full">
-                  NASTAVAK KUPOVINE
+                  {t.addedModal.continueShopping}
                 </button>
                 <Link href="/kosarica" onClick={closeAddModal} className="button-secondary w-full">
                   <span className="inline-flex items-center justify-center gap-2">
-                    VIDI KOŠARICU
+                    {t.addedModal.viewCart}
                     <ShoppingBag className="h-4 w-4" />
                   </span>
                 </Link>
                 <Link href="/checkout" onClick={closeAddModal} className="button-primary w-full">
                   <span className="inline-flex items-center justify-center gap-2">
-                    NASTAVAK NA PLAĆANJE
+                    {t.addedModal.checkout}
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 </Link>

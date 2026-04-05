@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Instagram, MessageCircle, Mail } from "lucide-react";
+import { useLanguage } from "@/contexts/language-context";
 import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, INSTAGRAM_HANDLE, NAV_LINKS } from "@/lib/site";
 
 const seoFooterLinks = [
@@ -11,17 +14,19 @@ const seoFooterLinks = [
 ] as const;
 
 export function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="border-t border-white/10 bg-[#0a0a0a]">
       {/* Top CTA strip */}
       <div className="border-b border-white/8 bg-[#111111]">
         <div className="page-shell flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
           <div>
-            <p className="font-heading text-2xl uppercase text-white sm:text-3xl">Pronašao si dres?</p>
-            <p className="mt-1 text-sm text-white/50">Naruči odmah — šaljemo sutra.</p>
+            <p className="font-heading text-2xl uppercase text-white sm:text-3xl">{t.footer.cta}</p>
+            <p className="mt-1 text-sm text-white/50">{t.footer.ctaSub}</p>
           </div>
           <Link href="/dresovi" className="button-primary shrink-0">
-            POGLEDAJ KATALOG
+            {t.footer.ctaBtn}
           </Link>
         </div>
       </div>
@@ -34,7 +39,7 @@ export function Footer() {
             DRES<span className="text-accent">IFY</span>
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-7 text-white/50">
-            Premium football shop s fiksnom cijenom 20€, dostavom po cijeloj Hrvatskoj i novim modelima svaki tjedan.
+            {t.footer.desc}
           </p>
           {/* Social links */}
           <div className="mt-6 flex gap-3">
@@ -65,7 +70,7 @@ export function Footer() {
 
         {/* Nav */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">Navigacija</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">{t.footer.nav}</p>
           <div className="mt-5 flex flex-col gap-3">
             {NAV_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
@@ -77,7 +82,7 @@ export function Footer() {
 
         {/* Popular */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">Popularno</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">{t.footer.popular}</p>
           <div className="mt-5 flex flex-col gap-3">
             {seoFooterLinks.map((link) => (
               <Link key={link.href} href={link.href} className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
@@ -89,7 +94,7 @@ export function Footer() {
 
         {/* Contact */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">Kontakt</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">{t.footer.contact}</p>
           <div className="mt-5 space-y-4">
             <div className="rounded-[8px] border border-white/8 bg-[#111111] p-4">
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">WhatsApp</p>
@@ -99,7 +104,7 @@ export function Footer() {
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">Instagram</p>
               <p className="mt-1 text-sm font-medium text-white">{INSTAGRAM_HANDLE}</p>
             </div>
-            <p className="text-xs text-white/35">Odgovaramo u roku sat vremena</p>
+            <p className="text-xs text-white/35">{t.footer.response}</p>
           </div>
         </div>
       </div>
@@ -107,11 +112,11 @@ export function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-white/8">
         <div className="page-shell flex flex-col items-center justify-between gap-2 py-5 sm:flex-row">
-          <p className="text-[11px] uppercase tracking-[0.28em] text-white/30">© 2026 DRESIFY — Sva prava pridržana</p>
+          <p className="text-[11px] uppercase tracking-[0.28em] text-white/30">{t.footer.copyright}</p>
           <div className="flex items-center gap-1">
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/20">Izrađeno s</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-white/20">{t.footer.madeWith}</span>
             <span className="text-accent/60 text-[11px]">♥</span>
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/20">u Hrvatskoj</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-white/20">{t.footer.inCroatia}</span>
           </div>
         </div>
       </div>

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Barlow, Bebas_Neue } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { cookies } from "next/headers";
+
+import { LanguageProvider } from "@/contexts/language-context";
+import { LOCALE_COOKIE, type Locale } from "@/lib/i18n";
 
 import "@/app/globals.css";
 
@@ -59,7 +63,7 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
@@ -67,8 +71,12 @@ export default function RootLayout({
   const organizationSchema = buildOrganizationSchema();
   const websiteSchema = buildWebsiteSchema();
 
+  const cookieStore = await cookies();
+  const rawLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+  const locale: Locale = rawLocale === "en" ? "en" : "hr";
+
   return (
-    <html lang="hr" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={`${bebas.variable} ${barlow.variable}`}>
         <script
           type="application/ld+json"
@@ -78,19 +86,21 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
-        <SiteProviders>
-          <div className="relative min-h-screen">
-            <AnnouncementBar />
-            <Navbar />
-            <main>{children}</main>
-            <Footer />
-            <CartDrawer />
-            <AddToCartModal />
-            <ContentProtection />
-          <FloatingWhatsAppButton />
-            <SocialProofPopup />
-          </div>
-        </SiteProviders>
+        <LanguageProvider initialLocale={locale}>
+          <SiteProviders>
+            <div className="relative min-h-screen">
+              <AnnouncementBar />
+              <Navbar />
+              <main>{children}</main>
+              <Footer />
+              <CartDrawer />
+              <AddToCartModal />
+              <ContentProtection />
+              <FloatingWhatsAppButton />
+              <SocialProofPopup />
+            </div>
+          </SiteProviders>
+        </LanguageProvider>
       </body>
       <GoogleAnalytics gaId="G-NKPLWRWPN9" />
     </html>

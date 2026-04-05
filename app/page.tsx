@@ -8,6 +8,7 @@ import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { SectionHeading } from "@/components/site/section-heading";
 import { jerseys } from "@/lib/data/jerseys";
 import { buildMetadata } from "@/lib/seo";
+import { getServerTranslations } from "@/lib/get-server-translations";
 
 export const metadata = buildMetadata({
   title: "Dresovi — Nogometni dresovi za djecu i odrasle | 20€",
@@ -37,7 +38,9 @@ export const metadata = buildMetadata({
   ]
 });
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { t } = await getServerTranslations();
+
   return (
     <>
       <HeroSection />
@@ -49,9 +52,9 @@ export default function HomePage() {
         <div className="page-shell">
           <div className="hidden md:block">
             <SectionHeading
-              kicker="Drop"
-              title="Odaberi svoj sljedeći dres"
-              description="Jedna cijena, jasan izbor i katalog koji kombinira najtraženije aktualne modele i retro favorite."
+              kicker={t.home.catalogKicker}
+              title={t.home.catalogTitle}
+              description={t.home.catalogDesc}
             />
           </div>
           <CatalogBrowser products={jerseys} compactHeader />

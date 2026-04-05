@@ -13,6 +13,7 @@ import {
 } from "@/lib/data/seo-collections";
 import { getJerseyBySlug, getJerseyStock, getRelatedJerseys, jerseys } from "@/lib/data/jerseys";
 import { buildBreadcrumbSchema, buildMetadata, buildProductSchema } from "@/lib/seo";
+import { getServerTranslations } from "@/lib/get-server-translations";
 import { repairText } from "@/lib/utils";
 
 type ProductPageProps = {
@@ -52,7 +53,8 @@ export function generateMetadata({ params }: ProductPageProps): Metadata {
   });
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { t } = await getServerTranslations();
   const product = getJerseyBySlug(params.slug);
 
   if (!product) {
@@ -63,8 +65,8 @@ export default function ProductPage({ params }: ProductPageProps) {
   const stock = getJerseyStock(product.id);
   const productSchema = buildProductSchema(product, stock);
   const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Početna", path: "/" },
-    { name: "Dresovi", path: "/dresovi" },
+    { name: t.productPage.breadcrumb.home, path: "/" },
+    { name: t.productPage.breadcrumb.jerseys, path: "/dresovi" },
     { name: `${repairText(product.klub)} ${repairText(product.igrac)}`, path: `/dres/${product.slug}` }
   ]);
   const clubCollection = getClubCollectionForProduct(product);
@@ -85,8 +87,8 @@ export default function ProductPage({ params }: ProductPageProps) {
 
         <Breadcrumbs
           items={[
-            { label: "Početna", href: "/" },
-            { label: "Dresovi", href: "/dresovi" },
+            { label: t.productPage.breadcrumb.home, href: "/" },
+            { label: t.productPage.breadcrumb.jerseys, href: "/dresovi" },
             { label: `${repairText(product.klub)} ${repairText(product.igrac)}` }
           ]}
         />
@@ -125,8 +127,8 @@ export default function ProductPage({ params }: ProductPageProps) {
         <section className="mt-16">
           <div className="mb-8 flex items-end justify-between">
             <div>
-              <span className="section-kicker">Možda te zanima</span>
-              <h2 className="mt-3 text-5xl uppercase leading-none text-white">Slični dresovi</h2>
+              <span className="section-kicker">{t.productPage.related}</span>
+              <h2 className="mt-3 text-5xl uppercase leading-none text-white">{t.productPage.relatedTitle}</h2>
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
