@@ -483,10 +483,10 @@ export function CatalogBrowser({ products, compactHeader = false }: CatalogBrows
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-white/45">Katalog</p>
             <h1 className="mt-3 text-3xl uppercase leading-none text-white sm:text-5xl">
-              Dresovi — Svaki klub. 20€.
+              Dresovi — Klubovi &amp; Reprezentacije. 20€.
             </h1>
-            <p className="mt-3 hidden max-w-2xl text-sm leading-7 text-white/60 sm:block">
-              Nogometni dresovi za djecu i odrasle. Barcelona, Real Madrid, Hrvatska i retro klasici — dostava pouzećem po cijeloj Hrvatskoj.
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60">
+              Nogometni dresovi za djecu i odrasle — Barcelona, Real Madrid, Bayern, Hrvatska reprezentacija i retro klasici. Fiksna cijena 20€, dostava pouzećem po cijeloj Hrvatskoj za 1–3 radna dana.
             </p>
           </div>
           <span className="inline-flex w-fit rounded-[4px] bg-accent px-4 py-2 text-sm font-semibold text-black">

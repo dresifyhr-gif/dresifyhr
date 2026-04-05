@@ -45,14 +45,14 @@ export function HeroSection() {
             </motion.div>
 
             <motion.h1
-              className="font-heading text-[clamp(4rem,10vw,7.4rem)] uppercase leading-[0.84] tracking-[0.02em] text-white"
+              className="font-heading text-[clamp(3.2rem,8.5vw,7.4rem)] uppercase leading-[0.84] tracking-[0.02em] text-white"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
-              <span className="block">SVAKI DRES.</span>
-              <span className="block">SVAKI KLUB.</span>
-              <span className="block text-accent">20€.</span>
+              <span className="block">DRESOVI.</span>
+              <span className="block">KLUBOVI &amp; REPREZENTACIJE.</span>
+              <span className="block text-accent">ZA DJECU I ODRASLE.</span>
             </motion.h1>
 
             <motion.p
