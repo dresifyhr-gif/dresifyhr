@@ -54,7 +54,7 @@ export default function JerseysPage() {
 
         <CatalogBrowser products={jerseys} />
 
-        <div className="mt-8 hidden gap-4 xl:grid xl:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <SeoLinkGrid
             title="Kupuj po kategoriji"
             description="Brzi ulaz za dječje komplete, dresove za odrasle, retro favorite i reprezentativne modele."
