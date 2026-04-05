@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Instagram } from "lucide-react";
 
 import { SectionHeading } from "@/components/site/section-heading";
+import { useLanguage } from "@/contexts/language-context";
 import { INSTAGRAM_HANDLE, INSTAGRAM_URL } from "@/lib/site";
 
 const instagramPosts = [
@@ -76,13 +77,15 @@ function InstagramPlaceholderTile() {
 }
 
 export function InstagramSection() {
+  const { t } = useLanguage();
+
   return (
     <section className="section-pad bg-[#111111]">
       <div className="page-shell">
         <SectionHeading
-          kicker="Instagram"
-          title={`Prati nas ${INSTAGRAM_HANDLE}`}
-          description="Tamo prvi objavljujemo nove dropove, dostupne veličine i najtraženije retro komade."
+          kicker={t.instagram.kicker}
+          title={t.instagram.title(INSTAGRAM_HANDLE)}
+          description={t.instagram.desc}
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {instagramPosts.map((post, index) => (
@@ -112,7 +115,7 @@ export function InstagramSection() {
           rel="noreferrer"
           className="button-secondary mt-8 px-6"
         >
-          {`Otvori Instagram ${INSTAGRAM_HANDLE}`}
+          {t.instagram.cta(INSTAGRAM_HANDLE)}
         </a>
       </div>
     </section>

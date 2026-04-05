@@ -163,7 +163,7 @@ body::before {
   }
 
   .button-primary {
-    @apply inline-flex min-h-[54px] items-center justify-center rounded-[4px] bg-accent px-7 font-heading text-xl uppercase tracking-[0.16em] text-black transition-all duration-200 ease-out hover:bg-[#f0ff71];
+    @apply inline-flex min-h-[54px] items-center justify-center rounded-[4px] bg-accent px-7 font-heading text-xl uppercase tracking-[0.16em] text-black transition-all duration-200 ease-out hover:bg-[#f0ff71] [text-indent:0.16em];
   }
 
   .button-secondary {

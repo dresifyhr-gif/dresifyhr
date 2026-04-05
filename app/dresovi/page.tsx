@@ -8,6 +8,7 @@ import {
 } from "@/lib/data/seo-collections";
 import { jerseys } from "@/lib/data/jerseys";
 import { buildBreadcrumbSchema, buildItemListSchema, buildMetadata } from "@/lib/seo";
+import { getServerTranslations } from "@/lib/get-server-translations";
 
 export const metadata = buildMetadata({
   title: "Dresovi — Nogometni dresovi za djecu i odrasle",
@@ -26,10 +27,12 @@ export const metadata = buildMetadata({
   ]
 });
 
-export default function JerseysPage() {
+export default async function JerseysPage() {
+  const { t } = await getServerTranslations();
+
   const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Početna", path: "/" },
-    { name: "Dresovi", path: "/dresovi" }
+    { name: t.productPage.breadcrumb.home, path: "/" },
+    { name: t.productPage.breadcrumb.jerseys, path: "/dresovi" }
   ]);
   const itemListSchema = buildItemListSchema("Svi dresovi u ponudi", "/dresovi", jerseys);
 
@@ -47,8 +50,8 @@ export default function JerseysPage() {
 
         <Breadcrumbs
           items={[
-            { label: "Početna", href: "/" },
-            { label: "Dresovi" }
+            { label: t.productPage.breadcrumb.home, href: "/" },
+            { label: t.productPage.breadcrumb.jerseys }
           ]}
         />
 
@@ -56,18 +59,18 @@ export default function JerseysPage() {
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <SeoLinkGrid
-            title="Kupuj po kategoriji"
-            description="Brzi ulaz za dječje komplete, dresove za odrasle, retro favorite i reprezentativne modele."
+            title={t.catalog.byCategory}
+            description={t.catalog.byCategoryDesc}
             collections={getFeaturedCategoryCollections()}
           />
           <SeoLinkGrid
-            title="Najtraženiji klubovi"
-            description="Otvaraj zasebne stranice za klubove koji nose najveći interes i najbolje pokrivaju ključne Google upite."
+            title={t.catalog.topClubs}
+            description={t.catalog.topClubsDesc}
             collections={getFeaturedClubCollections()}
           />
           <SeoLinkGrid
-            title="Popularni igrači"
-            description="Messi, Ronaldo, Neymar, Yamal i drugi jaki igrači sada imaju vlastite landing stranice."
+            title={t.catalog.popularPlayers}
+            description={t.catalog.popularPlayersDesc}
             collections={getFeaturedPlayerCollections()}
           />
         </div>

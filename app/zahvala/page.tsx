@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
+import { getServerTranslations } from "@/lib/get-server-translations";
 
 export const metadata: Metadata = {
   ...buildMetadata({
@@ -18,9 +19,11 @@ export const metadata: Metadata = {
   }
 };
 
-export default function ThankYouPage() {
+export default async function ThankYouPage() {
+  const { t } = await getServerTranslations();
+
   const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Početna", path: "/" },
+    { name: t.productPage.breadcrumb.home, path: "/" },
     { name: "Hvala", path: "/zahvala" }
   ]);
 
@@ -34,7 +37,7 @@ export default function ThankYouPage() {
 
         <Breadcrumbs
           items={[
-            { label: "Početna", href: "/" },
+            { label: t.productPage.breadcrumb.home, href: "/" },
             { label: "Hvala" }
           ]}
         />
@@ -45,18 +48,18 @@ export default function ThankYouPage() {
           </div>
 
           <h1 className="mt-8 font-heading text-[clamp(3rem,8vw,5rem)] uppercase leading-[0.9] tracking-[0.05em] text-white">
-            HVALA NA NARUDŽBI!
+            {t.thankYouPage.title}
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/65 sm:text-lg">
-            Potvrđujemo dostupnost u roku sat vremena i javljamo se na odabrani kanal kontakta.
+            {t.thankYouPage.message}
           </p>
 
           <Link
             href="/dresovi"
             className="button-primary mt-10 inline-flex min-h-[58px] items-center justify-center gap-2 px-8"
           >
-            PREGLEDAJ JOŠ DRESOVA
+            {t.thankYouPage.cta}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

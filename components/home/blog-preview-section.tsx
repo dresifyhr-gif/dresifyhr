@@ -1,17 +1,22 @@
+"use client";
+
 import Link from "next/link";
 
 import { SectionHeading } from "@/components/site/section-heading";
+import { useLanguage } from "@/contexts/language-context";
 import { blogPosts, getBlogReadingTime } from "@/lib/data/blog-posts";
 import { formatCroatianDate, repairText } from "@/lib/utils";
 
 export function BlogPreviewSection() {
+  const { t } = useLanguage();
+
   return (
     <section className="section-pad bg-[#0a0a0a]">
       <div className="page-shell">
         <SectionHeading
-          kicker="Blog"
-          title="Savjeti & novosti"
-          description="Kratki vodiči, trendovi i inspiracija za izbor dresa, veličine i retro klasika."
+          kicker={t.blog.kicker}
+          title={t.blog.title}
+          description={t.blog.desc}
         />
         <div className="grid gap-4 lg:grid-cols-3">
           {blogPosts.map((post) => (
@@ -24,7 +29,7 @@ export function BlogPreviewSection() {
               <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.28em] text-white/50">
                 <span>{formatCroatianDate(post.publishedAt)}</span>
                 <span className="h-1 w-1 rounded-full bg-white/20" />
-                <span>{getBlogReadingTime(post)} min čitanja</span>
+                <span>{getBlogReadingTime(post)} {t.blog.readTime}</span>
               </div>
               <h3 className="mt-4 text-3xl uppercase leading-none text-white transition duration-200 ease-out group-hover:text-accent">
                 {repairText(post.title)}

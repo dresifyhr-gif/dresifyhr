@@ -2,6 +2,7 @@ import { ContactForm } from "@/components/contact/contact-form";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { SectionHeading } from "@/components/site/section-heading";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
+import { getServerTranslations } from "@/lib/get-server-translations";
 
 export const metadata = buildMetadata({
   title: "Checkout i narudžba",
@@ -11,10 +12,12 @@ export const metadata = buildMetadata({
   keywords: ["checkout dresovi", "narudžba dresova", "plaćanje pouzećem", "dresify narudžba"]
 });
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
+  const { t } = await getServerTranslations();
+
   const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Početna", path: "/" },
-    { name: "Checkout", path: "/checkout" }
+    { name: t.productPage.breadcrumb.home, path: "/" },
+    { name: t.checkoutPage.kicker, path: "/checkout" }
   ]);
 
   return (
@@ -27,15 +30,15 @@ export default function CheckoutPage() {
 
         <Breadcrumbs
           items={[
-            { label: "Početna", href: "/" },
-            { label: "Checkout" }
+            { label: t.productPage.breadcrumb.home, href: "/" },
+            { label: t.checkoutPage.kicker }
           ]}
         />
 
         <SectionHeading
-          kicker="Checkout"
-          title="Dovrši narudžbu"
-          description="Unesi podatke za dostavu i potvrdi narudžbu. Ako je košarica prazna, željeni dres možeš ručno upisati ispod."
+          kicker={t.checkoutPage.kicker}
+          title={t.checkoutPage.title}
+          description={t.checkoutPage.desc}
         />
 
         <ContactForm />

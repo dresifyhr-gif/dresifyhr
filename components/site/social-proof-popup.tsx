@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { useLanguage } from "@/contexts/language-context";
 import { SOCIAL_PROOF_MESSAGES } from "@/lib/site";
 import { getInitials } from "@/lib/utils";
 
@@ -21,6 +22,7 @@ function getNextDelay() {
 }
 
 export function SocialProofPopup() {
+  const { t } = useLanguage();
   const [activePopup, setActivePopup] = useState<ActivePopup | null>(null);
   const showTimerRef = useRef<number | null>(null);
   const hideTimerRef = useRef<number | null>(null);
@@ -79,7 +81,7 @@ export function SocialProofPopup() {
               {getInitials(activePopup.message.split(" ")[0] ?? "DK")}
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-[0.28em] text-accent">Upravo kupljeno</p>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-accent">{t.socialProof.label}</p>
               <p className="mt-2 text-sm leading-6 text-white/82">{activePopup.message}</p>
             </div>
           </div>

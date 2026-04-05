@@ -7,19 +7,22 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, ShoppingBag, X } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
-
-const NAV_ITEMS = [
-  { href: "/", label: "POČETNA" },
-  { href: "/dresovi", label: "DRESOVI" },
-  { href: "/blog", label: "BLOG" },
-  { href: "/kontakt", label: "KONTAKT" },
-  { href: "/o-nama", label: "O NAMA" },
-] as const;
+import { useLanguage } from "@/contexts/language-context";
+import type { Locale } from "@/lib/i18n";
 
 export function Navbar() {
   const pathname = usePathname();
   const { itemCount, openDrawer } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { t, locale, setLocale } = useLanguage();
+
+  const NAV_ITEMS = [
+    { href: "/", label: t.nav.home },
+    { href: "/dresovi", label: t.nav.jerseys },
+    { href: "/blog", label: t.nav.blog },
+    { href: "/kontakt", label: t.nav.contact },
+    { href: "/o-nama", label: t.nav.about },
+  ];
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -27,11 +30,17 @@ export function Navbar() {
 
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
-
     return () => {
       document.body.style.overflow = "";
     };
   }, [isMenuOpen]);
+
+  const handleLocale = (next: Locale) => {
+    setLocale(next);
+    setIsMenuOpen(false);
+    // Reload so server components re-render in the new language
+    window.location.reload();
+  };
 
   return (
     <>
@@ -47,7 +56,6 @@ export function Navbar() {
           <nav className="hidden items-center gap-9 md:flex">
             {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
-
               return (
                 <Link
                   key={item.href}
@@ -63,11 +71,29 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* Language switcher */}
+            <div className="hidden items-center gap-0 md:flex">
+              {(["hr", "en"] as Locale[]).map((l, i) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => handleLocale(l)}
+                  className={`h-8 px-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition-all duration-200 ease-out ${
+                    locale === l
+                      ? "text-accent"
+                      : "text-white/40 hover:text-white/70"
+                  } ${i === 0 ? "border-r border-white/10" : ""}`}
+                >
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
             <button
               type="button"
               onClick={openDrawer}
               className="relative inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
-              aria-label="Otvori košaricu"
+              aria-label={t.nav.openCart}
             >
               <ShoppingBag className="h-5 w-5" />
               <span className="absolute -right-2 -top-2 min-w-6 rounded-full bg-accent px-1.5 py-1 text-[11px] font-bold leading-none text-black">
@@ -79,7 +105,7 @@ export function Navbar() {
               type="button"
               onClick={() => setIsMenuOpen(true)}
               className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent md:hidden"
-              aria-label="Otvori izbornik"
+              aria-label={t.nav.openMenu}
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -104,7 +130,7 @@ export function Navbar() {
                   type="button"
                   onClick={() => setIsMenuOpen(false)}
                   className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white"
-                  aria-label="Zatvori izbornik"
+                  aria-label={t.nav.closeMenu}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -121,6 +147,22 @@ export function Navbar() {
                   </Link>
                 ))}
               </nav>
+
+              {/* Language switcher — mobile */}
+              <div className="flex items-center gap-4 border-t border-white/10 pt-6">
+                {(["hr", "en"] as Locale[]).map((l) => (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => handleLocale(l)}
+                    className={`font-heading text-2xl uppercase tracking-[0.2em] transition-all duration-200 ease-out ${
+                      locale === l ? "text-accent" : "text-white/35 hover:text-white/60"
+                    }`}
+                  >
+                    {l.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
           </motion.div>
         ) : null}

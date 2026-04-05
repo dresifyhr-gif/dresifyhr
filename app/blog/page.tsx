@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { SectionHeading } from "@/components/site/section-heading";
 import { blogPosts, getBlogReadingTime } from "@/lib/data/blog-posts";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
+import { getServerTranslations } from "@/lib/get-server-translations";
 import { formatCroatianDate, repairText } from "@/lib/utils";
 
 export const metadata = buildMetadata({
@@ -14,10 +15,12 @@ export const metadata = buildMetadata({
   keywords: ["blog dresovi", "veličina dresa", "retro dresovi", "nogometni savjeti"]
 });
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const { t } = await getServerTranslations();
+
   const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Početna", path: "/" },
-    { name: "Blog", path: "/blog" }
+    { name: t.productPage.breadcrumb.home, path: "/" },
+    { name: t.blog.kicker, path: "/blog" }
   ]);
 
   return (
@@ -30,15 +33,15 @@ export default function BlogPage() {
 
         <Breadcrumbs
           items={[
-            { label: "Početna", href: "/" },
-            { label: "Blog" }
+            { label: t.productPage.breadcrumb.home, href: "/" },
+            { label: t.blog.kicker }
           ]}
         />
 
         <SectionHeading
-          kicker="Blog"
-          title="Savjeti i novosti"
-          description="Praktični članci za kupnju, veličine i odabir dresa koji će stvarno završiti u rotaciji."
+          kicker={t.blog.kicker}
+          title={t.blog.listingTitle}
+          description={t.blog.listingDesc}
         />
 
         <div className="grid gap-4 lg:grid-cols-3">
@@ -50,7 +53,7 @@ export default function BlogPage() {
             >
               <div className="absolute inset-x-0 top-0 h-1 bg-accent" />
               <p className="text-xs uppercase tracking-[0.32em] text-white/50">
-                {formatCroatianDate(post.publishedAt)} • {getBlogReadingTime(post)} min čitanja
+                {formatCroatianDate(post.publishedAt)} • {getBlogReadingTime(post)} {t.blog.readTime}
               </p>
               <h2 className="mt-4 text-4xl uppercase leading-none text-white transition duration-200 ease-out group-hover:text-accent">
                 {repairText(post.title)}

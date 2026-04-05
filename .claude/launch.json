@@ -3,14 +3,14 @@
   "configurations": [
     {
       "name": "Dresify Dev Server",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/opt/homebrew/bin/node",
+      "runtimeArgs": ["/Users/igor/projects/dresify/node_modules/.bin/next", "dev"],
       "port": 3000
     },
     {
       "name": "Dresify Production Preview",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start"],
+      "runtimeExecutable": "/opt/homebrew/bin/node",
+      "runtimeArgs": ["/Users/igor/projects/dresify/node_modules/.bin/next", "start"],
       "port": 3000
     }
   ]
