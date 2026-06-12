@@ -16,7 +16,7 @@ export type CartItem = {
   imageSrc?: string;
 };
 
-export type CartInput = Omit<CartItem, "id" | "price">;
+export type CartInput = Omit<CartItem, "id" | "price"> & { price?: number };
 
 type CartContextValue = {
   items: CartItem[];
@@ -83,7 +83,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const nextItem = {
       ...item,
       id: `${item.slug}-${item.segment}-${item.size}-${Date.now()}`,
-      price: JERSEY_PRICE_EUR
+      price: item.price ?? JERSEY_PRICE_EUR
     };
 
     setItems((current) => [nextItem, ...current]);
