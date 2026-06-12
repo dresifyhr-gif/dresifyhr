@@ -104,7 +104,7 @@ export function ProductCard({ product }: { product: Jersey }) {
           {/* Price & stock */}
           <div className="mt-2 flex items-center justify-between gap-2 border-t border-white/8 pt-2 sm:mt-3 sm:pt-3">
             <p className="font-heading text-[1.4rem] uppercase leading-none tracking-[0.03em] text-accent sm:text-[1.75rem]">
-              {formatPrice()}
+              {formatPrice(product.price)}
             </p>
             <p className={`hidden text-[12px] font-medium sm:block ${getStockTone(stock)}`}>Ostalo: {stock} kom</p>
             {/* Mobile cart button */}

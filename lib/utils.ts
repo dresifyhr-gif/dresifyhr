@@ -10,8 +10,8 @@ export function absoluteUrl(path = "/") {
   return new URL(path, SITE_URL).toString();
 }
 
-export function formatPrice() {
-  return CURRENCY_LABEL;
+export function formatPrice(price?: number) {
+  return price != null ? `${price}€` : CURRENCY_LABEL;
 }
 
 export function formatEuroAmount(value: number) {
