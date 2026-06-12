@@ -98,7 +98,28 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
     { src: "/dresovi/intermiami-messi-rozi/back.jpg", altLabel: "Stražnja strana" }
   ],
   "hrvatska-modric-komplet": [
-    { src: "/dresovi/hrvatska-modric-komplet/komplet.jpg", altLabel: "Komplet - dres, lopta i kapa" }
+    { src: "/dresovi/hrvatska-modric-komplet/komplet.png", altLabel: "Hrvatska Modrić komplet — dres, hlačice, lopta i kapa" }
+  ],
+  "portugal-ronaldo-komplet": [
+    { src: "/dresovi/portugal-ronaldo-komplet/komplet.png", altLabel: "Portugal Ronaldo komplet — dres, hlačice, lopta i kapa" }
+  ],
+  "barcelona-yamal-komplet": [
+    { src: "/dresovi/barcelona-yamal-komplet/komplet.png", altLabel: "Barcelona Yamal komplet — dres, hlačice, lopta i kapa" }
+  ],
+  "real-mbappe-komplet": [
+    { src: "/dresovi/real-mbappe-komplet/komplet.png", altLabel: "Real Madrid Mbappé komplet — dres, hlačice, lopta i kapa" }
+  ],
+  "bayern-kane-komplet": [
+    { src: "/dresovi/bayern-kane-komplet/komplet.png", altLabel: "Bayern Kane komplet — dres, hlačice, lopta i kapa" }
+  ],
+  "intermiami-messi-komplet": [
+    { src: "/dresovi/intermiami-messi-komplet/komplet.png", altLabel: "Inter Miami Messi komplet — dres, hlačice, lopta i kapa" }
+  ],
+  "njemacka-wirtz-komplet": [
+    { src: "/dresovi/njemacka-wirtz-komplet/komplet.png", altLabel: "Njemačka Wirtz komplet — dres, hlačice, lopta i kapa" }
+  ],
+  "milan-modric-komplet": [
+    { src: "/dresovi/milan-modric-komplet/komplet.png", altLabel: "AC Milan Modrić komplet — dres, hlačice, lopta i kapa" }
   ],
   "hrvatska-modric-dres-set": [
     { src: "/dresovi/hrvatska-modric-dres-set/front.jpg", altLabel: "Prednja strana" },
