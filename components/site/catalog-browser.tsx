@@ -551,7 +551,7 @@ export function CatalogBrowser({ products, compactHeader = false }: CatalogBrows
                             <p className="truncate text-sm font-semibold text-white">{repairText(product.klub)}</p>
                             <p className="truncate text-xs text-white/45">{repairText(product.igrac)}</p>
                           </div>
-                          <span className="shrink-0 font-heading text-sm text-accent">20€</span>
+                          <span className="shrink-0 font-heading text-sm text-accent">{product.price ?? 20}€</span>
                         </Link>
                       );
                     })}

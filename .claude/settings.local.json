@@ -27,7 +27,20 @@
       "Bash(curl -v http://localhost:3000/checkout)",
       "Bash(curl -sL http://localhost:3000/checkout/)",
       "Bash(node -e \":*)",
-      "Bash(node -e \"require\\(''@next/third-parties/google''\\); console.log\\(''OK''\\)\")"
+      "Bash(node -e \"require\\(''@next/third-parties/google''\\); console.log\\(''OK''\\)\")",
+      "Bash(grep -r \"export.*metadata\" /Users/igor/projects/dresify/.claude/worktrees/bold-austin/app/*.tsx)",
+      "Bash(grep -l metadata /Users/igor/projects/dresify/.claude/worktrees/bold-austin/app/**/*.tsx)",
+      "Bash(git -C /Users/igor/projects/dresify/.claude/worktrees/bold-austin status --porcelain)",
+      "Bash(git -C /Users/igor/projects/dresify/.claude/worktrees/bold-austin rev-parse --short HEAD)",
+      "Bash(/opt/homebrew/bin/vercel --prod --yes)",
+      "Bash(PATH=\"/opt/homebrew/bin:$PATH\" NODE_PATH=\"/opt/homebrew/lib/node_modules\" /opt/homebrew/bin/node /opt/homebrew/bin/vercel --prod --yes --cwd /Users/igor/projects/dresify/.claude/worktrees/bold-austin)",
+      "Bash(/opt/homebrew/bin/node /opt/homebrew/bin/vercel --prod --yes --cwd /Users/igor/projects/dresify/.claude/worktrees/bold-austin --scope infoyugocoin-4415s-projects)",
+      "Bash(cp /Users/igor/projects/dresify/.claude/worktrees/bold-austin/components/home/hero-section.tsx /Users/igor/projects/dresify/components/home/hero-section.tsx)",
+      "Bash(cp /Users/igor/projects/dresify/.claude/worktrees/bold-austin/components/site/catalog-browser.tsx /Users/igor/projects/dresify/components/site/catalog-browser.tsx)",
+      "Bash(cp /Users/igor/projects/dresify/.claude/worktrees/bold-austin/app/dresovi/page.tsx /Users/igor/projects/dresify/app/dresovi/page.tsx)",
+      "Bash(git -C /Users/igor/projects/dresify status --porcelain)",
+      "Bash(/opt/homebrew/bin/node /opt/homebrew/bin/vercel --prod --yes --cwd /Users/igor/projects/dresify --scope infoyugocoin-4415s-projects)",
+      "Bash(git -C /Users/igor/projects/dresify/.claude/worktrees/bold-austin add -A)"
     ]
   }
 }

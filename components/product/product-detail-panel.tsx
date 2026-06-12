@@ -47,9 +47,10 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
 
   const currentSizes = segment === "adult" ? sizeOptions.adults : sizeOptions.kids;
   const segmentLabel = segment === "adult" ? t.product.segmentAdult : t.product.segmentKid;
-  const whatsappMessage = `Pozdrav, želim naručiti dres: ${repairText(product.klub)} ${repairText(
+  const productPrice = product.price ?? 20;
+  const whatsappMessage = `Pozdrav, želim naručiti: ${repairText(product.klub)} ${repairText(
     product.igrac
-  )}, veličina: ${selectedSize}. Cijena: 20€.`;
+  )}${selectedSize ? `, veličina: ${selectedSize}` : ""}. Cijena: ${productPrice}€.`;
 
   const handleSegmentChange = (nextSegment: "adult" | "kid") => {
     setSegment(nextSegment);
@@ -73,7 +74,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
       <h1 className="mt-6 text-5xl uppercase leading-none text-white sm:text-6xl">
         {repairText(product.igrac)}
       </h1>
-      <p className="mt-4 text-4xl font-semibold text-accent">20€</p>
+      <p className="mt-4 text-4xl font-semibold text-accent">{productPrice}€</p>
       <p className={`mt-4 text-sm font-semibold uppercase tracking-[0.2em] ${getStockTone(stock)}`}>
         {t.product.stockWarning(stock)}
       </p>
@@ -107,26 +108,30 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         </div>
       ) : null}
 
-      <div className="mt-8">
-        <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/70">{t.product.selectSize}</p>
-        <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
-          {currentSizes.map((size) => (
-            <button
-              key={size}
-              type="button"
-              onClick={() => setSelectedSize(size)}
-              aria-pressed={selectedSize === size}
-              className={`h-14 border text-sm font-semibold transition duration-200 ease-out ${
-                selectedSize === size
-                  ? "border-accent bg-accent text-black"
-                  : "border-white/10 bg-[#0a0a0a] text-white hover:border-accent/40"
-              }`}
-            >
-              {size}
-            </button>
-          ))}
+      {currentSizes.length > 0 ? (
+        <div className="mt-8">
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/70">{t.product.selectSize}</p>
+          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+            {currentSizes.map((size) => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => setSelectedSize(size)}
+                aria-pressed={selectedSize === size}
+                className={`h-14 border text-sm font-semibold transition duration-200 ease-out ${
+                  selectedSize === size
+                    ? "border-accent bg-accent text-black"
+                    : "border-white/10 bg-[#0a0a0a] text-white hover:border-accent/40"
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : (
+        <p className="mt-8 text-sm font-medium uppercase tracking-[0.24em] text-white/50">Jedna veličina</p>
+      )}
 
       <button
         ref={mainButtonRef}
