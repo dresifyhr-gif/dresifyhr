@@ -7,7 +7,7 @@ import { getServerTranslations } from "@/lib/get-server-translations";
 export const metadata = buildMetadata({
   title: "Checkout i narudžba",
   description:
-    "Dovrši narudžbu za dresove u nekoliko klikova. Dostava pouzećem po cijeloj Hrvatskoj ili osobna dostava unutar Zagreba.",
+    "Dovrši narudžbu za dresove u nekoliko klikova. Dostava pouzećem po cijeloj Hrvatskoj za 7,50€.",
   path: "/checkout",
   keywords: ["checkout dresovi", "narudžba dresova", "plaćanje pouzećem", "dresify narudžba"]
 });

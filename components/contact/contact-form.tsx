@@ -2,17 +2,25 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, Loader2, MapPin, Truck } from "lucide-react";
+import { ArrowRight, Loader2, Truck } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
+import { useLanguage } from "@/contexts/language-context";
 import {
   COD_FEE_EUR,
   HOME_DELIVERY_PRICE_EUR,
-  JERSEY_PRICE_EUR,
-  ZAGREB_DELIVERY_PRICE_EUR
+  JERSEY_PRICE_EUR
 } from "@/lib/site";
 import { createCartOrderSummary, formatEuroAmount, repairText } from "@/lib/utils";
 import type { FulfillmentType } from "@/lib/orders";
+
+type FulfillmentOption = {
+  id: FulfillmentType;
+  label: string;
+  description: string;
+  price: number;
+  Icon: typeof Truck;
+};
 
 type FormState = {
   name: string;
@@ -26,28 +34,6 @@ type FormState = {
   note: string;
 };
 
-const FULFILLMENT_OPTIONS: Array<{
-  id: FulfillmentType;
-  label: string;
-  description: string;
-  price: number;
-  Icon: typeof Truck;
-}> = [
-  {
-    id: "delivery",
-    label: "Dostava pouzećem",
-    description: "HP Paket24, plaćanje pri preuzimanju",
-    price: HOME_DELIVERY_PRICE_EUR + COD_FEE_EUR,
-    Icon: Truck
-  },
-  {
-    id: "zagreb_delivery",
-    label: "Besplatna dostava Zagreb",
-    description: "Osobno dostavljamo unutar Zagreba",
-    price: ZAGREB_DELIVERY_PRICE_EUR,
-    Icon: MapPin
-  }
-];
 
 const inputClass =
   "w-full rounded-[8px] border border-white/10 bg-[#0d0d0d] px-4 py-3 text-sm text-white placeholder:text-white/25 outline-none transition duration-150 focus:border-accent/50 focus:bg-[#111] focus:ring-1 focus:ring-accent/15";
@@ -65,7 +51,18 @@ function StepLabel({ number, title }: { number: string; title: string }) {
 
 export function ContactForm() {
   const router = useRouter();
+  const { t } = useLanguage();
   const { items, subtotal, itemCount, clearCart } = useCart();
+
+  const FULFILLMENT_OPTIONS: FulfillmentOption[] = [
+    {
+      id: "delivery",
+      label: t.contactForm.deliveryCod,
+      description: t.contactForm.deliveryCodDesc,
+      price: HOME_DELIVERY_PRICE_EUR + COD_FEE_EUR,
+      Icon: Truck
+    }
+  ];
 
   const hasCartItems = items.length > 0;
   const autoDetails = createCartOrderSummary(items);
@@ -88,7 +85,7 @@ export function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const needsAddress = form.fulfillment === "delivery" || form.fulfillment === "zagreb_delivery";
+  const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
   const shipping = selectedOption.price;
   const orderSubtotal = hasCartItems ? subtotal : JERSEY_PRICE_EUR;
@@ -135,14 +132,14 @@ export function ContactForm() {
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setError(data.message ?? "Greška pri slanju narudžbe. Pokušaj ponovo.");
+        setError(data.message ?? t.contactForm.errorGeneral);
         return;
       }
 
       clearCart();
       router.push("/zahvala");
     } catch {
-      setError("Veza nije uspjela. Provjeri internet i pokušaj ponovo.");
+      setError(t.contactForm.errorNetwork);
     } finally {
       setLoading(false);
     }
@@ -155,11 +152,11 @@ export function ContactForm() {
 
         {/* Step 1 — Kontakt */}
         <div className="panel p-5 sm:p-7">
-          <StepLabel number="1" title="Kontakt podaci" />
+          <StepLabel number="1" title={t.contactForm.step1} />
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="name" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
-                Ime i prezime
+                {t.contactForm.name}
               </label>
               <input
                 id="name"
@@ -174,7 +171,7 @@ export function ContactForm() {
             </div>
             <div>
               <label htmlFor="phone" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
-                Broj mobitela
+                {t.contactForm.phone}
               </label>
               <input
                 id="phone"
@@ -189,7 +186,7 @@ export function ContactForm() {
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="email" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
-                Email adresa
+                {t.contactForm.email}
               </label>
               <input
                 id="email"
@@ -207,7 +204,7 @@ export function ContactForm() {
 
         {/* Step 2 — Dostava */}
         <div className="panel p-5 sm:p-7">
-          <StepLabel number="2" title="Način dostave" />
+          <StepLabel number="2" title={t.contactForm.step2} />
           <div className="grid gap-3 sm:grid-cols-2">
             {FULFILLMENT_OPTIONS.map(({ id, label, description, price, Icon }) => {
               const active = form.fulfillment === id;
@@ -234,7 +231,7 @@ export function ContactForm() {
                     </p>
                     <p className="mt-0.5 text-xs leading-5 text-white/35">{description}</p>
                     <p className={`mt-2 text-sm font-bold ${active ? "text-accent" : "text-white/30"}`}>
-                      {price === 0 ? "Besplatno" : formatEuroAmount(price)}
+                      {price === 0 ? t.contactForm.free : formatEuroAmount(price)}
                     </p>
                   </div>
                 </button>
@@ -246,7 +243,7 @@ export function ContactForm() {
             <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_150px]">
               <div className="sm:col-span-2">
                 <label htmlFor="street" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
-                  Ulica i kućni broj
+                  {t.contactForm.street}
                 </label>
                 <input
                   id="street"
@@ -261,7 +258,7 @@ export function ContactForm() {
               </div>
               <div>
                 <label htmlFor="city" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
-                  Grad
+                  {t.contactForm.city}
                 </label>
                 <input
                   id="city"
@@ -276,7 +273,7 @@ export function ContactForm() {
               </div>
               <div>
                 <label htmlFor="postalCode" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
-                  Poštanski broj
+                  {t.contactForm.zip}
                 </label>
                 <input
                   id="postalCode"
@@ -295,12 +292,12 @@ export function ContactForm() {
           {/* Note field — only show here */}
           <div className="mt-5 border-t border-white/6 pt-5">
             <label htmlFor="note" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
-              Napomena (opcionalno)
+              {t.contactForm.note}
             </label>
             <input
               id="note"
               type="text"
-              placeholder="Npr. poklon pakiranje, kontakt napomena..."
+              placeholder={t.contactForm.notePlaceholder}
               value={form.note}
               onChange={(e) => set("note", e.target.value)}
               className={inputClass}
@@ -311,11 +308,11 @@ export function ContactForm() {
         {/* Manual order — only if cart is empty */}
         {!hasCartItems && (
           <div className="panel p-5 sm:p-7">
-            <StepLabel number="3" title="Što želiš naručiti?" />
+            <StepLabel number="3" title={t.contactForm.step3} />
             <textarea
               required
               rows={4}
-              placeholder={"Npr. Real Madrid - Bellingham, odrasli, veličina L"}
+              placeholder={t.contactForm.orderPlaceholder}
               value={form.manualDetails}
               onChange={(e) => set("manualDetails", e.target.value)}
               className={`${inputClass} resize-none`}
@@ -337,7 +334,7 @@ export function ContactForm() {
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
             <span className="inline-flex items-center gap-2">
-              POŠALJI NARUDŽBU <ArrowRight className="h-4 w-4" />
+              {t.contactForm.submit} <ArrowRight className="h-4 w-4" />
             </span>
           )}
         </button>
@@ -347,7 +344,7 @@ export function ContactForm() {
       <aside className="h-fit xl:sticky xl:top-24">
         <div className="panel overflow-hidden p-5 sm:p-6">
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-white/45">
-            Sažetak narudžbe
+            {t.contactForm.orderSummary}
           </p>
 
           {hasCartItems ? (
@@ -365,20 +362,20 @@ export function ContactForm() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-white/35">Košarica je prazna — detalje upiši u koraku 3.</p>
+            <p className="text-sm text-white/35">{t.contactForm.cartEmpty}</p>
           )}
 
           <div className="mt-5 space-y-2.5 border-t border-white/8 pt-5 text-sm">
             <div className="flex items-center justify-between text-white/50">
-              <span>Artikli</span>
+              <span>{t.contactForm.items}</span>
               <span>{formatEuroAmount(hasCartItems ? subtotal : JERSEY_PRICE_EUR)}</span>
             </div>
             <div className="flex items-center justify-between text-white/50">
-              <span>Dostava</span>
-              <span>{shipping === 0 ? "Besplatno" : formatEuroAmount(shipping)}</span>
+              <span>{t.contactForm.shipping}</span>
+              <span>{shipping === 0 ? t.contactForm.free : formatEuroAmount(shipping)}</span>
             </div>
             <div className="flex items-center justify-between border-t border-white/8 pt-3">
-              <span className="font-heading text-lg uppercase tracking-wide text-white">Ukupno</span>
+              <span className="font-heading text-lg uppercase tracking-wide text-white">{t.contactForm.total}</span>
               <span className="font-heading text-2xl text-accent">{formatEuroAmount(total)}</span>
             </div>
           </div>
@@ -392,13 +389,13 @@ export function ContactForm() {
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <span className="inline-flex items-center gap-2">
-                POŠALJI NARUDŽBU <ArrowRight className="h-4 w-4" />
+                {t.contactForm.submit} <ArrowRight className="h-4 w-4" />
               </span>
             )}
           </button>
 
           <p className="mt-4 text-center text-[11px] leading-5 text-white/25">
-            Potvrđujemo dostupnost u roku sat vremena.
+            {t.contactForm.confirmNote}
           </p>
         </div>
       </aside>

@@ -5,10 +5,12 @@ import Link from "next/link";
 import { ArrowRight, ShoppingBag, Trash2 } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
+import { useLanguage } from "@/contexts/language-context";
 import { SHIPPING_PRICE_EUR, SHIPPING_PRICE_LABEL } from "@/lib/site";
 import { formatEuroAmount, repairText } from "@/lib/utils";
 
 export function CartPageContent() {
+  const { t } = useLanguage();
   const { items, subtotal, removeItem } = useCart();
   const shipping = items.length ? SHIPPING_PRICE_EUR : 0;
   const total = subtotal + shipping;
@@ -20,13 +22,13 @@ export function CartPageContent() {
           <ShoppingBag className="h-8 w-8" />
         </div>
         <h2 className="mt-6 font-heading text-[2.8rem] uppercase leading-none text-white">
-          Košarica je prazna
+          {t.cartPage.empty}
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-white/60 sm:text-base">
-          Dodaj dresove u košaricu i vrati se ovdje kad budeš spreman za narudžbu.
+          {t.cartPage.emptyDesc}
         </p>
         <Link href="/dresovi" className="button-primary mt-8 inline-flex">
-          POGLEDAJ DRESOVE
+          {t.cartPage.viewJerseys}
         </Link>
       </div>
     );
@@ -64,8 +66,8 @@ export function CartPageContent() {
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-white/60">{repairText(item.igrac)}</p>
                 <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-white/65">
-                  <span className="border border-white/10 px-3 py-2">Veličina: {item.size}</span>
-                  <span className="border border-white/10 px-3 py-2">Količina: 1</span>
+                  <span className="border border-white/10 px-3 py-2">{t.cartPage.size} {item.size}</span>
+                  <span className="border border-white/10 px-3 py-2">{t.cartPage.qty} 1</span>
                   <span className="border border-white/10 px-3 py-2 text-accent">
                     {formatEuroAmount(item.price)}
                   </span>
@@ -76,7 +78,7 @@ export function CartPageContent() {
                 type="button"
                 onClick={() => removeItem(item.id)}
                 className="inline-flex h-11 w-11 items-center justify-center border border-white/10 text-white/55 transition duration-200 ease-out hover:border-red-400/40 hover:text-red-400"
-                aria-label="Ukloni artikl"
+                aria-label={t.cartPage.removeItem}
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -86,28 +88,25 @@ export function CartPageContent() {
       </div>
 
       <aside className="panel h-fit p-5 sm:sticky sm:top-24 sm:p-6">
-        <p className="text-xs uppercase tracking-[0.28em] text-white/45">Sažetak narudžbe</p>
+        <p className="text-xs uppercase tracking-[0.28em] text-white/45">{t.cartPage.summary}</p>
         <div className="mt-5 space-y-3 text-sm text-white">
           <div className="flex items-center justify-between">
-            <span className="text-white/55">Artikli</span>
+            <span className="text-white/55">{t.cartPage.items}</span>
             <span className="font-semibold">{formatEuroAmount(subtotal)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-white/55">Dostava</span>
+            <span className="text-white/55">{t.cartPage.shipping}</span>
             <span className="font-semibold">{SHIPPING_PRICE_LABEL}</span>
           </div>
           <div className="flex items-center justify-between border-t border-white/10 pt-3">
-            <span className="font-heading text-xl uppercase tracking-[0.12em] text-white">Ukupno</span>
+            <span className="font-heading text-xl uppercase tracking-[0.12em] text-white">{t.cartPage.total}</span>
             <span className="text-3xl font-bold text-accent">{formatEuroAmount(total)}</span>
           </div>
-          <p className="text-sm leading-6 text-white/55">
-            Ako odabereš Zagreb osobno u checkoutu, dostava će biti besplatna.
-          </p>
         </div>
 
         <Link href="/checkout" className="button-primary mt-6 w-full">
           <span className="inline-flex items-center gap-2">
-            NASTAVAK NA PLAĆANJE
+            {t.cartPage.checkout}
             <ArrowRight className="h-4 w-4" />
           </span>
         </Link>
