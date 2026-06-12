@@ -6,6 +6,7 @@ export type Jersey = {
   liga: string;
   retro: boolean;
   vel: string;
+  price?: number;
 };
 
 export const jerseys: Jersey[] = [
@@ -66,7 +67,11 @@ export const jerseys: Jersey[] = [
   { id: 55, slug: "real-bellingham", klub: "Real Madrid", igrac: "Bellingham nr5", liga: "La Liga", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL" },
   { id: 56, slug: "psg-doue-bijeli", klub: "PSG", igrac: "D.Doué nr14 — bijeli", liga: "Ligue 1", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL" },
   { id: 57, slug: "bayern-musiala-crveni", klub: "Bayern München", igrac: "Musiala nr42 — crveni", liga: "Bundesliga", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL" },
-  { id: 58, slug: "intermiami-messi-rozi", klub: "Inter Miami", igrac: "Messi nr10 — rozi", liga: "MLS", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL" }
+  { id: 58, slug: "intermiami-messi-rozi", klub: "Inter Miami", igrac: "Messi nr10 — rozi", liga: "MLS", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL" },
+  { id: 59, slug: "hrvatska-modric-komplet", klub: "Hrvatska", igrac: "Modrić nr10 — komplet (dres + lopta + kapa)", liga: "Reprezentacija", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL", price: 40 },
+  { id: 60, slug: "hrvatska-modric-dres-set", klub: "Hrvatska", igrac: "Modrić nr10 — dres + hlačice", liga: "Reprezentacija", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL", price: 25 },
+  { id: 61, slug: "hrvatska-modric-lopta", klub: "Hrvatska", igrac: "Lopta Modrić nr10", liga: "Reprezentacija", retro: false, vel: "", price: 13 },
+  { id: 62, slug: "hrvatska-modric-kapa", klub: "Hrvatska", igrac: "Kapa Modrić — Luka Modrić", liga: "Reprezentacija", retro: false, vel: "", price: 13 }
 ];
 
 export const adultSizes = ["S", "M", "L", "XL"] as const;

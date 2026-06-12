@@ -85,7 +85,7 @@ export function buildProductSchema(product: Jersey, stock: number) {
     offers: {
       "@type": "Offer",
       priceCurrency: "EUR",
-      price: "20",
+      price: String(product.price ?? 20),
       availability: stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       url: absoluteUrl(`/dres/${product.slug}`),
       itemCondition: "https://schema.org/NewCondition"

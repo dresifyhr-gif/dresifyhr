@@ -24,6 +24,7 @@ type NotificationResult = {
   email: ChannelResult;
   customerEmail: ChannelResult;
   whatsapp: ChannelResult;
+  telegram: ChannelResult;
   configuredChannels: number;
   successfulChannels: number;
 };
@@ -194,6 +195,37 @@ async function sendWhatsAppViaZapier(order: OrderPayload): Promise<ChannelResult
   }
 }
 
+async function sendTelegram(order: OrderPayload): Promise<ChannelResult> {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim();
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
+
+  if (!botToken || !chatId) {
+    return { configured: false, sent: false };
+  }
+
+  try {
+    const message = buildWhatsAppNotification(order);
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "HTML" })
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(detail || `Telegram API returned ${response.status}`);
+    }
+
+    return { configured: true, sent: true };
+  } catch (error) {
+    return {
+      configured: true,
+      sent: false,
+      error: error instanceof Error ? error.message : "Unknown Telegram error"
+    };
+  }
+}
+
 async function sendWhatsApp(order: OrderPayload): Promise<ChannelResult> {
   const twilioResult = await sendWhatsAppViaTwilio(order);
 
@@ -213,19 +245,23 @@ export async function sendOrderNotifications(order: OrderPayload): Promise<Notif
     createdAt: order.createdAt
   });
 
-  const [email, customerEmail, whatsapp] = await Promise.all([
+  const [email, customerEmail, whatsapp, telegram] = await Promise.all([
     sendAdminEmail(order),
     sendCustomerEmail(order),
-    sendWhatsApp(order)
+    sendWhatsApp(order),
+    sendTelegram(order)
   ]);
 
-  const configuredChannels = Number(email.configured) + Number(customerEmail.configured) + Number(whatsapp.configured);
-  const successfulChannels = Number(email.sent) + Number(customerEmail.sent) + Number(whatsapp.sent);
+  const configuredChannels =
+    Number(email.configured) + Number(customerEmail.configured) + Number(whatsapp.configured) + Number(telegram.configured);
+  const successfulChannels =
+    Number(email.sent) + Number(customerEmail.sent) + Number(whatsapp.sent) + Number(telegram.sent);
 
   return {
     email,
     customerEmail,
     whatsapp,
+    telegram,
     configuredChannels,
     successfulChannels
   };

@@ -96,6 +96,19 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
   "intermiami-messi-rozi": [
     { src: "/dresovi/intermiami-messi-rozi/front.jpg", altLabel: "Prednja strana" },
     { src: "/dresovi/intermiami-messi-rozi/back.jpg", altLabel: "Stražnja strana" }
+  ],
+  "hrvatska-modric-komplet": [
+    { src: "/dresovi/hrvatska-modric-komplet/komplet.jpg", altLabel: "Komplet - dres, lopta i kapa" }
+  ],
+  "hrvatska-modric-dres-set": [
+    { src: "/dresovi/hrvatska-modric-dres-set/front.jpg", altLabel: "Prednja strana" },
+    { src: "/dresovi/hrvatska-modric-dres-set/back.jpg", altLabel: "Stražnja strana" }
+  ],
+  "hrvatska-modric-lopta": [
+    { src: "/dresovi/hrvatska-modric-lopta/lopta.jpg", altLabel: "Lopta Modrić nr10" }
+  ],
+  "hrvatska-modric-kapa": [
+    { src: "/dresovi/hrvatska-modric-kapa/kapa.jpg", altLabel: "Kapa Luka Modrić" }
   ]
 };
 
