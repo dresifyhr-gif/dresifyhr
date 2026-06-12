@@ -9,9 +9,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Auto-detect from Vercel's geo header
-  const country = request.headers.get("x-vercel-ip-country") ?? "";
-  const locale: Locale = HR_COUNTRIES.has(country) ? "hr" : "en";
+  // Auto-detect from Vercel's geo header — default to HR if no header (dev / unknown)
+  const country = request.headers.get("x-vercel-ip-country");
+  const locale: Locale = !country || HR_COUNTRIES.has(country) ? "hr" : "en";
 
   const response = NextResponse.next();
   response.cookies.set(LOCALE_COOKIE, locale, {
