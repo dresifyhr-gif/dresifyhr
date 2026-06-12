@@ -48,7 +48,12 @@ export default async function KompletiPage() {
           ]}
         />
 
-        <CatalogBrowser products={kompleti} />
+        <CatalogBrowser
+          products={kompleti}
+          headingLabel="Komplete"
+          headingTitle="Komplete — Dres + Hlačice + Lopta + Kapa. 40€."
+          headingDesc="Nogometni komplete za djecu i odrasle — dres, hlačice, lopta i kapa u jednom paketu. Fiksna cijena 40€, dostava pouzećem po cijeloj Hrvatskoj za 1–3 radna dana."
+        />
       </div>
     </section>
   );

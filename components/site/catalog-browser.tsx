@@ -22,6 +22,9 @@ import { repairText } from "@/lib/utils";
 type CatalogBrowserProps = {
   products: Jersey[];
   compactHeader?: boolean;
+  headingLabel?: string;
+  headingTitle?: string;
+  headingDesc?: string;
 };
 
 type FilterSectionKey = "liga" | "klub" | "igrac" | "velicina" | "retro";
@@ -111,7 +114,7 @@ function FilterSection({
   );
 }
 
-export function CatalogBrowser({ products, compactHeader = false }: CatalogBrowserProps) {
+export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc }: CatalogBrowserProps) {
   const { t } = useLanguage();
   const availableClubs = getClubOptions();
   const clubOptions = useMemo(() => {
@@ -483,12 +486,12 @@ export function CatalogBrowser({ products, compactHeader = false }: CatalogBrows
       ) : (
         <div className="mb-6 flex flex-col gap-4 border-b border-white/10 pb-6 lg:mb-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-white/45">{t.catalog.label}</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-white/45">{headingLabel ?? t.catalog.label}</p>
             <h1 className="mt-3 text-3xl uppercase leading-none text-white sm:text-5xl">
-              {t.catalog.title}
+              {headingTitle ?? t.catalog.title}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60">
-              {t.catalog.desc}
+              {headingDesc ?? t.catalog.desc}
             </p>
           </div>
           <span className="inline-flex w-fit rounded-[4px] bg-accent px-4 py-2 text-sm font-semibold text-black">
