@@ -7,6 +7,8 @@ import { TrustStrip } from "@/components/home/trust-strip";
 import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { SectionHeading } from "@/components/site/section-heading";
 import { jerseys } from "@/lib/data/jerseys";
+
+const dresovi = jerseys.filter((j) => j.liga !== "Komplet");
 import { buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
@@ -57,7 +59,7 @@ export default async function HomePage() {
               description={t.home.catalogDesc}
             />
           </div>
-          <CatalogBrowser products={jerseys} compactHeader />
+          <CatalogBrowser products={dresovi} compactHeader />
         </div>
       </section>
 
