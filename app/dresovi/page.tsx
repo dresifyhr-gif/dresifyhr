@@ -7,6 +7,8 @@ import {
   getFeaturedPlayerCollections
 } from "@/lib/data/seo-collections";
 import { jerseys } from "@/lib/data/jerseys";
+
+const dresovi = jerseys.filter((j) => j.liga !== "Komplet");
 import { buildBreadcrumbSchema, buildItemListSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
@@ -34,7 +36,7 @@ export default async function JerseysPage() {
     { name: t.productPage.breadcrumb.home, path: "/" },
     { name: t.productPage.breadcrumb.jerseys, path: "/dresovi" }
   ]);
-  const itemListSchema = buildItemListSchema("Svi dresovi u ponudi", "/dresovi", jerseys);
+  const itemListSchema = buildItemListSchema("Svi dresovi u ponudi", "/dresovi", dresovi);
 
   return (
     <section className="bg-[#0a0a0a] py-6 sm:py-8 lg:py-10">
@@ -55,7 +57,7 @@ export default async function JerseysPage() {
           ]}
         />
 
-        <CatalogBrowser products={jerseys} />
+        <CatalogBrowser products={dresovi} />
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <SeoLinkGrid
