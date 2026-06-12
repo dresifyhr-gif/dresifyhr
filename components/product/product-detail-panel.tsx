@@ -144,7 +144,8 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
             size: selectedSize,
             segment,
             segmentLabel,
-            imageSrc: frontImage
+            imageSrc: frontImage,
+            price: product.price
           })
         }
         className="button-primary mt-8 w-full"
