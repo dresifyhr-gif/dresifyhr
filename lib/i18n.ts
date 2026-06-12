@@ -18,7 +18,7 @@ const hr = {
   nav: {
     home: "POČETNA",
     jerseys: "DRESOVI",
-    sets: "KOMPLETE",
+    sets: "KOMPLETI",
     blog: "BLOG",
     contact: "KONTAKT",
     about: "O NAMA",
@@ -291,6 +291,7 @@ const en: typeof hr = {
     home: "HOME",
     jerseys: "JERSEYS",
     sets: "SETS",
+
     blog: "BLOG",
     contact: "CONTACT",
     about: "ABOUT",

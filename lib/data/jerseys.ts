@@ -76,9 +76,6 @@ export const jerseys: Jersey[] = [
   { id: 67, slug: "intermiami-messi-komplet", klub: "Inter Miami", igrac: "Messi nr10 — komplet (dres + hlačice + lopta + kapa)", liga: "Komplet", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL", price: 40 },
   { id: 68, slug: "njemacka-wirtz-komplet", klub: "Njemačka", igrac: "Wirtz nr17 — komplet (dres + hlačice + lopta + kapa)", liga: "Komplet", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL", price: 40 },
   { id: 69, slug: "milan-modric-komplet", klub: "AC Milan", igrac: "Modrić nr14 — komplet (dres + hlačice + lopta + kapa)", liga: "Komplet", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL", price: 40 },
-  { id: 60, slug: "hrvatska-modric-dres-set", klub: "Hrvatska", igrac: "Modrić nr10 — dres + hlačice", liga: "Reprezentacija", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL", price: 25 },
-  { id: 61, slug: "hrvatska-modric-lopta", klub: "Hrvatska", igrac: "Lopta Modrić nr10", liga: "Reprezentacija", retro: false, vel: "", price: 13 },
-  { id: 62, slug: "hrvatska-modric-kapa", klub: "Hrvatska", igrac: "Kapa Modrić — Luka Modrić", liga: "Reprezentacija", retro: false, vel: "", price: 13 }
 ];
 
 export const adultSizes = ["S", "M", "L", "XL"] as const;
