@@ -41,7 +41,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [recentlyAddedItem, setRecentlyAddedItem] = useState<CartItem | null>(null);
-  const subtotal = items.length * JERSEY_PRICE_EUR;
+  const subtotal = items.reduce((sum, item) => sum + item.price, 0);
 
   useEffect(() => {
     if (typeof window === "undefined") {
