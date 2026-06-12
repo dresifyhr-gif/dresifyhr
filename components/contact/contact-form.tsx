@@ -2,15 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, Loader2, MapPin, Truck } from "lucide-react";
+import { ArrowRight, Loader2, Truck } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
 import {
   COD_FEE_EUR,
   HOME_DELIVERY_PRICE_EUR,
-  JERSEY_PRICE_EUR,
-  ZAGREB_DELIVERY_PRICE_EUR
+  JERSEY_PRICE_EUR
 } from "@/lib/site";
 import { createCartOrderSummary, formatEuroAmount, repairText } from "@/lib/utils";
 import type { FulfillmentType } from "@/lib/orders";
@@ -62,13 +61,6 @@ export function ContactForm() {
       description: t.contactForm.deliveryCodDesc,
       price: HOME_DELIVERY_PRICE_EUR + COD_FEE_EUR,
       Icon: Truck
-    },
-    {
-      id: "zagreb_delivery",
-      label: t.contactForm.deliveryZagreb,
-      description: t.contactForm.deliveryZagrebDesc,
-      price: ZAGREB_DELIVERY_PRICE_EUR,
-      Icon: MapPin
     }
   ];
 
@@ -93,7 +85,7 @@ export function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const needsAddress = form.fulfillment === "delivery" || form.fulfillment === "zagreb_delivery";
+  const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
   const shipping = selectedOption.price;
   const orderSubtotal = hasCartItems ? subtotal : JERSEY_PRICE_EUR;

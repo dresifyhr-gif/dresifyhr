@@ -102,9 +102,6 @@ export function CartPageContent() {
             <span className="font-heading text-xl uppercase tracking-[0.12em] text-white">{t.cartPage.total}</span>
             <span className="text-3xl font-bold text-accent">{formatEuroAmount(total)}</span>
           </div>
-          <p className="text-sm leading-6 text-white/55">
-            {t.cartPage.zagrebNote}
-          </p>
         </div>
 
         <Link href="/checkout" className="button-primary mt-6 w-full">

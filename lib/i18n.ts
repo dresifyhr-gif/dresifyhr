@@ -9,9 +9,8 @@ export const HR_COUNTRIES = new Set(["HR", "BA", "RS", "SI", "ME", "MK"]);
 
 const hr = {
   announcement: [
-    "🚚 Besplatna dostava unutar Zagreba!",
-    "⚡ Novo svaki tjedan — provjeri katalog",
     "📦 Dostava pouzećem po cijeloj Hrvatskoj — 7,50€",
+    "⚡ Novo svaki tjedan — provjeri katalog",
     "💬 Naruči na WhatsApp — odgovaramo u sat vremena",
   ],
 
@@ -66,7 +65,7 @@ const hr = {
     addToCart: "DODAJ U KOŠARICU",
     orderWhatsApp: "NARUČI NA WHATSAPP",
     paymentSummary: (payment: string, shipping: string) =>
-      `Plaćanje: ${payment} • Zagreb 0,00 € • ostatak HR ${shipping}`,
+      `Plaćanje: ${payment} • Dostava: ${shipping}`,
     benefits: {
       delivery: "Dostava 1–3 dana",
       response: "Odgovor u sat vremena",
@@ -218,7 +217,6 @@ const hr = {
     items: "Artikli",
     shipping: "Dostava",
     total: "Ukupno",
-    zagrebNote: "Ako odabereš Zagreb osobno u checkoutu, dostava će biti besplatna.",
     checkout: "NASTAVAK NA PLAĆANJE",
     size: "Veličina:",
     qty: "Količina:",
@@ -257,8 +255,6 @@ const hr = {
     step2: "Način dostave",
     deliveryCod: "Dostava pouzećem",
     deliveryCodDesc: "HP Paket24, plaćanje pri preuzimanju",
-    deliveryZagreb: "Besplatna dostava Zagreb",
-    deliveryZagrebDesc: "Osobno dostavljamo unutar Zagreba, bez troška dostave",
     street: "Ulica i kućni broj",
     city: "Grad",
     zip: "Poštanski broj",
@@ -281,9 +277,8 @@ const hr = {
 
 const en: typeof hr = {
   announcement: [
-    "🚚 Free delivery within Zagreb!",
-    "⚡ New drops every week — check the catalog",
     "📦 Cash on delivery across Croatia — 7.50€",
+    "⚡ New drops every week — check the catalog",
     "💬 Order on WhatsApp — we reply within the hour",
   ],
 
@@ -339,7 +334,7 @@ const en: typeof hr = {
     addToCart: "ADD TO CART",
     orderWhatsApp: "ORDER ON WHATSAPP",
     paymentSummary: (payment: string, shipping: string) =>
-      `Payment: ${payment} • Zagreb free • rest of HR ${shipping}`,
+      `Payment: ${payment} • Shipping: ${shipping}`,
     benefits: {
       delivery: "Delivery 1–3 days",
       response: "Reply within the hour",
@@ -486,7 +481,6 @@ const en: typeof hr = {
     items: "Items",
     shipping: "Shipping",
     total: "Total",
-    zagrebNote: "If you choose Zagreb personal pickup at checkout, shipping is free.",
     checkout: "PROCEED TO CHECKOUT",
     size: "Size:",
     qty: "Qty:",
@@ -524,8 +518,6 @@ const en: typeof hr = {
     step2: "Delivery method",
     deliveryCod: "Cash on delivery",
     deliveryCodDesc: "HP Paket24, pay on receipt",
-    deliveryZagreb: "Free Zagreb delivery",
-    deliveryZagrebDesc: "Personal delivery within Zagreb, no shipping cost",
     street: "Street and house number",
     city: "City",
     zip: "Postal code",

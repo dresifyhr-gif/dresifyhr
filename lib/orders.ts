@@ -1,4 +1,4 @@
-export type FulfillmentType = "zagreb_delivery" | "delivery";
+export type FulfillmentType = "delivery";
 export type ContactChannelType = "web" | "whatsapp" | "instagram";
 
 export type OrderPayload = {
@@ -22,7 +22,6 @@ export type OrderPayload = {
 };
 
 const fulfillmentLabels: Record<FulfillmentType, string> = {
-  zagreb_delivery: "Zagreb besplatna dostava",
   delivery: "Dostava pouzećem"
 };
 
@@ -92,10 +91,7 @@ export function parseOrderPayload(body: unknown): { payload?: OrderPayload; erro
   if (!payload.email) errors.push("Upiši email adresu.");
   if (!payload.details) errors.push("Odaberi dresove iz košarice ili ručno upiši što želiš naručiti.");
 
-  if (
-    (payload.fulfillment === "delivery" || payload.fulfillment === "zagreb_delivery") &&
-    (!payload.street || !payload.city || !payload.postalCode)
-  ) {
+  if (payload.fulfillment === "delivery" && (!payload.street || !payload.city || !payload.postalCode)) {
     errors.push("Upiši ulicu, grad i poštanski broj za dostavu.");
   }
 
@@ -108,7 +104,7 @@ export function parseOrderPayload(body: unknown): { payload?: OrderPayload; erro
 
 export function buildOrderSubject(order: OrderPayload) {
   const reference = getOrderReference(order.createdAt);
-  const destination = order.fulfillment === "zagreb_delivery" ? "ZAGREB" : "POUZEĆE";
+  const destination = "POUZEĆE";
   const titleLine = order.details
     .split("\n")
     .find((line) => line.trim().length > 0 && /^\d+\./.test(line.trim()));
