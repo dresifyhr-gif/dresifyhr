@@ -38,7 +38,7 @@ export function HeroKompletiCarousel() {
   const active = SLIDES[index];
 
   return (
-    <div className="relative mx-auto max-w-[400px]">
+    <div className="relative mx-auto max-w-[540px]">
       <span className="section-kicker mb-3 inline-flex">
         <span className="h-1.5 w-1.5 rounded-full bg-accent" />
         Posebna ponuda — Kompleti 40€
@@ -68,7 +68,7 @@ export function HeroKompletiCarousel() {
                 alt={active.alt}
                 fill
                 priority
-                sizes="400px"
+                sizes="540px"
                 draggable={false}
                 className="pointer-events-none object-contain select-none"
               />
