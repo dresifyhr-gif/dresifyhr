@@ -50,13 +50,12 @@ export function JerseyVisual({ product, mode = "card" }: JerseyVisualProps) {
         <div className="absolute inset-0">
           <div
             className={`absolute inset-0 flex items-center justify-center ${
-              isCard ? "px-3 py-3 sm:px-4 sm:py-4" : "px-8 py-8"
+              isCard ? "px-2 py-2" : "px-6 py-6"
             }`}
           >
             <div
-              style={{ mixBlendMode: "screen" }}
               className={`relative h-full w-full ${
-                isCard ? "max-h-[88%] max-w-[88%]" : "max-h-[80%] max-w-[82%]"
+                isCard ? "max-h-[96%] max-w-[96%]" : "max-h-[88%] max-w-[88%]"
               }`}
             >
               <Image
