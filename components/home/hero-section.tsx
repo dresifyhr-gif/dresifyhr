@@ -32,7 +32,7 @@ export function HeroSection() {
       />
 
       <div className="page-shell relative z-10 py-8 sm:py-10 lg:py-14">
-        <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(460px,580px)] lg:gap-12">
+        <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(560px,760px)] lg:gap-10">
 
           {/* ── Left column ── */}
           <div className="order-2 max-w-[620px] lg:order-1">
@@ -49,7 +49,7 @@ export function HeroSection() {
             </motion.div>
 
             <motion.h1
-              className="font-heading text-[clamp(3.2rem,8.5vw,7.4rem)] uppercase leading-[0.84] tracking-[0.02em] text-white"
+              className="font-heading text-[clamp(2.5rem,6vw,5.4rem)] uppercase leading-[0.86] tracking-[0.02em] text-white"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
