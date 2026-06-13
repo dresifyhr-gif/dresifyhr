@@ -68,10 +68,12 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
     { src: "/dresovi/real-ronaldo-bijeli-cl/back.jpg", altLabel: "Stražnja strana" }
   ],
   "alnassr-ronaldo-zuti": [
-    { src: "/dresovi/alnassr-ronaldo-zuti/front.jpg", altLabel: "Prednja strana" }
+    { src: "/dresovi/alnassr-ronaldo-zuti/adult.jpg", altLabel: "Odrasli — dres" },
+    { src: "/dresovi/alnassr-ronaldo-zuti/front.jpg", altLabel: "Djeca — komplet s hlačicama" }
   ],
   "alnassr-ronaldo-home": [
-    { src: "/dresovi/alnassr-ronaldo-home/front.jpg", altLabel: "Prednja strana" }
+    { src: "/dresovi/alnassr-ronaldo-home/adult.jpg", altLabel: "Odrasli — dres" },
+    { src: "/dresovi/alnassr-ronaldo-home/front.jpg", altLabel: "Djeca — komplet s hlačicama" }
   ],
   "barcelona-yamal-se-plavi": [
     { src: "/dresovi/barcelona-yamal-se-plavi/front.jpg", altLabel: "Prednja strana" }
@@ -110,7 +112,8 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
     { src: "/dresovi/manutd-ronaldo-crveni-ucl/front.jpg", altLabel: "Prednja strana" }
   ],
   "milan-modric": [
-    { src: "/dresovi/milan-modric/front.jpg", altLabel: "Prednja strana" }
+    { src: "/dresovi/milan-modric/adult.jpg", altLabel: "Odrasli — dres" },
+    { src: "/dresovi/milan-modric/front.jpg", altLabel: "Djeca — komplet s hlačicama" }
   ],
   "real-bellingham": [
     { src: "/dresovi/real-bellingham/front.jpg", altLabel: "Prednja strana" }
@@ -119,7 +122,8 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
     { src: "/dresovi/real-bellingham-narancasti/front.jpg", altLabel: "Prednja strana" }
   ],
   "real-mbappe-bijeli-2026": [
-    { src: "/dresovi/real-mbappe-bijeli-2026/front.jpg", altLabel: "Prednja strana" }
+    { src: "/dresovi/real-mbappe-bijeli-2026/adult.jpg", altLabel: "Odrasli — dres" },
+    { src: "/dresovi/real-mbappe-bijeli-2026/front.jpg", altLabel: "Djeca — komplet s hlačicama" }
   ],
   "real-ronaldo-balmain": [
     { src: "/dresovi/real-ronaldo-balmain/front.jpg", altLabel: "Prednja strana" }
@@ -152,10 +156,12 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
     { src: "/dresovi/brazil-kaka-crni/front.jpg", altLabel: "Prednja strana" }
   ],
   "hrvatska-modric-2026": [
-    { src: "/dresovi/hrvatska-modric-2026/front.jpg", altLabel: "Prednja strana" }
+    { src: "/dresovi/hrvatska-modric-2026/adult.jpg", altLabel: "Odrasli — dres" },
+    { src: "/dresovi/hrvatska-modric-2026/front.jpg", altLabel: "Djeca — komplet s hlačicama" }
   ],
   "argentina-messi-retro": [
-    { src: "/dresovi/argentina-messi-retro/front.jpg", altLabel: "Prednja strana" }
+    { src: "/dresovi/argentina-messi-retro/adult.jpg", altLabel: "Odrasli — dres" },
+    { src: "/dresovi/argentina-messi-retro/front.jpg", altLabel: "Djeca — komplet s hlačicama" }
   ],
   "njemacka-wirtz": [
     { src: "/dresovi/njemacka-wirtz/front.jpg", altLabel: "Prednja strana" }
@@ -176,7 +182,8 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
     { src: "/dresovi/santos-neymar-bijeli/front.jpg", altLabel: "Prednja strana" }
   ],
   "bayern-kane-crveni": [
-    { src: "/dresovi/bayern-kane-crveni/front.jpg", altLabel: "Prednja strana" }
+    { src: "/dresovi/bayern-kane-crveni/adult.jpg", altLabel: "Odrasli — dres" },
+    { src: "/dresovi/bayern-kane-crveni/front.jpg", altLabel: "Djeca — komplet s hlačicama" }
   ],
   "hrvatska-modric-komplet": [
     { src: "/dresovi/hrvatska-modric-komplet/komplet.png", altLabel: "Hrvatska Modrić komplet — dres, hlačice, lopta i kapa" }

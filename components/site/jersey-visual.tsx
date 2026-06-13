@@ -23,7 +23,7 @@ export function JerseyVisual({ product, mode = "card" }: JerseyVisualProps) {
       className={`relative overflow-hidden border-b border-white/10 ${
         mode === "detail"
           ? "aspect-[4/5] min-h-[420px]"
-          : "aspect-[4/5] bg-[#f2f2f2]"
+          : "aspect-[4/5] bg-[#fbfbfb]"
       }`}
     >
       {mode === "detail" ? (
@@ -32,7 +32,7 @@ export function JerseyVisual({ product, mode = "card" }: JerseyVisualProps) {
         </>
       ) : (
         <>
-          <div className="absolute inset-0 bg-[#f2f2f2]" />
+          <div className="absolute inset-0 bg-[#fbfbfb]" />
           {/* Subtle bottom shadow so jersey doesn't float */}
           <div className="absolute inset-x-[15%] bottom-[3%] h-6 rounded-full bg-black/10 blur-[14px]" />
         </>
