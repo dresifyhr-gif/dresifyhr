@@ -23,10 +23,6 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
     { src: "/dresovi/barcelona-yamal-sareni/front.jpg", altLabel: "Prednja strana" },
     { src: "/dresovi/barcelona-yamal-sareni/back.jpg", altLabel: "Stražnja strana" }
   ],
-  "santos-neymar-bijeli": [
-    { src: "/dresovi/santos-neymar-bijeli/front.jpg", altLabel: "Prednja strana" },
-    { src: "/dresovi/santos-neymar-bijeli/back.jpg", altLabel: "Stražnja strana" }
-  ],
   "barcelona-yamal-rozo": [
     { src: "/dresovi/barcelona-yamal-rozo/front.jpg", altLabel: "Prednja strana" },
     { src: "/dresovi/barcelona-yamal-rozo/back.jpg", altLabel: "Stražnja strana" }
@@ -34,11 +30,9 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
   "italija-zeleni-posebni": [
     { src: "/dresovi/italija-zeleni-posebni/front.jpg", altLabel: "Prednja strana" }
   ],
-  "barcelona-yamal-crni-rozi": [],
   "barcelona-kobe": [
     { src: "/dresovi/barcelona-kobe/front.jpg", altLabel: "Prednja strana" }
   ],
-  "barcelona-neymar-retro-qatar": [],
   "barcelona-raphinha": [
     { src: "/dresovi/barcelona-raphinha/front.jpg", altLabel: "Prednja strana" },
     { src: "/dresovi/barcelona-raphinha/back.jpg", altLabel: "Stražnja strana" }
@@ -64,38 +58,125 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
     { src: "/dresovi/real-mbappe-2526/front.jpg", altLabel: "Prednja strana" },
     { src: "/dresovi/real-mbappe-2526/back.jpg", altLabel: "Stražnja strana" }
   ],
-  "real-bellingham": [
-    { src: "/dresovi/real-bellingham/front.jpg", altLabel: "Prednja strana" },
-    { src: "/dresovi/real-bellingham/back.jpg", altLabel: "Stražnja strana" }
-  ],
   "real-guler": [],
-  "psg-doue-2526": [
-    { src: "/dresovi/psg-doue-2526/front.jpg", altLabel: "Prednja strana" },
-    { src: "/dresovi/psg-doue-2526/back.jpg", altLabel: "Stražnja strana" }
-  ],
-  "psg-doue-bijeli": [
-    { src: "/dresovi/psg-doue-bijeli/front.jpg", altLabel: "Prednja strana" },
-    { src: "/dresovi/psg-doue-bijeli/back.jpg", altLabel: "Stražnja strana" }
-  ],
   "real-ronaldo-ljubicasti-cl": [
     { src: "/dresovi/real-ronaldo-ljubicasti-cl/front.jpg", altLabel: "Prednja strana" },
     { src: "/dresovi/real-ronaldo-ljubicasti-cl/back.jpg", altLabel: "Stražnja strana" }
-  ],
-  "manutd-ronaldo-crveni-ucl": [
-    { src: "/dresovi/manutd-ronaldo-crveni-ucl/front.jpg", altLabel: "Prednja strana" },
-    { src: "/dresovi/manutd-ronaldo-crveni-ucl/back.jpg", altLabel: "Stražnja strana" }
   ],
   "real-ronaldo-bijeli-cl": [
     { src: "/dresovi/real-ronaldo-bijeli-cl/front.jpg", altLabel: "Prednja strana" },
     { src: "/dresovi/real-ronaldo-bijeli-cl/back.jpg", altLabel: "Stražnja strana" }
   ],
   "alnassr-ronaldo-zuti": [
-    { src: "/dresovi/alnassr-ronaldo-zuti/front.jpg", altLabel: "Prednja strana" },
-    { src: "/dresovi/alnassr-ronaldo-zuti/back.jpg", altLabel: "Stražnja strana" }
+    { src: "/dresovi/alnassr-ronaldo-zuti/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "alnassr-ronaldo-home": [
+    { src: "/dresovi/alnassr-ronaldo-home/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "barcelona-yamal-se-plavi": [
+    { src: "/dresovi/barcelona-yamal-se-plavi/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "barcelona-raphinha-zeleni": [
+    { src: "/dresovi/barcelona-raphinha-zeleni/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "barcelona-raphinha-crni": [
+    { src: "/dresovi/barcelona-raphinha-crni/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "barcelona-yamal-plavi": [
+    { src: "/dresovi/barcelona-yamal-plavi/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "barcelona-messi-cl-berlin": [
+    { src: "/dresovi/barcelona-messi-cl-berlin/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "barcelona-neymar-retro-qatar": [
+    { src: "/dresovi/barcelona-neymar-retro-qatar/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "barcelona-yamal-crni-rozi": [
+    { src: "/dresovi/barcelona-yamal-crni-rozi/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "chelsea-palmer": [
+    { src: "/dresovi/chelsea-palmer/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "francuska-zidane-sp1998": [
+    { src: "/dresovi/francuska-zidane-sp1998/front.jpg", altLabel: "Prednja strana" }
   ],
   "intermiami-messi-rozi": [
-    { src: "/dresovi/intermiami-messi-rozi/front.jpg", altLabel: "Prednja strana" },
-    { src: "/dresovi/intermiami-messi-rozi/back.jpg", altLabel: "Stražnja strana" }
+    { src: "/dresovi/intermiami-messi-rozi/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "intermiami-messi-crni": [
+    { src: "/dresovi/intermiami-messi-crni/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "manutd-ronaldo-crveni-ucl": [
+    { src: "/dresovi/manutd-ronaldo-crveni-ucl/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "milan-modric": [
+    { src: "/dresovi/milan-modric/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "real-bellingham": [
+    { src: "/dresovi/real-bellingham/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "real-bellingham-narancasti": [
+    { src: "/dresovi/real-bellingham-narancasti/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "real-mbappe-bijeli-2026": [
+    { src: "/dresovi/real-mbappe-bijeli-2026/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "real-ronaldo-balmain": [
+    { src: "/dresovi/real-ronaldo-balmain/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "real-ronaldo-2014": [
+    { src: "/dresovi/real-ronaldo-2014/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "real-ronaldo-2018": [
+    { src: "/dresovi/real-ronaldo-2018/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "bih-bajraktarevic": [
+    { src: "/dresovi/bih-bajraktarevic/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "bih-dzeko": [
+    { src: "/dresovi/bih-dzeko/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "brazil-neymar-domaci": [
+    { src: "/dresovi/brazil-neymar-domaci/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "brazil-ronaldinho-posebni": [
+    { src: "/dresovi/brazil-ronaldinho-posebni/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "brazil-vinitjr": [
+    { src: "/dresovi/brazil-vinitjr/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "brazil-vinitjr-plavi": [
+    { src: "/dresovi/brazil-vinitjr-plavi/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "brasil-kaka-crni": [
+    { src: "/dresovi/brazil-kaka-crni/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "hrvatska-modric-2026": [
+    { src: "/dresovi/hrvatska-modric-2026/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "argentina-messi-retro": [
+    { src: "/dresovi/argentina-messi-retro/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "njemacka-wirtz": [
+    { src: "/dresovi/njemacka-wirtz/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "psg-doue-crni": [
+    { src: "/dresovi/psg-doue-crni/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "psg-doue-bijeli": [
+    { src: "/dresovi/psg-doue-bijeli/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "psg-doue-2526": [
+    { src: "/dresovi/psg-doue-2526/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "portugal-ronaldo-crveni": [
+    { src: "/dresovi/portugal-ronaldo-crveni/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "santos-neymar-bijeli": [
+    { src: "/dresovi/santos-neymar-bijeli/front.jpg", altLabel: "Prednja strana" }
+  ],
+  "bayern-kane-crveni": [
+    { src: "/dresovi/bayern-kane-crveni/front.jpg", altLabel: "Prednja strana" }
   ],
   "hrvatska-modric-komplet": [
     { src: "/dresovi/hrvatska-modric-komplet/komplet.png", altLabel: "Hrvatska Modrić komplet — dres, hlačice, lopta i kapa" }
