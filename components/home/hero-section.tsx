@@ -32,7 +32,7 @@ export function HeroSection() {
       />
 
       <div className="page-shell relative z-10 py-8 sm:py-10 lg:py-14">
-        <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(560px,760px)] lg:gap-10">
+        <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(380px,460px)] lg:gap-12">
 
           {/* ── Left column ── */}
           <div className="max-w-[620px]">
