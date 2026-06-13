@@ -1,4 +1,5 @@
 import { BlogPreviewSection } from "@/components/home/blog-preview-section";
+import { FaqSection } from "@/components/home/faq-section";
 import { FeaturedSection } from "@/components/home/featured-section";
 import { HeroSection } from "@/components/home/hero-section";
 import { InstagramSection } from "@/components/home/instagram-section";
@@ -65,6 +66,7 @@ export default async function HomePage() {
 
       <ReviewsSection />
       <InstagramSection />
+      <FaqSection />
       <BlogPreviewSection />
       <NewsletterSection />
     </>
