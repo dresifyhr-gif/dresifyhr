@@ -10,6 +10,7 @@ import { ProductCard } from "@/components/site/product-card";
 import { useLanguage } from "@/contexts/language-context";
 import { hasJerseyGallery } from "@/lib/data/jersey-media";
 import {
+  FLAGSHIP_SLUG,
   PLAYER_FILTER_OPTIONS,
   getClubOptions,
   matchesPlayerFilter,
@@ -216,6 +217,10 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
         );
       })
       .sort((left, right) => {
+        // Flagship product is always first
+        if (left.slug === FLAGSHIP_SLUG) return -1;
+        if (right.slug === FLAGSHIP_SLUG) return 1;
+
         const leftHasImage = hasJerseyGallery(left.slug);
         const rightHasImage = hasJerseyGallery(right.slug);
 

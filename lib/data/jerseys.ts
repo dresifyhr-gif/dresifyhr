@@ -68,6 +68,9 @@ export const jerseys: Jersey[] = [
   { id: 69, slug: "milan-modric-komplet", klub: "AC Milan", igrac: "Modrić nr14 — komplet (dres + hlačice + lopta + kapa)", liga: "Komplet", retro: false, vel: "Djeca: 116-176 · Odrasli: S-XL", price: 40 },
 ];
 
+// Flagship product — always shown first across the site
+export const FLAGSHIP_SLUG = "hrvatska-modric-2026";
+
 export const adultSizes = ["S", "M", "L", "XL"] as const;
 export const kidSizes = ["116", "128", "140", "152", "164", "176"] as const;
 

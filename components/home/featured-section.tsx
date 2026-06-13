@@ -8,6 +8,7 @@ import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { formatPrice, getProductRating, repairText } from "@/lib/utils";
 
 const FEATURED_SLUGS = [
+  "hrvatska-modric-2026",
   "milan-modric",
   "alnassr-ronaldo-zuti",
   "argentina-messi-retro",
@@ -15,7 +16,6 @@ const FEATURED_SLUGS = [
   "dortmund-adeyemi",
   "atletico-griezmann",
   "real-bellingham",
-  "portugal-ronaldo-crveni",
 ];
 
 const featuredProducts = FEATURED_SLUGS
