@@ -67,7 +67,7 @@ export function FeaturedSection() {
                   )}
 
                   {/* Image */}
-                  <div className="relative aspect-square bg-[#f2f2f2]">
+                  <div className="relative aspect-square bg-[#fbfbfb]">
                     {image ? (
                       <Image
                         src={image}
