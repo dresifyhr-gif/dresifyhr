@@ -6,6 +6,7 @@ import { Truck, RotateCcw, MessageCircle, Zap } from "lucide-react";
 import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
 import { StickyAddToCart } from "@/components/product/sticky-add-to-cart";
+import { SizeGuide } from "@/components/product/size-guide";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import {
   getJerseySizeOptions,
@@ -110,7 +111,10 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
 
       {currentSizes.length > 0 ? (
         <div className="mt-8">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/70">{t.product.selectSize}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/70">{t.product.selectSize}</p>
+            <SizeGuide />
+          </div>
           <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
             {currentSizes.map((size) => (
               <button
