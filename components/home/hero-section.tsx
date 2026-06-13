@@ -35,7 +35,7 @@ export function HeroSection() {
         <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(560px,760px)] lg:gap-10">
 
           {/* ── Left column ── */}
-          <div className="order-2 max-w-[620px] lg:order-1">
+          <div className="max-w-[620px]">
 
             {/* Eyebrow badge */}
             <motion.div
@@ -98,30 +98,11 @@ export function HeroSection() {
               ))}
             </motion.div>
 
-            {/* Trust items — mobile only */}
-            <motion.div
-              className="mt-6 grid grid-cols-2 gap-3 md:hidden"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.24, ease: "easeOut" }}
-            >
-              {[
-                { icon: "🚚", label: t.hero.trust.delivery },
-                { icon: "⚡", label: t.hero.trust.response },
-                { icon: "↩️", label: t.hero.trust.returns },
-                { icon: "📦", label: t.hero.trust.newWeekly },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2 rounded-[6px] border border-white/8 bg-white/4 px-3 py-2.5">
-                  <span className="text-base">{item.icon}</span>
-                  <span className="text-[11px] font-medium leading-tight text-white/60">{item.label}</span>
-                </div>
-              ))}
-            </motion.div>
           </div>
 
           {/* ── Right column — hero kit image ── */}
           <motion.div
-            className="relative order-1 lg:order-2"
+            className="relative"
             initial={{ opacity: 0, x: 28 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.12, ease: "easeOut" }}
