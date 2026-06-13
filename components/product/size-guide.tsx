@@ -17,6 +17,7 @@ const ADULTS = [
   { size: "M", chest: "96–104 cm", length: "72 cm" },
   { size: "L", chest: "104–112 cm", length: "74 cm" },
   { size: "XL", chest: "112–120 cm", length: "76 cm" },
+  { size: "XXL", chest: "120–128 cm", length: "78 cm" },
 ];
 
 export function SizeGuide() {
