@@ -17,8 +17,8 @@ export const blogPosts: BlogPost[] = [
       "Pregled najlegendarnijih retro nogometnih dresova koji i dalje nose karakter, priču i ogroman streetwear potencijal.",
     publishedAt: "2025-01-14",
     relatedSlugs: [
-      "barcelona-ronaldinho-cl2006",
-      "real-ramos-cl",
+      "barcelona-messi-cl-berlin",
+      "real-bellingham",
       "francuska-zidane-sp1998"
     ],
     paragraphs: [
@@ -35,9 +35,9 @@ export const blogPosts: BlogPost[] = [
       "Jednostavan vodič za odabir dječje veličine nogometnog dresa uz praktične mjere i savjete za sigurniju kupnju.",
     publishedAt: "2025-02-04",
     relatedSlugs: [
-      "hrvatska-modric-bijeli",
+      "hrvatska-modric-2026",
       "barcelona-yamal-domaci",
-      "argentina-messi-sp2022"
+      "argentina-messi-retro"
     ],
     paragraphs: [
       "Odabir veličine za dječji dres najčešće je razlika između poklona koji se nosi svaki tjedan i komada koji ostane u ormaru. Najbolji pristup nije pogađanje po godinama, nego kratko mjerenje kod kuće. Uzmi omiljenu majicu koja djetetu trenutno dobro stoji, raširi je na ravnu podlogu i izmjeri širinu ispod pazuha te duljinu od ramena do donjeg ruba. Kod kompleta pogledaj i duljinu hlačica ako naručuješ dječju varijantu. Te dvije mjere obično su dovoljne da odabereš puno sigurnije nego samo prema dobi.",
@@ -53,9 +53,9 @@ export const blogPosts: BlogPost[] = [
       "Pregled najpopularnijih Ronaldo dresova od Manchestera do Al-Nassra: koji modeli imaju najveći karakter i zašto su uvijek prvi na listi.",
     publishedAt: "2025-04-02",
     relatedSlugs: [
-      "manutd-ronaldo-crni-ucl",
       "manutd-ronaldo-crveni-ucl",
-      "real-ronaldo-bijeli-cl"
+      "manutd-ronaldo-crveni-ucl",
+      "real-ronaldo-2014"
     ],
     paragraphs: [
       "Ronaldo dres jedna je od najtraženijih pretraga kada govorimo o nogometnim dresovima u Hrvatskoj i regiji. Razlog je jednostavan: Ronaldo je kroz karijeru nosio dresove koji su postali ikone, a svaki od njih nosi drugačiju priču i vizualni identitet. Kada birate koji Ronaldo dres kupiti, ključno pitanje nije koji je najnoviji, nego koji vam nosi najveći naboj. Trenutni Al-Nassr žuti dres privlači pažnju zbog atipičnog kluba i upečatljive boje, dok su Manchester United i Real Madrid modeli klasici koji nikad ne izgledaju zastarjelo.",
@@ -71,8 +71,8 @@ export const blogPosts: BlogPost[] = [
       "Vodič kroz najpopularnije Messi dresove: SP 2022, Barcelona klasici i crni Inter Miami — što svaki model predstavlja i kome odgovara.",
     publishedAt: "2025-04-10",
     relatedSlugs: [
-      "argentina-messi-sp2022",
-      "argentina-messi-crni",
+      "argentina-messi-retro",
+      "argentina-messi-retro",
       "barcelona-messi-cl-berlin"
     ],
     paragraphs: [
@@ -91,7 +91,7 @@ export const blogPosts: BlogPost[] = [
     relatedSlugs: [
       "real-mbappe-2526",
       "barcelona-yamal-domaci",
-      "hrvatska-modric-plavi"
+      "hrvatska-modric-2026"
     ],
     paragraphs: [
       "Svaka sezona ima nekoliko modela koji iskaču odmah, ali pravi signal dolazi tek kad vidiš što ljudi stvarno traže u porukama. Kod nas se najviše izdvajaju tri smjera: veliki europski klubovi, reprezentacije s jakim identitetom i retro modeli koji imaju veću priču od trenutne forme na terenu. Ove sezone Real Madrid, Barcelona i Hrvatska drže vrh interesa gotovo stalno, dok Brazil i Argentina ulaze u svaku jaču turu narudžbi čim objavimo nove komade na Instagramu.",
@@ -108,7 +108,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2025-04-20",
     relatedSlugs: [
       "real-mbappe-2526",
-      "hrvatska-modric-bijeli",
+      "hrvatska-modric-2026",
       "barcelona-yamal-domaci"
     ],
     paragraphs: [
