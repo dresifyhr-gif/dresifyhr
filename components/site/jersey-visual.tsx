@@ -23,7 +23,7 @@ export function JerseyVisual({ product, mode = "card" }: JerseyVisualProps) {
       className={`relative overflow-hidden border-b border-white/10 ${
         mode === "detail"
           ? "aspect-[4/5] min-h-[420px]"
-          : "aspect-[4/5] bg-[#111111]"
+          : "aspect-[4/5] bg-[#f2f2f2]"
       }`}
     >
       {mode === "detail" ? (
@@ -32,17 +32,9 @@ export function JerseyVisual({ product, mode = "card" }: JerseyVisualProps) {
         </>
       ) : (
         <>
-          <div className="absolute inset-0 bg-[#0d0d0d]" />
-          {/* Spotlight glow from top-centre */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_50%_20%,rgba(255,255,255,0.09)_0%,rgba(255,255,255,0.02)_50%,transparent_100%)]" />
-          {/* Subtle diagonal light sweep */}
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03)_0%,transparent_55%)]" />
-          {/* Bottom fade to black */}
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_35%,rgba(0,0,0,0.72)_100%)]" />
-          {/* Corner vignette */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,transparent_55%,rgba(0,0,0,0.45)_100%)]" />
-          {/* Jersey shadow blob */}
-          <div className="absolute inset-x-[18%] bottom-[4%] h-8 rounded-full bg-black/70 blur-[22px]" />
+          <div className="absolute inset-0 bg-[#f2f2f2]" />
+          {/* Subtle bottom shadow so jersey doesn't float */}
+          <div className="absolute inset-x-[15%] bottom-[3%] h-6 rounded-full bg-black/10 blur-[14px]" />
         </>
       )}
 
@@ -106,8 +98,8 @@ export function JerseyVisual({ product, mode = "card" }: JerseyVisualProps) {
       ) : null}
 
       {hasRealImages ? (
-        <span className="pointer-events-none absolute bottom-3 right-3 select-none font-heading text-[15px] tracking-[0.18em] text-white/45">
-          DRES<span className="text-accent/70">IFY</span>
+        <span className="pointer-events-none absolute bottom-3 right-3 select-none font-heading text-[15px] tracking-[0.18em] text-black/30">
+          DRES<span className="text-accent/60">IFY</span>
         </span>
       ) : null}
 
