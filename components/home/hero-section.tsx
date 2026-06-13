@@ -17,7 +17,7 @@ export function HeroSection() {
   const { t } = useLanguage();
 
   return (
-    <section className="relative overflow-hidden bg-[#0a0a0a]">
+    <section className="relative overflow-hidden bg-black">
       {/* Background atmosphere — left accent glow */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_6%_22%,rgba(232,255,60,0.13),transparent_52%)]" />
       {/* Right-bottom second glow */}
@@ -119,47 +119,22 @@ export function HeroSection() {
             </motion.div>
           </div>
 
-          {/* ── Right column — floating jerseys ── */}
+          {/* ── Right column — hero kit image ── */}
           <motion.div
             className="relative order-1 lg:order-2"
             initial={{ opacity: 0, x: 28 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.12, ease: "easeOut" }}
           >
-            {/* Glow blob behind jerseys */}
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_55%,rgba(232,255,60,0.18),transparent_65%)]" />
-
-            <div className="relative flex h-[300px] items-end justify-center gap-0 sm:h-[380px] lg:h-[460px]">
-              {/* Left jersey — tilted left */}
-              <motion.div
-                className="relative z-10 -mr-8 h-[72%] w-[34%] sm:-mr-10 sm:h-[75%]"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
-              >
-                <div className="absolute inset-0" style={{ transform: "rotate(-8deg)" }}>
-                  <Image src="/dresovi/milan-modric/front.jpg" alt="AC Milan Modrić" fill sizes="34vw" className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]" />
-                </div>
-              </motion.div>
-
-              {/* Center jersey — tallest */}
-              <motion.div
-                className="relative z-20 h-[92%] w-[38%] sm:h-[95%]"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Image src="/dresovi/argentina-messi-retro/front.jpg" alt="Argentina Messi" fill sizes="38vw" className="object-contain drop-shadow-[0_24px_48px_rgba(0,0,0,0.7)]" />
-              </motion.div>
-
-              {/* Right jersey — tilted right */}
-              <motion.div
-                className="relative z-10 -ml-8 h-[72%] w-[34%] sm:-ml-10 sm:h-[75%]"
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
-              >
-                <div className="absolute inset-0" style={{ transform: "rotate(8deg)" }}>
-                  <Image src="/dresovi/alnassr-ronaldo-zuti/front.jpg" alt="Al-Nassr Ronaldo" fill sizes="34vw" className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]" />
-                </div>
-              </motion.div>
+            <div className="relative aspect-[3/2]">
+              <Image
+                src="/hero/hero-kitovi.jpg"
+                alt="DRESIFY — nogometni kompleti"
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 580px"
+                className="object-contain"
+              />
             </div>
           </motion.div>
         </div>
