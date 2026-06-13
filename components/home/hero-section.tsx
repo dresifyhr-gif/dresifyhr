@@ -89,7 +89,7 @@ export function HeroSection() {
               {[
                 { value: "100+", label: t.hero.stats.jerseys },
                 { value: "20€", label: t.hero.stats.price },
-                { value: "1–3", label: t.hero.stats.delivery },
+                { value: "2–5", label: t.hero.stats.delivery },
               ].map((stat) => (
                 <div key={stat.label} className="flex items-baseline gap-2">
                   <span className="font-heading text-2xl leading-none text-accent">{stat.value}</span>

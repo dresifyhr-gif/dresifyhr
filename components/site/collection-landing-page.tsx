@@ -57,7 +57,7 @@ export function CollectionLandingPage({
               Fiksna cijena 20€
             </span>
             <span className="border border-white/10 bg-[#111111] px-4 py-2 text-sm text-white">
-              Dostava 1-3 dana po Hrvatskoj
+              Dostava 2-5 dana po Hrvatskoj
             </span>
           </div>
           <p className="mt-5 max-w-4xl text-sm leading-8 text-white/60">{repairText(collection.intro)}</p>

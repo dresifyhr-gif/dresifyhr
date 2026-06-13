@@ -9,7 +9,7 @@ export default function ONamaPage() {
     { value: "500+", label: "zadovoljnih kupaca" },
     { value: "100+", label: "dresova u katalogu" },
     { value: "20€", label: "fiksna cijena" },
-    { value: "1–3 dana", label: "dostava po HR" },
+    { value: "2–5 dana", label: "dostava po HR" },
   ];
 
   const values = [

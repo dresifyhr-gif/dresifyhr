@@ -67,7 +67,7 @@ const hr = {
     paymentSummary: (payment: string, shipping: string) =>
       `Plaćanje: ${payment} • Dostava: ${shipping}`,
     benefits: {
-      delivery: "Dostava 1–3 dana",
+      delivery: "Dostava 2–5 dana",
       response: "Odgovor u sat vremena",
       returns: "Jednostavan povrat",
       orderToday: "Naruči danas — šaljemo sutra",
@@ -85,7 +85,7 @@ const hr = {
     cta: "POGLEDAJ DRESOVE",
     stats: { jerseys: "dresova", price: "fiksna cijena", delivery: "dana dostava" },
     trust: {
-      delivery: "Dostava 1–3 dana",
+      delivery: "Dostava 2–5 dana",
       response: "Odgovor u sat vremena",
       returns: "Jednostavan povrat",
       newWeekly: "Novo svaki tjedan",
@@ -102,7 +102,7 @@ const hr = {
   catalog: {
     label: "Katalog",
     title: "Dresovi — Klubovi & Reprezentacije. 20€.",
-    desc: "Nogometni dresovi za djecu i odrasle — Barcelona, Real Madrid, Bayern, Hrvatska reprezentacija i retro klasici. Fiksna cijena 20€, dostava pouzećem po cijeloj Hrvatskoj za 1–3 radna dana.",
+    desc: "Nogometni dresovi za djecu i odrasle — Barcelona, Real Madrid, Bayern, Hrvatska reprezentacija i retro klasici. Fiksna cijena 20€, dostava pouzećem po cijeloj Hrvatskoj za 2–5 radnih dana.",
     filters: "Filteri",
     filterTitle: "Filtriraj katalog",
     filterDesc: "Liga, klub, igrač i veličina.",
@@ -150,7 +150,7 @@ const hr = {
   },
 
   trust: {
-    delivery: "Dostava po cijeloj HR (1-3 dana)",
+    delivery: "Dostava po cijeloj HR (2-5 dana)",
     response: "Odgovaramo u roku sat vremena",
     returns: "Jednostavan povrat",
     newWeekly: "Novo svaki tjedan",
@@ -336,7 +336,7 @@ const en: typeof hr = {
     paymentSummary: (payment: string, shipping: string) =>
       `Payment: ${payment} • Shipping: ${shipping}`,
     benefits: {
-      delivery: "Delivery 1–3 days",
+      delivery: "Delivery 2–5 days",
       response: "Reply within the hour",
       returns: "Easy returns",
       orderToday: "Order today — ships tomorrow",
@@ -354,7 +354,7 @@ const en: typeof hr = {
     cta: "BROWSE JERSEYS",
     stats: { jerseys: "jerseys", price: "fixed price", delivery: "day delivery" },
     trust: {
-      delivery: "Delivery 1–3 days",
+      delivery: "Delivery 2–5 days",
       response: "Reply within the hour",
       returns: "Easy returns",
       newWeekly: "New every week",
@@ -371,7 +371,7 @@ const en: typeof hr = {
   catalog: {
     label: "Catalog",
     title: "Jerseys — Clubs & National Teams. 20€.",
-    desc: "Football jerseys for kids and adults — Barcelona, Real Madrid, Bayern, Croatia national team and retro classics. Fixed price 20€, cash on delivery across Croatia in 1–3 business days.",
+    desc: "Football jerseys for kids and adults — Barcelona, Real Madrid, Bayern, Croatia national team and retro classics. Fixed price 20€, cash on delivery across Croatia in 2–5 business days.",
     filters: "Filters",
     filterTitle: "Filter catalog",
     filterDesc: "League, club, player and size.",
@@ -415,7 +415,7 @@ const en: typeof hr = {
   },
 
   trust: {
-    delivery: "Delivery across HR (1-3 days)",
+    delivery: "Delivery across HR (2-5 days)",
     response: "We reply within the hour",
     returns: "Easy returns",
     newWeekly: "New every week",

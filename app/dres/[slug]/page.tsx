@@ -43,7 +43,7 @@ export function generateMetadata({ params }: ProductPageProps): Metadata {
     title: `${repairText(product.klub)} ${repairText(product.igrac)}`,
     description: `${repairText(product.klub)} ${repairText(
       product.igrac
-    )} nogometni dres za 20€. Dostava po cijeloj Hrvatskoj za 1-3 dana.`,
+    )} nogometni dres za 20€. Dostava po cijeloj Hrvatskoj za 2-5 dana.`,
     path: `/dres/${product.slug}`,
     keywords: [
       `${repairText(product.klub)} dres`.toLowerCase(),
