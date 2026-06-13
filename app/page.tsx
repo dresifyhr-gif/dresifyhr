@@ -1,4 +1,6 @@
 import { BlogPreviewSection } from "@/components/home/blog-preview-section";
+import { CategoriesSection } from "@/components/home/categories-section";
+import { FeaturedSection } from "@/components/home/featured-section";
 import { HeroSection } from "@/components/home/hero-section";
 import { InstagramSection } from "@/components/home/instagram-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
@@ -7,10 +9,10 @@ import { TrustStrip } from "@/components/home/trust-strip";
 import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { SectionHeading } from "@/components/site/section-heading";
 import { jerseys } from "@/lib/data/jerseys";
-
-const dresovi = jerseys.filter((j) => j.liga !== "Komplet");
 import { buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
+
+const dresovi = jerseys.filter((j) => j.liga !== "Komplet");
 
 export const metadata = buildMetadata({
   title: "Dresovi — Nogometni dresovi za djecu i odrasle | 20€",
@@ -46,11 +48,11 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
-      <div className="hidden md:block">
-        <TrustStrip />
-      </div>
+      <TrustStrip />
+      <CategoriesSection />
+      <FeaturedSection />
 
-      <section className="section-pad bg-[#111111]">
+      <section className="section-pad bg-[#0a0a0a]">
         <div className="page-shell">
           <div className="hidden md:block">
             <SectionHeading

@@ -9,7 +9,7 @@ import { JerseyVisual } from "@/components/site/jersey-visual";
 import { useCart } from "@/components/providers/cart-provider";
 import { type Jersey, getJerseyStock, getStockTone, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
-import { formatPrice, repairText } from "@/lib/utils";
+import { formatPrice, getProductRating, repairText } from "@/lib/utils";
 
 export function ProductCard({ product }: { product: Jersey }) {
   const stock = getJerseyStock(product.id);
@@ -81,9 +81,15 @@ export function ProductCard({ product }: { product: Jersey }) {
 
         <div className="relative">
           <JerseyVisual product={product} />
-          {product.retro && (
-            <span className="absolute left-3 top-3 z-20 bg-white/10 backdrop-blur-sm border border-white/20 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.25em] text-white/80">
-              RETRO
+          {(product.badge || product.retro) && (
+            <span className={`absolute left-2.5 top-2.5 z-20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] ${
+              product.badge === "bestseller"
+                ? "bg-accent text-black"
+                : product.badge === "novo"
+                ? "bg-[#3b82f6] text-white"
+                : "bg-black/50 backdrop-blur-sm border border-white/25 text-white/90"
+            }`}>
+              {product.badge === "bestseller" ? "★ Bestseller" : product.badge === "novo" ? "● Novo" : "Retro"}
             </span>
           )}
         </div>
@@ -100,6 +106,16 @@ export function ProductCard({ product }: { product: Jersey }) {
             <p className="mt-0.5 text-[11px] leading-4 text-white/50 sm:mt-1 sm:text-[13px] sm:leading-5">
               {repairText(product.igrac)}
             </p>
+            {/* Stars */}
+            {(() => {
+              const { rating, count } = getProductRating(product.id);
+              return (
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <span className="text-accent text-[11px] tracking-[-1px]">{"★★★★★"}</span>
+                  <span className="text-[10px] text-white/40">{rating} ({count})</span>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Price & stock */}
