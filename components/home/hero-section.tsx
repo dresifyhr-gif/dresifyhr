@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
+import { HeroKompletiCarousel } from "@/components/home/hero-kompleti-carousel";
 import { useLanguage } from "@/contexts/language-context";
 
 const TICKER_ITEMS = [
@@ -100,23 +100,14 @@ export function HeroSection() {
 
           </div>
 
-          {/* ── Right column — hero kit image ── */}
+          {/* ── Right column — rotating kompleti promo ── */}
           <motion.div
             className="relative"
             initial={{ opacity: 0, x: 28 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.12, ease: "easeOut" }}
           >
-            <div className="relative aspect-[3/2]">
-              <Image
-                src="/hero/hero-kitovi.jpg"
-                alt="DRESIFY — nogometni kompleti"
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 580px"
-                className="object-contain"
-              />
-            </div>
+            <HeroKompletiCarousel />
           </motion.div>
         </div>
 
