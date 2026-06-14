@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 import { JERSEY_PRICE_EUR } from "@/lib/site";
+import { fbTrack } from "@/lib/fbpixel";
 
 export type CartItem = {
   id: string;
@@ -89,6 +90,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((current) => [nextItem, ...current]);
     setRecentlyAddedItem(nextItem);
     setIsAddModalOpen(true);
+
+    fbTrack("AddToCart", {
+      content_ids: [nextItem.slug],
+      content_type: "product",
+      content_name: `${nextItem.klub} ${nextItem.igrac}`,
+      value: nextItem.price,
+      currency: "EUR"
+    });
   };
 
   const removeItem = (id: string) => {

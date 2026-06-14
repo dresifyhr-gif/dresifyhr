@@ -7,6 +7,7 @@ import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
 import { StickyAddToCart } from "@/components/product/sticky-add-to-cart";
 import { SizeGuide } from "@/components/product/size-guide";
+import { fbTrack } from "@/lib/fbpixel";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import {
   getJerseySizeOptions,
@@ -45,6 +46,16 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
       setSelectedSize(nextSize);
     }
   }, [product.slug, sizeOptions.hasAdults, defaultAdultSize, defaultKidSize]);
+
+  useEffect(() => {
+    fbTrack("ViewContent", {
+      content_ids: [product.slug],
+      content_type: "product",
+      content_name: `${repairText(product.klub)} ${repairText(product.igrac)}`,
+      value: product.price ?? 20,
+      currency: "EUR"
+    });
+  }, [product.slug, product.klub, product.igrac, product.price]);
 
   const currentSizes = segment === "adult" ? sizeOptions.adults : sizeOptions.kids;
   const segmentLabel = segment === "adult" ? t.product.segmentAdult : t.product.segmentKid;

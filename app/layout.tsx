@@ -8,6 +8,7 @@ import { LOCALE_COOKIE, type Locale } from "@/lib/i18n";
 
 import "@/app/globals.css";
 
+import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { SiteProviders } from "@/components/providers/site-providers";
 import { AddToCartModal } from "@/components/site/add-to-cart-modal";
 import { AnnouncementBar } from "@/components/site/announcement-bar";
@@ -101,6 +102,7 @@ export default async function RootLayout({
             </div>
           </SiteProviders>
         </LanguageProvider>
+        <MetaPixel />
       </body>
       <GoogleAnalytics gaId="G-NKPLWRWPN9" />
     </html>

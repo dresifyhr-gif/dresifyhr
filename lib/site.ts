@@ -12,6 +12,8 @@ export const CURRENCY_LABEL = "20\u20ac";
 export const DELIVERY_LABEL = "Dostava 2-5 dana po HR";
 export const DEFAULT_OG_IMAGE = "/og-default.svg";
 export const JERSEY_PRICE_EUR = 20;
+
+export const META_PIXEL_ID = "1621563625577336";
 export const HOME_DELIVERY_PRICE_EUR = 6.5;
 export const COD_FEE_EUR = 1;
 export const SHIPPING_PRICE_EUR = HOME_DELIVERY_PRICE_EUR + COD_FEE_EUR;

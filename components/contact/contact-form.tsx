@@ -12,6 +12,7 @@ import {
   JERSEY_PRICE_EUR
 } from "@/lib/site";
 import { createCartOrderSummary, formatEuroAmount, repairText } from "@/lib/utils";
+import { fbTrack } from "@/lib/fbpixel";
 import type { FulfillmentType } from "@/lib/orders";
 
 type FulfillmentOption = {
@@ -135,6 +136,14 @@ export function ContactForm() {
         setError(data.message ?? t.contactForm.errorGeneral);
         return;
       }
+
+      fbTrack("Purchase", {
+        content_ids: hasCartItems ? items.map((item) => item.slug) : undefined,
+        content_type: "product",
+        value: total,
+        currency: "EUR",
+        num_items: hasCartItems ? itemCount : 1
+      });
 
       clearCart();
       router.push("/zahvala");
