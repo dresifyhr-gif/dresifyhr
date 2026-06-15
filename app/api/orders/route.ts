@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { parseOrderPayload } from "@/lib/orders";
 import { sendOrderNotifications } from "@/lib/notifications";
+import { logOrderToSheet } from "@/lib/sheets";
 
 export const runtime = "nodejs";
 
@@ -44,6 +45,9 @@ export async function POST(request: Request) {
         { status: 502 }
       );
     }
+
+    // Log to Google Sheet (best-effort — never blocks or fails the order)
+    await logOrderToSheet(payload!);
 
     return NextResponse.json({
       ok: true,
