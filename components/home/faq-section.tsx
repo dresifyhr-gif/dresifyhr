@@ -32,6 +32,10 @@ const FAQ_HR = [
     a: "Dresovi su vrhunske kvalitete s ušivenim imenom i brojem igrača, vjerni originalnom izgledu. Materijal je lagan i prozračan, ugodan za nošenje.",
   },
   {
+    q: "Jesu li slike na stranici stvarne?",
+    a: "Da — sve fotografije prikazuju naše stvarne proizvode. Ono što vidiš na slici je ono što ćeš i dobiti.",
+  },
+  {
     q: "Kako naručujem?",
     a: "Odaberi veličinu, dodaj u košaricu i ispuni narudžbu — ili naruči direktno preko WhatsAppa. Odgovaramo u roku od sat vremena.",
   },
@@ -61,6 +65,10 @@ const FAQ_EN = [
   {
     q: "Are the jerseys good quality?",
     a: "The jerseys are high quality with stitched player name and number, faithful to the original look. The fabric is light and breathable.",
+  },
+  {
+    q: "Are the photos on the site real?",
+    a: "Yes — all photos show our actual products. What you see in the photo is what you'll get.",
   },
   {
     q: "How do I order?",
