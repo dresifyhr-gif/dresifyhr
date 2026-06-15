@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Ruler, X } from "lucide-react";
 
 const KIDS = [
+  { size: "104", height: "98–104 cm", age: "3–4 god." },
   { size: "116", height: "110–116 cm", age: "5–6 god." },
   { size: "128", height: "116–128 cm", age: "7–8 god." },
   { size: "140", height: "128–140 cm", age: "9–10 god." },
