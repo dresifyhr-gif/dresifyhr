@@ -68,7 +68,7 @@ export function ContactForm() {
   const hasCartItems = items.length > 0;
   const autoDetails = createCartOrderSummary(items);
   const cartSummaryText = items
-    .map((item) => `${repairText(item.klub)} — ${repairText(item.igrac)}, ${item.size}, ${item.segmentLabel}`)
+    .map((item, i) => `${i + 1}. ${repairText(item.klub)} — ${repairText(item.igrac)}, ${item.size}, ${item.segmentLabel}`)
     .join("\n");
 
   const [form, setForm] = useState<FormState>({
