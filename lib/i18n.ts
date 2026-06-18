@@ -199,8 +199,8 @@ const hr = {
   },
 
   productPage: {
-    related: "Može te zanima",
-    relatedTitle: "Slični dresovi",
+    related: "Možda te zanima",
+    relatedTitle: "Često se kupuje zajedno",
     notFound: "Dres nije pronađen",
     notFoundDesc: "Traženi dres nije dostupan.",
     breadcrumb: { home: "Početna", jerseys: "Dresovi" },

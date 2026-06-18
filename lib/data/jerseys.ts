@@ -236,13 +236,25 @@ export function getClubOptions() {
 }
 
 export function getRelatedJerseys(product: Jersey) {
-  const sameClub = jerseys.filter((item) => item.slug !== product.slug && item.klub === product.klub);
-  const sameLeague = jerseys.filter(
-    (item) =>
-      item.slug !== product.slug &&
-      item.liga === product.liga &&
-      item.klub !== product.klub
+  const isKomplet = product.liga === "Komplet";
+
+  // Best upsell: the full komplet of the same club (unless already viewing one)
+  const kompletUpsell = isKomplet
+    ? []
+    : jerseys.filter(
+        (item) => item.slug !== product.slug && item.liga === "Komplet" && item.klub === product.klub
+      );
+
+  const sameClub = jerseys.filter(
+    (item) => item.slug !== product.slug && item.klub === product.klub && item.liga !== "Komplet"
   );
 
-  return [...sameClub, ...sameLeague].slice(0, 4);
+  const sameLeague = jerseys.filter(
+    (item) => item.slug !== product.slug && item.liga === product.liga && item.klub !== product.klub
+  );
+
+  const seen = new Set<string>();
+  return [...kompletUpsell, ...sameClub, ...sameLeague]
+    .filter((item) => (seen.has(item.slug) ? false : (seen.add(item.slug), true)))
+    .slice(0, 4);
 }
