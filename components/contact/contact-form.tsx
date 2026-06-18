@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Loader2, Truck } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
+import { PROMO_STORAGE_KEY } from "@/components/site/promo-capture";
 import {
   COD_FEE_EUR,
   FREE_SHIPPING_THRESHOLD_EUR,
@@ -91,6 +92,7 @@ export function ContactForm() {
   const [promoInput, setPromoInput] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
   const [promoMessage, setPromoMessage] = useState<string | null>(null);
+  const [autoPromoTried, setAutoPromoTried] = useState(false);
 
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
@@ -119,6 +121,24 @@ export function ContactForm() {
     setPromoInput("");
     setPromoMessage(null);
   }
+
+  // Pre-fill + auto-apply a promo code captured from a URL link (e.g. Instagram)
+  useEffect(() => {
+    if (autoPromoTried || appliedPromo) return;
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(PROMO_STORAGE_KEY);
+    if (!stored) return;
+    const result = validatePromo(stored, orderSubtotal);
+    if (result.ok) {
+      setPromoInput(result.promo.code);
+      setAppliedPromo(result.promo);
+      setPromoMessage(`Kod ${result.promo.code} primijenjen — ušteda ${formatEuroAmount(result.discount)}`);
+      setAutoPromoTried(true);
+    } else if (orderSubtotal > 0) {
+      // Cart loaded but below minimum — pre-fill the field so the customer sees it
+      setPromoInput(stored);
+    }
+  }, [autoPromoTried, appliedPromo, orderSubtotal]);
 
   function set(field: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
