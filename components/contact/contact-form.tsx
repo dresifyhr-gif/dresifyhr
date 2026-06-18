@@ -14,6 +14,7 @@ import {
 } from "@/lib/site";
 import { createCartOrderSummary, formatEuroAmount, repairText } from "@/lib/utils";
 import { fbTrack } from "@/lib/fbpixel";
+import { computePromoDiscount, validatePromo, type PromoCode } from "@/lib/promo";
 import type { FulfillmentType } from "@/lib/orders";
 
 type FulfillmentOption = {
@@ -87,12 +88,37 @@ export function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
+  const [promoMessage, setPromoMessage] = useState<string | null>(null);
+
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
   const orderSubtotal = hasCartItems ? subtotal : JERSEY_PRICE_EUR;
   const freeShipping = orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR;
   const shipping = freeShipping ? 0 : selectedOption.price;
-  const total = orderSubtotal + shipping;
+  const discount = computePromoDiscount(appliedPromo, orderSubtotal);
+  const total = orderSubtotal - discount + shipping;
+
+  function applyPromo() {
+    const result = validatePromo(promoInput, orderSubtotal);
+    if (result.ok) {
+      setAppliedPromo(result.promo);
+      setPromoMessage(`Kod ${result.promo.code} primijenjen — ušteda ${formatEuroAmount(result.discount)}`);
+    } else if (result.reason === "min_not_met" && result.promo) {
+      setAppliedPromo(null);
+      setPromoMessage(`Kod ${result.promo.code} vrijedi za narudžbe od ${formatEuroAmount(result.promo.minSubtotal)}.`);
+    } else {
+      setAppliedPromo(null);
+      setPromoMessage("Promo kod nije ispravan.");
+    }
+  }
+
+  function clearPromo() {
+    setAppliedPromo(null);
+    setPromoInput("");
+    setPromoMessage(null);
+  }
 
   function set(field: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -122,6 +148,8 @@ export function ContactForm() {
         subtotal: orderSubtotal,
         shipping,
         total,
+        discount: discount > 0 ? discount : undefined,
+        promoCode: discount > 0 && appliedPromo ? appliedPromo.code : undefined,
         itemCount: hasCartItems ? itemCount : 1,
         createdAt: new Date().toISOString()
       };
@@ -385,6 +413,49 @@ export function ContactForm() {
               <span>{t.contactForm.shipping}</span>
               <span>{shipping === 0 ? t.contactForm.free : formatEuroAmount(shipping)}</span>
             </div>
+
+            {/* Promo code */}
+            {appliedPromo && discount > 0 ? (
+              <div className="flex items-center justify-between text-accent">
+                <span>Popust ({appliedPromo.code})</span>
+                <span>-{formatEuroAmount(discount)}</span>
+              </div>
+            ) : null}
+
+            <div className="pt-1">
+              {appliedPromo && discount > 0 ? (
+                <button
+                  type="button"
+                  onClick={clearPromo}
+                  className="text-[12px] text-white/45 underline transition hover:text-white"
+                >
+                  Ukloni promo kod
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoInput}
+                    onChange={(e) => setPromoInput(e.target.value)}
+                    placeholder="Promo kod"
+                    className="h-10 flex-1 rounded-[6px] border border-white/10 bg-[#0d0d0d] px-3 text-sm uppercase text-white placeholder:text-white/25 outline-none focus:border-accent/50"
+                  />
+                  <button
+                    type="button"
+                    onClick={applyPromo}
+                    className="h-10 shrink-0 rounded-[6px] border border-accent/40 bg-accent/10 px-4 text-xs font-semibold uppercase tracking-[0.14em] text-accent transition hover:bg-accent/20"
+                  >
+                    Primijeni
+                  </button>
+                </div>
+              )}
+              {promoMessage ? (
+                <p className={`mt-2 text-[12px] ${appliedPromo && discount > 0 ? "text-accent" : "text-white/45"}`}>
+                  {promoMessage}
+                </p>
+              ) : null}
+            </div>
+
             <div className="flex items-center justify-between border-t border-white/8 pt-3">
               <span className="font-heading text-lg uppercase tracking-wide text-white">{t.contactForm.total}</span>
               <span className="font-heading text-2xl text-accent">{formatEuroAmount(total)}</span>

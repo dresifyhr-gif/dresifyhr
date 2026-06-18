@@ -17,6 +17,8 @@ export type OrderPayload = {
   subtotal: number;
   shipping: number;
   total: number;
+  discount?: number;
+  promoCode?: string;
   itemCount: number;
   createdAt: string;
 };
@@ -80,6 +82,8 @@ export function parseOrderPayload(body: unknown): { payload?: OrderPayload; erro
     subtotal: parseMoney(source.subtotal),
     shipping: parseMoney(source.shipping),
     total: parseMoney(source.total),
+    discount: parseMoney(source.discount),
+    promoCode: normalizeText(source.promoCode),
     itemCount: Math.max(0, Math.trunc(parseMoney(source.itemCount))),
     createdAt: normalizeText(source.createdAt) || new Date().toISOString()
   };
@@ -136,6 +140,7 @@ export function buildOrderText(order: OrderPayload) {
     `Plaćanje: ${order.payment}`,
     `Broj artikala: ${order.itemCount}`,
     `Subtotal: ${formatEuro(order.subtotal)}`,
+    order.discount && order.discount > 0 ? `Popust${order.promoCode ? ` (${order.promoCode})` : ""}: -${formatEuro(order.discount)}` : undefined,
     `Dostava: ${formatEuro(order.shipping)}`,
     `Ukupno: ${formatEuro(order.total)}`,
     "",
@@ -163,6 +168,9 @@ export function buildCustomerOrderText(order: OrderPayload) {
     "",
     `Način dostave: ${fulfillmentLabels[order.fulfillment]}`,
     `Plaćanje: ${order.payment}`,
+    ...(order.discount && order.discount > 0
+      ? [`Popust${order.promoCode ? ` (${order.promoCode})` : ""}: -${formatEuro(order.discount)}`]
+      : []),
     `Ukupno: ${formatEuro(order.total)}`,
     "",
     "Tvoj odabir:",
@@ -195,6 +203,7 @@ export function buildOrderHtml(order: OrderPayload) {
           ${row("Plaćanje", order.payment)}
           ${row("Broj artikala", String(order.itemCount))}
           ${row("Subtotal", formatEuro(order.subtotal))}
+          ${order.discount && order.discount > 0 ? row(`Popust${order.promoCode ? ` (${escapeHtml(order.promoCode)})` : ""}`, `-${formatEuro(order.discount)}`) : ""}
           ${row("Dostava", formatEuro(order.shipping))}
           ${row("Ukupno", formatEuro(order.total))}
         </table>
@@ -227,6 +236,7 @@ export function buildCustomerOrderHtml(order: OrderPayload) {
         <table style="width:100%;border-collapse:collapse;font-size:16px;">
           ${row("Način dostave", fulfillmentLabels[order.fulfillment])}
           ${row("Plaćanje", order.payment)}
+          ${order.discount && order.discount > 0 ? row(`Popust${order.promoCode ? ` (${escapeHtml(order.promoCode)})` : ""}`, `-${formatEuro(order.discount)}`) : ""}
           ${row("Ukupno", formatEuro(order.total))}
         </table>
         ${section("Tvoj odabir", order.details)}
@@ -243,6 +253,7 @@ export function buildWhatsAppNotification(order: OrderPayload) {
     `Mobitel: ${order.phone}`,
     `Dostava: ${fulfillmentLabels[order.fulfillment]}`,
     `Plaćanje: ${order.payment}`,
+    order.discount && order.discount > 0 ? `Popust${order.promoCode ? ` (${order.promoCode})` : ""}: -${formatEuro(order.discount)}` : undefined,
     `Ukupno: ${formatEuro(order.total)}`,
     "",
     order.details,
