@@ -1,4 +1,5 @@
 import { BlogPreviewSection } from "@/components/home/blog-preview-section";
+import { DealBanner } from "@/components/home/deal-banner";
 import { FaqSection } from "@/components/home/faq-section";
 import { FeaturedSection } from "@/components/home/featured-section";
 import { HeroSection } from "@/components/home/hero-section";
@@ -50,6 +51,7 @@ export default async function HomePage() {
       <HeroSection />
       <TrustStrip />
       <FeaturedSection />
+      <DealBanner />
 
       <section className="section-pad bg-[#0a0a0a]">
         <div className="page-shell">
