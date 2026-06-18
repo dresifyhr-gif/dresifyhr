@@ -28,7 +28,7 @@ export async function logOrderToSheet(payload: OrderPayload) {
         itemCount: payload.itemCount,
         fulfillment: payload.fulfillment,
         payment: payload.payment,
-        total: payload.total,
+        total: payload.subtotal,
       }),
     });
 
