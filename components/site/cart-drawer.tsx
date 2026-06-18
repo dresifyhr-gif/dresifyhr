@@ -7,14 +7,16 @@ import { ArrowRight, ShoppingBag, Trash2, X } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
-import { SHIPPING_PRICE_EUR, SHIPPING_PRICE_LABEL, ZAGREB_DELIVERY_PRICE_LABEL } from "@/lib/site";
+import { FREE_SHIPPING_THRESHOLD_EUR, SHIPPING_PRICE_EUR, SHIPPING_PRICE_LABEL } from "@/lib/site";
 import { formatEuroAmount, repairText } from "@/lib/utils";
 
 export function CartDrawer() {
   const { items, subtotal, isDrawerOpen, closeDrawer, removeItem, clearCart } = useCart();
   const { t } = useLanguage();
-  const shipping = items.length ? SHIPPING_PRICE_EUR : 0;
+  const freeShipping = subtotal >= FREE_SHIPPING_THRESHOLD_EUR;
+  const shipping = items.length && !freeShipping ? SHIPPING_PRICE_EUR : 0;
   const total = subtotal + shipping;
+  const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD_EUR - subtotal);
 
   return (
     <AnimatePresence>
@@ -106,6 +108,17 @@ export function CartDrawer() {
             </div>
 
             <div className="mt-6 border border-white/10 bg-[#111111] p-5">
+              {items.length ? (
+                <div className="mb-4 rounded-[6px] border border-accent/25 bg-accent/5 px-3 py-2 text-center text-[12px] leading-5 text-white/75">
+                  {freeShipping ? (
+                    <span className="font-semibold text-accent">🎉 Ostvario si besplatnu dostavu!</span>
+                  ) : (
+                    <>
+                      Dodaj još <span className="font-semibold text-accent">{formatEuroAmount(remainingForFree)}</span> za <span className="font-semibold text-white">besplatnu dostavu</span>
+                    </>
+                  )}
+                </div>
+              ) : null}
               <div className="space-y-3 text-sm text-white">
                 <div className="flex items-center justify-between">
                   <span className="font-medium uppercase tracking-[0.2em] text-white/50">{t.cart.items}</span>
@@ -113,7 +126,9 @@ export function CartDrawer() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-medium uppercase tracking-[0.2em] text-white/50">{t.cart.shipping}</span>
-                  <span className="font-semibold">{items.length ? SHIPPING_PRICE_LABEL : ZAGREB_DELIVERY_PRICE_LABEL}</span>
+                  <span className={`font-semibold ${freeShipping ? "text-accent" : ""}`}>
+                    {!items.length ? "—" : freeShipping ? "Besplatno" : SHIPPING_PRICE_LABEL}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between border-t border-white/10 pt-3">
                   <span className="font-medium uppercase tracking-[0.28em] text-white/50">{t.cart.total}</span>

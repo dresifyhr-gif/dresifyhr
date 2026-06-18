@@ -8,6 +8,7 @@ import { Menu, ShoppingBag, X } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
+import { SearchOverlay } from "@/components/site/search-overlay";
 import type { Locale } from "@/lib/i18n";
 
 export function Navbar() {
@@ -89,6 +90,8 @@ export function Navbar() {
                 </button>
               ))}
             </div>
+
+            <SearchOverlay />
 
             <button
               type="button"

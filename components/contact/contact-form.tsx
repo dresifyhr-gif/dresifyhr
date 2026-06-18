@@ -8,6 +8,7 @@ import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
 import {
   COD_FEE_EUR,
+  FREE_SHIPPING_THRESHOLD_EUR,
   HOME_DELIVERY_PRICE_EUR,
   JERSEY_PRICE_EUR
 } from "@/lib/site";
@@ -88,8 +89,9 @@ export function ContactForm() {
 
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
-  const shipping = selectedOption.price;
   const orderSubtotal = hasCartItems ? subtotal : JERSEY_PRICE_EUR;
+  const freeShipping = orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR;
+  const shipping = freeShipping ? 0 : selectedOption.price;
   const total = orderSubtotal + shipping;
 
   function set(field: keyof FormState, value: string) {

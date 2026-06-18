@@ -6,14 +6,16 @@ import { ArrowRight, ShoppingBag, Trash2 } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
-import { SHIPPING_PRICE_EUR, SHIPPING_PRICE_LABEL } from "@/lib/site";
+import { FREE_SHIPPING_THRESHOLD_EUR, SHIPPING_PRICE_EUR, SHIPPING_PRICE_LABEL } from "@/lib/site";
 import { formatEuroAmount, repairText } from "@/lib/utils";
 
 export function CartPageContent() {
   const { t } = useLanguage();
   const { items, subtotal, removeItem } = useCart();
-  const shipping = items.length ? SHIPPING_PRICE_EUR : 0;
+  const freeShipping = subtotal >= FREE_SHIPPING_THRESHOLD_EUR;
+  const shipping = items.length && !freeShipping ? SHIPPING_PRICE_EUR : 0;
   const total = subtotal + shipping;
+  const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD_EUR - subtotal);
 
   if (!items.length) {
     return (
@@ -96,8 +98,15 @@ export function CartPageContent() {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-white/55">{t.cartPage.shipping}</span>
-            <span className="font-semibold">{SHIPPING_PRICE_LABEL}</span>
+            <span className={`font-semibold ${freeShipping ? "text-accent" : ""}`}>
+              {freeShipping ? "Besplatno" : SHIPPING_PRICE_LABEL}
+            </span>
           </div>
+          {!freeShipping ? (
+            <div className="rounded-[6px] border border-accent/25 bg-accent/5 px-3 py-2 text-center text-[12px] leading-5 text-white/75">
+              Dodaj još <span className="font-semibold text-accent">{formatEuroAmount(remainingForFree)}</span> za besplatnu dostavu
+            </div>
+          ) : null}
           <div className="flex items-center justify-between border-t border-white/10 pt-3">
             <span className="font-heading text-xl uppercase tracking-[0.12em] text-white">{t.cartPage.total}</span>
             <span className="text-3xl font-bold text-accent">{formatEuroAmount(total)}</span>
