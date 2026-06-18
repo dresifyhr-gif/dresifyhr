@@ -7,7 +7,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function absoluteUrl(path = "/") {
-  return new URL(path, SITE_URL).toString();
+  const url = new URL(path, SITE_URL);
+  // Match next.config `trailingSlash: true` for page routes so sitemap/canonical
+  // URLs equal the served URL. Skip the root and file paths (.jpg, .png, .xml…).
+  if (url.pathname !== "/" && !url.pathname.endsWith("/") && !/\.[a-z0-9]+$/i.test(url.pathname)) {
+    url.pathname += "/";
+  }
+  return url.toString();
 }
 
 export function formatPrice(price?: number) {

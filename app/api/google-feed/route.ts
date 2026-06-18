@@ -37,7 +37,7 @@ export function GET() {
       <g:id>${xmlEscape(product.slug)}</g:id>
       <g:title>${xmlEscape(title)}</g:title>
       <g:description>${xmlEscape(description)}</g:description>
-      <g:link>${SITE_URL}/dres/${xmlEscape(product.slug)}</g:link>
+      <g:link>${SITE_URL}/dres/${xmlEscape(product.slug)}/</g:link>
       <g:image_link>${image ? `${SITE_URL}${xmlEscape(image)}` : ""}</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:condition>new</g:condition>

@@ -11,7 +11,7 @@ import {
   getClubCollectionForProduct,
   getPlayerCollectionForProduct
 } from "@/lib/data/seo-collections";
-import { getJerseyBySlug, getJerseyStock, getRelatedJerseys, jerseys } from "@/lib/data/jerseys";
+import { getJerseyBySlug, getJerseyDescription, getJerseyStock, getRelatedJerseys, jerseys } from "@/lib/data/jerseys";
 import { buildBreadcrumbSchema, buildMetadata, buildProductSchema } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 import { repairText } from "@/lib/utils";
@@ -97,6 +97,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <ProductGallery product={product} />
           <ProductDetailPanel product={product} />
         </div>
+
+        <section className="mt-10 max-w-3xl">
+          <h2 className="font-heading text-3xl uppercase leading-none text-white sm:text-4xl">
+            O proizvodu — {repairText(product.klub)} {repairText(product.igrac)}
+          </h2>
+          <div className="mt-5 space-y-4">
+            {getJerseyDescription(product).map((paragraph, i) => (
+              <p key={i} className="text-sm leading-7 text-white/60 sm:text-[15px]">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </section>
 
         <div className="mt-8 grid gap-4 xl:grid-cols-3">
           {clubCollection ? (

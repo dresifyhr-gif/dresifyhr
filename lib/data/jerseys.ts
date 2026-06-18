@@ -1,3 +1,5 @@
+import { repairText } from "@/lib/utils";
+
 export type Jersey = {
   id: number;
   slug: string;
@@ -257,4 +259,41 @@ export function getRelatedJerseys(product: Jersey) {
   return [...kompletUpsell, ...sameClub, ...sameLeague]
     .filter((item) => (seen.has(item.slug) ? false : (seen.add(item.slug), true)))
     .slice(0, 4);
+}
+
+const LEAGUE_PHRASE: Record<string, string> = {
+  "La Liga": "španjolske La Lige",
+  "Premier Liga": "engleske Premier lige",
+  "Bundesliga": "njemačke Bundeslige",
+  "Serie A": "talijanske Serie A",
+  "Ligue 1": "francuske Ligue 1",
+  Reprezentacija: "reprezentativnog nogometa",
+  "Saudi Pro": "Saudijske Pro lige",
+  Brazil: "brazilskog nogometa",
+  MLS: "američke MLS lige"
+};
+
+// Builds a unique, per-product description (helps users + search indexing).
+export function getJerseyDescription(product: Jersey): string[] {
+  const klub = repairText(product.klub);
+  const igrac = repairText(product.igrac);
+  const isKomplet = product.liga === "Komplet";
+  const leaguePhrase = LEAGUE_PHRASE[product.liga] ?? "svjetskog nogometa";
+
+  const intro = isKomplet
+    ? `${klub} komplet s motivom igrača ${igrac} dolazi kao zaokružen paket — dres, hlačice, lopta i kapa. Idealan poklon za male navijače jer dijete dobije sve potrebno za igru odmah iz kutije.`
+    : `${klub} dres s ušivenim imenom i brojem igrača ${igrac}, vjeran originalnom izgledu. Materijal je lagan i prozračan, ugodan za nošenje i na terenu i u gradu.`;
+
+  const context = product.retro
+    ? `Riječ je o retro modelu koji vraća kultni izgled iz ${leaguePhrase} — komad koji nosi priču i prepoznatljivu siluetu.`
+    : `Model prati aktualni izgled iz ${leaguePhrase} i jedan je od traženijih u našoj ponudi.`;
+
+  const sizes = isKomplet
+    ? "Dostupno u dječjim (104–176) i odraslim (S–XXL) veličinama; svaki komplet uključuje dres, hlačice, loptu i kapu."
+    : "Dostupno u dječjim veličinama 104–176 (dres + hlačice) te odraslim veličinama S–XXL (dres).";
+
+  const delivery =
+    "Dostava po cijeloj Hrvatskoj uz plaćanje pouzećem, isporuka 2–5 radnih dana. Nisi siguran/na za veličinu? Pošalji nam visinu na WhatsApp i predložit ćemo pravu.";
+
+  return [intro, context, sizes, delivery];
 }

@@ -47,7 +47,7 @@ export function GET() {
       "in stock",
       "new",
       `${price.toFixed(2)} EUR`,
-      `${SITE_URL}/dres/${product.slug}`,
+      `${SITE_URL}/dres/${product.slug}/`,
       image ? `${SITE_URL}${image}` : "",
       "Dresify",
       liga,
