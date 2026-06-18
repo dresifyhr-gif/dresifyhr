@@ -4,14 +4,13 @@ import { FormEvent, useState } from "react";
 
 import { useLanguage } from "@/contexts/language-context";
 
-const STORAGE_KEY = "dresify_newsletter_emails";
-
 export function NewsletterSection() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const { t } = useLanguage();
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const trimmedEmail = email.trim().toLowerCase();
@@ -22,13 +21,26 @@ export function NewsletterSection() {
       return;
     }
 
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    const list = stored ? (JSON.parse(stored) as string[]) : [];
-    const nextList = Array.from(new Set([...list, trimmedEmail]));
+    setLoading(true);
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmedEmail })
+      });
 
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextList));
-    setEmail("");
-    setMessage(t.newsletter.success);
+      if (!res.ok) {
+        setMessage(t.newsletter.error);
+        return;
+      }
+
+      setEmail("");
+      setMessage(t.newsletter.success);
+    } catch {
+      setMessage(t.newsletter.error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,8 +60,8 @@ export function NewsletterSection() {
                 placeholder={t.newsletter.placeholder}
                 className="h-14 flex-1 rounded-[4px] border border-white/10 bg-[#111111] px-5 text-sm text-white outline-none transition duration-200 ease-out focus:border-accent"
               />
-              <button type="submit" className="button-primary px-7">
-                {t.newsletter.submit}
+              <button type="submit" className="button-primary px-7" disabled={loading}>
+                {loading ? "..." : t.newsletter.submit}
               </button>
             </form>
           </div>
