@@ -20,16 +20,6 @@ export const SHIPPING_PRICE_EUR = HOME_DELIVERY_PRICE_EUR + COD_FEE_EUR;
 export const SHIPPING_PRICE_LABEL = "7,50 \u20ac";
 export const FREE_SHIPPING_THRESHOLD_EUR = 60;
 export const FREE_SHIPPING_LABEL = "Besplatna dostava preko 60 \u20ac";
-
-// "Dres mjeseca" homepage banner \u2014 change slug/text here to feature a new product.
-export const DEAL_OF_MONTH = {
-  slug: "hrvatska-modric-komplet",
-  kicker: "Dres mjeseca",
-  title: "Hrvatska Modri\u0107 \u2014 komplet",
-  subtitle:
-    "Dres + hla\u010dice + lopta i kapa u jednom paketu. Najtra\u017eeniji komplet ovog mjeseca \u2014 savr\u0161en poklon za male navija\u010de.",
-  cta: "Pogledaj komplet"
-};
 export const ZAGREB_DELIVERY_PRICE_EUR = 0;
 export const ZAGREB_DELIVERY_PRICE_LABEL = "0,00 \u20ac";
 export const PAYMENT_METHOD_LABEL = "Pouze\u0107e";
