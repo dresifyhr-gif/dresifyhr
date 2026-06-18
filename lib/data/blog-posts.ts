@@ -11,6 +11,34 @@ export type BlogPost = {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "najljepsi-dresovi-2026",
+    title: "Najljepši nogometni dresovi za 2026.",
+    description:
+      "Pregled najljepših i najtraženijih nogometnih dresova za 2026. — od reprezentativnih klasika do najnovijih klupskih modela.",
+    publishedAt: "2026-06-10",
+    relatedSlugs: ["hrvatska-modric-2026", "real-mbappe-2526", "barcelona-yamal-domaci"],
+    paragraphs: [
+      "Svaka nova sezona donosi val novih dizajna, a 2026. je posebno jaka godina za nogometne dresove. Reprezentacije su osvježile svoje komplete uoči velikih natjecanja, a klubovi su izbacili modele koji spajaju tradiciju i moderan kroj. Ako biraš dres koji će izgledati jednako dobro na tribini i u gradu, ovo je sezona u kojoj imaš puno odličnih opcija. U ovom pregledu izdvajamo modele koji se najviše traže i koji najbolje stoje i djeci i odraslima.",
+      "Na vrhu liste je Hrvatska Modrić 2026 — dres koji je apsolutni hit kod nas. Spaja prepoznatljivi kockasti identitet reprezentacije i ime igrača koji je obilježio cijelu generaciju. Uz njega, najnoviji Real Madrid Mbappé model privlači sve koji prate Ligu prvaka, dok Barcelona Yamal domaći dres nosi onaj svjež, mladenački karakter nove ere katalonskog kluba. Ovi modeli najbrže odlaze čim nova tura stigne, pa se isplati ne čekati predugo.",
+      "Za one koji vole nešto drukčije, tu su i statement modeli u posebnim bojama i retro reizdanja koja se ne viđaju svaki dan. Dobar dres ne mora pratiti samo trenutni rezultat kluba — često najbolje stoje upravo oni komadi koji nose priču ili neobičnu kombinaciju boja. Kod odabira vodi se onime što tebi budi reakciju čim ga vidiš, jer takav dres ćeš stvarno nositi, a ne ostaviti u ormaru.",
+      "Bez obzira koji model odabereš, svi naši dresovi dolaze s ušivenim imenom i brojem igrača, dostupni su za djecu (s hlačicama) i odrasle, a dostava ide po cijeloj Hrvatskoj uz plaćanje pouzećem. Ako nisi siguran koji model ili veličinu uzeti, javi nam se na WhatsApp i rado ćemo ti pomoći oko odabira. Nova sezona je prava prilika da osvježiš kolekciju komadom koji izgleda kao da znaš što nosiš.",
+    ],
+  },
+  {
+    slug: "dres-ili-komplet-za-dijete",
+    title: "Dres ili komplet za dijete — što odabrati?",
+    description:
+      "Usporedba dječjeg dresa i kompleta (dres + hlačice + lopta + kapa) uz savjete kako odabrati pravi poklon za malog navijača.",
+    publishedAt: "2026-06-14",
+    relatedSlugs: ["hrvatska-modric-komplet", "hrvatska-modric-2026", "barcelona-yamal-domaci"],
+    paragraphs: [
+      "Kad kupuješ dres za dijete, prva dilema je gotovo uvijek ista: uzeti samo dres ili cijeli komplet? Odgovor ovisi o tome za što ti dres treba. Ako dijete već ima hlačice i loptu i samo želi dres svog idola, klasična dječja varijanta dresa s hlačicama je sasvim dovoljna. Ako pak tražiš poklon koji ostavlja dojam — za rođendan, Božić ili kraj sezone — komplet je očiti izbor jer dolazi kao zaokružen paket.",
+      "Naš komplet uključuje dres, hlačice, loptu i kapu, sve u jednom paketu po cijeni od 40 €. To je odlična opcija upravo za poklone jer dijete dobije sve što mu treba za igru odmah iz kutije, bez dodatnog kupovanja. Mali navijači posebno vole kad uz dres dobiju i loptu s istim motivom — to čini cijeli poklon puno većim i uzbudljivijim nego sam dres.",
+      "Kod veličina vrijedi isto pravilo i za dres i za komplet: ne vodi se godinama nego visinom djeteta. Dječje veličine kreću od 104 pa sve do 176, a ako je dijete između dvije veličine, gotovo uvijek je bolje uzeti veću — dres koji je malo prostraniji nosit će se dulje i ugodniji je za trčanje. Ako nisi siguran, pošalji nam visinu djeteta na WhatsApp i predložit ćemo veličinu koja ima smisla.",
+      "Bilo da odabereš samo dres ili cijeli komplet, dostava ide po cijeloj Hrvatskoj uz plaćanje pouzećem, pa ne plaćaš ništa unaprijed. Za poklone s rokom (rođendan, blagdani) javi nam datum na vrijeme i potrudit ćemo se da paket stigne prije. Komplet je najsigurnija opcija kad želiš da poklon izgleda potpuno i da dijete bude oduševljeno čim otvori kutiju.",
+    ],
+  },
+  {
     slug: "top-10-retro-dresova-2025",
     title: "Top 10 retro dresova koje moraš imati u 2025.",
     description:
