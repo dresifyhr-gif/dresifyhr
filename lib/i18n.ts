@@ -232,7 +232,7 @@ const hr = {
   thankYouPage: {
     title: "HVALA NA NARUDŽBI!",
     message:
-      "Potvrđujemo dostupnost u roku sat vremena i javljamo se na odabrani kanal kontakta.",
+      "Zaprimili smo tvoju narudžbu i uskoro ti se javljamo na odabrani kanal kontakta.",
     cta: "PREGLEDAJ JOŠ DRESOVA",
   },
 
@@ -269,7 +269,7 @@ const hr = {
     free: "Besplatno",
     total: "Ukupno",
     submit: "POŠALJI NARUDŽBU",
-    confirmNote: "Potvrđujemo dostupnost u roku sat vremena.",
+    confirmNote: "Zaprimili smo tvoju narudžbu i uskoro ti se javljamo.",
     errorGeneral: "Greška pri slanju narudžbe. Pokušaj ponovo.",
     errorNetwork: "Veza nije uspjela. Provjeri internet i pokušaj ponovo.",
   },
@@ -495,7 +495,7 @@ const en: typeof hr = {
 
   thankYouPage: {
     title: "THANK YOU FOR YOUR ORDER!",
-    message: "We'll confirm availability within the hour and get back to you on your chosen contact channel.",
+    message: "We've received your order and will get back to you shortly on your chosen contact channel.",
     cta: "BROWSE MORE JERSEYS",
   },
 
@@ -532,7 +532,7 @@ const en: typeof hr = {
     free: "Free",
     total: "Total",
     submit: "SEND ORDER",
-    confirmNote: "We confirm availability within the hour.",
+    confirmNote: "We've received your order and will get back to you shortly.",
     errorGeneral: "Error sending order. Please try again.",
     errorNetwork: "Connection failed. Check your internet and try again.",
   },

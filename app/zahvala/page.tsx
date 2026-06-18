@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   ...buildMetadata({
     title: "Hvala na narudžbi",
     description:
-      "Hvala na narudžbi. Potvrđujemo dostupnost u roku sat vremena i javljamo se na odabrani kanal kontakta.",
+      "Hvala na narudžbi. Zaprimili smo tvoju narudžbu i uskoro ti se javljamo na odabrani kanal kontakta.",
     path: "/zahvala"
   }),
   robots: {

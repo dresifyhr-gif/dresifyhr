@@ -159,7 +159,7 @@ export function buildCustomerOrderText(order: OrderPayload) {
   return [
     `Hvala na narudžbi #${reference}!`,
     "",
-    "Zaprimili smo tvoju narudžbu i potvrđujemo dostupnost u roku sat vremena.",
+    `${order.name}, zaprimili smo tvoju narudžbu #${reference}.`,
     "",
     `Način dostave: ${fulfillmentLabels[order.fulfillment]}`,
     `Plaćanje: ${order.payment}`,
@@ -222,7 +222,7 @@ export function buildCustomerOrderHtml(order: OrderPayload) {
       <div style="padding:28px;">
         <h1 style="margin:0 0 10px;font-family:'Bebas Neue',Arial,sans-serif;font-size:38px;line-height:1;">Hvala na narudžbi!</h1>
         <p style="margin:0 0 18px;font-size:16px;line-height:1.6;color:#444;">
-          Zaprimili smo tvoju narudžbu <strong>#${escapeHtml(reference)}</strong> i potvrđujemo dostupnost u roku sat vremena.
+          ${escapeHtml(order.name)}, zaprimili smo tvoju narudžbu <strong>#${escapeHtml(reference)}</strong>.
         </p>
         <table style="width:100%;border-collapse:collapse;font-size:16px;">
           ${row("Način dostave", fulfillmentLabels[order.fulfillment])}
