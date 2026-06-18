@@ -3,6 +3,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { LOCALE_COOKIE, HR_COUNTRIES, type Locale } from "@/lib/i18n";
 
 export function middleware(request: NextRequest) {
+  // Canonicalize host: redirect www.dresifyshop.com -> dresifyshop.com so the
+  // same content isn't served on two hostnames (which confuses indexing).
+  const host = request.headers.get("host");
+  if (host && host.startsWith("www.")) {
+    const url = request.nextUrl.clone();
+    url.host = host.slice(4);
+    return NextResponse.redirect(url, 308);
+  }
+
   // If user already has a locale cookie, respect it
   const existingLocale = request.cookies.get(LOCALE_COOKIE)?.value as Locale | undefined;
   if (existingLocale === "hr" || existingLocale === "en") {
