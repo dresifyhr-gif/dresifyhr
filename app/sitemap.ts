@@ -10,7 +10,7 @@ import { jerseys } from "@/lib/data/jerseys";
 import { absoluteUrl } from "@/lib/utils";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes = ["", "/dresovi", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat"];
+  const staticRoutes = ["", "/dresovi", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/igra"];
   const categoryRoutes = getJerseyCategoryCollections().map((collection) => collection.path);
   const clubRoutes = getJerseyClubCollections().map((collection) => collection.path);
   const playerRoutes = getJerseyPlayerCollections().map((collection) => collection.path);

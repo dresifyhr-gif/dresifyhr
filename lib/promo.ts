@@ -11,7 +11,8 @@ export type PromoCode = {
 
 export const PROMO_CODES: PromoCode[] = [
   { code: "DRESIFY10", value: 10, minSubtotal: 60, label: "10% popusta na narudžbe od 60 €" },
-  { code: "INSTA15", value: 15, minSubtotal: 100, label: "15% popusta na narudžbe od 100 €" }
+  { code: "INSTA15", value: 15, minSubtotal: 100, label: "15% popusta na narudžbe od 100 €" },
+  { code: "GOL10", value: 10, minSubtotal: 20, label: "10% popusta — nagrada iz Penalty igre" }
 ];
 
 export function findPromoCode(input: string): PromoCode | null {
