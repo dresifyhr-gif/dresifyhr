@@ -6,7 +6,6 @@ import { InstagramSection } from "@/components/home/instagram-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { ReviewsSection } from "@/components/home/reviews-section";
 import { TrustStrip } from "@/components/home/trust-strip";
-import { WorldCupSection } from "@/components/home/worldcup-section";
 import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { SectionHeading } from "@/components/site/section-heading";
 import { jerseys } from "@/lib/data/jerseys";
@@ -50,7 +49,6 @@ export default async function HomePage() {
     <>
       <HeroSection />
       <TrustStrip />
-      <WorldCupSection />
       <FeaturedSection />
 
       <section className="section-pad bg-[#0a0a0a]">
