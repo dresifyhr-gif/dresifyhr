@@ -18,7 +18,6 @@ import { FloatingWhatsAppButton } from "@/components/site/floating-whatsapp-butt
 import { Footer } from "@/components/site/footer";
 import { Navbar } from "@/components/site/navbar";
 import { PromoCapture } from "@/components/site/promo-capture";
-import { SocialProofPopup } from "@/components/site/social-proof-popup";
 import { buildOrganizationSchema, buildWebsiteSchema, defaultMetadata } from "@/lib/seo";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -99,7 +98,6 @@ export default async function RootLayout({
               <AddToCartModal />
               <ContentProtection />
               <FloatingWhatsAppButton />
-              <SocialProofPopup />
               <PromoCapture />
             </div>
           </SiteProviders>

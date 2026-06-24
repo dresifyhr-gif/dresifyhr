@@ -9,7 +9,7 @@ import { JerseyVisual } from "@/components/site/jersey-visual";
 import { useCart } from "@/components/providers/cart-provider";
 import { type Jersey, getJerseyStock, getStockTone, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
-import { formatPrice, getProductRating, repairText } from "@/lib/utils";
+import { formatPrice, repairText } from "@/lib/utils";
 
 export function ProductCard({ product }: { product: Jersey }) {
   const stock = getJerseyStock(product.id);
@@ -106,16 +106,6 @@ export function ProductCard({ product }: { product: Jersey }) {
             <p className="mt-0.5 text-[11px] leading-4 text-white/50 sm:mt-1 sm:text-[13px] sm:leading-5">
               {repairText(product.igrac)}
             </p>
-            {/* Stars */}
-            {(() => {
-              const { rating, count } = getProductRating(product.id);
-              return (
-                <div className="mt-1.5 flex items-center gap-1.5">
-                  <span className="text-accent text-[11px] tracking-[-1px]">{"★★★★★"}</span>
-                  <span className="text-[10px] text-white/40">{rating} ({count})</span>
-                </div>
-              );
-            })()}
           </div>
 
           {/* Price & stock */}

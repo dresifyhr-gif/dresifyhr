@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { jerseys } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
-import { formatPrice, getProductRating, repairText } from "@/lib/utils";
+import { formatPrice, repairText } from "@/lib/utils";
 
 const FEATURED_SLUGS = [
   "hrvatska-modric-2026",
@@ -44,7 +44,6 @@ export function FeaturedSection() {
             {featuredProducts.map((product) => {
               const gallery = getJerseyGallery(product.slug);
               const image = gallery[0]?.src;
-              const { rating, count } = getProductRating(product.id);
               const badge = product.badge ?? (product.retro ? "retro" : null);
 
               return (
@@ -93,10 +92,6 @@ export function FeaturedSection() {
                     <p className="text-[10px] leading-tight text-white/50">
                       {repairText(product.igrac)}
                     </p>
-                    <div className="flex items-center gap-1">
-                      <span className="text-accent text-[10px]">★★★★★</span>
-                      <span className="text-[9px] text-white/35">{rating} ({count})</span>
-                    </div>
                     <div className="mt-0.5 flex items-center justify-between">
                       <span className="font-heading text-lg leading-none text-accent">
                         {formatPrice(product.price)}

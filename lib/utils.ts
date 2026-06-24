@@ -94,16 +94,6 @@ export function repairText(value: string) {
   );
 }
 
-const RATINGS = [4.9, 4.8, 4.9, 4.7, 4.8, 4.9, 4.8, 4.7, 4.9, 4.8];
-const REVIEW_COUNTS = [312, 256, 188, 98, 121, 93, 76, 64, 178, 203, 145, 89, 234, 167, 43, 112, 287, 56];
-
-export function getProductRating(id: number) {
-  return {
-    rating: RATINGS[id % RATINGS.length],
-    count: REVIEW_COUNTS[id % REVIEW_COUNTS.length]
-  };
-}
-
 export function storageAvailable() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }

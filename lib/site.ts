@@ -34,15 +34,6 @@ export const NAV_LINKS = [
   { href: "/o-nama", label: "O nama" }
 ] as const;
 
-export const SOCIAL_PROOF_MESSAGES = [
-  "Luka iz Zagreba upravo naru\u010dio Real Madrid dres",
-  "Maja iz Splita upravo naru\u010dila Barcelona komplet",
-  "Ivan iz Rijeke upravo naru\u010dio Brazil dres",
-  "Sara iz Osijeka upravo naru\u010dila Hrvatska dres",
-  "Josip iz Zadra upravo naru\u010dio PSG dres",
-  "Petra iz Vara\u017edina upravo naru\u010dila Juventus dres"
-] as const;
-
 export const CONTACT_CHANNELS = [
   {
     id: "whatsapp",
