@@ -95,7 +95,7 @@ export default function ONamaPage() {
             </p>
             <p className="flex items-center gap-2 text-white/45 text-sm sm:text-base">
               <Heart className="h-4 w-4 shrink-0 text-accent" />
-              Izrađeno s ljubavlju prema fudbalu, iz Hrvatske.
+              Izrađeno s ljubavlju prema nogometu, iz Hrvatske.
             </p>
           </div>
         </div>
