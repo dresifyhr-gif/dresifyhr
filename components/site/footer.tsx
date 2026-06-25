@@ -80,6 +80,9 @@ export function Footer() {
             <Link href="/dostava-i-povrat" className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
               Dostava i povrat
             </Link>
+            <Link href="/igre" className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
+              Mini igre
+            </Link>
           </div>
         </div>
 
