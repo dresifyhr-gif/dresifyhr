@@ -14,6 +14,7 @@ import { AddToCartModal } from "@/components/site/add-to-cart-modal";
 import { AnnouncementBar } from "@/components/site/announcement-bar";
 import { CartDrawer } from "@/components/site/cart-drawer";
 import { ContentProtection } from "@/components/site/content-protection";
+import { ChatWidget } from "@/components/site/chat-widget";
 import { FloatingWhatsAppButton } from "@/components/site/floating-whatsapp-button";
 import { Footer } from "@/components/site/footer";
 import { Navbar } from "@/components/site/navbar";
@@ -97,6 +98,7 @@ export default async function RootLayout({
               <CartDrawer />
               <AddToCartModal />
               <ContentProtection />
+              <ChatWidget />
               <FloatingWhatsAppButton />
               <PromoCapture />
             </div>

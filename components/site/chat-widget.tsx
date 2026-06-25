@@ -1,0 +1,182 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { MessageCircle, X, Send, Bot } from "lucide-react";
+
+type Message = { role: "user" | "assistant"; content: string };
+
+function renderLinks(text: string) {
+  const parts = text.split(/(\[([^\]]+)\]\((https?:\/\/[^\)]+)\))/g);
+  const result: React.ReactNode[] = [];
+  let i = 0;
+  while (i < parts.length) {
+    const part = parts[i];
+    if (part && part.startsWith("[")) {
+      const label = parts[i + 1];
+      const href = parts[i + 2];
+      if (label && href) {
+        result.push(
+          <a key={i} href={href} className="underline text-accent hover:text-white transition-colors">
+            {label}
+          </a>
+        );
+        i += 3;
+        continue;
+      }
+    }
+    if (part) result.push(<span key={i}>{part}</span>);
+    i++;
+  }
+  return result;
+}
+
+export function ChatWidget() {
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    { role: "assistant", content: "Bok! 👋 Mogu li ti pomoći pronaći pravi dres?" }
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 120);
+  }, [open]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  async function send() {
+    const text = input.trim();
+    if (!text || loading) return;
+    setInput("");
+    const next: Message[] = [...messages, { role: "user", content: text }];
+    setMessages(next);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: next.slice(-8) }),
+      });
+
+      if (!res.ok || !res.body) throw new Error("fetch failed");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let reply = "";
+      setMessages(m => [...m, { role: "assistant", content: "" }]);
+      setLoading(false);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        reply += decoder.decode(value, { stream: true });
+        setMessages(m => {
+          const copy = [...m];
+          copy[copy.length - 1] = { role: "assistant", content: reply };
+          return copy;
+        });
+      }
+    } catch {
+      setLoading(false);
+      setMessages(m => [...m, { role: "assistant", content: "Ups, nešto je pošlo po krivu. Pokušaj ponovo ili nas kontaktiraj na WhatsAppu." }]);
+    }
+  }
+
+  return (
+    <>
+      {/* Toggle button */}
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="fixed bottom-6 left-6 z-[90] flex h-14 w-14 items-center justify-center rounded-full bg-accent text-black shadow-[0_4px_24px_rgba(232,255,60,0.35)] transition-all duration-200 hover:scale-105 hover:bg-[#f0ff71]"
+        aria-label="Otvori chat asistenta"
+      >
+        {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+      </button>
+
+      {/* Chat window */}
+      {open && (
+        <div className="fixed bottom-24 left-6 z-[90] flex w-[340px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-[18px] border border-white/10 bg-[#0d0d0d] shadow-[0_24px_64px_rgba(0,0,0,0.7)]">
+          {/* Header */}
+          <div className="flex items-center gap-3 border-b border-white/10 bg-[#111] px-4 py-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/15 text-accent">
+              <Bot className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Dresify asistent</p>
+              <p className="text-[11px] text-white/40">Pomažem pronaći pravi dres</p>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="flex max-h-[340px] flex-col gap-3 overflow-y-auto p-4">
+            {messages.map((m, i) => (
+              <div
+                key={i}
+                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[82%] rounded-[12px] px-3.5 py-2.5 text-sm leading-6 ${
+                    m.role === "user"
+                      ? "bg-accent text-black"
+                      : "bg-white/8 text-white/85"
+                  }`}
+                >
+                  {m.role === "assistant" ? renderLinks(m.content) : m.content}
+                  {m.role === "assistant" && m.content === "" && (
+                    <span className="inline-flex gap-1">
+                      <span className="animate-bounce" style={{ animationDelay: "0ms" }}>·</span>
+                      <span className="animate-bounce" style={{ animationDelay: "150ms" }}>·</span>
+                      <span className="animate-bounce" style={{ animationDelay: "300ms" }}>·</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div className="flex justify-start">
+                <div className="rounded-[12px] bg-white/8 px-3.5 py-2.5 text-white/85">
+                  <span className="inline-flex gap-1 text-lg">
+                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>·</span>
+                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>·</span>
+                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>·</span>
+                  </span>
+                </div>
+              </div>
+            )}
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Input */}
+          <div className="border-t border-white/10 p-3">
+            <form
+              onSubmit={e => { e.preventDefault(); send(); }}
+              className="flex items-center gap-2"
+            >
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                placeholder="Pitaj nešto…"
+                disabled={loading}
+                className="h-10 flex-1 rounded-[8px] border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || loading}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-accent text-black transition hover:bg-[#f0ff71] disabled:opacity-40"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
