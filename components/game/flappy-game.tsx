@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { PROMO_STORAGE_KEY } from "@/components/site/promo-capture";
+
 const STAGE_HTML = `
 <style>
 .fb-btn{transition:transform .08s ease}
@@ -111,20 +113,17 @@ export function FlappyGame() {
         + '<div style="font-size:30px;font-weight:800;color:#fff;line-height:1;margin-bottom:2px;">' + score + '</div>'
         + '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:14px;">bodova &middot; rekord ' + best() + '</div>';
       if (reward) {
-        h += '<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:8px;">Osvojio si <b style="color:#e8ff3c;">-' + reward.pct + '%</b> na dresove</div>'
-          + '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;"><span style="font-size:12px;color:rgba(255,255,255,0.5);">KOD:</span>'
-          + '<span id="fb_code" style="font-family:monospace;font-size:18px;font-weight:700;letter-spacing:3px;color:#0b0b0b;background:#e8ff3c;padding:6px 14px;border-radius:9px;cursor:pointer;">' + reward.code + '</span></div>'
-          + '<button id="fb_shop" class="fb-btn" style="width:200px;padding:13px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">ISKORISTI -' + reward.pct + '%</button>'
-          + '<button id="fb_again" class="fb-btn" style="width:200px;margin-top:8px;padding:10px 0;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:transparent;color:#fff;font-size:13px;cursor:pointer;">Igraj ponovno</button>';
+        h += '<div style="font-size:13px;color:rgba(255,255,255,0.75);margin-bottom:14px;">Osvojio si <b style="color:#e8ff3c;font-size:18px;">-' + reward.pct + '%</b> na sve dresove!</div>'
+          + '<button id="fb_shop" class="fb-btn" style="width:220px;padding:14px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">ISKORISTI -' + reward.pct + '% &rarr;</button>'
+          + '<button id="fb_again" class="fb-btn" style="width:220px;margin-top:8px;padding:10px 0;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:transparent;color:#fff;font-size:13px;cursor:pointer;">Igraj ponovno</button>'
+          + '<div style="margin-top:10px;font-size:10px;color:rgba(255,255,255,0.35);">Popust se sam primijeni na blagajni</div>';
       } else {
-        h += '<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:12px;">Dođi do <b style="color:#e8ff3c;">' + nextAt + '</b> za -' + nextAt + '% kod!</div>'
-          + '<button id="fb_again" class="fb-btn" style="width:200px;padding:13px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">Igraj ponovno</button>';
+        h += '<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:12px;">Dođi do <b style="color:#e8ff3c;">' + nextAt + '</b> za -' + nextAt + '% popusta!</div>'
+          + '<button id="fb_again" class="fb-btn" style="width:220px;padding:13px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">Igraj ponovno</button>';
       }
       over.innerHTML = h; over.style.display = "flex";
-      const codeEl = root!.querySelector<HTMLElement>("#fb_code");
-      if (codeEl && reward) codeEl.onclick = (e) => { e.stopPropagation(); try { navigator.clipboard.writeText(reward.code); codeEl.textContent = "KOPIRANO"; setTimeout(() => { codeEl.textContent = reward.code; }, 1200); } catch {} };
       const shopEl = root!.querySelector<HTMLElement>("#fb_shop");
-      if (shopEl && reward) shopEl.onclick = (e) => { e.stopPropagation(); window.location.href = "/?kod=" + reward.code; };
+      if (shopEl && reward) shopEl.onclick = (e) => { e.stopPropagation(); try { localStorage.setItem(PROMO_STORAGE_KEY, reward.code); } catch {} window.location.href = "/dresovi"; };
       const againEl = root!.querySelector<HTMLElement>("#fb_again");
       if (againEl) againEl.onclick = (e) => { e.stopPropagation(); over.style.display = "none"; state = "play"; reset(); ball.vy = -6.6; loop(); };
     }

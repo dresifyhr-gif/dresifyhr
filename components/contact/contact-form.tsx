@@ -106,10 +106,10 @@ export function ContactForm() {
     const result = validatePromo(promoInput, orderSubtotal);
     if (result.ok) {
       setAppliedPromo(result.promo);
-      setPromoMessage(`Kod ${result.promo.code} primijenjen — ušteda ${formatEuroAmount(result.discount)}`);
+      setPromoMessage(`Popust primijenjen — ušteda ${formatEuroAmount(result.discount)}`);
     } else if (result.reason === "min_not_met" && result.promo) {
       setAppliedPromo(null);
-      setPromoMessage(`Kod ${result.promo.code} vrijedi za narudžbe od ${formatEuroAmount(result.promo.minSubtotal)}.`);
+      setPromoMessage(`Ovaj kod vrijedi za narudžbe od ${formatEuroAmount(result.promo.minSubtotal)}.`);
     } else {
       setAppliedPromo(null);
       setPromoMessage("Promo kod nije ispravan.");
@@ -132,7 +132,7 @@ export function ContactForm() {
     if (result.ok) {
       setPromoInput(result.promo.code);
       setAppliedPromo(result.promo);
-      setPromoMessage(`Kod ${result.promo.code} primijenjen — ušteda ${formatEuroAmount(result.discount)}`);
+      setPromoMessage(`Popust primijenjen — ušteda ${formatEuroAmount(result.discount)}`);
       setAutoPromoTried(true);
     } else if (orderSubtotal > 0) {
       // Cart loaded but below minimum — pre-fill the field so the customer sees it
@@ -437,7 +437,7 @@ export function ContactForm() {
             {/* Promo code */}
             {appliedPromo && discount > 0 ? (
               <div className="flex items-center justify-between text-accent">
-                <span>Popust ({appliedPromo.code})</span>
+                <span>Popust (-{appliedPromo.value}%)</span>
                 <span>-{formatEuroAmount(discount)}</span>
               </div>
             ) : null}

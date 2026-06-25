@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { PROMO_STORAGE_KEY } from "@/components/site/promo-capture";
+
 const STAGE_HTML = `
 <style>
 @keyframes pgspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
@@ -215,11 +217,10 @@ export function PenaltyGame() {
       if (win) {
         controls.innerHTML =
           '<p style="margin:0 0 2px;text-align:center;font-size:18px;font-weight:800;color:#e8ff3c;">POBJEDA — ' + goals + '/5!</p>' +
-          '<p style="margin:0 0 12px;text-align:center;font-size:12px;color:rgba(255,255,255,0.6);">Otključao si -10% na sve dresove</p>' +
-          '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;"><span style="font-size:12px;color:rgba(255,255,255,0.5);">KOD:</span>' +
-          '<span id="pg_code" style="font-family:monospace;font-size:19px;font-weight:700;letter-spacing:3px;color:#0b0b0b;background:#e8ff3c;padding:7px 16px;border-radius:9px;cursor:pointer;" title="Kopiraj">GOL10</span></div>' +
-          '<button id="pg_shop" class="pg-btn" style="width:100%;padding:14px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">ISKORISTI -10% NA SHOPU</button>' +
-          '<button id="pg_again" class="pg-btn" style="width:100%;margin-top:8px;padding:11px 0;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:transparent;color:#fff;font-size:13px;cursor:pointer;">Igraj ponovno</button>' + bestLine;
+          '<p style="margin:0 0 14px;text-align:center;font-size:13px;color:rgba(255,255,255,0.75);">Osvojio si <b style="color:#e8ff3c;font-size:18px;">-10%</b> na sve dresove!</p>' +
+          '<button id="pg_shop" class="pg-btn" style="width:100%;padding:14px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">ISKORISTI -10% NA SHOPU &rarr;</button>' +
+          '<button id="pg_again" class="pg-btn" style="width:100%;margin-top:8px;padding:11px 0;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:transparent;color:#fff;font-size:13px;cursor:pointer;">Igraj ponovno</button>' +
+          '<p style="margin:8px 0 0;text-align:center;font-size:10px;color:rgba(255,255,255,0.35);">Popust se sam primijeni na blagajni</p>' + bestLine;
         confetti(); sfxGoal();
       } else {
         controls.innerHTML =
@@ -227,10 +228,8 @@ export function PenaltyGame() {
           '<p style="margin:0 0 12px;text-align:center;font-size:12px;color:rgba(255,255,255,0.6);">Treba 4 za kod — ciljaj same kuteve!</p>' +
           '<button id="pg_again" class="pg-btn" style="width:100%;padding:14px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">Igraj ponovno</button>' + bestLine;
       }
-      const codeEl = root!.querySelector<HTMLElement>("#pg_code");
-      if (codeEl) codeEl.onclick = () => { try { navigator.clipboard.writeText("GOL10"); codeEl.textContent = "KOPIRANO"; setTimeout(() => { codeEl.textContent = "GOL10"; }, 1200); } catch {} };
       const shopEl = root!.querySelector<HTMLElement>("#pg_shop");
-      if (shopEl) shopEl.onclick = () => { window.location.href = "/?kod=GOL10"; };
+      if (shopEl) shopEl.onclick = () => { try { localStorage.setItem(PROMO_STORAGE_KEY, "GOL10"); } catch {} window.location.href = "/dresovi"; };
       const againEl = root!.querySelector<HTMLElement>("#pg_again");
       if (againEl) againEl.onclick = () => {
         shot = 1; goals = 0; for (let i = 0; i < 5; i++) results[i] = null;
