@@ -14,7 +14,9 @@ VAŽNO:
 - Besplatna dostava za narudžbe preko 60€.
 - Plaćanje samo pouzećem (gotovinom pri preuzimanju).
 - Veličine: djeca 104-176, odrasli S-XXL.
-- Dječji komplet = dres + hlačice. Odrasli = samo dres.
+- Komplet 40€ = dres + hlačice + lopta + kapa (i za djecu i za odrasle).
+- Dječje veličine (104-176) uvijek dolaze s hlačicama. Odrasle veličine (S-XXL) dolaze BEZ hlačica — samo dres.
+- Dakle: dijete naruči komplet → dres + hlačice + lopta + kapa. Odrasli naruče komplet → dres + lopta + kapa (bez hlačica).
 - Veličina djeteta: 104=3-4g, 116=5-6g, 128=7-8g, 140=9-10g, 152=11-12g, 164=13-14g, 176=15-16g.
 
 KATALOG DRESOVA (link: https://dresifyshop.com/dres/SLUG):
