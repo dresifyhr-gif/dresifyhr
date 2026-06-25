@@ -10,6 +10,7 @@ export type Jersey = {
   vel: string;
   price?: number;
   badge?: "bestseller" | "novo";
+  outOfStock?: "adults" | "kids" | "all";
 };
 
 export const jerseys: Jersey[] = [
@@ -44,8 +45,8 @@ export const jerseys: Jersey[] = [
   { id: 71, slug: "barcelona-raphinha-crni", klub: "FC Barcelona", igrac: "Raphinha nr11 — crni", liga: "La Liga", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 72, slug: "bayern-kane-crveni", klub: "Bayern München", igrac: "Kane nr9 — crveni", liga: "Bundesliga", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL", badge: "novo" },
   { id: 73, slug: "real-bellingham-narancasti", klub: "Real Madrid", igrac: "Bellingham nr5 — narančasti", liga: "La Liga", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
-  { id: 74, slug: "bih-bajraktarevic", klub: "BiH", igrac: "Bajraktarević nr10", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176" },
-  { id: 75, slug: "bih-dzeko", klub: "BiH", igrac: "Džeko nr9", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176" },
+  { id: 74, slug: "bih-bajraktarevic", klub: "BiH", igrac: "Bajraktarević nr10", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL", outOfStock: "adults" },
+  { id: 75, slug: "bih-dzeko", klub: "BiH", igrac: "Džeko nr9", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL", outOfStock: "adults" },
   { id: 76, slug: "brazil-neymar-domaci", klub: "Brazil", igrac: "Neymar nr10 — domaći žuti", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 77, slug: "brazil-ronaldinho-posebni", klub: "Brazil", igrac: "Ronaldinho — posebno izdanje", liga: "Reprezentacija", retro: true, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 78, slug: "brazil-vinitjr", klub: "Brazil", igrac: "Vinícius Jr nr7 — domaći", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
@@ -199,7 +200,9 @@ export function getJerseySizeOptions(product: Jersey) {
     hasKids,
     hasAdults,
     adults: hasAdults ? [...adultSizes] : [],
-    kids: hasKids ? [...kidSizes] : []
+    kids: hasKids ? [...kidSizes] : [],
+    adultsOutOfStock: product.outOfStock === "adults" || product.outOfStock === "all",
+    kidsOutOfStock: product.outOfStock === "kids" || product.outOfStock === "all",
   };
 }
 

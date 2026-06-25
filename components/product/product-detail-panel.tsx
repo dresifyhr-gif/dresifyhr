@@ -127,21 +127,33 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
             <SizeGuide />
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
-            {currentSizes.map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => setSelectedSize(size)}
-                aria-pressed={selectedSize === size}
-                className={`h-14 border text-sm font-semibold transition duration-200 ease-out ${
-                  selectedSize === size
-                    ? "border-accent bg-accent text-black"
-                    : "border-white/10 bg-[#0a0a0a] text-white hover:border-accent/40"
-                }`}
-              >
-                {size}
-              </button>
-            ))}
+            {currentSizes.map((size) => {
+              const oos = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock);
+              return (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => !oos && setSelectedSize(size)}
+                  disabled={oos}
+                  aria-pressed={selectedSize === size}
+                  title={oos ? "Nema na stanju" : undefined}
+                  className={`relative h-14 border text-sm font-semibold transition duration-200 ease-out ${
+                    oos
+                      ? "cursor-not-allowed border-white/5 bg-[#0a0a0a] text-white/20"
+                      : selectedSize === size
+                      ? "border-accent bg-accent text-black"
+                      : "border-white/10 bg-[#0a0a0a] text-white hover:border-accent/40"
+                  }`}
+                >
+                  {oos ? (
+                    <span className="flex flex-col items-center leading-tight">
+                      <span>{size}</span>
+                      <span className="text-[9px] uppercase tracking-[0.15em] text-white/30">nema</span>
+                    </span>
+                  ) : size}
+                </button>
+              );
+            })}
           </div>
         </div>
       ) : (

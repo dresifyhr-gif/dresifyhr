@@ -160,20 +160,27 @@ export function ProductCard({ product, priority = false }: { product: Jersey; pr
 
                   {/* Size buttons */}
                   <div className="mb-2.5 flex flex-wrap gap-1.5">
-                    {currentSizes.map((size) => (
-                      <button
-                        key={size}
-                        type="button"
-                        onClick={(e) => handleSizeClick(e, size)}
-                        className={`min-w-[40px] rounded-[4px] border px-2 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-all duration-150 ${
-                          selectedSize === size
-                            ? "border-accent bg-accent text-black"
-                            : "border-white/15 text-white/60 hover:border-accent/50 hover:text-white"
-                        }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
+                    {currentSizes.map((size) => {
+                      const oos = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock);
+                      return (
+                        <button
+                          key={size}
+                          type="button"
+                          onClick={(e) => !oos && handleSizeClick(e, size)}
+                          disabled={oos}
+                          title={oos ? "Nema na stanju" : undefined}
+                          className={`min-w-[40px] rounded-[4px] border px-2 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-all duration-150 ${
+                            oos
+                              ? "cursor-not-allowed border-white/5 text-white/20"
+                              : selectedSize === size
+                              ? "border-accent bg-accent text-black"
+                              : "border-white/15 text-white/60 hover:border-accent/50 hover:text-white"
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* Add to cart button */}
