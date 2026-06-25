@@ -600,8 +600,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           ) : null}
 
           <div className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-3 2xl:grid-cols-3">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.slug} product={product} />
+            {filteredProducts.map((product, index) => (
+              <ProductCard key={product.slug} product={product} priority={index < 6} />
             ))}
           </div>
 

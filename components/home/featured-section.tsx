@@ -72,6 +72,7 @@ export function FeaturedSection() {
                         src={image}
                         alt={`${repairText(product.klub)} ${repairText(product.igrac)}`}
                         fill
+                        priority
                         sizes="190px"
                         className="object-contain object-center p-2 transition-transform duration-300 group-hover:scale-105"
                       />

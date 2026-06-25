@@ -9,9 +9,12 @@ import { getInitials, repairText } from "@/lib/utils";
 type JerseyVisualProps = {
   product: Jersey;
   mode?: "card" | "detail";
+  priority?: boolean;
 };
 
-export function JerseyVisual({ product, mode = "card" }: JerseyVisualProps) {
+const WHITE_BLUR = "data:image/gif;base64,R0lGODlhAQABAIAAAP7//wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
+
+export function JerseyVisual({ product, mode = "card", priority = false }: JerseyVisualProps) {
   const gallery = getJerseyGallery(product.slug);
   const frontImage = gallery[0];
   const backImage = gallery[1];
@@ -54,6 +57,9 @@ export function JerseyVisual({ product, mode = "card" }: JerseyVisualProps) {
                 src={frontImage.src}
                 alt={`${repairText(product.klub)} ${repairText(product.igrac)} ${frontImage.altLabel}`}
                 fill
+                priority={priority}
+                placeholder="blur"
+                blurDataURL={WHITE_BLUR}
                 sizes={
                   mode === "detail" ? "(max-width: 1024px) 100vw, 45vw" : "(max-width: 768px) 50vw, 25vw"
                 }

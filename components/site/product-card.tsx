@@ -11,7 +11,7 @@ import { type Jersey, getJerseyStock, getStockTone, getJerseySizeOptions } from 
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { formatPrice, repairText } from "@/lib/utils";
 
-export function ProductCard({ product }: { product: Jersey }) {
+export function ProductCard({ product, priority = false }: { product: Jersey; priority?: boolean }) {
   const stock = getJerseyStock(product.id);
   const sizeOptions = getJerseySizeOptions(product);
   const { addItem } = useCart();
@@ -80,7 +80,7 @@ export function ProductCard({ product }: { product: Jersey }) {
       >
 
         <div className="relative">
-          <JerseyVisual product={product} />
+          <JerseyVisual product={product} priority={priority} />
           {(product.badge || product.retro) && (
             <span className={`absolute left-2.5 top-2.5 z-20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] ${
               product.badge === "bestseller"
