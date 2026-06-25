@@ -21,7 +21,7 @@ const games = [
   {
     href: "/flappy",
     title: "Flappy Ball",
-    desc: "Provedi loptu kroz golove i skupi 10 bodova.",
+    desc: "Provedi loptu kroz golove — što dalje prođeš, veći popust.",
     Icon: Volleyball
   }
 ];

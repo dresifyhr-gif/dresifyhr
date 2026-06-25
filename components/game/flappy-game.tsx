@@ -14,7 +14,7 @@ const STAGE_HTML = `
       <span style="font-size:11px;color:#e8ff3c;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Flappy Ball</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 18px;font-size:12px;color:rgba(255,255,255,0.6);background:#111;">
-      <span>CILJ <b style="color:#e8ff3c;font-size:14px;">10</b> bodova = kod</span>
+      <span>10&middot;15&middot;20 = <b style="color:#e8ff3c;">veći popust</b></span>
       <span style="display:flex;align-items:center;gap:10px;">REKORD <b id="fb_best" style="color:#fff;font-size:14px;">0</b>
         <button id="fb_mute" aria-label="Zvuk" style="background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;font-size:15px;padding:0;line-height:1;">&#9834;</button>
       </span>
@@ -26,7 +26,7 @@ const STAGE_HTML = `
       <div id="fb_intro" style="position:absolute;inset:0;background:rgba(7,7,7,0.74);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">DRESIFY FLAPPY BALL</div>
         <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Provedi loptu kroz golove</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:250px;">Tapni za skok. Skupi <b style="color:#e8ff3c;">10 bodova</b> i osvoji -10% kod na dresove.</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Tapni za skok. Što dalje prođeš, veći popust: <b style="color:#e8ff3c;">10&rarr;-10%</b>, 15&rarr;-15%, 20&rarr;-20%. Sve teže ide!</div>
         <button id="fb_start" class="fb-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;">START &#9917;</button>
       </div>
 
@@ -81,11 +81,14 @@ export function FlappyGame() {
     const GROUND = 46, R = 15, PW = 58, GAP0 = 150, SPACE = 210;
     let ball = { x: 108, y: 210, vy: 0 };
     let pipes: { x: number; gy: number; passed: boolean }[] = [];
-    let score = 0, state: "idle" | "play" | "over" = "idle", raf = 0, frame = 0, unlocked = false;
+    let score = 0, state: "idle" | "play" | "over" = "idle", raf = 0, frame = 0, tierCode = "";
 
-    function gap() { return Math.max(118, GAP0 - score * 2); }
-    function spawn() { const m = 70, g = gap(); const gy = m + g / 2 + Math.random() * (H - GROUND - 2 * m - g); pipes.push({ x: W + 20, gy, passed: false }); }
-    function reset() { ball = { x: 108, y: 210, vy: 0 }; pipes = []; score = 0; frame = 0; unlocked = false; spawn(); }
+    function gap() { return score <= 20 ? Math.max(100, GAP0 - score * 2.6) : Math.max(78, 100 - (score - 20) * 3); }
+    function speed() { return Math.min(5.4, 2.4 + score * 0.13); }
+    function spacing() { return Math.max(150, SPACE - score * 2.6); }
+    function rewardFor(s: number) { return s >= 20 ? { code: "GOL20", pct: 20 } : s >= 15 ? { code: "GOL15", pct: 15 } : s >= 10 ? { code: "GOL10", pct: 10 } : null; }
+    function spawn() { const m = 64, g = gap(); const gy = m + g / 2 + Math.random() * (H - GROUND - 2 * m - g); pipes.push({ x: W + 20, gy, passed: false }); }
+    function reset() { ball = { x: 108, y: 210, vy: 0 }; pipes = []; score = 0; frame = 0; tierCode = ""; spawn(); }
 
     function flap() {
       if (state === "idle") { intro.style.display = "none"; state = "play"; reset(); ball.vy = -6.6; sFlap(); loop(); }
@@ -101,23 +104,27 @@ export function FlappyGame() {
       state = "over"; sHit(); buzz(120);
       if (score > best()) localStorage.setItem(BEST_KEY, String(score));
       bestEl.textContent = String(best());
-      const win = score >= 10;
+      const reward = rewardFor(score);
+      const win = !!reward;
+      const nextAt = score < 10 ? 10 : score < 15 ? 15 : score < 20 ? 20 : null;
       let h = '<div style="font-size:13px;letter-spacing:2px;color:' + (win ? "#e8ff3c" : "rgba(255,255,255,0.6)") + ';font-weight:700;margin-bottom:4px;">' + (win ? "POBJEDA!" : "KRAJ IGRE") + '</div>'
         + '<div style="font-size:30px;font-weight:800;color:#fff;line-height:1;margin-bottom:2px;">' + score + '</div>'
         + '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:14px;">bodova &middot; rekord ' + best() + '</div>';
-      if (win) {
-        h += '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;"><span style="font-size:12px;color:rgba(255,255,255,0.5);">KOD:</span>'
-          + '<span id="fb_code" style="font-family:monospace;font-size:18px;font-weight:700;letter-spacing:3px;color:#0b0b0b;background:#e8ff3c;padding:6px 14px;border-radius:9px;cursor:pointer;">GOL10</span></div>'
-          + '<button id="fb_shop" class="fb-btn" style="width:200px;padding:13px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">ISKORISTI -10%</button>'
+      if (reward) {
+        h += '<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:8px;">Osvojio si <b style="color:#e8ff3c;">-' + reward.pct + '%</b> na dresove</div>'
+          + '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;"><span style="font-size:12px;color:rgba(255,255,255,0.5);">KOD:</span>'
+          + '<span id="fb_code" style="font-family:monospace;font-size:18px;font-weight:700;letter-spacing:3px;color:#0b0b0b;background:#e8ff3c;padding:6px 14px;border-radius:9px;cursor:pointer;">' + reward.code + '</span></div>'
+          + '<button id="fb_shop" class="fb-btn" style="width:200px;padding:13px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">ISKORISTI -' + reward.pct + '%</button>'
           + '<button id="fb_again" class="fb-btn" style="width:200px;margin-top:8px;padding:10px 0;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:transparent;color:#fff;font-size:13px;cursor:pointer;">Igraj ponovno</button>';
       } else {
-        h += '<button id="fb_again" class="fb-btn" style="width:200px;padding:13px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">Igraj ponovno</button>';
+        h += '<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:12px;">Dođi do <b style="color:#e8ff3c;">' + nextAt + '</b> za -' + nextAt + '% kod!</div>'
+          + '<button id="fb_again" class="fb-btn" style="width:200px;padding:13px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">Igraj ponovno</button>';
       }
       over.innerHTML = h; over.style.display = "flex";
       const codeEl = root!.querySelector<HTMLElement>("#fb_code");
-      if (codeEl) codeEl.onclick = (e) => { e.stopPropagation(); try { navigator.clipboard.writeText("GOL10"); codeEl.textContent = "KOPIRANO"; setTimeout(() => { codeEl.textContent = "GOL10"; }, 1200); } catch {} };
+      if (codeEl && reward) codeEl.onclick = (e) => { e.stopPropagation(); try { navigator.clipboard.writeText(reward.code); codeEl.textContent = "KOPIRANO"; setTimeout(() => { codeEl.textContent = reward.code; }, 1200); } catch {} };
       const shopEl = root!.querySelector<HTMLElement>("#fb_shop");
-      if (shopEl) shopEl.onclick = (e) => { e.stopPropagation(); window.location.href = "/?kod=GOL10"; };
+      if (shopEl && reward) shopEl.onclick = (e) => { e.stopPropagation(); window.location.href = "/?kod=" + reward.code; };
       const againEl = root!.querySelector<HTMLElement>("#fb_again");
       if (againEl) againEl.onclick = (e) => { e.stopPropagation(); over.style.display = "none"; state = "play"; reset(); ball.vy = -6.6; loop(); };
     }
@@ -161,18 +168,19 @@ export function FlappyGame() {
         ctx.fillStyle = "#fff"; ctx.font = "800 34px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "top";
         ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 6;
         ctx.fillText(String(score), W / 2, 18); ctx.shadowBlur = 0;
-        if (unlocked) { ctx.fillStyle = "#e8ff3c"; ctx.font = "700 11px Arial"; ctx.fillText("KOD OTKLJUČAN", W / 2, 58); }
+        if (tierCode) { ctx.fillStyle = "#e8ff3c"; ctx.font = "700 11px Arial"; ctx.fillText("KOD " + tierCode + " OTKLJUČAN", W / 2, 58); }
       }
     }
 
     function update() {
       ball.vy += 0.45; ball.y += ball.vy;
-      for (const p of pipes) p.x -= 2.4;
-      if (pipes.length && pipes[pipes.length - 1].x < W - SPACE) spawn();
+      const sp = speed();
+      for (const p of pipes) p.x -= sp;
+      if (pipes.length && pipes[pipes.length - 1].x < W - spacing()) spawn();
       pipes = pipes.filter((p) => p.x + PW > -10);
       const g = gap();
       for (const p of pipes) {
-        if (!p.passed && p.x + PW < ball.x) { p.passed = true; score++; sScore(); if (score === 10) { unlocked = true; buzz(40); } }
+        if (!p.passed && p.x + PW < ball.x) { p.passed = true; score++; sScore(); const r = rewardFor(score); if (r && r.code !== tierCode) { tierCode = r.code; buzz(40); } }
         if (ball.x + R > p.x && ball.x - R < p.x + PW && (ball.y - R < p.gy - g / 2 || ball.y + R > p.gy + g / 2)) { gameOver(); return; }
       }
       if (ball.y + R > H - GROUND || ball.y - R < 0) { ball.y = Math.max(R, ball.y); gameOver(); }
