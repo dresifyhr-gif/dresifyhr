@@ -95,20 +95,10 @@ export function ChatWidget() {
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="fixed bottom-4 right-4 z-40 flex h-16 w-16 items-center justify-center rounded-[4px] border border-white/10 bg-accent text-black shadow-[0_18px_40px_rgba(232,255,60,0.25)] transition-transform duration-200 ease-out hover:-translate-y-1 sm:bottom-6 sm:right-6 md:h-auto md:w-auto md:gap-3 md:px-4 md:py-3"
+        className="fixed bottom-4 right-4 z-40 flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_18px_40px_rgba(37,211,102,0.28)] transition-transform duration-200 ease-out hover:-translate-y-1 sm:bottom-6 sm:right-6"
         aria-label="Otvori chat asistenta"
       >
-        <span className="flex h-16 w-16 items-center justify-center md:h-11 md:w-11 md:bg-black/10">
-          {open ? <X className="h-7 w-7 shrink-0 md:h-5 md:w-5" /> : <Bot className="h-7 w-7 shrink-0 md:h-5 md:w-5" />}
-        </span>
-        <span className="hidden md:block">
-          <span className="block text-[10px] font-semibold uppercase tracking-[0.28em] text-black/70">
-            AI asistent
-          </span>
-          <span className="block font-heading text-xl uppercase tracking-[0.16em] text-black">
-            Pitaj me nešto
-          </span>
-        </span>
+        {open ? <X className="h-7 w-7" /> : <Bot className="h-7 w-7" />}
       </button>
 
       {/* Chat window */}
