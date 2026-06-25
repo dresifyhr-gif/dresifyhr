@@ -1,190 +1,154 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { Heart, Package, Shirt, Truck, Zap, Shield } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { Heart, Package, Shirt, Truck, Zap, Shield } from "lucide-react";
+
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata({
+  title: "O nama — Dresify | Nogometni dresovi iz Hrvatske",
+  description:
+    "Dresify je hrvatska online trgovina nogometnih dresova. Više od 500 zadovoljnih kupaca, fiksna cijena 20€, dostava pouzećem po cijeloj Hrvatskoj.",
+  path: "/o-nama"
+});
+
+const stats = [
+  { value: "500+", label: "zadovoljnih kupaca" },
+  { value: "100+", label: "dresova u katalogu" },
+  { value: "20€", label: "fiksna cijena" },
+  { value: "2–5 dana", label: "dostava po HR" }
+];
+
+const values = [
+  {
+    Icon: Shirt,
+    title: "Dresovi koje stvarno nosiš",
+    desc: "Nije sve u skupim originalima. Mi nudimo dresove koji izgledaju odlično, po cijeni koja ima smisla."
+  },
+  {
+    Icon: Truck,
+    title: "Dostava po cijeloj Hrvatskoj",
+    desc: "Šaljemo brzom poštom na svaku adresu u Hrvatskoj. Pakiranje je uredno, dostava brza."
+  },
+  {
+    Icon: Zap,
+    title: "Narudžba za 2 minute",
+    desc: "Bez registracije, bez komplikacija. Odabereš dres, veličinu, pošalješ upit — gotovo."
+  },
+  {
+    Icon: Shield,
+    title: "Jednostavan povrat",
+    desc: "Nije ti odgovarala veličina? Bez problema — javi nam se i riješimo to zajedno."
+  }
+];
 
 export default function ONamaPage() {
-  const stats = [
-    { value: "500+", label: "zadovoljnih kupaca" },
-    { value: "100+", label: "dresova u katalogu" },
-    { value: "20€", label: "fiksna cijena" },
-    { value: "2–5 dana", label: "dostava po HR" },
-  ];
-
-  const values = [
-    {
-      icon: Shirt,
-      title: "Dresovi koje stvarno nosiš",
-      desc: "Nije sve u skupim originalima. Mi nudimo dresove koji izgledaju odlično, po cijeni koja ima smisla.",
-    },
-    {
-      icon: Truck,
-      title: "Dostava po cijeloj Hrvatskoj",
-      desc: "Šaljemo brzom poštom na svaku adresu u Hrvatskoj. Pakiranje je uredno, dostava brza.",
-    },
-    {
-      icon: Zap,
-      title: "Narudžba za 2 minute",
-      desc: "Bez registracije, bez komplikacija. Odabereš dres, veličinu, pošalješ upit — gotovo.",
-    },
-    {
-      icon: Shield,
-      title: "Jednostavan povrat",
-      desc: "Nije ti odgovarala veličina? Bez problema — javi nam se i riješimo to zajedno.",
-    },
-  ];
-
   return (
-    <main className="bg-[#0a0a0a] min-h-screen">
-
+    <main>
       {/* Hero */}
-      <section className="relative pt-24 pb-16 overflow-hidden">
-        {/* Bg glow */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#e2ff54]/5 rounded-full blur-[120px]" />
-        </div>
-
-        <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <span className="inline-block text-xs font-bold tracking-widest uppercase text-[#e2ff54] border border-[#e2ff54]/30 px-4 py-1.5 rounded-full mb-6">
-              O nama
-            </span>
-
-            <h1 className="text-4xl md:text-6xl font-black uppercase text-white leading-tight mb-6">
-              Dresovi za{" "}
-              <span className="text-[#e2ff54]">prave navijače</span>
-            </h1>
-
-            <p className="text-lg text-white/60 leading-relaxed max-w-2xl mx-auto">
-              Dresify je nastao iz jednostavne ideje — da svaki navijač
-              može imati dres svog idola, bez da troši cijelu plaću.
-              Fiksna cijena, brza dostava, bez komplikacija.
-            </p>
-          </motion.div>
+      <section className="section-pad">
+        <div className="page-shell max-w-3xl text-center">
+          <span className="section-kicker">O nama</span>
+          <h1 className="mt-4 font-heading text-[clamp(2.4rem,7vw,4.5rem)] uppercase leading-[0.95] tracking-[0.04em] text-white">
+            Dresovi za{" "}
+            <span className="text-accent">prave navijače</span>
+          </h1>
+          <p className="section-copy mx-auto mt-6">
+            Dresify je nastao iz jednostavne ideje — da svaki navijač može imati dres svog idola,
+            bez da troši cijelu plaću. Fiksna cijena, brza dostava, bez komplikacija.
+          </p>
         </div>
       </section>
 
       {/* Stats */}
-      <section className="py-12 border-y border-white/5">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((s, i) => (
-              <motion.div
-                key={s.label}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="text-center"
-              >
-                <div className="text-3xl md:text-4xl font-black text-[#e2ff54] mb-1">
+      <section className="border-y border-white/8 py-10 sm:py-12">
+        <div className="page-shell">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
+            {stats.map((s) => (
+              <div key={s.label} className="panel p-5 text-center sm:p-7">
+                <div className="font-heading text-[2.2rem] uppercase leading-none text-accent sm:text-[2.8rem]">
                   {s.value}
                 </div>
-                <div className="text-sm text-white/40 uppercase tracking-wide">
+                <div className="mt-2 text-[11px] uppercase tracking-[0.24em] text-white/45">
                   {s.label}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Story */}
-      <section className="py-20">
-        <div className="max-w-3xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="space-y-6 text-white/70 text-lg leading-relaxed"
-          >
+      <section className="section-pad">
+        <div className="page-shell max-w-3xl">
+          <div className="space-y-5 text-base leading-8 text-white/65 sm:text-lg sm:leading-9">
             <p>
-              Tako je nastao Dresify. Ideja je bila jednostavna:{" "}
-              <span className="text-white font-semibold">
+              Dresify je nastao iz jednostavne ideje:{" "}
+              <span className="font-semibold text-white">
                 jedan dres, jedna cijena, brza dostava
               </span>
-              . Bez skrivenih troškova, bez čekanja tjednima, bez
-              razočaranja kad paket stigne.
+              . Bez skrivenih troškova, bez čekanja tjednima, bez razočaranja kad paket stigne.
             </p>
             <p>
-              Danas imamo više od 100 modela u katalogu — od aktualnih
-              zvijezda poput Yamal i Mbappéa do retro klasika koje nosi
-              svaka generacija. Svaki dres šaljemo s pažnjom, uredno
-              upakiran, na svaku adresu u Hrvatskoj.
+              Danas imamo više od 100 modela u katalogu — od aktualnih zvijezda poput Yamala
+              i Mbappéa do retro klasika koje nosi svaka generacija. Svaki dres šaljemo s pažnjom,
+              uredno upakiran, na svaku adresu u Hrvatskoj.
             </p>
-            <p className="flex items-center gap-2 text-white/50 text-base">
-              <Heart className="w-4 h-4 text-[#e2ff54] shrink-0" />
+            <p className="flex items-center gap-2 text-white/45 text-sm sm:text-base">
+              <Heart className="h-4 w-4 shrink-0 text-accent" />
               Izrađeno s ljubavlju prema fudbalu, iz Hrvatske.
             </p>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Values */}
-      <section className="py-16 border-t border-white/5">
-        <div className="max-w-4xl mx-auto px-6">
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-black uppercase text-white text-center mb-12"
-          >
-            Zašto <span className="text-[#e2ff54]">Dresify</span>?
-          </motion.h2>
+      <section className="section-pad border-t border-white/8">
+        <div className="page-shell">
+          <div className="mb-10 text-center sm:mb-12">
+            <span className="section-kicker">Zašto Dresify</span>
+            <h2 className="mt-4 font-heading text-[clamp(1.8rem,4vw,3rem)] uppercase leading-[0.95] tracking-[0.04em] text-white">
+              Što nas razlikuje
+            </h2>
+          </div>
 
-          <div className="grid md:grid-cols-2 gap-5">
-            {values.map((v, i) => (
-              <motion.div
-                key={v.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="bg-white/[0.03] border border-white/8 rounded-2xl p-6 flex gap-4"
-              >
-                <div className="w-10 h-10 rounded-xl bg-[#e2ff54]/10 flex items-center justify-center shrink-0">
-                  <v.icon className="w-5 h-5 text-[#e2ff54]" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {values.map(({ Icon, title, desc }) => (
+              <div key={title} className="panel flex flex-col gap-4 p-6">
+                <div className="inline-flex h-11 w-11 items-center justify-center rounded-[10px] border border-accent/30 bg-accent/10 text-accent">
+                  <Icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white mb-1">{v.title}</h3>
-                  <p className="text-sm text-white/50 leading-relaxed">{v.desc}</p>
+                  <h3 className="font-heading text-lg uppercase leading-tight tracking-[0.04em] text-white">
+                    {title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-white/55">{desc}</p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20">
-        <div className="max-w-xl mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Package className="w-10 h-10 text-[#e2ff54] mx-auto mb-4" />
-            <h2 className="text-2xl md:text-3xl font-black uppercase text-white mb-4">
-              Spreman za novi dres?
-            </h2>
-            <p className="text-white/50 mb-8">
-              Pogledaj katalog i pronađi dres koji tražiš.
-            </p>
-            <Link
-              href="/dresovi"
-              className="inline-block bg-[#e2ff54] text-black font-black uppercase tracking-wider px-10 py-4 rounded-full hover:bg-[#d4f040] transition-colors"
-            >
+      <section className="section-pad border-t border-white/8">
+        <div className="page-shell max-w-xl text-center">
+          <Package className="mx-auto mb-5 h-10 w-10 text-accent" />
+          <h2 className="font-heading text-[clamp(1.8rem,4vw,3rem)] uppercase leading-[0.95] tracking-[0.04em] text-white">
+            Spreman za novi dres?
+          </h2>
+          <p className="section-copy mx-auto mt-4">
+            Pogledaj katalog i pronađi dres koji tražiš.
+          </p>
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link href="/dresovi" className="button-primary">
               Pogledaj dresove
             </Link>
-          </motion.div>
+            <Link href="/kontakt" className="button-secondary">
+              Kontaktiraj nas
+            </Link>
+          </div>
         </div>
       </section>
-
     </main>
   );
 }
