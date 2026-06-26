@@ -169,6 +169,84 @@ const jerseyMediaMap: Record<string, JerseyGalleryImage[]> = {
   "milan-modric-komplet": [
     { src: "/dresovi/milan-modric-komplet/komplet.png", altLabel: "AC Milan Modrić komplet — dres, hlačice, lopta i kapa" }
   ],
+  "milan-ibrahimovic": [
+    { src: "/dresovi/milan-ibrahimovic/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "milan-maldini-gucci": [
+    { src: "/dresovi/milan-maldini-gucci/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "bayern-karl": [
+    { src: "/dresovi/bayern-karl/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "bayern-luis-diaz": [
+    { src: "/dresovi/bayern-luis-diaz/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "brazil-neymar-plavi": [
+    { src: "/dresovi/brazil-neymar-plavi/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "brazil-pele-jesus": [
+    { src: "/dresovi/brazil-pele-jesus/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "barcelona-yamal-bijelo-rozi": [
+    { src: "/dresovi/barcelona-yamal-bijelo-rozi/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "barcelona-neymar-2015": [
+    { src: "/dresovi/barcelona-neymar-2015/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "barcelona-ronaldo-r9": [
+    { src: "/dresovi/barcelona-ronaldo-r9/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "hrvatska-modric-plavi-2026": [
+    { src: "/dresovi/hrvatska-modric-plavi-2026/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "hrvatska-modric-crveni-2026": [
+    { src: "/dresovi/hrvatska-modric-crveni-2026/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "hrvatska-gvardiol-2026": [
+    { src: "/dresovi/hrvatska-gvardiol-2026/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "hrvatska-livakovic": [
+    { src: "/dresovi/hrvatska-livakovic/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "hrvatska-perisic": [
+    { src: "/dresovi/hrvatska-perisic/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "hrvatska-stanisic-2026": [
+    { src: "/dresovi/hrvatska-stanisic-2026/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "juventus-sp10": [
+    { src: "/dresovi/juventus-sp10/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "liverpool-ekitike": [
+    { src: "/dresovi/liverpool-ekitike/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "mancity-cherki": [
+    { src: "/dresovi/mancity-cherki/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "manutd-sesko": [
+    { src: "/dresovi/manutd-sesko/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "psg-hakimi": [
+    { src: "/dresovi/psg-hakimi/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "psg-ronaldinho": [
+    { src: "/dresovi/psg-ronaldinho/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "portugal-ronaldo-2026": [
+    { src: "/dresovi/portugal-ronaldo-2026/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "real-ramos-2018-cl": [
+    { src: "/dresovi/real-ramos-2018-cl/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "real-ronaldo-ljubicasti-cl": [
+    { src: "/dresovi/real-ronaldo-ljubicasti-cl/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "real-arda-guler": [
+    { src: "/dresovi/real-arda-guler/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
+  "real-ronaldo-bijeli-cl": [
+    { src: "/dresovi/real-ronaldo-bijeli-cl/front.jpg", altLabel: "Prednja i stražnja strana" }
+  ],
 };
 
 export function getJerseyGallery(slug: string) {
