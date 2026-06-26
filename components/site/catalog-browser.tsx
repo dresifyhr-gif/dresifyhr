@@ -221,6 +221,11 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
         if (left.slug === FLAGSHIP_SLUG) return -1;
         if (right.slug === FLAGSHIP_SLUG) return 1;
 
+        // Croatian national team jerseys always second
+        const leftHR = left.klub === "Hrvatska";
+        const rightHR = right.klub === "Hrvatska";
+        if (leftHR !== rightHR) return leftHR ? -1 : 1;
+
         const leftHasImage = hasJerseyGallery(left.slug);
         const rightHasImage = hasJerseyGallery(right.slug);
 
