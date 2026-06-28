@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Goal, HelpCircle, Layers, Volleyball } from "lucide-react";
+import { ArrowRight, Goal, HelpCircle, Layers, Volleyball, Worm } from "lucide-react";
 
 import { buildMetadata } from "@/lib/seo";
 
@@ -35,6 +35,12 @@ const games = [
     title: "Spojnica",
     desc: "Spoji svih 6 parova u ograničenom broju pokušaja. Osvoji besplatnu dostavu.",
     Icon: Layers
+  },
+  {
+    href: "/zmija",
+    title: "Zmija",
+    desc: "Jedi lopte i rasti. 5 = besplatna dostava, 12 = −15%, 20 = −20%.",
+    Icon: Worm
   }
 ];
 
