@@ -21,7 +21,7 @@ export function GamesCta() {
               Odigraj i osvoji nagradu!
             </h2>
             <p className="mt-2 text-sm leading-6 text-white/60">
-              Penalty Cup ⚽, Flappy Ball i Football Kviz — pobijedi i osvoji besplatnu dostavu, popust ili poklon.
+              Penalty Cup ⚽, Flappy Ball, Football Kviz i Spojnica — pobijedi i osvoji besplatnu dostavu, popust ili poklon.
             </p>
           </div>
 

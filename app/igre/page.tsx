@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Goal, HelpCircle, Volleyball } from "lucide-react";
+import { ArrowRight, Goal, HelpCircle, Layers, Volleyball } from "lucide-react";
 
 import { buildMetadata } from "@/lib/seo";
 
@@ -27,8 +27,14 @@ const games = [
   {
     href: "/kviz",
     title: "Football Kviz",
-    desc: "5 pitanja iz footballa. Odgovori 4/5 točno i osvoji nagradu po izboru.",
+    desc: "5 pitanja iz footballa. Odgovori 5/5 točno i osvoji nagradu po izboru.",
     Icon: HelpCircle
+  },
+  {
+    href: "/spojnica",
+    title: "Spojnica",
+    desc: "Spoji svih 6 parova u ograničenom broju pokušaja. Osvoji besplatnu dostavu.",
+    Icon: Layers
   }
 ];
 
