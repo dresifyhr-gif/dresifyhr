@@ -470,11 +470,12 @@ export function ContactForm() {
               ) : (
                 <div className="flex gap-2">
                   <input
-                    type="text"
+                    type="password"
+                    autoComplete="off"
                     value={promoInput}
                     onChange={(e) => setPromoInput(e.target.value)}
                     placeholder="Promo kod"
-                    className="h-10 flex-1 rounded-[6px] border border-white/10 bg-[#0d0d0d] px-3 text-sm uppercase text-white placeholder:text-white/25 outline-none focus:border-accent/50"
+                    className="h-10 flex-1 rounded-[6px] border border-white/10 bg-[#0d0d0d] px-3 text-sm uppercase tracking-[0.3em] text-white placeholder:tracking-normal placeholder:text-white/25 outline-none focus:border-accent/50"
                   />
                   <button
                     type="button"
