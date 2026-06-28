@@ -102,9 +102,23 @@ export function CartPageContent() {
               {freeShipping ? "Besplatno" : SHIPPING_PRICE_LABEL}
             </span>
           </div>
-          {!freeShipping ? (
-            <div className="rounded-[6px] border border-accent/25 bg-accent/5 px-3 py-2 text-center text-[12px] leading-5 text-white/75">
-              Dodaj još <span className="font-semibold text-accent">{formatEuroAmount(remainingForFree)}</span> za besplatnu dostavu
+          {items.length ? (
+            <div className="rounded-[6px] border border-accent/25 bg-accent/5 px-3 py-2.5">
+              <p className="text-center text-[12px] leading-5 text-white/75">
+                {freeShipping ? (
+                  <span className="font-semibold text-accent">🎉 Ostvario si besplatnu dostavu!</span>
+                ) : (
+                  <>
+                    Dodaj još <span className="font-semibold text-accent">{formatEuroAmount(remainingForFree)}</span> za besplatnu dostavu
+                  </>
+                )}
+              </p>
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-accent transition-all duration-500 ease-out"
+                  style={{ width: `${Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD_EUR) * 100)}%` }}
+                />
+              </div>
             </div>
           ) : null}
           <div className="flex items-center justify-between border-t border-white/10 pt-3">
