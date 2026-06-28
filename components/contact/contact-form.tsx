@@ -100,16 +100,26 @@ export function ContactForm() {
   const orderSubtotal = hasCartItems ? subtotal : JERSEY_PRICE_EUR;
   // High game rewards (-15% / -20%) can't stack with free shipping — protects the margin.
   const blocksFreeShipping = appliedPromo?.code === "GOL20" || appliedPromo?.code === "GOL15";
-  const freeShipping = orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR && !blocksFreeShipping;
+  // A free-shipping reward (e.g. DOSTAVA) zeros shipping when its minimum is met.
+  const promoFreeShipping =
+    appliedPromo?.kind === "freeship" && orderSubtotal >= appliedPromo.minSubtotal;
+  const freeShipping =
+    (orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR && !blocksFreeShipping) || promoFreeShipping;
   const shipping = freeShipping ? 0 : selectedOption.price;
   const discount = computePromoDiscount(appliedPromo, orderSubtotal);
   const total = orderSubtotal - discount + shipping;
+  // A reward is "active" if it gives a discount OR free shipping.
+  const rewardActive = !!appliedPromo && (discount > 0 || promoFreeShipping);
 
   function applyPromo() {
     const result = validatePromo(promoInput, orderSubtotal);
     if (result.ok) {
       setAppliedPromo(result.promo);
-      setPromoMessage(`Popust primijenjen — ušteda ${formatEuroAmount(result.discount)}`);
+      setPromoMessage(
+        result.promo.kind === "freeship"
+          ? "Besplatna dostava primijenjena 🎉"
+          : `Popust primijenjen — ušteda ${formatEuroAmount(result.discount)}`
+      );
     } else if (result.reason === "min_not_met" && result.promo) {
       setAppliedPromo(null);
       setPromoMessage(`Ovaj kod vrijedi za narudžbe od ${formatEuroAmount(result.promo.minSubtotal)}.`);
@@ -141,7 +151,11 @@ export function ContactForm() {
     if (result.ok) {
       setPromoInput(result.promo.code);
       setAppliedPromo(result.promo);
-      setPromoMessage(`Popust primijenjen — ušteda ${formatEuroAmount(result.discount)}`);
+      setPromoMessage(
+        result.promo.kind === "freeship"
+          ? "Besplatna dostava primijenjena 🎉"
+          : `Popust primijenjen — ušteda ${formatEuroAmount(result.discount)}`
+      );
       setAutoPromoTried(true);
     } else if (orderSubtotal > 0) {
       // Cart loaded but below minimum — pre-fill the field so the customer sees it
@@ -178,7 +192,7 @@ export function ContactForm() {
         shipping,
         total,
         discount: discount > 0 ? discount : undefined,
-        promoCode: discount > 0 && appliedPromo ? appliedPromo.code : undefined,
+        promoCode: rewardActive && appliedPromo ? appliedPromo.code : undefined,
         itemCount: hasCartItems ? itemCount : 1,
         createdAt: new Date().toISOString()
       };
@@ -453,15 +467,21 @@ export function ContactForm() {
             )}
 
             {/* Promo code */}
-            {appliedPromo && discount > 0 ? (
+            {rewardActive && discount > 0 ? (
               <div className="flex items-center justify-between text-accent">
-                <span>Popust (-{appliedPromo.value}%)</span>
+                <span>Popust (-{appliedPromo!.value}%)</span>
                 <span>-{formatEuroAmount(discount)}</span>
+              </div>
+            ) : null}
+            {rewardActive && promoFreeShipping ? (
+              <div className="flex items-center justify-between text-accent">
+                <span>Besplatna dostava 🎉</span>
+                <span>-{formatEuroAmount(selectedOption.price)}</span>
               </div>
             ) : null}
 
             <div className="pt-1">
-              {appliedPromo && discount > 0 ? (
+              {rewardActive ? (
                 <button
                   type="button"
                   onClick={clearPromo}
@@ -489,7 +509,7 @@ export function ContactForm() {
                 </div>
               )}
               {promoMessage ? (
-                <p className={`mt-2 text-[12px] ${appliedPromo && discount > 0 ? "text-accent" : "text-white/45"}`}>
+                <p className={`mt-2 text-[12px] ${rewardActive ? "text-accent" : "text-white/45"}`}>
                   {promoMessage}
                 </p>
               ) : null}

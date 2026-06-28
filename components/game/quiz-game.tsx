@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ArrowRight, Gift, Percent, RotateCcw, Trophy } from "lucide-react";
+import { ArrowRight, Gift, RotateCcw, Trophy, Truck } from "lucide-react";
 
 import { GIFT_STORAGE_KEY } from "@/lib/promo";
 import { PROMO_STORAGE_KEY } from "@/components/site/promo-capture";
@@ -137,8 +137,8 @@ export function QuizGame() {
     }, 1100);
   };
 
-  const claimDiscount = () => {
-    try { localStorage.setItem(PROMO_STORAGE_KEY, "KVIZ10"); } catch {}
+  const claimFreeShipping = () => {
+    try { localStorage.setItem(PROMO_STORAGE_KEY, "DOSTAVA"); } catch {}
     setPhase("claimed");
     setTimeout(() => { window.location.href = "/dresovi"; }, 1400);
   };
@@ -166,7 +166,7 @@ export function QuizGame() {
         </div>
         <div className="flex flex-col gap-2 rounded-[10px] border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/70">
           <p>🎁 <span className="text-white">Poklon iznenađenja</span> uz narudžbu</p>
-          <p>💰 <span className="text-white">−10%</span> popust na sve dresove</p>
+          <p>🚚 <span className="text-white">Besplatna dostava</span> na tvoju narudžbu</p>
           <p className="mt-1 text-xs text-white/40">Ti biraš nagradu ako pobijediš</p>
         </div>
         <button
@@ -213,14 +213,14 @@ export function QuizGame() {
 
           <button
             type="button"
-            onClick={claimDiscount}
+            onClick={claimFreeShipping}
             className="group flex items-center gap-4 rounded-[12px] border border-white/15 bg-[#111] p-5 text-left transition hover:border-accent/60 hover:bg-accent/5"
           >
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-accent/10 text-accent">
-              <Percent className="h-6 w-6" />
+              <Truck className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-semibold text-white">−10% na sve dresove</p>
+              <p className="font-semibold text-white">Besplatna dostava</p>
               <p className="text-xs text-white/50">Automatski se primijeni na blagajni</p>
             </div>
             <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-white/30 transition group-hover:translate-x-1 group-hover:text-accent" />

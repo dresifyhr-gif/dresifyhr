@@ -27,12 +27,14 @@ Komplet za odrasle: dres + lopta + kapa (bez hlačica)
 Narudžba ide preko web forme na stranici dresa (gumb "Naruči"). Nema registracije. Može i direktno na WhatsApp.
 Povrat: ako veličina ne odgovara, kupac se javi na WhatsApp i riješimo zajedno.
 
-=== POPUSTI ===
-Na stranici /igre postoje dvije mini igre: Penalty Cup i Flappy Ball.
-- Penalty Cup: zabij 4/5 penala → automatski osvoji -10% popust
-- Flappy Ball: što dalje prođeš, veći popust — 10 bodova=-10%, 15 bodova=-15%, 20 bodova=-20%
-Popust se automatski primijeni pri narudžbi, kupac ne mora ništa upisivati.
-Slobodno preporuči igrice kad netko pita za popust ili kako uštedjeti.
+=== NAGRADE / POPUSTI ===
+Na stranici /igre postoje tri mini igre: Penalty Cup, Flappy Ball i Football Kviz.
+- Penalty Cup: zabij 4/5 penala → osvoji besplatnu dostavu
+- Flappy Ball: 10 bodova=besplatna dostava, 15 bodova=-15% popust, 20 bodova=-20% popust
+- Football Kviz: odgovori 5/5 točno → biraš nagradu: besplatna dostava ILI poklon iznenađenja uz narudžbu
+Nagrada se automatski primijeni pri narudžbi, kupac ne mora ništa upisivati.
+Napomena: -15% i -20% se ne mogu kombinirati s besplatnom dostavom (na te popuste se plaća dostava).
+Slobodno preporuči igrice kad netko pita za popust, nagradu ili kako uštedjeti.
 
 === STRANICE NA SHOPU ===
 /dresovi — cijeli katalog s filterima (liga, klub, igrač, veličina, retro)

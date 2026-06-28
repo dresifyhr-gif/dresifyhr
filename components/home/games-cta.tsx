@@ -18,10 +18,10 @@ export function GamesCta() {
               Mini igre
             </span>
             <h2 className="mt-3 font-heading text-[clamp(1.7rem,4vw,2.6rem)] uppercase leading-[0.98] tracking-[0.03em] text-white">
-              Odigraj i osvoji popust!
+              Odigraj i osvoji nagradu!
             </h2>
             <p className="mt-2 text-sm leading-6 text-white/60">
-              Penalty Cup ⚽ i Flappy Ball — pobijedi i otključaj do -20% na sve dresove.
+              Penalty Cup ⚽, Flappy Ball i Football Kviz — pobijedi i osvoji besplatnu dostavu, popust ili poklon.
             </p>
           </div>
 

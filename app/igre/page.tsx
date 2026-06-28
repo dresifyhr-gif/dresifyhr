@@ -7,7 +7,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "DRESIFY mini igre — igraj i osvoji nagradu",
   description:
-    "Igraj DRESIFY mini igre: Penalty Cup, Flappy Ball i Football Kviz. Pobijedi i osvoji popust ili poklon uz narudžbu.",
+    "Igraj DRESIFY mini igre: Penalty Cup, Flappy Ball i Football Kviz. Pobijedi i osvoji besplatnu dostavu, popust ili poklon uz narudžbu.",
   path: "/igre"
 });
 
@@ -15,13 +15,13 @@ const games = [
   {
     href: "/igra",
     title: "Penalty Cup",
-    desc: "Zabij 4 od 5 penala protiv DRESIFY golmana. Osvoji −10% popust.",
+    desc: "Zabij 4 od 5 penala protiv DRESIFY golmana. Osvoji besplatnu dostavu.",
     Icon: Goal
   },
   {
     href: "/flappy",
     title: "Flappy Ball",
-    desc: "Provedi loptu kroz golove — što dalje prođeš, veći popust (do −20%).",
+    desc: "Provedi loptu kroz golove — 10 = besplatna dostava, 15 = −15%, 20 = −20%.",
     Icon: Volleyball
   },
   {
@@ -39,10 +39,10 @@ export default function IgrePage() {
         <div className="mb-8 text-center">
           <span className="section-kicker">Mini igre</span>
           <h1 className="mt-2 font-heading text-[clamp(2.2rem,6vw,3.6rem)] uppercase leading-[0.95] tracking-[0.04em] text-white">
-            Igraj i osvoji popust
+            Igraj i osvoji nagradu
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">
-            Pobijedi i osvoji popust ili poklon iznenađenja uz narudžbu. Tri igre — odaberi svoju.
+            Pobijedi i osvoji besplatnu dostavu, popust ili poklon iznenađenja uz narudžbu. Tri igre — odaberi svoju.
           </p>
         </div>
 

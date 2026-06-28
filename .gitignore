@@ -9,3 +9,15 @@ yarn-error.log*
 pnpm-debug.log*
 
 .vercel
+
+# Environment / secrets
+.env
+.env.local
+.env*.local
+
+# Build / editor artifacts
+tsconfig.tsbuildinfo
+.DS_Store
+
+# Local git worktrees
+.claude/worktrees/

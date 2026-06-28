@@ -2,20 +2,24 @@
 // `value` is a percentage; `minSubtotal` is the minimum item subtotal (without
 // shipping) required for the code to apply.
 
+export type PromoKind = "percent" | "freeship";
+
 export type PromoCode = {
   code: string;
-  value: number; // percent off
+  kind: PromoKind;
+  value: number; // percent off (0 for free-shipping codes)
   minSubtotal: number;
   label: string; // short description shown in the UI
 };
 
 export const PROMO_CODES: PromoCode[] = [
-  { code: "DRESIFY10", value: 10, minSubtotal: 60, label: "10% popusta na narudžbe od 60 €" },
-  { code: "INSTA15", value: 15, minSubtotal: 100, label: "15% popusta na narudžbe od 100 €" },
-  { code: "GOL10", value: 10, minSubtotal: 20, label: "10% popusta — nagrada iz igre" },
-  { code: "GOL15", value: 15, minSubtotal: 30, label: "15% popusta — nagrada iz igre" },
-  { code: "GOL20", value: 20, minSubtotal: 40, label: "20% popusta — nagrada iz igre" },
-  { code: "KVIZ10", value: 10, minSubtotal: 20, label: "10% popusta — nagrada iz kviza" }
+  { code: "DRESIFY10", kind: "percent", value: 10, minSubtotal: 60, label: "10% popusta na narudžbe od 60 €" },
+  { code: "INSTA15", kind: "percent", value: 15, minSubtotal: 100, label: "15% popusta na narudžbe od 100 €" },
+  { code: "GOL10", kind: "percent", value: 10, minSubtotal: 20, label: "10% popusta — nagrada iz igre" },
+  { code: "GOL15", kind: "percent", value: 15, minSubtotal: 30, label: "15% popusta — nagrada iz igre" },
+  { code: "GOL20", kind: "percent", value: 20, minSubtotal: 40, label: "20% popusta — nagrada iz igre" },
+  { code: "KVIZ10", kind: "percent", value: 10, minSubtotal: 20, label: "10% popusta — nagrada iz kviza" },
+  { code: "DOSTAVA", kind: "freeship", value: 0, minSubtotal: 20, label: "Besplatna dostava — nagrada iz igre" }
 ];
 
 export const GIFT_STORAGE_KEY = "dresify_poklon";

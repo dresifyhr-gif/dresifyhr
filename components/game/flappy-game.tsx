@@ -16,7 +16,7 @@ const STAGE_HTML = `
       <span style="font-size:11px;color:#e8ff3c;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Flappy Ball</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 18px;font-size:12px;color:rgba(255,255,255,0.6);background:#111;">
-      <span>10&middot;15&middot;20 = <b style="color:#e8ff3c;">veći popust</b></span>
+      <span>10&middot;15&middot;20 = <b style="color:#e8ff3c;">veća nagrada</b></span>
       <span style="display:flex;align-items:center;gap:10px;">REKORD <b id="fb_best" style="color:#fff;font-size:14px;">0</b>
         <button id="fb_mute" aria-label="Zvuk" style="background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;font-size:15px;padding:0;line-height:1;">&#9834;</button>
       </span>
@@ -28,7 +28,7 @@ const STAGE_HTML = `
       <div id="fb_intro" style="position:absolute;inset:0;background:rgba(7,7,7,0.74);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">DRESIFY FLAPPY BALL</div>
         <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Provedi loptu kroz golove</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Tapni za skok. Što dalje prođeš, veći popust: <b style="color:#e8ff3c;">10&rarr;-10%</b>, 15&rarr;-15%, 20&rarr;-20%. Sve teže ide!</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Tapni za skok. Što dalje prođeš, veća nagrada: <b style="color:#e8ff3c;">10&rarr;besplatna dostava</b>, 15&rarr;-15%, 20&rarr;-20%. Sve teže ide!</div>
         <button id="fb_start" class="fb-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;">START &#9917;</button>
       </div>
 
@@ -88,7 +88,9 @@ export function FlappyGame() {
     function gap() { return score <= 20 ? Math.max(100, GAP0 - score * 3.0) : Math.max(74, 100 - (score - 20) * 3.2); }
     function speed() { return Math.min(6.2, 2.5 + score * 0.16); }
     function spacing() { return Math.max(135, SPACE - score * 3.2); }
-    function rewardFor(s: number) { return s >= 20 ? { code: "GOL20", pct: 20 } : s >= 15 ? { code: "GOL15", pct: 15 } : s >= 10 ? { code: "GOL10", pct: 10 } : null; }
+    function rewardFor(s: number) { return s >= 20 ? { code: "GOL20", label: "-20% popusta" } : s >= 15 ? { code: "GOL15", label: "-15% popusta" } : s >= 10 ? { code: "DOSTAVA", label: "besplatnu dostavu" } : null; }
+    function nextRewardLabel(s: number) { return s < 10 ? "besplatnu dostavu" : s < 15 ? "-15% popusta" : s < 20 ? "-20% popusta" : null; }
+    function nextRewardAt(s: number) { return s < 10 ? 10 : s < 15 ? 15 : s < 20 ? 20 : null; }
     function spawn() { const m = 64, g = gap(); const gy = m + g / 2 + Math.random() * (H - GROUND - 2 * m - g); pipes.push({ x: W + 20, gy, passed: false }); }
     function reset() { ball = { x: 108, y: 210, vy: 0 }; pipes = []; score = 0; frame = 0; tierCode = ""; spawn(); }
 
@@ -108,17 +110,16 @@ export function FlappyGame() {
       bestEl.textContent = String(best());
       const reward = rewardFor(score);
       const win = !!reward;
-      const nextAt = score < 10 ? 10 : score < 15 ? 15 : score < 20 ? 20 : null;
       let h = '<div style="font-size:13px;letter-spacing:2px;color:' + (win ? "#e8ff3c" : "rgba(255,255,255,0.6)") + ';font-weight:700;margin-bottom:4px;">' + (win ? "POBJEDA!" : "KRAJ IGRE") + '</div>'
         + '<div style="font-size:30px;font-weight:800;color:#fff;line-height:1;margin-bottom:2px;">' + score + '</div>'
         + '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:14px;">bodova &middot; rekord ' + best() + '</div>';
       if (reward) {
-        h += '<div style="font-size:13px;color:rgba(255,255,255,0.75);margin-bottom:14px;">Osvojio si <b style="color:#e8ff3c;font-size:18px;">-' + reward.pct + '%</b> na sve dresove!</div>'
-          + '<button id="fb_shop" class="fb-btn" style="width:220px;padding:14px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">ISKORISTI -' + reward.pct + '% &rarr;</button>'
+        h += '<div style="font-size:13px;color:rgba(255,255,255,0.75);margin-bottom:14px;">Osvojio si <b style="color:#e8ff3c;font-size:18px;">' + reward.label + '</b>!</div>'
+          + '<button id="fb_shop" class="fb-btn" style="width:220px;padding:14px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">ISKORISTI NAGRADU &rarr;</button>'
           + '<button id="fb_again" class="fb-btn" style="width:220px;margin-top:8px;padding:10px 0;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:transparent;color:#fff;font-size:13px;cursor:pointer;">Igraj ponovno</button>'
-          + '<div style="margin-top:10px;font-size:10px;color:rgba(255,255,255,0.35);">Popust se sam primijeni na blagajni</div>';
+          + '<div style="margin-top:10px;font-size:10px;color:rgba(255,255,255,0.35);">Nagrada se sam primijeni na blagajni</div>';
       } else {
-        h += '<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:12px;">Dođi do <b style="color:#e8ff3c;">' + nextAt + '</b> za -' + nextAt + '% popusta!</div>'
+        h += '<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:12px;">Dođi do <b style="color:#e8ff3c;">' + nextRewardAt(score) + '</b> bodova za <b style="color:#e8ff3c;">' + nextRewardLabel(score) + '</b>!</div>'
           + '<button id="fb_again" class="fb-btn" style="width:220px;padding:13px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">Igraj ponovno</button>';
       }
       over.innerHTML = h; over.style.display = "flex";
@@ -167,7 +168,7 @@ export function FlappyGame() {
         ctx.fillStyle = "#fff"; ctx.font = "800 34px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "top";
         ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 6;
         ctx.fillText(String(score), W / 2, 18); ctx.shadowBlur = 0;
-        if (tierCode) { ctx.fillStyle = "#e8ff3c"; ctx.font = "700 11px Arial"; ctx.fillText("KOD " + tierCode + " OTKLJUČAN", W / 2, 58); }
+        if (tierCode) { ctx.fillStyle = "#e8ff3c"; ctx.font = "700 11px Arial"; ctx.fillText("NAGRADA OTKLJUČANA", W / 2, 58); }
       }
     }
 
