@@ -15,7 +15,7 @@ import {
 } from "@/lib/site";
 import { createCartOrderSummary, formatEuroAmount, repairText } from "@/lib/utils";
 import { fbTrack } from "@/lib/fbpixel";
-import { computePromoDiscount, validatePromo, type PromoCode } from "@/lib/promo";
+import { computePromoDiscount, GIFT_STORAGE_KEY, validatePromo, type PromoCode } from "@/lib/promo";
 import type { FulfillmentType } from "@/lib/orders";
 
 type FulfillmentOption = {
@@ -93,6 +93,7 @@ export function ContactForm() {
   const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
   const [promoMessage, setPromoMessage] = useState<string | null>(null);
   const [autoPromoTried, setAutoPromoTried] = useState(false);
+  const [hasGift, setHasGift] = useState(false);
 
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
@@ -121,6 +122,12 @@ export function ContactForm() {
     setPromoInput("");
     setPromoMessage(null);
   }
+
+  // Check for quiz gift reward
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.localStorage.getItem(GIFT_STORAGE_KEY)) setHasGift(true);
+  }, []);
 
   // Pre-fill + auto-apply a promo code captured from a URL link (e.g. Instagram)
   useEffect(() => {
@@ -164,7 +171,7 @@ export function ContactForm() {
         contactChannel: "web",
         fulfillment: form.fulfillment,
         payment: "Pouzeće",
-        note: form.note || undefined,
+        note: [hasGift ? "🎁 POKLON IZ KVIZA" : "", form.note].filter(Boolean).join(" · ") || undefined,
         subtotal: orderSubtotal,
         shipping,
         total,
@@ -196,6 +203,7 @@ export function ContactForm() {
       });
 
       clearCart();
+      try { localStorage.removeItem(GIFT_STORAGE_KEY); } catch {}
       router.push("/zahvala");
     } catch {
       setError(t.contactForm.errorNetwork);
@@ -433,6 +441,14 @@ export function ContactForm() {
               <span>{t.contactForm.shipping}</span>
               <span>{shipping === 0 ? t.contactForm.free : formatEuroAmount(shipping)}</span>
             </div>
+
+            {/* Gift reward from quiz */}
+            {hasGift && (
+              <div className="flex items-center gap-2 rounded-[6px] border border-accent/30 bg-accent/8 px-3 py-2 text-sm text-accent">
+                <span>🎁</span>
+                <span>Poklon iznenađenja aktiviran — prilaže se uz narudžbu</span>
+              </div>
+            )}
 
             {/* Promo code */}
             {appliedPromo && discount > 0 ? (

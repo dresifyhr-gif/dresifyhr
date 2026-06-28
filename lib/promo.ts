@@ -14,8 +14,11 @@ export const PROMO_CODES: PromoCode[] = [
   { code: "INSTA15", value: 15, minSubtotal: 100, label: "15% popusta na narudžbe od 100 €" },
   { code: "GOL10", value: 10, minSubtotal: 20, label: "10% popusta — nagrada iz igre" },
   { code: "GOL15", value: 15, minSubtotal: 30, label: "15% popusta — nagrada iz igre" },
-  { code: "GOL20", value: 20, minSubtotal: 40, label: "20% popusta — nagrada iz igre" }
+  { code: "GOL20", value: 20, minSubtotal: 40, label: "20% popusta — nagrada iz igre" },
+  { code: "KVIZ10", value: 10, minSubtotal: 20, label: "10% popusta — nagrada iz kviza" }
 ];
+
+export const GIFT_STORAGE_KEY = "dresify_poklon";
 
 export function findPromoCode(input: string): PromoCode | null {
   const norm = input.trim().toUpperCase();
