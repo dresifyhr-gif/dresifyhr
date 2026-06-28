@@ -180,15 +180,6 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         {t.product.addToCart}
       </button>
 
-      <a
-        href={createWhatsAppUrl(whatsappMessage)}
-        target="_blank"
-        rel="noreferrer"
-        className="button-secondary mt-3 w-full"
-      >
-        {t.product.orderWhatsApp}
-      </a>
-
       <p className="mt-3 text-sm text-white/50">
         {t.product.paymentSummary(PAYMENT_METHOD_LABEL.toLowerCase(), SHIPPING_PRICE_LABEL)}
       </p>
