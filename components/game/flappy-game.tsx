@@ -80,21 +80,21 @@ export function FlappyGame() {
     const sHit = () => tone(120, 0.25, "sawtooth", 0.2);
     const buzz = (ms: number | number[]) => { try { (navigator as any).vibrate && navigator.vibrate(ms); } catch {} };
 
-    const GROUND = 46, R = 15, PW = 58, GAP0 = 170, SPACE = 210;
+    const GROUND = 46, R = 15, PW = 58, GAP0 = 158, SPACE = 210;
     let ball = { x: 108, y: 210, vy: 0 };
     let pipes: { x: number; gy: number; passed: boolean }[] = [];
     let score = 0, state: "idle" | "play" | "over" = "idle", raf = 0, frame = 0, tierCode = "";
 
-    function gap() { return score <= 20 ? Math.max(115, GAP0 - score * 2.6) : Math.max(90, 115 - (score - 20) * 3); }
-    function speed() { return Math.min(5.0, 2.1 + score * 0.11); }
-    function spacing() { return Math.max(150, SPACE - score * 2.6); }
+    function gap() { return score <= 20 ? Math.max(100, GAP0 - score * 3.0) : Math.max(74, 100 - (score - 20) * 3.2); }
+    function speed() { return Math.min(6.2, 2.5 + score * 0.16); }
+    function spacing() { return Math.max(135, SPACE - score * 3.2); }
     function rewardFor(s: number) { return s >= 20 ? { code: "GOL20", pct: 20 } : s >= 15 ? { code: "GOL15", pct: 15 } : s >= 10 ? { code: "GOL10", pct: 10 } : null; }
     function spawn() { const m = 64, g = gap(); const gy = m + g / 2 + Math.random() * (H - GROUND - 2 * m - g); pipes.push({ x: W + 20, gy, passed: false }); }
     function reset() { ball = { x: 108, y: 210, vy: 0 }; pipes = []; score = 0; frame = 0; tierCode = ""; spawn(); }
 
     function flap() {
-      if (state === "idle") { intro.style.display = "none"; state = "play"; reset(); ball.vy = -6.0; sFlap(); loop(); }
-      else if (state === "play") { ball.vy = -6.0; sFlap(); }
+      if (state === "idle") { intro.style.display = "none"; state = "play"; reset(); ball.vy = -6.6; sFlap(); loop(); }
+      else if (state === "play") { ball.vy = -6.6; sFlap(); }
     }
 
     startBtn.onclick = (e) => { e.stopPropagation(); flap(); };
@@ -172,7 +172,7 @@ export function FlappyGame() {
     }
 
     function update() {
-      ball.vy += 0.38; ball.y += ball.vy;
+      ball.vy += 0.46; ball.y += ball.vy;
       const sp = speed();
       for (const p of pipes) p.x -= sp;
       if (pipes.length && pipes[pipes.length - 1].x < W - spacing()) spawn();
