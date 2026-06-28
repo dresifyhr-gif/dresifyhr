@@ -69,8 +69,6 @@ export const jerseys: Jersey[] = [
   { id: 96, slug: "barcelona-yamal-bijelo-rozi", klub: "FC Barcelona", igrac: "Yamal nr10 — bijelo/rozi", liga: "La Liga", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 97, slug: "barcelona-neymar-2015", klub: "FC Barcelona", igrac: "Neymar nr11 — 2015 home", liga: "La Liga", retro: true, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 98, slug: "barcelona-ronaldo-r9", klub: "FC Barcelona", igrac: "Ronaldo R9 nr9 — Kappa", liga: "La Liga", retro: true, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
-  { id: 99, slug: "hrvatska-modric-plavi-2026", klub: "Hrvatska", igrac: "Modrić nr10 — plavi 2026", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
-  { id: 100, slug: "hrvatska-modric-crveni-2026", klub: "Hrvatska", igrac: "Modrić nr10 — crveni rukav 2026", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 101, slug: "hrvatska-gvardiol-2026", klub: "Hrvatska", igrac: "Gvardiol nr4 — 2026", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 102, slug: "hrvatska-livakovic", klub: "Hrvatska", igrac: "Livaković nr1", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 103, slug: "hrvatska-perisic", klub: "Hrvatska", igrac: "Perišić nr14", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
