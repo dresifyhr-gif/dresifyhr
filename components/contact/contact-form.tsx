@@ -98,8 +98,8 @@ export function ContactForm() {
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
   const orderSubtotal = hasCartItems ? subtotal : JERSEY_PRICE_EUR;
-  // GOL20 (-20%) can't stack with free shipping — protects the margin.
-  const blocksFreeShipping = appliedPromo?.code === "GOL20";
+  // High game rewards (-15% / -20%) can't stack with free shipping — protects the margin.
+  const blocksFreeShipping = appliedPromo?.code === "GOL20" || appliedPromo?.code === "GOL15";
   const freeShipping = orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR && !blocksFreeShipping;
   const shipping = freeShipping ? 0 : selectedOption.price;
   const discount = computePromoDiscount(appliedPromo, orderSubtotal);

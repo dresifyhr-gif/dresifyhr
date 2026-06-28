@@ -94,7 +94,7 @@ const ALL_QUESTIONS: Q[] = [
 ];
 
 const TOTAL_Q = 5;
-const NEEDED = 4;
+const NEEDED = 5;
 
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
