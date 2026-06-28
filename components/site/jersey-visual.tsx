@@ -14,6 +14,10 @@ type JerseyVisualProps = {
 
 const WHITE_BLUR = "data:image/gif;base64,R0lGODlhAQABAIAAAP7//wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
 
+// Tiled diagonal "DRESIFY" watermark — makes stolen screenshots useless.
+export const WATERMARK =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='170'%3E%3Ctext x='0' y='95' font-family='Arial,sans-serif' font-weight='700' font-size='26' fill='rgba(0,0,0,0.07)' transform='rotate(-28 130 85)'%3EDRESIFY%3C/text%3E%3C/svg%3E\")";
+
 export function JerseyVisual({ product, mode = "card", priority = false }: JerseyVisualProps) {
   const gallery = getJerseyGallery(product.slug);
   const frontImage = gallery[0];
@@ -80,6 +84,12 @@ export function JerseyVisual({ product, mode = "card", priority = false }: Jerse
                   className="hidden object-contain object-center opacity-0 transition duration-300 md:block md:group-hover:opacity-100 md:group-hover:scale-[1.03]"
                 />
               ) : null}
+              {/* Tiled diagonal watermark over the jersey */}
+              <div
+                className="pointer-events-none absolute inset-0 z-10 select-none"
+                style={{ backgroundImage: WATERMARK, backgroundRepeat: "repeat" }}
+                aria-hidden
+              />
             </div>
           </div>
         </div>

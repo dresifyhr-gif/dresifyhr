@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import { JerseyVisual } from "@/components/site/jersey-visual";
+import { JerseyVisual, WATERMARK } from "@/components/site/jersey-visual";
 import { type Jersey } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { repairText } from "@/lib/utils";
@@ -36,7 +36,14 @@ export function ProductGallery({ product }: ProductGalleryProps) {
           className="object-contain px-6 py-6"
         />
 
-        <span className="pointer-events-none absolute bottom-4 right-4 select-none font-heading text-xl tracking-[0.18em] text-black/30">
+        {/* Tiled diagonal watermark */}
+        <div
+          className="pointer-events-none absolute inset-0 z-10 select-none"
+          style={{ backgroundImage: WATERMARK, backgroundRepeat: "repeat" }}
+          aria-hidden
+        />
+
+        <span className="pointer-events-none absolute bottom-4 right-4 z-20 select-none font-heading text-xl tracking-[0.18em] text-black/30">
           DRES<span className="text-accent/60">IFY</span>
         </span>
 
