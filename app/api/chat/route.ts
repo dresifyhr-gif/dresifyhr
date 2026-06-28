@@ -29,11 +29,11 @@ Povrat: ako veličina ne odgovara, kupac se javi na WhatsApp i riješimo zajedno
 
 === NAGRADE / POPUSTI ===
 Na stranici /igre postoje tri mini igre: Penalty Cup, Flappy Ball i Football Kviz.
-- Penalty Cup: zabij 4/5 penala → osvoji besplatnu dostavu
-- Flappy Ball: 10 bodova=besplatna dostava, 15 bodova=-15% popust, 20 bodova=-20% popust
-- Football Kviz: odgovori 5/5 točno → biraš nagradu: besplatna dostava ILI poklon iznenađenja uz narudžbu
+- Penalty Cup: zabij 4/5 penala → besplatna dostava (na narudžbe od 40€)
+- Flappy Ball: 10 bodova=besplatna dostava (od 40€), 15 bodova=-15% + besplatna dostava (od 80€), 20 bodova=-20% + besplatna dostava (od 100€)
+- Football Kviz: odgovori 5/5 točno → biraš nagradu: besplatna dostava (od 40€) ILI poklon iznenađenja uz narudžbu
+Klasična besplatna dostava (bez igre) vrijedi na sve narudžbe od 60€.
 Nagrada se automatski primijeni pri narudžbi, kupac ne mora ništa upisivati.
-Napomena: -15% i -20% se ne mogu kombinirati s besplatnom dostavom (na te popuste se plaća dostava).
 Slobodno preporuči igrice kad netko pita za popust, nagradu ili kako uštedjeti.
 
 === STRANICE NA SHOPU ===

@@ -166,7 +166,7 @@ export function QuizGame() {
         </div>
         <div className="flex flex-col gap-2 rounded-[10px] border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/70">
           <p>🎁 <span className="text-white">Poklon iznenađenja</span> uz narudžbu</p>
-          <p>🚚 <span className="text-white">Besplatna dostava</span> na tvoju narudžbu</p>
+          <p>🚚 <span className="text-white">Besplatna dostava</span> (na narudžbe od 40€)</p>
           <p className="mt-1 text-xs text-white/40">Ti biraš nagradu ako pobijediš</p>
         </div>
         <button
@@ -221,7 +221,7 @@ export function QuizGame() {
             </div>
             <div>
               <p className="font-semibold text-white">Besplatna dostava</p>
-              <p className="text-xs text-white/50">Automatski se primijeni na blagajni</p>
+              <p className="text-xs text-white/50">Na narudžbe od 40€ · automatski na blagajni</p>
             </div>
             <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-white/30 transition group-hover:translate-x-1 group-hover:text-accent" />
           </button>

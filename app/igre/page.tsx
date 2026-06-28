@@ -21,7 +21,7 @@ const games = [
   {
     href: "/flappy",
     title: "Flappy Ball",
-    desc: "Provedi loptu kroz golove — 10 = besplatna dostava, 15 = −15%, 20 = −20%.",
+    desc: "Provedi loptu kroz golove — 10 = besplatna dostava, 15 = −15%, 20 = −20% (uz dostavu).",
     Icon: Volleyball
   },
   {

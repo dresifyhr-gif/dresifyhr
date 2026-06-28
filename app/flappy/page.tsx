@@ -6,7 +6,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "DRESIFY Flappy Ball — skupi bodove i osvoji nagradu",
   description:
-    "Odigraj DRESIFY Flappy Ball: provedi loptu kroz golove. 10 bodova = besplatna dostava, 15 = -15%, 20 = -20% na nogometne dresove.",
+    "Odigraj DRESIFY Flappy Ball: 10 bodova = besplatna dostava (od 40€), 15 = -15% + dostava (od 80€), 20 = -20% + dostava (od 100€).",
   path: "/flappy"
 });
 
@@ -20,7 +20,7 @@ export default function FlappyPage() {
             Što dalje prođeš, veća nagrada
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">
-            Provedi DRESIFY loptu kroz golove — igra je sve teža. 10 bodova = besplatna dostava, 15 = -15%, 20 = -20% na sve dresove.
+            Provedi DRESIFY loptu kroz golove — igra je sve teža. 10 bodova = besplatna dostava (od 40€), 15 = -15% + dostava (od 80€), 20 = -20% + dostava (od 100€).
           </p>
         </div>
         <FlappyGame />

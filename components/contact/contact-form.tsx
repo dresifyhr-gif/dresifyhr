@@ -98,13 +98,12 @@ export function ContactForm() {
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
   const orderSubtotal = hasCartItems ? subtotal : JERSEY_PRICE_EUR;
-  // High game rewards (-15% / -20%) can't stack with free shipping — protects the margin.
-  const blocksFreeShipping = appliedPromo?.code === "GOL20" || appliedPromo?.code === "GOL15";
   // A free-shipping reward (e.g. DOSTAVA) zeros shipping when its minimum is met.
+  // GOL15/GOL20 require €80/€100, so the classic €60 threshold already covers them.
   const promoFreeShipping =
     appliedPromo?.kind === "freeship" && orderSubtotal >= appliedPromo.minSubtotal;
   const freeShipping =
-    (orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR && !blocksFreeShipping) || promoFreeShipping;
+    orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR || promoFreeShipping;
   const shipping = freeShipping ? 0 : selectedOption.price;
   const discount = computePromoDiscount(appliedPromo, orderSubtotal);
   const total = orderSubtotal - discount + shipping;

@@ -59,7 +59,7 @@ const STAGE_HTML = `
       <div id="pg_intro" style="position:absolute;inset:0;background:rgba(7,7,7,0.78);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">DRESIFY PENALTY CUP</div>
         <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Zabij 4 od 5 penala</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:240px;">i osvoji <b style="color:#e8ff3c;">besplatnu dostavu</b> na svoju narudžbu. Tapni u gol gdje želiš pucati.</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:240px;">i osvoji <b style="color:#e8ff3c;">besplatnu dostavu</b> (od 40€). Tapni u gol gdje želiš pucati.</div>
         <button id="pg_start" class="pg-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;">START &#9917;</button>
         <div id="pg_best" style="margin-top:14px;font-size:11px;color:rgba(255,255,255,0.45);"></div>
       </div>
@@ -217,7 +217,7 @@ export function PenaltyGame() {
       if (win) {
         controls.innerHTML =
           '<p style="margin:0 0 2px;text-align:center;font-size:18px;font-weight:800;color:#e8ff3c;">POBJEDA — ' + goals + '/5!</p>' +
-          '<p style="margin:0 0 14px;text-align:center;font-size:13px;color:rgba(255,255,255,0.75);">Osvojio si <b style="color:#e8ff3c;font-size:18px;">besplatnu dostavu</b>!</p>' +
+          '<p style="margin:0 0 14px;text-align:center;font-size:13px;color:rgba(255,255,255,0.75);">Osvojio si <b style="color:#e8ff3c;font-size:18px;">besplatnu dostavu</b> (na narudžbe od 40€)!</p>' +
           '<button id="pg_shop" class="pg-btn" style="width:100%;padding:14px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">ISKORISTI NA SHOPU &rarr;</button>' +
           '<button id="pg_again" class="pg-btn" style="width:100%;margin-top:8px;padding:11px 0;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:transparent;color:#fff;font-size:13px;cursor:pointer;">Igraj ponovno</button>' +
           '<p style="margin:8px 0 0;text-align:center;font-size:10px;color:rgba(255,255,255,0.35);">Besplatna dostava se sam primijeni na blagajni</p>' + bestLine;
