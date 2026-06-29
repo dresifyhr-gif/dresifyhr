@@ -14,6 +14,10 @@ export async function logOrderToSheet(payload: OrderPayload) {
     .filter(Boolean)
     .join(", ");
 
+  const eur = (n: number) => `${n.toFixed(2)} €`;
+  const dostava = payload.shipping === 0 ? "BESPLATNA" : eur(payload.shipping);
+  const popust = payload.discount ? `-${eur(payload.discount)}` : "";
+
   try {
     const res = await fetch(url, {
       method: "POST",
@@ -28,7 +32,12 @@ export async function logOrderToSheet(payload: OrderPayload) {
         itemCount: payload.itemCount,
         fulfillment: payload.fulfillment,
         payment: payload.payment,
-        total: payload.subtotal - (payload.discount || 0),
+        subtotal: eur(payload.subtotal),
+        dostava,
+        popust,
+        promoCode: payload.promoCode || "",
+        napomena: payload.note || "",
+        total: eur(payload.total),
       }),
     });
 
