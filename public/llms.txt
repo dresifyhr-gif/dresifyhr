@@ -1,0 +1,22 @@
+# Dresify
+
+> Dresify (dresifyshop.com) je hrvatska online trgovina nogometnih dresova — klupski i reprezentativni dresovi, retro modeli, dječji dresovi s hlačicama i kompleti (dres + hlačice + lopta + kapa). Plaćanje pouzećem, dostava po cijeloj Hrvatskoj.
+
+## Ključne informacije
+
+- **Što prodajemo:** nogometni dresovi (klubovi i reprezentacije), retro modeli, dječji dresovi (104–176, dolaze s hlačicama), kompleti s loptom i kapom.
+- **Veličine:** djeca 104–176; odrasli S–XXL za reprezentacije, S–XL za klupske dresove.
+- **Cijena:** dres 20 €, komplet 40 € (mogući popusti i besplatna dostava kroz mini igre na stranici).
+- **Plaćanje:** pouzećem (gotovina pri preuzimanju) — ništa se ne plaća unaprijed.
+- **Dostava:** 7,50 € po cijeloj Hrvatskoj (besplatna za narudžbe od 60 €), 2–5 radnih dana, HP Paket24.
+- **Povrat i zamjena:** jednostavni, dogovor preko WhatsAppa.
+- **Jezici:** hrvatski i engleski.
+
+## Glavne stranice
+
+- [Svi dresovi](https://dresifyshop.com/dresovi): cijeli katalog nogometnih dresova
+- [Kompleti](https://dresifyshop.com/kompleti): kompleti dres + hlačice + lopta + kapa
+- [Mini igre](https://dresifyshop.com/igre): igraj i osvoji besplatnu dostavu ili popust
+- [Blog](https://dresifyshop.com/blog): vodiči i novosti o dresovima
+- [O nama](https://dresifyshop.com/o-nama): o trgovini Dresify
+- [Dostava i povrat](https://dresifyshop.com/dostava-i-povrat): uvjeti dostave, plaćanja i povrata

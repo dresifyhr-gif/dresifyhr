@@ -1,4 +1,4 @@
-import { jerseys } from "@/lib/data/jerseys";
+import { jerseys, isNationalTeam } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { JERSEY_PRICE_EUR, SITE_URL } from "@/lib/site";
 import { repairText } from "@/lib/utils";
@@ -35,10 +35,11 @@ export function GET() {
     const image = getJerseyGallery(product.slug)[0]?.src ?? "";
 
     const isKomplet = product.liga === "Komplet";
+    const adultRange = isNationalTeam(product) ? "S–XXL" : "S–XL";
     const title = isKomplet ? `${klub} ${igrac}` : `${klub} ${igrac} — nogometni dres`;
     const description = isKomplet
       ? `${klub} ${igrac}. Komplet uključuje dres, hlačice, loptu i kapu. Dostupno za djecu i odrasle. Dostava pouzećem po cijeloj Hrvatskoj.`
-      : `Nogometni dres ${klub} ${igrac}. Dostupno za djecu (s hlačicama) i odrasle (S–XXL). Ušiveno ime i broj. Dostava pouzećem po cijeloj Hrvatskoj.`;
+      : `Nogometni dres ${klub} ${igrac}. Dostupno za djecu (s hlačicama) i odrasle (${adultRange}). Ušiveno ime i broj. Dostava pouzećem po cijeloj Hrvatskoj.`;
 
     return [
       product.slug,

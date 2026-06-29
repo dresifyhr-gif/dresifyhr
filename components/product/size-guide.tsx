@@ -21,8 +21,9 @@ const ADULTS = [
   { size: "XXL", chest: "120–128 cm", length: "78 cm" },
 ];
 
-export function SizeGuide() {
+export function SizeGuide({ showXXL = true }: { showXXL?: boolean }) {
   const [open, setOpen] = useState(false);
+  const adults = showXXL ? ADULTS : ADULTS.filter((row) => row.size !== "XXL");
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -95,7 +96,7 @@ export function SizeGuide() {
                   </tr>
                 </thead>
                 <tbody className="text-white/80">
-                  {ADULTS.map((row) => (
+                  {adults.map((row) => (
                     <tr key={row.size} className="border-t border-white/8">
                       <td className="py-2 font-semibold text-white">{row.size}</td>
                       <td className="py-2">{row.chest}</td>

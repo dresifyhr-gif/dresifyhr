@@ -124,7 +124,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         <div className="mt-8">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/70">{t.product.selectSize}</p>
-            <SizeGuide />
+            <SizeGuide showXXL={sizeOptions.adults.includes("XXL")} />
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
             {currentSizes.map((size) => {

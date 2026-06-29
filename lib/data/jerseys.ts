@@ -100,6 +100,10 @@ export const FLAGSHIP_SLUG = "hrvatska-modric-2026";
 export const adultSizes = ["S", "M", "L", "XL", "XXL"] as const;
 export const kidSizes = ["104", "116", "128", "140", "152", "164", "176"] as const;
 
+// National-team kits go up to XXL; club kits only up to XL (we don't stock club XXL).
+const NATIONAL_TEAMS = new Set(["Hrvatska", "Argentina", "Brazil", "Portugal", "Francuska", "Njemačka", "BiH"]);
+const adultSizesNoXXL = adultSizes.filter((s) => s !== "XXL");
+
 export const PLAYER_FILTER_OPTIONS = [
   "Messi",
   "Ronaldo",
@@ -215,14 +219,20 @@ export function getJerseyImagePath(slug: string) {
   return `/dresovi/${slug}.jpg`;
 }
 
+export function isNationalTeam(product: Jersey) {
+  return product.liga === "Reprezentacija" || NATIONAL_TEAMS.has(product.klub);
+}
+
 export function getJerseySizeOptions(product: Jersey) {
   const hasKids = product.vel.includes("Djeca");
   const hasAdults = product.vel.includes("Odrasli");
+  // Clubs don't carry XXL — only national teams do.
+  const adultRange = isNationalTeam(product) ? adultSizes : adultSizesNoXXL;
 
   return {
     hasKids,
     hasAdults,
-    adults: hasAdults ? [...adultSizes] : [],
+    adults: hasAdults ? [...adultRange] : [],
     kids: hasKids ? [...kidSizes] : [],
     adultsOutOfStock: product.outOfStock === "adults" || product.outOfStock === "all",
     kidsOutOfStock: product.outOfStock === "kids" || product.outOfStock === "all",
@@ -314,9 +324,10 @@ export function getJerseyDescription(product: Jersey): string[] {
     ? `Riječ je o retro modelu koji vraća kultni izgled iz ${leaguePhrase} — komad koji nosi priču i prepoznatljivu siluetu.`
     : `Model prati aktualni izgled iz ${leaguePhrase} i jedan je od traženijih u našoj ponudi.`;
 
+  const adultRange = isNationalTeam(product) ? "S–XXL" : "S–XL";
   const sizes = isKomplet
-    ? "Dostupno u dječjim (104–176) i odraslim (S–XXL) veličinama; svaki komplet uključuje dres, hlačice, loptu i kapu."
-    : "Dostupno u dječjim veličinama 104–176 (dres + hlačice) te odraslim veličinama S–XXL (dres).";
+    ? `Dostupno u dječjim (104–176) i odraslim (${adultRange}) veličinama; svaki komplet uključuje dres, hlačice, loptu i kapu.`
+    : `Dostupno u dječjim veličinama 104–176 (dres + hlačice) te odraslim veličinama ${adultRange} (dres).`;
 
   const delivery =
     "Dostava po cijeloj Hrvatskoj uz plaćanje pouzećem, isporuka 2–5 radnih dana. Nisi siguran/na za veličinu? Pošalji nam visinu na WhatsApp i predložit ćemo pravu.";

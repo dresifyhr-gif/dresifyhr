@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ProductGallery } from "@/components/product/product-gallery";
 import { ProductDetailPanel } from "@/components/product/product-detail-panel";
+import { ProductFaq } from "@/components/product/product-faq";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { ProductCard } from "@/components/site/product-card";
 import { SeoLinkGrid } from "@/components/site/seo-link-grid";
@@ -110,6 +111,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
             ))}
           </div>
         </section>
+
+        <ProductFaq product={product} />
 
         <div className="mt-8 grid gap-4 xl:grid-cols-3">
           {clubCollection ? (
