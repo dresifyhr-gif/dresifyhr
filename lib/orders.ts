@@ -247,14 +247,18 @@ export function buildCustomerOrderHtml(order: OrderPayload) {
 
 export function buildWhatsAppNotification(order: OrderPayload) {
   const reference = getOrderReference(order.createdAt);
+  const dostava = order.shipping === 0 ? "BESPLATNA 🎉" : formatEuro(order.shipping);
   return [
     `Nova DRESIFY narudžba #${reference}`,
     `Kupac: ${order.name}`,
     `Mobitel: ${order.phone}`,
-    `Dostava: ${fulfillmentLabels[order.fulfillment]}`,
     `Plaćanje: ${order.payment}`,
-    order.discount && order.discount > 0 ? `Popust${order.promoCode ? ` (${order.promoCode})` : ""}: -${formatEuro(order.discount)}` : undefined,
+    // Always show the reward code if present (works for both discount and free-ship rewards)
+    order.promoCode ? `🎟️ Kod: ${order.promoCode}` : undefined,
+    order.discount && order.discount > 0 ? `Popust: -${formatEuro(order.discount)}` : undefined,
+    `Dostava: ${dostava}`,
     `Ukupno: ${formatEuro(order.total)}`,
+    order.note ? `Napomena: ${order.note}` : undefined,
     "",
     order.details,
     "",

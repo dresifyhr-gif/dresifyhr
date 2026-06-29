@@ -219,6 +219,7 @@ export function ContactForm() {
 
       clearCart();
       try { localStorage.removeItem(GIFT_STORAGE_KEY); } catch {}
+      try { localStorage.removeItem(PROMO_STORAGE_KEY); } catch {}
       router.push("/zahvala");
     } catch {
       setError(t.contactForm.errorNetwork);
