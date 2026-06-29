@@ -32,12 +32,14 @@ export async function logOrderToSheet(payload: OrderPayload) {
         itemCount: payload.itemCount,
         fulfillment: payload.fulfillment,
         payment: payload.payment,
-        subtotal: eur(payload.subtotal),
+        // numeric so existing "Ukupno" column + sum formulas keep working
+        subtotal: payload.subtotal,
+        total: payload.total,
+        // readable info columns
         dostava,
         popust,
         promoCode: payload.promoCode || "",
         napomena: payload.note || "",
-        total: eur(payload.total),
       }),
     });
 
