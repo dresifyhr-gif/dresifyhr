@@ -45,7 +45,7 @@ const games = [
   {
     href: "/uhvati",
     title: "Uhvati dres",
-    desc: "Hvataj dresove u kutiju kroz 3 razine. 1 = besplatna dostava, 2 = −15%, 3 = −20%.",
+    desc: "Hvataj dresove u kutiju kroz 3 razine (po 20). 20 = besplatna dostava, 40 = −15%, 60 = −20%.",
     Icon: PackageOpen
   }
 ];

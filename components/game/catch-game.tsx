@@ -28,7 +28,7 @@ const STAGE_HTML = `
       <div id="ct_intro" style="position:absolute;inset:0;background:rgba(7,7,7,0.74);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">DRESIFY UHVATI DRES</div>
         <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Skupi dresove u kutiju</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Pomiči kutiju i hvataj dresove. Padaju sve brže! <b style="color:#e8ff3c;">Razina 1&rarr;besplatna dostava</b>, 2&rarr;-15%, 3&rarr;-20%. Smiješ promašiti najviše 3!</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Pomiči kutiju i hvataj dresove. Svaka razina = 20 dresova, sve brže! <b style="color:#e8ff3c;">20&rarr;besplatna dostava</b>, 40&rarr;-15%, 60&rarr;-20%. Smiješ promašiti najviše 3!</div>
         <button id="ct_start" class="ct-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;">START &#128230;</button>
       </div>
 
@@ -88,16 +88,26 @@ export function CatchGame() {
     let state: "idle" | "play" | "over" = "idle", raf = 0;
 
     function rewardFor(s: number) {
-      return s >= 20 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" }
-        : s >= 12 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" }
-        : s >= 5 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null;
+      return s >= 60 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" }
+        : s >= 40 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" }
+        : s >= 20 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null;
     }
-    const nextAt = (s: number) => s < 5 ? 5 : s < 12 ? 12 : s < 20 ? 20 : null;
-    const nextLabel = (s: number) => s < 5 ? "besplatnu dostavu (od 40€)" : s < 12 ? "-15% + dostava (od 80€)" : s < 20 ? "-20% + dostava (od 100€)" : null;
-    const level = (s: number) => (s < 5 ? 1 : s < 12 ? 2 : 3);
+    const nextAt = (s: number) => s < 20 ? 20 : s < 40 ? 40 : s < 60 ? 60 : null;
+    const nextLabel = (s: number) => s < 20 ? "besplatnu dostavu (od 40€)" : s < 40 ? "-15% + dostava (od 80€)" : "-20% + dostava (od 100€)";
+    // Endless levels of 20 jerseys each; keeps speeding up past level 3.
+    const level = (s: number) => Math.floor(s / 20) + 1;
 
-    function fallSpeed() { return Math.min(6.6, 2.0 + score * 0.13); }
-    function spawnEvery() { return Math.max(42, 105 - score * 2.8); }
+    // Slow start, gentle ramp within a level, faster every 20 caught (no upper level cap).
+    function fallSpeed() {
+      const l = level(score);
+      const within = score - (l - 1) * 20; // 0..19
+      const base = 1.8 + (l - 1) * 1.0; // L1:1.8, L2:2.8, L3:3.8, L4:4.8…
+      return Math.min(9, base + within * 0.03);
+    }
+    function spawnEvery() {
+      const l = level(score);
+      return Math.max(28, 98 - (l - 1) * 22); // L1:98, L2:76, L3:54, L4:32…
+    }
 
     function reset() {
       box = { x: W / 2 }; items = []; score = 0; misses = 0; frame = 0; tier = "";
