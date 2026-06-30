@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Goal, HelpCircle, Layers, PackageOpen, Volleyball, Worm } from "lucide-react";
+import { ArrowRight, Footprints, Goal, HelpCircle, Layers, PackageOpen, Volleyball, Worm } from "lucide-react";
 
 import { buildMetadata } from "@/lib/seo";
 
@@ -47,6 +47,12 @@ const games = [
     title: "Uhvati dres",
     desc: "Hvataj dresove u kutiju kroz 3 razine (po 20). 20 = besplatna dostava, 40 = −15%, 60 = −20%.",
     Icon: PackageOpen
+  },
+  {
+    href: "/trkac",
+    title: "Super Dresify",
+    desc: "Trči i skači, skupljaj dresove i preskači čunjeve. 8 = besplatna dostava, 15 = −15%, 25 = −20%.",
+    Icon: Footprints
   }
 ];
 
