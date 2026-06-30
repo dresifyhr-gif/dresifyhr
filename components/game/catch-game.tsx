@@ -24,6 +24,7 @@ const STAGE_HTML = `
 
     <div id="ct_stage" style="position:relative;width:100%;aspect-ratio:360/480;overflow:hidden;background:#0e1a12;cursor:pointer;touch-action:none;">
       <canvas id="ct_canvas" style="display:block;width:100%;height:100%;"></canvas>
+      <div style="position:absolute;top:2.5%;left:0;right:0;text-align:center;font-size:9px;letter-spacing:6px;color:rgba(232,255,60,0.5);font-weight:700;pointer-events:none;z-index:2;">D R E S I F Y &nbsp; A R E N A</div>
 
       <div id="ct_intro" style="position:absolute;inset:0;background:rgba(7,7,7,0.74);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">DRESIFY UHVATI DRES</div>

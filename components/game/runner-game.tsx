@@ -20,6 +20,7 @@ const STAGE_HTML = `
 
     <div id="rn_stage" style="position:relative;width:100%;aspect-ratio:360/480;overflow:hidden;background:#0e1a12;cursor:pointer;touch-action:none;">
       <canvas id="rn_canvas" style="display:block;width:100%;height:100%;"></canvas>
+      <div style="position:absolute;top:2.5%;left:0;right:0;text-align:center;font-size:9px;letter-spacing:6px;color:rgba(232,255,60,0.5);font-weight:700;pointer-events:none;z-index:2;">D R E S I F Y &nbsp; A R E N A</div>
 
       <div id="rn_intro" style="position:absolute;inset:0;background:rgba(7,7,7,0.74);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">SUPER DRESIFY</div>
@@ -80,7 +81,7 @@ export function RunnerGame() {
     const PW = 24, PH = 34;          // player width/height
     const GRAV = 0.72, JUMP = -11.5;
 
-    type Ent = { type: "cone" | "jersey"; x: number; y: number; done?: boolean };
+    type Ent = { type: "cone" | "jersey" | "plat"; x: number; y: number; w?: number; done?: boolean };
     let player = { y: GROUND, vy: 0, jumps: 0 };
     let ents: Ent[] = [];
     let score = 0, frame = 0, speed = 3.2, distAcc = 0, nextGap = 200, tier = "", grounded = true;
@@ -105,8 +106,15 @@ export function RunnerGame() {
     }
 
     function spawnOne() {
-      if (Math.random() < 0.42) {
+      const r = Math.random();
+      if (r < 0.30) {
         ents.push({ type: "cone", x: W + 24, y: GROUND });
+      } else if (r < 0.55) {
+        // floating platform with a jersey to grab on top of it (Mario-style)
+        const pw = 60 + Math.random() * 30;
+        const py = GROUND - (62 + Math.random() * 46);
+        ents.push({ type: "plat", x: W + 24, y: py, w: pw });
+        ents.push({ type: "jersey", x: W + 24 + pw / 2 - 12, y: py - 22 });
       } else {
         ents.push({ type: "jersey", x: W + 24, y: GROUND - (28 + Math.random() * 80) });
       }
@@ -119,6 +127,30 @@ export function RunnerGame() {
     function roundRect(x: number, y: number, w: number, h: number, r: number) {
       if (typeof ctx.roundRect === "function") { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
       else { ctx.beginPath(); ctx.rect(x, y, w, h); }
+    }
+
+    // Lime jersey collectible with a soft fade + glow (replaces the flat emoji)
+    function drawJersey(cx: number, cy: number) {
+      ctx.save();
+      ctx.shadowColor = "rgba(232,255,60,0.7)"; ctx.shadowBlur = 12;
+      const g = ctx.createLinearGradient(0, cy - 11, 0, cy + 11);
+      g.addColorStop(0, "#e8ff3c");
+      g.addColorStop(1, "rgba(232,255,60,0.4)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(cx - 11, cy - 5);
+      ctx.lineTo(cx - 6, cy - 9);
+      ctx.lineTo(cx - 3, cy - 6);
+      ctx.lineTo(cx + 3, cy - 6);
+      ctx.lineTo(cx + 6, cy - 9);
+      ctx.lineTo(cx + 11, cy - 5);
+      ctx.lineTo(cx + 7, cy);
+      ctx.lineTo(cx + 6, cy + 10);
+      ctx.lineTo(cx - 6, cy + 10);
+      ctx.lineTo(cx - 7, cy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
     }
 
     const PX = 58; // fixed player x
@@ -143,8 +175,12 @@ export function RunnerGame() {
           ctx.fillStyle = "#ff7a1a";
           ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + cw, by); ctx.lineTo(bx + cw / 2, by - ch); ctx.closePath(); ctx.fill();
           ctx.fillStyle = "#fff"; ctx.fillRect(bx + 4, by - ch * 0.55, cw - 8, 3);
+        } else if (e.type === "plat") {
+          const pw = e.w || 60;
+          ctx.fillStyle = "#0b2e16"; roundRect(e.x, e.y, pw, 12, 4); ctx.fill();
+          ctx.fillStyle = "#e8ff3c"; roundRect(e.x, e.y, pw, 4, 2); ctx.fill();
         } else {
-          ctx.font = "24px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("👕", e.x + 12, e.y);
+          drawJersey(e.x + 12, e.y);
         }
       }
 
@@ -181,29 +217,40 @@ export function RunnerGame() {
       frame++;
       speed = Math.min(7.2, 3.2 + score * 0.06 + frame * 0.0009);
 
-      // physics
-      player.vy += GRAV; player.y += player.vy;
-      if (player.y >= GROUND) { player.y = GROUND; player.vy = 0; player.jumps = 0; grounded = true; }
-      else grounded = false;
+      // move world
+      for (const e of ents) e.x -= speed;
 
       // spawn
       distAcc += speed;
       if (distAcc >= nextGap) { distAcc = 0; spawnOne(); nextGap = computeGap(); }
 
-      // move + collide
+      // physics + one-way platform landing (Mario-style: land only from above)
+      const prevFeet = player.y;
+      player.vy += GRAV; player.y += player.vy;
+      let support = player.y >= GROUND ? GROUND : Infinity;
+      if (player.vy >= 0) {
+        for (const e of ents) {
+          if (e.type !== "plat") continue;
+          const pw = e.w || 60;
+          if (PX + PW > e.x && PX < e.x + pw && prevFeet <= e.y + 1 && player.y >= e.y && e.y < support) support = e.y;
+        }
+      }
+      if (support !== Infinity) { player.y = support; player.vy = 0; player.jumps = 0; grounded = true; }
+      else grounded = false;
+
+      // collisions
       const pBox = { x: PX, y: player.y - PH, w: PW, h: PH };
       for (const e of ents) {
-        e.x -= speed;
         if (e.done) continue;
         if (e.type === "cone") {
           const cBox = { x: e.x + 2, y: GROUND - 26, w: 18, h: 26 };
           if (hit(pBox, cBox)) { gameOver(); return; }
-        } else {
+        } else if (e.type === "jersey") {
           const dx = (e.x + 12) - (PX + PW / 2), dy = e.y - (player.y - PH / 2);
           if (Math.sqrt(dx * dx + dy * dy) < 24) { e.done = true; score++; sCollect(); const r = rewardFor(score); if (r && r.code !== tier) { tier = r.code; buzz(40); } }
         }
       }
-      ents = ents.filter((e) => !e.done && e.x > -40);
+      ents = ents.filter((e) => !e.done && e.x > -120);
     }
 
     function loop() {
