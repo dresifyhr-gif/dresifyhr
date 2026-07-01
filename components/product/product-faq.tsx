@@ -6,36 +6,64 @@ import { repairText } from "@/lib/utils";
 // Product-specific FAQ rendered server-side (native <details>, no client JS) with
 // FAQPage JSON-LD. Questions reference the actual club/player and exact sizes
 // (S–XL for clubs, S–XXL for national teams) so each page is unique, not duplicate.
-export function ProductFaq({ product }: { product: Jersey }) {
+export function ProductFaq({ product, locale = "hr" }: { product: Jersey; locale?: "hr" | "en" }) {
   const klub = repairText(product.klub);
   const igrac = repairText(product.igrac);
   const adultRange = isNationalTeam(product) ? "S–XXL" : "S–XL";
   const isKomplet = product.liga === "Komplet";
+  const en = locale === "en";
 
-  const items = [
-    {
-      q: `Koje veličine ima ${klub} ${igrac}?`,
-      a: isKomplet
-        ? `Komplet je dostupan u dječjim veličinama 104–176 i odraslim veličinama ${adultRange}, a uključuje dres, hlačice, loptu i kapu.`
-        : `Dostupan je u dječjim veličinama 104–176 (dres + hlačice) i odraslim veličinama ${adultRange} (samo dres).`
-    },
-    {
-      q: "Koliko košta dostava i koliko traje?",
-      a: "Dostava je 7,50 € po cijeloj Hrvatskoj (besplatna za narudžbe od 60 €), uz isporuku 2–5 radnih dana putem HP Paket24."
-    },
-    {
-      q: `Kako plaćam ${klub} dres?`,
-      a: "Plaćaš pouzećem (gotovinom) pri preuzimanju paketa od dostavljača — ništa ne plaćaš unaprijed."
-    },
-    {
-      q: "Mogu li vratiti ili zamijeniti dres?",
-      a: "Da. Ako veličina ne odgovara ili nisi zadovoljan, javi nam se na WhatsApp i dogovorimo zamjenu ili povrat."
-    },
-    {
-      q: `Je li ${klub} ${igrac} dres kvalitetan?`,
-      a: "Dres ima ušiveno ime i broj igrača i vjeran je originalnom izgledu, izrađen od laganog i prozračnog materijala ugodnog za nošenje."
-    }
-  ];
+  const heading = en ? "Frequently asked questions" : "Česta pitanja";
+
+  const items = en
+    ? [
+        {
+          q: `What sizes does the ${klub} ${igrac} come in?`,
+          a: isKomplet
+            ? `The kit is available in kids' sizes 104–176 and adult sizes ${adultRange}, and includes jersey, shorts, ball and cap.`
+            : `Available in kids' sizes 104–176 (jersey + shorts) and adult sizes ${adultRange} (jersey only).`
+        },
+        {
+          q: "How much is shipping and how long does it take?",
+          a: "Shipping is €7.50 across Croatia (free for orders from €60), dispatched in 2–5 business days via HP Paket24."
+        },
+        {
+          q: `How do I pay for the ${klub} jersey?`,
+          a: "Payment is cash on delivery when you receive the parcel — nothing is paid upfront."
+        },
+        {
+          q: "Can I return or exchange a jersey?",
+          a: "Yes. If the size doesn't fit or you're not satisfied, message us on WhatsApp and we'll arrange an exchange or return."
+        },
+        {
+          q: `Is the ${klub} ${igrac} jersey good quality?`,
+          a: "The jersey has a stitched player name and number, is faithful to the original look, and is made of a light, breathable, comfortable fabric."
+        }
+      ]
+    : [
+        {
+          q: `Koje veličine ima ${klub} ${igrac}?`,
+          a: isKomplet
+            ? `Komplet je dostupan u dječjim veličinama 104–176 i odraslim veličinama ${adultRange}, a uključuje dres, hlačice, loptu i kapu.`
+            : `Dostupan je u dječjim veličinama 104–176 (dres + hlačice) i odraslim veličinama ${adultRange} (samo dres).`
+        },
+        {
+          q: "Koliko košta dostava i koliko traje?",
+          a: "Dostava je 7,50 € po cijeloj Hrvatskoj (besplatna za narudžbe od 60 €), uz isporuku 2–5 radnih dana putem HP Paket24."
+        },
+        {
+          q: `Kako plaćam ${klub} dres?`,
+          a: "Plaćaš pouzećem (gotovinom) pri preuzimanju paketa od dostavljača — ništa ne plaćaš unaprijed."
+        },
+        {
+          q: "Mogu li vratiti ili zamijeniti dres?",
+          a: "Da. Ako veličina ne odgovara ili nisi zadovoljan, javi nam se na WhatsApp i dogovorimo zamjenu ili povrat."
+        },
+        {
+          q: `Je li ${klub} ${igrac} dres kvalitetan?`,
+          a: "Dres ima ušiveno ime i broj igrača i vjeran je originalnom izgledu, izrađen od laganog i prozračnog materijala ugodnog za nošenje."
+        }
+      ];
 
   const schema = {
     "@context": "https://schema.org",
@@ -49,7 +77,7 @@ export function ProductFaq({ product }: { product: Jersey }) {
 
   return (
     <section className="mt-10 max-w-3xl">
-      <h2 className="font-heading text-3xl uppercase leading-none text-white sm:text-4xl">Česta pitanja</h2>
+      <h2 className="font-heading text-3xl uppercase leading-none text-white sm:text-4xl">{heading}</h2>
       <div className="mt-5 divide-y divide-white/10 border-y border-white/10">
         {items.map((it) => (
           <details key={it.q} className="group py-4">

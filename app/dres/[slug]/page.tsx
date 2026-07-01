@@ -55,7 +55,7 @@ export function generateMetadata({ params }: ProductPageProps): Metadata {
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const { t } = await getServerTranslations();
+  const { t, locale } = await getServerTranslations();
   const product = getJerseyBySlug(params.slug);
 
   if (!product) {
@@ -101,10 +101,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <section className="mt-10 max-w-3xl">
           <h2 className="font-heading text-3xl uppercase leading-none text-white sm:text-4xl">
-            O proizvodu — {repairText(product.klub)} {repairText(product.igrac)}
+            {locale === "en" ? "About" : "O proizvodu"} — {repairText(product.klub)} {repairText(product.igrac)}
           </h2>
           <div className="mt-5 space-y-4">
-            {getJerseyDescription(product).map((paragraph, i) => (
+            {getJerseyDescription(product, locale).map((paragraph, i) => (
               <p key={i} className="text-sm leading-7 text-white/60 sm:text-[15px]">
                 {paragraph}
               </p>
@@ -112,7 +112,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
         </section>
 
-        <ProductFaq product={product} />
+        <ProductFaq product={product} locale={locale} />
 
         <div className="mt-8 grid gap-4 xl:grid-cols-3">
           {clubCollection ? (
