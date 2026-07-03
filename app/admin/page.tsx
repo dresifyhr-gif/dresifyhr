@@ -10,11 +10,12 @@ export const dynamic = "force-dynamic";
 
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 
-function Stat({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: string }) {
+function Stat({ label, value, profit, sub }: { label: string; value: string; profit?: string; sub?: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
-      <div className={`mt-1 text-2xl font-bold ${accent ?? "text-slate-900"}`}>{value}</div>
+      <div className="mt-1 text-2xl font-bold text-slate-900">{value}</div>
+      {profit && <div className="mt-0.5 text-xs font-semibold text-emerald-600">{profit} profit</div>}
       {sub && <div className="mt-0.5 text-xs text-slate-400">{sub}</div>}
     </div>
   );
@@ -67,10 +68,10 @@ export default async function AdminDashboard() {
 
         {/* Top stats */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-          <Stat label="Danas" value={eur(m.todayRev)} sub={`${m.todayOrders} narudžbi`} accent="text-emerald-600" />
-          <Stat label="Ovaj mjesec" value={eur(m.monthRev)} sub={`${m.monthOrders} narudžbi`} />
-          <Stat label="Ukupno promet" value={eur(m.totalRev)} />
-          <Stat label="Narudžbi" value={String(m.orderCount)} />
+          <Stat label="Danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} sub={`${m.todayOrders} narudžbi`} />
+          <Stat label="Tjedan" value={eur(m.weekRev)} profit={eur(m.weekProfit)} sub={`${m.weekOrders} narudžbi`} />
+          <Stat label="Mjesec" value={eur(m.monthRev)} profit={eur(m.monthProfit)} sub={`${m.monthOrders} narudžbi`} />
+          <Stat label="Ukupno" value={eur(m.totalRev)} profit={eur(m.totalProfit)} sub={`${m.orderCount} narudžbi`} />
           <Stat label="Prosj. košarica" value={eur(m.aov)} />
           <Stat label="Poslano" value={String(m.shippedCount)} sub="označeno" />
         </div>
@@ -180,7 +181,7 @@ export default async function AdminDashboard() {
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-400">
-          Profit/marža dolazi kad upišemo nabavne cijene. Sljedeće: AI chat + uvoz povijesti.
+          Profit = 20 € prodaja − 6 € nabava = 14 € po dresu. Sljedeće: uvoz povijesti narudžbi.
         </p>
       </div>
     </div>

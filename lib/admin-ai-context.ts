@@ -33,9 +33,10 @@ export async function buildBusinessContext(): Promise<string> {
   const inact = inactive.map((c) => `${c.name || c.phone || "?"}: zadnja kupnja ${c.lastOrderAt.toLocaleDateString("hr-HR")}, ukupno ${eur(c.totalSpent)}`);
 
   return [
-    `DANAS: ${eur(m.todayRev)} prometa, ${m.todayOrders} narudžbi.`,
-    `OVAJ MJESEC: ${eur(m.monthRev)} prometa, ${m.monthOrders} narudžbi.`,
-    `UKUPNO: ${eur(m.totalRev)} prometa, ${m.orderCount} narudžbi, prosječna košarica ${eur(m.aov)}, poslano ${m.shippedCount}.`,
+    `DANAS: ${eur(m.todayRev)} prometa (profit ${eur(m.todayProfit)}), ${m.todayOrders} narudžbi.`,
+    `TJEDAN: ${eur(m.weekRev)} prometa (profit ${eur(m.weekProfit)}), ${m.weekOrders} narudžbi.`,
+    `MJESEC: ${eur(m.monthRev)} prometa (profit ${eur(m.monthProfit)}), ${m.monthOrders} narudžbi.`,
+    `UKUPNO: ${eur(m.totalRev)} prometa (profit ${eur(m.totalProfit)}), ${m.orderCount} narudžbi, prosječna košarica ${eur(m.aov)}, poslano ${m.shippedCount}.`,
     ``,
     `PROMET ZADNJIH 14 DANA (dan: iznos): ${m.byDay.map((d) => `${d.day.slice(5)}: ${eur(d.total)}`).join(" · ")}`,
     ``,
@@ -49,6 +50,6 @@ export async function buildBusinessContext(): Promise<string> {
     ``,
     `NISKA/NEMA ZALIHA (iz kataloga):\n${lowStock.length ? lowStock.join("\n") : "sve dostupno"}`,
     ``,
-    `Napomena: profit/marža nije dostupan jer nabavne cijene još nisu upisane — reci to ako te pitaju za profit.`
+    `Napomena o profitu: nabavna cijena je 6 € po dresu, prodajna 20 €, dakle profit 14 € po dresu. Profit iznad je već izračunat (prodaja − nabava po artiklu).`
   ].join("\n");
 }
