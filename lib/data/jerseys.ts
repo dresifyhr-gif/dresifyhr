@@ -11,6 +11,8 @@ export type Jersey = {
   price?: number;
   badge?: "bestseller" | "novo";
   outOfStock?: "adults" | "kids" | "all";
+  // Specific sizes that are sold out (e.g. ["XL","XXL"] or kids ["104","116"]).
+  soldOutSizes?: string[];
 };
 
 export const jerseys: Jersey[] = [
@@ -50,14 +52,14 @@ export const jerseys: Jersey[] = [
   { id: 76, slug: "brazil-neymar-domaci", klub: "Brazil", igrac: "Neymar nr10 — domaći žuti", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 77, slug: "brazil-ronaldinho-posebni", klub: "Brazil", igrac: "Ronaldinho — posebno izdanje", liga: "Reprezentacija", retro: true, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 78, slug: "brazil-vinitjr", klub: "Brazil", igrac: "Vinícius Jr nr7 — domaći", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
-  { id: 79, slug: "hrvatska-modric-2026", klub: "Hrvatska", igrac: "Modrić nr10 — 2026", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL", badge: "novo" },
+  { id: 79, slug: "hrvatska-modric-2026", klub: "Hrvatska", igrac: "Modrić nr10 — 2026", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL", badge: "novo", soldOutSizes: ["XL", "XXL"] },
   { id: 80, slug: "barcelona-yamal-plavi", klub: "FC Barcelona", igrac: "Yamal nr10 — plavi", liga: "La Liga", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 81, slug: "argentina-messi-retro", klub: "Argentina", igrac: "Messi nr10 — retro", liga: "Reprezentacija", retro: true, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 82, slug: "intermiami-messi-crni", klub: "Inter Miami", igrac: "Messi nr10 — crni", liga: "MLS", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 83, slug: "njemacka-wirtz", klub: "Njemačka", igrac: "Wirtz nr10 — domaći", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 84, slug: "psg-doue-crni", klub: "PSG", igrac: "D.Doué nr14 — crni SE", liga: "Ligue 1", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 85, slug: "real-mbappe-bijeli-2026", klub: "Real Madrid", igrac: "Mbappé nr10 — bijeli 2026", liga: "La Liga", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL", badge: "novo" },
-  { id: 87, slug: "portugal-ronaldo-crveni", klub: "Portugal", igrac: "Ronaldo nr7 — crveni", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL", badge: "bestseller" },
+  { id: 87, slug: "portugal-ronaldo-crveni", klub: "Portugal", igrac: "Ronaldo nr7 — crveni", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL", badge: "bestseller", soldOutSizes: ["S", "M", "XL", "XXL", "104", "116", "128", "140", "152", "164"] },
   { id: 88, slug: "real-ronaldo-2018", klub: "Real Madrid", igrac: "Ronaldo nr7 — 2018", liga: "La Liga", retro: true, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 89, slug: "brazil-vinitjr-plavi", klub: "Brazil", igrac: "Vinícius Jr nr7 — plavi", liga: "Reprezentacija", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 90, slug: "milan-ibrahimovic", klub: "AC Milan", igrac: "Ibrahimović nr11 — retro", liga: "Serie A", retro: true, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
@@ -236,6 +238,7 @@ export function getJerseySizeOptions(product: Jersey) {
     kids: hasKids ? [...kidSizes] : [],
     adultsOutOfStock: product.outOfStock === "adults" || product.outOfStock === "all",
     kidsOutOfStock: product.outOfStock === "kids" || product.outOfStock === "all",
+    soldOutSizes: product.soldOutSizes ?? [],
   };
 }
 

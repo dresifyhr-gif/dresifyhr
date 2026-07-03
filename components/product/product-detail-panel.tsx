@@ -30,9 +30,12 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   const stock = getJerseyStock(product.id);
   const { addItem } = useCart();
   const mainButtonRef = useRef<HTMLButtonElement>(null);
-  const defaultSegment = sizeOptions.hasAdults ? "adult" : "kid";
-  const defaultAdultSize = sizeOptions.adults[0] ?? "";
-  const defaultKidSize = sizeOptions.kids[0] ?? "";
+  const firstAvailable = (arr: string[], segmentOut: boolean) =>
+    segmentOut ? "" : (arr.find((s) => !sizeOptions.soldOutSizes.includes(s)) ?? "");
+  const defaultAdultSize = firstAvailable(sizeOptions.adults, sizeOptions.adultsOutOfStock);
+  const defaultKidSize = firstAvailable(sizeOptions.kids, sizeOptions.kidsOutOfStock);
+  const defaultSegment: "adult" | "kid" =
+    sizeOptions.hasAdults && defaultAdultSize ? "adult" : defaultKidSize ? "kid" : sizeOptions.hasAdults ? "adult" : "kid";
   const [segment, setSegment] = useState<"adult" | "kid">(defaultSegment);
   const [selectedSize, setSelectedSize] = useState(
     defaultSegment === "adult" ? defaultAdultSize : defaultKidSize
@@ -128,7 +131,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
             {currentSizes.map((size) => {
-              const oos = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock);
+              const oos = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock) || sizeOptions.soldOutSizes.includes(size);
               return (
                 <button
                   key={size}

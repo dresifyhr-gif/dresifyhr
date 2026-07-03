@@ -16,8 +16,13 @@ export function ProductCard({ product, priority = false }: { product: Jersey; pr
   const sizeOptions = getJerseySizeOptions(product);
   const { addItem } = useCart();
 
-  const defaultSegment = sizeOptions.hasAdults ? "adult" : "kid";
-  const defaultSize = defaultSegment === "adult" ? (sizeOptions.adults[0] ?? "") : (sizeOptions.kids[0] ?? "");
+  const firstAvailable = (arr: string[], segmentOut: boolean) =>
+    segmentOut ? "" : (arr.find((s) => !sizeOptions.soldOutSizes.includes(s)) ?? "");
+  const availAdult = firstAvailable(sizeOptions.adults, sizeOptions.adultsOutOfStock);
+  const availKid = firstAvailable(sizeOptions.kids, sizeOptions.kidsOutOfStock);
+  const defaultSegment: "adult" | "kid" =
+    sizeOptions.hasAdults && availAdult ? "adult" : availKid ? "kid" : sizeOptions.hasAdults ? "adult" : "kid";
+  const defaultSize = defaultSegment === "adult" ? availAdult : availKid;
 
   const [isOpen, setIsOpen] = useState(false);
   const [segment, setSegment] = useState<"adult" | "kid">(defaultSegment);
@@ -54,7 +59,7 @@ export function ProductCard({ product, priority = false }: { product: Jersey; pr
     e.preventDefault();
     e.stopPropagation();
     setSegment(seg);
-    setSelectedSize(seg === "adult" ? (sizeOptions.adults[0] ?? "") : (sizeOptions.kids[0] ?? ""));
+    setSelectedSize(seg === "adult" ? availAdult : availKid);
   };
 
   const handleMobileToggle = (e: React.MouseEvent) => {
@@ -161,7 +166,7 @@ export function ProductCard({ product, priority = false }: { product: Jersey; pr
                   {/* Size buttons */}
                   <div className="mb-2.5 flex flex-wrap gap-1.5">
                     {currentSizes.map((size) => {
-                      const oos = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock);
+                      const oos = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock) || sizeOptions.soldOutSizes.includes(size);
                       return (
                         <button
                           key={size}
