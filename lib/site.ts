@@ -14,10 +14,10 @@ export const DEFAULT_OG_IMAGE = "/og-default.png";
 export const JERSEY_PRICE_EUR = 20;
 
 export const META_PIXEL_ID = "1621563625577336";
-export const HOME_DELIVERY_PRICE_EUR = 6.5;
+export const HOME_DELIVERY_PRICE_EUR = 4;
 export const COD_FEE_EUR = 1;
 export const SHIPPING_PRICE_EUR = HOME_DELIVERY_PRICE_EUR + COD_FEE_EUR;
-export const SHIPPING_PRICE_LABEL = "7,50 \u20ac";
+export const SHIPPING_PRICE_LABEL = "5,00 \u20ac";
 export const FREE_SHIPPING_THRESHOLD_EUR = 60;
 export const FREE_SHIPPING_LABEL = "Besplatna dostava preko 60 \u20ac";
 export const ZAGREB_DELIVERY_PRICE_EUR = 0;
@@ -60,7 +60,7 @@ export const FULFILLMENT_OPTIONS = [
     id: "delivery",
     label: "Dostava pouze\u0107em",
     icon: "delivery",
-    description: "Pla\u0107anje pri preuzimanju, 7,50 \u20ac dostava po Hrvatskoj"
+    description: "Pla\u0107anje pri preuzimanju, 5,00 \u20ac dostava po Hrvatskoj"
   },
   {
     id: "pickup",

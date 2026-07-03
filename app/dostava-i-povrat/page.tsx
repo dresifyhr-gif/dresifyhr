@@ -32,7 +32,7 @@ const deliveryItems = [
   {
     icon: MapPin,
     title: "Cijena dostave",
-    text: "Dostava je 7,50 € po cijeloj Hrvatskoj. Za narudžbe preko 60 € dostava je besplatna."
+    text: "Dostava je 5,00 € po cijeloj Hrvatskoj. Za narudžbe preko 60 € dostava je besplatna."
   }
 ];
 

@@ -10,7 +10,7 @@ export const HR_COUNTRIES = new Set(["HR", "BA", "RS", "SI", "ME", "MK"]);
 const hr = {
   announcement: [
     "🏆 SP 2026 je tu — navijaj u svom dresu! Reprezentacije od 20€",
-    "📦 Dostava pouzećem po cijeloj Hrvatskoj — 7,50€",
+    "📦 Dostava pouzećem po cijeloj Hrvatskoj — 5,00€",
     "⚡ Novo svaki tjedan — provjeri katalog",
     "💬 Naruči na WhatsApp — odgovaramo u sat vremena",
   ],
@@ -279,7 +279,7 @@ const hr = {
 const en: typeof hr = {
   announcement: [
     "🏆 World Cup 2026 is here — cheer in your jersey! National teams from €20",
-    "📦 Cash on delivery across Croatia — 7.50€",
+    "📦 Cash on delivery across Croatia — 5.00€",
     "⚡ New drops every week — check the catalog",
     "💬 Order on WhatsApp — we reply within the hour",
   ],
