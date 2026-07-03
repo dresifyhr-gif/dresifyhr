@@ -193,6 +193,16 @@ export function ContactForm() {
         discount: discount > 0 ? discount : undefined,
         promoCode: rewardActive && appliedPromo ? appliedPromo.code : undefined,
         itemCount: hasCartItems ? itemCount : 1,
+        items: hasCartItems
+          ? items.map((item) => ({
+              slug: item.slug,
+              klub: repairText(item.klub),
+              igrac: repairText(item.igrac),
+              size: item.size,
+              segment: item.segment,
+              unitPrice: item.price
+            }))
+          : undefined,
         createdAt: new Date().toISOString()
       };
 

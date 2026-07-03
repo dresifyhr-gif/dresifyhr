@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { parseOrderPayload } from "@/lib/orders";
 import { sendOrderNotifications } from "@/lib/notifications";
 import { logOrderToSheet } from "@/lib/sheets";
+import { saveOrderToDb } from "@/lib/order-db";
 
 export const runtime = "nodejs";
 
@@ -46,8 +47,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Log to Google Sheet (best-effort — never blocks or fails the order)
-    await logOrderToSheet(payload!);
+    // Log to Google Sheet + mirror to DB (both best-effort — never block/fail the order)
+    await Promise.allSettled([logOrderToSheet(payload!), saveOrderToDb(payload!)]);
 
     return NextResponse.json({
       ok: true,

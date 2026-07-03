@@ -1,6 +1,15 @@
 export type FulfillmentType = "delivery";
 export type ContactChannelType = "web" | "whatsapp" | "instagram";
 
+export type OrderLineInput = {
+  slug: string;
+  klub: string;
+  igrac: string;
+  size: string;
+  segment: string;
+  unitPrice: number;
+};
+
 export type OrderPayload = {
   name: string;
   phone: string;
@@ -21,6 +30,7 @@ export type OrderPayload = {
   promoCode?: string;
   itemCount: number;
   createdAt: string;
+  items?: OrderLineInput[];
 };
 
 const fulfillmentLabels: Record<FulfillmentType, string> = {
@@ -85,7 +95,18 @@ export function parseOrderPayload(body: unknown): { payload?: OrderPayload; erro
     discount: parseMoney(source.discount),
     promoCode: normalizeText(source.promoCode),
     itemCount: Math.max(0, Math.trunc(parseMoney(source.itemCount))),
-    createdAt: normalizeText(source.createdAt) || new Date().toISOString()
+    createdAt: normalizeText(source.createdAt) || new Date().toISOString(),
+    items: (Array.isArray(source.items) ? source.items : []).map((raw) => {
+      const it = (raw ?? {}) as Record<string, unknown>;
+      return {
+        slug: normalizeText(it.slug),
+        klub: normalizeText(it.klub),
+        igrac: normalizeText(it.igrac),
+        size: normalizeText(it.size),
+        segment: normalizeText(it.segment),
+        unitPrice: parseMoney(it.unitPrice)
+      };
+    })
   };
 
   const errors: string[] = [];

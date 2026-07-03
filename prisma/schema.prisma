@@ -1,0 +1,89 @@
+// Dresify internal DB — orders/customers/products for the admin dashboard + AI.
+// The public shop keeps working exactly as before; this data layer is additive.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  reference    String?     // e.g. DRS-260629-0909
+  createdAt    DateTime    @default(now())
+
+  customerName String
+  phone        String?
+  email        String?
+  address      String?
+
+  channel      String      @default("web")
+  fulfillment  String?
+  payment      String?
+
+  subtotal     Float       @default(0)
+  shipping     Float       @default(0)
+  discount     Float       @default(0)
+  total        Float       @default(0)
+  promoCode    String?
+  note         String?
+  itemCount    Int         @default(0)
+
+  status       String      @default("new") // new | shipped | done
+
+  items        OrderItem[]
+  customer     Customer?   @relation(fields: [customerId], references: [id])
+  customerId   String?
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+
+  slug      String?
+  klub      String?
+  igrac     String?
+  size      String?
+  segment   String? // adult | kid
+  quantity  Int     @default(1)
+  unitPrice Float   @default(0)
+
+  @@index([orderId])
+  @@index([slug])
+}
+
+model Customer {
+  id           String   @id @default(cuid())
+  phone        String?  @unique
+  email        String?
+  name         String?
+  address      String?
+
+  firstOrderAt DateTime @default(now())
+  lastOrderAt  DateTime @default(now())
+  totalOrders  Int      @default(0)
+  totalSpent   Float    @default(0)
+
+  orders       Order[]
+}
+
+// Product cost (nabavna cijena) for margin/profit; mirrors the catalog by slug.
+model Product {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  klub      String
+  igrac     String
+  liga      String?
+  price     Float    @default(20)
+  cost      Float    @default(0)
+  active    Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
