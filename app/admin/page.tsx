@@ -6,6 +6,7 @@ import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { AdminAiChat } from "@/components/admin/ai-chat";
 import { AdSpendForm } from "@/components/admin/ad-spend-form";
 import { ShippingQueue } from "@/components/admin/shipping-queue";
+import { RecentOrders } from "@/components/admin/recent-orders";
 
 export const metadata: Metadata = { title: "Dresify Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -226,7 +227,7 @@ export default async function AdminDashboard() {
             />
           </Panel>
 
-          <Panel title={`Vrati kupce (60+ dana bez kupnje) · ${m.inactive.length}`}>
+          <Panel title={`Vrati kupce (30+ dana bez kupnje) · ${m.inactive.length}`}>
             {m.inactive.length === 0 ? (
               <div className="text-sm text-slate-400">Nema neaktivnih kupaca.</div>
             ) : (
@@ -295,37 +296,17 @@ export default async function AdminDashboard() {
 
         {/* Recent orders */}
         <div className="mt-6">
-          <Panel title="Zadnje narudžbe">
-            {m.recentOrders.length === 0 ? (
-              <div className="text-sm text-slate-400">Još nema narudžbi u bazi.</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-[11px] uppercase tracking-wider text-slate-400">
-                      <th className="pb-2 pr-3 font-semibold">Datum</th>
-                      <th className="pb-2 pr-3 font-semibold">Kupac</th>
-                      <th className="pb-2 pr-3 font-semibold">Kom</th>
-                      <th className="pb-2 pr-3 font-semibold">Ukupno</th>
-                      <th className="pb-2 font-semibold"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {m.recentOrders.map((o) => (
-                      <tr key={o.id} className="border-t border-slate-100">
-                        <td className="py-2 pr-3 text-slate-400">{o.createdAt.toLocaleDateString("hr-HR")}</td>
-                        <td className="py-2 pr-3 text-slate-700">{o.customerName}</td>
-                        <td className="py-2 pr-3 text-slate-500">{o.itemCount}</td>
-                        <td className="py-2 pr-3 font-semibold text-slate-900">{eur(o.total)}</td>
-                        <td className="py-2 text-right">
-                          <a href={`/admin/print/${o.id}/`} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-slate-400 hover:text-slate-800">🖨 Print</a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+          <Panel title={m.returnedCount > 0 ? `Zadnje narudžbe · vraćeno ${m.returnedCount} (${eur(m.returnedTotal)})` : "Zadnje narudžbe"}>
+            <RecentOrders
+              orders={m.recentOrders.map((o) => ({
+                id: o.id,
+                dateLabel: o.createdAt.toLocaleDateString("hr-HR"),
+                customerName: o.customerName,
+                itemCount: o.itemCount,
+                total: o.total,
+                status: o.status
+              }))}
+            />
           </Panel>
         </div>
 

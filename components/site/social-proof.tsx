@@ -10,68 +10,76 @@ type ProofItem = {
   agoHours: number;
 };
 
-function agoLabel(hours: number): string {
-  if (hours <= 1) return "prije nekoliko minuta";
-  if (hours < 24) return `prije ${hours} h`;
-  const days = Math.round(hours / 24);
-  if (days === 1) return "jučer";
-  return `prije ${days} dana`;
-}
+const keyOf = (i: ProofItem) => `${i.name}|${i.city}|${i.product}`;
 
-// Social proof: cycles real recent purchases (first name + city + product) as a
-// small toast in the corner. Data is anonymized server-side via /api/social-proof.
+// Social proof: shows a toast ONLY when a genuinely fresh order lands (last ~20 min)
+// while the shopper is on the site — polls the API and shows each new order once.
+// Anonymized server-side (first name + city + product).
 export function SocialProof() {
-  const [items, setItems] = useState<ProofItem[]>([]);
-  const [index, setIndex] = useState(0);
+  const [current, setCurrent] = useState<ProofItem | null>(null);
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+
+  const seen = useRef<Set<string>>(new Set());
+  const queue = useRef<ProofItem[]>([]);
+  const showing = useRef(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const dismissedRef = useRef(false);
 
   useEffect(() => {
     let alive = true;
-    fetch("/api/social-proof/")
-      .then((r) => (r.ok ? r.json() : { items: [] }))
-      .then((d) => {
-        if (alive && Array.isArray(d.items)) setItems(d.items);
-      })
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, []);
 
-  useEffect(() => {
-    if (dismissed || items.length === 0) return;
-
-    const clear = () => {
-      timers.current.forEach(clearTimeout);
-      timers.current = [];
-    };
-
-    const show = () => {
+    const pump = () => {
+      if (dismissedRef.current || showing.current) return;
+      const next = queue.current.shift();
+      if (!next) return;
+      showing.current = true;
+      setCurrent(next);
       setVisible(true);
       timers.current.push(
         setTimeout(() => {
           setVisible(false);
           timers.current.push(
             setTimeout(() => {
-              setIndex((i) => (i + 1) % items.length);
-            }, 500)
+              showing.current = false;
+              pump();
+            }, 600)
           );
-        }, 5000) // visible 5s
+        }, 6000) // visible 6s
       );
     };
 
-    // First appearance after a short delay, then repeats via index change.
-    timers.current.push(setTimeout(show, 4000));
-    return clear;
-    // re-run when index changes to show the next item
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, items, dismissed]);
+    const fetchFresh = async () => {
+      try {
+        const res = await fetch("/api/social-proof/");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!alive || !Array.isArray(data.items)) return;
+        // Oldest first so they appear in the order they were placed.
+        for (const it of [...data.items].reverse() as ProofItem[]) {
+          const k = keyOf(it);
+          if (!seen.current.has(k)) {
+            seen.current.add(k);
+            queue.current.push(it);
+          }
+        }
+        pump();
+      } catch {
+        /* ignore */
+      }
+    };
 
-  if (dismissed || items.length === 0) return null;
-  const item = items[index];
-  if (!item) return null;
+    fetchFresh();
+    const poll = setInterval(fetchFresh, 90_000);
+
+    return () => {
+      alive = false;
+      clearInterval(poll);
+      timers.current.forEach(clearTimeout);
+    };
+  }, []);
+
+  if (dismissed || !current) return null;
 
   return (
     <div
@@ -85,16 +93,19 @@ export function SocialProof() {
         </div>
         <div className="min-w-0">
           <p className="text-[13px] leading-5 text-white">
-            <span className="font-semibold">{item.name}</span>
-            {item.city ? <span className="text-white/60"> iz {item.city}</span> : null}{" "}
-            <span className="text-white/60">naručio je</span>
+            <span className="font-semibold">{current.name}</span>
+            {current.city ? <span className="text-white/60"> iz {current.city}</span> : null}{" "}
+            <span className="text-white/60">upravo je naručio</span>
           </p>
-          <p className="truncate text-[13px] font-medium text-accent">{item.product}</p>
-          <p className="mt-0.5 text-[11px] text-white/40">{agoLabel(item.agoHours)} · ✅ potvrđeno</p>
+          <p className="truncate text-[13px] font-medium text-accent">{current.product}</p>
+          <p className="mt-0.5 text-[11px] text-white/40">upravo sada · ✅ potvrđeno</p>
         </div>
         <button
           type="button"
-          onClick={() => setDismissed(true)}
+          onClick={() => {
+            dismissedRef.current = true;
+            setDismissed(true);
+          }}
           aria-label="Zatvori"
           className="absolute right-2 top-2 text-white/35 transition hover:text-white/70"
         >

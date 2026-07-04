@@ -27,14 +27,18 @@ function parseCity(address?: string | null): string {
 
 // Public feed of recent real purchases for the social-proof popup.
 // Only exposes first name + city + product + rough time — no PII.
+// Only genuinely fresh orders (last ~20 min) so the popup shows a purchase in
+// near-real-time when a shopper is on the site — not stale orders from hours ago.
+const LIVE_WINDOW_MS = 20 * 60 * 1000;
+
 export async function GET() {
   try {
     if (!process.env.DATABASE_URL) return NextResponse.json({ items: [] });
 
     const orders = await prisma.order.findMany({
-      where: { createdAt: { gte: new Date(Date.now() - 30 * DAY) } },
+      where: { createdAt: { gte: new Date(Date.now() - LIVE_WINDOW_MS) } },
       orderBy: { createdAt: "desc" },
-      take: 40,
+      take: 10,
       select: {
         createdAt: true,
         customerName: true,

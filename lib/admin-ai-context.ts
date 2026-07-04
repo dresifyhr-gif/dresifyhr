@@ -13,7 +13,7 @@ export async function buildBusinessContext(): Promise<string> {
   const m = await getDashboardMetrics();
 
   const inactive = await prisma.customer.findMany({
-    where: { lastOrderAt: { lt: new Date(Date.now() - 60 * DAY) }, totalOrders: { gt: 0 } },
+    where: { lastOrderAt: { lt: new Date(Date.now() - 30 * DAY) }, totalOrders: { gt: 0 } },
     orderBy: { totalSpent: "desc" },
     take: 15
   });
@@ -31,6 +31,7 @@ export async function buildBusinessContext(): Promise<string> {
   const top = m.topItems.map((t) => `${t.klub} ${t.igrac}: ${t._sum.quantity ?? 0} kom`);
   const best = m.bestCustomers.map((c) => `${c.name || c.phone || "?"}: ${eur(c.totalSpent)} (${c.totalOrders} narudžbi)`);
   const inact = inactive.map((c) => `${c.name || c.phone || "?"}: zadnja kupnja ${c.lastOrderAt.toLocaleDateString("hr-HR")}, ukupno ${eur(c.totalSpent)}`);
+  const ret = m.returned.map((o) => `${o.customerName}${o.phone ? ` (${o.phone})` : ""}: ${eur(o.total)}, ${o.createdAt.toLocaleDateString("hr-HR")}`);
 
   return [
     `DANAS: ${eur(m.todayRev)} prometa (profit ${eur(m.todayProfit)}), ${m.todayOrders} narudžbi.`,
@@ -50,7 +51,9 @@ export async function buildBusinessContext(): Promise<string> {
     ``,
     `NAJBOLJI KUPCI:\n${best.length ? best.join("\n") : "nema podataka"}`,
     ``,
-    `NEAKTIVNI KUPCI (60+ dana bez kupnje):\n${inact.length ? inact.join("\n") : "nema"}`,
+    `NEAKTIVNI KUPCI (30+ dana bez kupnje):\n${inact.length ? inact.join("\n") : "nema"}`,
+    ``,
+    `VRAĆENE POŠILJKE (nije pokupljeno, gubitak dostave) — ${m.returnedCount}, ukupno ${eur(m.returnedTotal)}:\n${ret.length ? ret.join("\n") : "nema vraćenih"}`,
     ``,
     `NISU SE PRODALI (mrtvi modeli, ${m.deadProducts.length}):\n${m.deadProducts.slice(0, 30).join(", ") || "nema"}`,
     ``,

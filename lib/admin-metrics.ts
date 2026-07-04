@@ -57,13 +57,16 @@ export async function getDashboardMetrics() {
   const totalRev = total._sum.total ?? 0;
 
   // ── Extras: trends, shipping queue, win-back, cities, ad ROI ──────────────
-  const [prev7, prev30, pending, inactive, allAddr, adAll] = await Promise.all([
+  const [prev7, prev30, pending, inactive, allAddr, adAll, returned] = await Promise.all([
     prisma.order.aggregate({ _sum: { total: true }, where: { createdAt: { gte: new Date(now.getTime() - 14 * DAY), lt: startWeek } } }),
     prisma.order.aggregate({ _sum: { total: true }, where: { createdAt: { gte: new Date(now.getTime() - 60 * DAY), lt: startMonth } } }),
     prisma.order.findMany({ where: { status: "new" }, orderBy: { createdAt: "asc" }, take: 40, select: { id: true, createdAt: true, customerName: true, phone: true, itemCount: true, total: true } }),
-    prisma.customer.findMany({ where: { lastOrderAt: { lt: new Date(now.getTime() - 60 * DAY) }, totalOrders: { gt: 0 } }, orderBy: { totalSpent: "desc" }, take: 20 }),
+    // Neaktivni kupci: bez kupnje 30+ dana (win-back meta).
+    prisma.customer.findMany({ where: { lastOrderAt: { lt: new Date(now.getTime() - 30 * DAY) }, totalOrders: { gt: 0 } }, orderBy: { totalSpent: "desc" }, take: 20 }),
     prisma.order.findMany({ select: { address: true, total: true } }),
-    prisma.adSpend.aggregate({ _sum: { amount: true } })
+    prisma.adSpend.aggregate({ _sum: { amount: true } }),
+    // Vraćene pošiljke (nije pokupljeno) — za AI i evidenciju gubitka.
+    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true } })
   ]);
 
   const pct = (cur: number, prev: number | null) => (prev && prev > 0 ? ((cur - prev) / prev) * 100 : null);
@@ -109,6 +112,9 @@ export async function getDashboardMetrics() {
     pending,
     pendingTotal,
     inactive,
+    returned,
+    returnedCount: returned.length,
+    returnedTotal: returned.reduce((s, o) => s + o.total, 0),
     topCities,
     adSpendTotal,
     roas: adSpendTotal > 0 ? totalRev / adSpendTotal : null,
