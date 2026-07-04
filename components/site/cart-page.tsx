@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ShoppingBag, Trash2 } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
+import { CartUpsell } from "@/components/site/cart-upsell";
 import { useLanguage } from "@/contexts/language-context";
 import { FREE_SHIPPING_THRESHOLD_EUR, SHIPPING_PRICE_EUR, SHIPPING_PRICE_LABEL } from "@/lib/site";
 import { formatEuroAmount, repairText } from "@/lib/utils";
@@ -87,6 +88,11 @@ export function CartPageContent() {
             </div>
           ))}
         </div>
+        {items.length ? (
+          <div className="mt-6">
+            <CartUpsell />
+          </div>
+        ) : null}
       </div>
 
       <aside className="panel h-fit p-5 sm:sticky sm:top-24 sm:p-6">

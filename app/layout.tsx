@@ -17,6 +17,7 @@ import { ContentProtection } from "@/components/site/content-protection";
 import { ChatWidget } from "@/components/site/chat-widget";
 import { Footer } from "@/components/site/footer";
 import { Navbar } from "@/components/site/navbar";
+import { SocialProof } from "@/components/site/social-proof";
 import { PromoCapture } from "@/components/site/promo-capture";
 import { buildOrganizationSchema, buildWebsiteSchema, defaultMetadata } from "@/lib/seo";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
@@ -95,6 +96,7 @@ export default async function RootLayout({
               <main>{children}</main>
               <Footer />
               <CartDrawer />
+              <SocialProof />
               <AddToCartModal />
               <ContentProtection />
               <ChatWidget />

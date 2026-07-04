@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ShoppingBag, Trash2, X } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
+import { CartUpsell } from "@/components/site/cart-upsell";
 import { useLanguage } from "@/contexts/language-context";
 import { FREE_SHIPPING_THRESHOLD_EUR, SHIPPING_PRICE_EUR, SHIPPING_PRICE_LABEL } from "@/lib/site";
 import { formatEuroAmount, repairText } from "@/lib/utils";
@@ -125,6 +126,11 @@ export function CartDrawer() {
                       style={{ width: `${Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD_EUR) * 100)}%` }}
                     />
                   </div>
+                </div>
+              ) : null}
+              {items.length ? (
+                <div className="mb-4">
+                  <CartUpsell onNavigate={closeDrawer} />
                 </div>
               ) : null}
               <div className="space-y-3 text-sm text-white">
