@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { jerseys } from "@/lib/data/jerseys";
+import { formatCroatianName } from "@/lib/utils";
 
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 const DAY = 86_400_000;
@@ -29,9 +30,9 @@ export async function buildBusinessContext(): Promise<string> {
     });
 
   const top = m.topItems.map((t) => `${t.klub} ${t.igrac}: ${t._sum.quantity ?? 0} kom`);
-  const best = m.bestCustomers.map((c) => `${c.name || c.phone || "?"}: ${eur(c.totalSpent)} (${c.totalOrders} narudžbi)`);
-  const inact = inactive.map((c) => `${c.name || c.phone || "?"}: zadnja kupnja ${c.lastOrderAt.toLocaleDateString("hr-HR")}, ukupno ${eur(c.totalSpent)}`);
-  const ret = m.returned.map((o) => `${o.customerName}${o.phone ? ` (${o.phone})` : ""}: ${eur(o.total)}, ${o.createdAt.toLocaleDateString("hr-HR")}`);
+  const best = m.bestCustomers.map((c) => `${c.name ? formatCroatianName(c.name) : c.phone || "?"}: ${eur(c.totalSpent)} (${c.totalOrders} narudžbi)`);
+  const inact = inactive.map((c) => `${c.name ? formatCroatianName(c.name) : c.phone || "?"}: zadnja kupnja ${c.lastOrderAt.toLocaleDateString("hr-HR")}, ukupno ${eur(c.totalSpent)}`);
+  const ret = m.returned.map((o) => `${formatCroatianName(o.customerName)}${o.phone ? ` (${o.phone})` : ""}: ${eur(o.total)}, ${o.createdAt.toLocaleDateString("hr-HR")}`);
 
   return [
     `DANAS: ${eur(m.todayRev)} prometa (profit ${eur(m.todayProfit)}), ${m.todayOrders} narudžbi.`,

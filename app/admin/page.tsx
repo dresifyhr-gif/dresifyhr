@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
+import { formatCroatianName } from "@/lib/utils";
 import { AdminAiChat } from "@/components/admin/ai-chat";
 import { AdSpendForm } from "@/components/admin/ad-spend-form";
 import { ShippingQueue } from "@/components/admin/shipping-queue";
@@ -211,7 +212,7 @@ export default async function AdminDashboard() {
                 {m.bestCustomers.map((c) => (
                   <li key={c.id} className="flex items-center justify-between text-sm">
                     <span className="text-slate-700">
-                      {c.name || c.phone || "—"} <span className="text-slate-400">· {c.totalOrders}×</span>
+                      {c.name ? formatCroatianName(c.name) : c.phone || "—"} <span className="text-slate-400">· {c.totalOrders}×</span>
                     </span>
                     <span className="font-semibold text-emerald-600">{eur(c.totalSpent)}</span>
                   </li>
@@ -228,7 +229,7 @@ export default async function AdminDashboard() {
               orders={m.pending.map((o) => ({
                 id: o.id,
                 dateLabel: o.createdAt.toLocaleDateString("hr-HR"),
-                customerName: o.customerName,
+                customerName: formatCroatianName(o.customerName),
                 itemCount: o.itemCount,
                 total: o.total
               }))}
@@ -245,7 +246,7 @@ export default async function AdminDashboard() {
                   return (
                     <li key={c.id} className="flex items-center justify-between text-sm">
                       <span className="text-slate-700">
-                        {c.name || c.phone || "—"} <span className="text-slate-400">· zadnja {c.lastOrderAt.toLocaleDateString("hr-HR")}</span>
+                        {c.name ? formatCroatianName(c.name) : c.phone || "—"} <span className="text-slate-400">· zadnja {c.lastOrderAt.toLocaleDateString("hr-HR")}</span>
                       </span>
                       <span className="flex items-center gap-2">
                         <span className="font-semibold text-emerald-600">{eur(c.totalSpent)}</span>
@@ -309,7 +310,7 @@ export default async function AdminDashboard() {
               orders={m.recentOrders.map((o) => ({
                 id: o.id,
                 dateLabel: o.createdAt.toLocaleDateString("hr-HR"),
-                customerName: o.customerName,
+                customerName: formatCroatianName(o.customerName),
                 itemCount: o.itemCount,
                 total: o.total,
                 status: o.status

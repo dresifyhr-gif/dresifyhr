@@ -5,6 +5,7 @@ import { isAdmin } from "@/lib/admin-auth";
 import { buildBusinessContext } from "@/lib/admin-ai-context";
 import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
+import { formatCroatianName } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -68,7 +69,7 @@ ${context}`;
           count: orders.length,
           orders: orders.map((o) => ({
             id: o.id,
-            ime: o.customerName,
+            ime: formatCroatianName(o.customerName),
             mobitel: o.phone || "",
             datum: o.createdAt.toLocaleDateString("hr-HR"),
             referenca: o.reference || getOrderReference(o.createdAt.toISOString()),
@@ -96,7 +97,7 @@ ${context}`;
         await prisma.order.update({ where: { id: orderId }, data: { status: "cancelled" } });
         return {
           ok: true,
-          ime: order.customerName,
+          ime: formatCroatianName(order.customerName),
           iznos: eur(order.total),
           referenca: order.reference || getOrderReference(order.createdAt.toISOString())
         };

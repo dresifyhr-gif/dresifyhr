@@ -4,7 +4,7 @@ import { AutoPrint } from "@/components/admin/auto-print";
 import { isAdmin } from "@/lib/admin-auth";
 import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
-import { repairText } from "@/lib/utils";
+import { formatCroatianName, repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -58,7 +58,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
         {/* Prima */}
         <div className="text-[11px] font-bold uppercase tracking-wider text-black/60">Prima</div>
         <div className="mt-0.5 leading-6">
-          <div className="text-[20px] font-bold leading-tight">{repairText(order.customerName)}</div>
+          <div className="text-[20px] font-bold leading-tight">{formatCroatianName(order.customerName)}</div>
           {order.phone ? <div className="text-[16px] font-semibold">📞 {order.phone}</div> : null}
           {order.address ? <div className="text-[17px] font-medium leading-6">{repairText(order.address)}</div> : null}
         </div>

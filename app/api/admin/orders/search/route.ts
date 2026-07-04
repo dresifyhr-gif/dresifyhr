@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
+import { formatCroatianName, repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -61,9 +62,9 @@ export async function GET(request: Request) {
       id: o.id,
       date: o.createdAt.toLocaleDateString("hr-HR"),
       reference: o.reference || getOrderReference(o.createdAt.toISOString()),
-      customerName: o.customerName,
+      customerName: formatCroatianName(o.customerName),
       phone: o.phone || "",
-      address: o.address || "",
+      address: repairText(o.address || ""),
       itemCount: o.itemCount,
       total: o.total,
       status: o.status,

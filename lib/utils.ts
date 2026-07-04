@@ -94,6 +94,28 @@ export function repairText(value: string) {
   );
 }
 
+// Normalizira ime i prezime kupca (za prikaz i poštanske naljepnice):
+// - veliko prvo slovo svake riječi (i dijela iza crtice), ostalo malo
+// - hrvatska prezimena koja završavaju na "ic" → "ić" (npr. maric → Marić),
+//   jer za poštu prezime mora biti točno napisano s ć.
+export function formatCroatianName(value: string) {
+  const cleaned = repairText(String(value ?? "")).replace(/\s+/g, " ").trim();
+  if (!cleaned) return "";
+
+  const fixIc = (seg: string) => (/ic$/i.test(seg) ? seg.slice(0, -2) + "ić" : seg);
+  const titleCase = (word: string) =>
+    word
+      .split("-")
+      .map((seg) => {
+        if (!seg) return seg;
+        const cased = seg.charAt(0).toLocaleUpperCase("hr") + seg.slice(1).toLocaleLowerCase("hr");
+        return fixIc(cased);
+      })
+      .join("-");
+
+  return cleaned.split(" ").map(titleCase).join(" ");
+}
+
 export function storageAvailable() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }
