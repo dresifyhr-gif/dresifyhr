@@ -20,7 +20,7 @@ export async function getDashboardMetrics() {
   const items = (gte?: Date) =>
     prisma.orderItem.aggregate({ _sum: { unitPrice: true }, _count: true, where: gte ? { order: { createdAt: { gte } } } : undefined });
 
-  const [today, week, month, total, iToday, iWeek, iMonth, iTotal, orderCount, shippedCount, topItems, bestCustomers, recentOrders, windowOrders, soldSlugRows] =
+  const [today, week, month, total, iToday, iWeek, iMonth, iTotal, orderCount, shippedAgg, iShipped, topItems, bestCustomers, recentOrders, windowOrders, soldSlugRows] =
     await Promise.all([
       rev(startToday),
       rev(startWeek),
@@ -31,7 +31,8 @@ export async function getDashboardMetrics() {
       items(startMonth),
       items(),
       prisma.order.count(),
-      prisma.order.count({ where: { status: { in: ["shipped", "done"] } } }),
+      prisma.order.aggregate({ _sum: { total: true }, _count: true, where: { status: { in: ["shipped", "done"] } } }),
+      prisma.orderItem.aggregate({ _sum: { unitPrice: true }, _count: true, where: { order: { status: { in: ["shipped", "done"] } } } }),
       prisma.orderItem.groupBy({ by: ["slug", "klub", "igrac"], _sum: { quantity: true }, orderBy: { _sum: { quantity: "desc" } }, take: 8 }),
       prisma.customer.findMany({ orderBy: { totalSpent: "desc" }, take: 8 }),
       prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 12 }),
@@ -68,7 +69,9 @@ export async function getDashboardMetrics() {
     totalRev,
     totalProfit: profit(iTotal),
     orderCount,
-    shippedCount,
+    shippedCount: shippedAgg._count,
+    shippedRev: shippedAgg._sum.total ?? 0,
+    shippedProfit: profit(iShipped),
     aov: orderCount ? totalRev / orderCount : 0,
     topItems,
     bestCustomers,

@@ -73,7 +73,7 @@ export default async function AdminDashboard() {
           <Stat label="30 dana" value={eur(m.monthRev)} profit={eur(m.monthProfit)} sub={`${m.monthOrders} narudžbi`} />
           <Stat label="Ukupno" value={eur(m.totalRev)} profit={eur(m.totalProfit)} sub={`${m.orderCount} narudžbi`} />
           <Stat label="Prosj. košarica" value={eur(m.aov)} />
-          <Stat label="Poslano" value={String(m.shippedCount)} sub="označeno" />
+          <Stat label="Poslano" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
         </div>
 
         {/* AI assistant */}
