@@ -59,12 +59,15 @@ export async function markOrderShippedInSheet(order: {
   name?: string | null;
   createdAt?: string | Date | null;
   shipped: boolean;
+  by?: string | null; // "igor" | "ivica" → written to the "Poslao" column
 }) {
   const url = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
   if (!url) return { ok: false, skipped: true as const };
   // Guard: only fire once the Apps Script knows how to handle `action:"markShipped"`.
   // Otherwise the existing doPost would append a junk row. Flip on after deploying.
   if (process.env.SHEET_SYNC_ENABLED !== "1") return { ok: false, skipped: true as const };
+
+  const byLabel = order.by === "ivica" ? "Ivica" : order.by === "igor" ? "Igor" : "";
 
   try {
     const res = await fetch(url, {
@@ -75,7 +78,8 @@ export async function markOrderShippedInSheet(order: {
         phone: order.phone || "",
         name: order.name || "",
         createdAt: order.createdAt ? new Date(order.createdAt).toISOString() : "",
-        shipped: order.shipped
+        shipped: order.shipped,
+        by: byLabel
       })
     });
     return { ok: res.ok };
@@ -85,10 +89,13 @@ export async function markOrderShippedInSheet(order: {
   }
 }
 
-// Reads which orders are marked shipped in the Sheet (by Ivica/wife) so the admin
-// queue reflects their checkmarks. Returns a set of normalized phone numbers.
-// Requires the Apps Script `doGet?action=shipped` endpoint. Best-effort.
-export async function fetchShippedPhonesFromSheet(): Promise<string[]> {
+export type SheetShippedRow = { phone: string; by: "igor" | "ivica" | null };
+
+// Reads which orders are marked shipped in the Sheet (Odradeno checkbox) plus who
+// shipped them (Poslao column), so the admin queue + Igor/Ivica split reflect the
+// Sheet. Returns normalized phone + shipper. Requires the Apps Script
+// `doGet?action=shipped` endpoint. Best-effort.
+export async function fetchShippedPhonesFromSheet(): Promise<SheetShippedRow[]> {
   const url = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
   if (!url || process.env.SHEET_SYNC_ENABLED !== "1") return [];
   try {
@@ -96,10 +103,19 @@ export async function fetchShippedPhonesFromSheet(): Promise<string[]> {
     const res = await fetch(`${url}${sep}action=shipped`, { method: "GET" });
     if (!res.ok) return [];
     const data = await res.json().catch(() => null);
-    const arr = Array.isArray(data) ? data : Array.isArray(data?.phones) ? data.phones : [];
-    return arr.map((p: unknown) => String(p ?? "").replace(/\D/g, "")).filter(Boolean);
+    const arr: unknown[] = Array.isArray(data?.shipped) ? data.shipped : Array.isArray(data) ? data : [];
+    const mapBy = (v: unknown): "igor" | "ivica" | null => {
+      const s = String(v ?? "").toLowerCase();
+      return s.includes("ivic") ? "ivica" : s.includes("igor") ? "igor" : null;
+    };
+    return arr
+      .map((r): SheetShippedRow => {
+        const row = r as { phone?: unknown; by?: unknown };
+        return { phone: String(row?.phone ?? "").replace(/\D/g, ""), by: mapBy(row?.by) };
+      })
+      .filter((r) => r.phone);
   } catch (error) {
-    console.error("[sheets] Failed to fetch shipped phones from Google Sheet", error);
+    console.error("[sheets] Failed to fetch shipped rows from Google Sheet", error);
     return [];
   }
 }

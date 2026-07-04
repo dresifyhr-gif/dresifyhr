@@ -34,7 +34,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     phone: order.phone,
     name: order.customerName,
     createdAt: order.createdAt,
-    shipped
+    shipped,
+    by
   });
 
   return NextResponse.json({ ok: true, shipped });

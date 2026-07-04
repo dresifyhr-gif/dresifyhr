@@ -8,27 +8,46 @@ export const runtime = "nodejs";
 
 const normalize = (p?: string | null) => String(p || "").replace(/\D/g, "");
 
-// Pulls the "Poslao" checkmarks Ivica/wife set in the Sheet and marks the matching
-// DB orders as shipped, so the admin queue reflects their work. Only flips
-// new → shipped (never un-ships), to avoid clobbering admin actions.
+// Pulls the "Odradeno" checkmarks + "Poslao" (Igor/Ivica) column from the Sheet and
+// reflects them into the DB: matching orders become shipped and get shippedBy set.
+// Matches by phone. Also backfills shippedBy on already-shipped orders that had no
+// shipper tagged. Never un-ships.
 export async function POST() {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
-  const shippedPhones = await fetchShippedPhonesFromSheet();
-  if (shippedPhones.length === 0) {
-    return NextResponse.json({ ok: true, updated: 0, note: "Nema podataka iz Sheeta (ili endpoint nije postavljen)." });
+  const rows = await fetchShippedPhonesFromSheet();
+  if (rows.length === 0) {
+    return NextResponse.json({ ok: true, updated: 0, note: "Nema podataka iz Sheeta (ili endpoint/sync nije uključen)." });
   }
 
-  const phoneSet = new Set(shippedPhones);
-  const pending = await prisma.order.findMany({
-    where: { status: "new" },
-    select: { id: true, phone: true }
+  // phone → shipper (last non-null wins)
+  const byPhone = new Map<string, "igor" | "ivica" | null>();
+  for (const r of rows) {
+    if (!byPhone.has(r.phone) || r.by) byPhone.set(r.phone, r.by ?? byPhone.get(r.phone) ?? null);
+  }
+
+  // Candidate DB orders: anything not yet shipped, or shipped but missing a shipper.
+  const candidates = await prisma.order.findMany({
+    where: { OR: [{ status: "new" }, { shippedBy: null, status: { in: ["shipped", "done"] } }] },
+    select: { id: true, phone: true, status: true, shippedBy: true }
   });
 
-  const toShip = pending.filter((o) => phoneSet.has(normalize(o.phone))).map((o) => o.id);
-  if (toShip.length > 0) {
-    await prisma.order.updateMany({ where: { id: { in: toShip } }, data: { status: "shipped" } });
+  let updated = 0;
+  const now = new Date();
+  for (const o of candidates) {
+    const key = normalize(o.phone);
+    if (!byPhone.has(key)) continue;
+    const by = byPhone.get(key) ?? null;
+    const data: { status?: string; shippedBy?: string | null; shippedAt?: Date } = {};
+    if (o.status === "new") {
+      data.status = "shipped";
+      data.shippedAt = now;
+    }
+    if (!o.shippedBy && by) data.shippedBy = by;
+    if (Object.keys(data).length === 0) continue;
+    await prisma.order.update({ where: { id: o.id }, data });
+    updated++;
   }
 
-  return NextResponse.json({ ok: true, updated: toShip.length });
+  return NextResponse.json({ ok: true, updated });
 }
