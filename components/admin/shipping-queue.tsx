@@ -31,6 +31,19 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
     router.refresh();
   }
 
+  async function cancelOrder(id: string) {
+    if (busy) return;
+    if (typeof window !== "undefined" && !window.confirm("Otkazati ovu narudžbu? Neće se poslati.")) return;
+    setBusy(id);
+    await fetch(`/api/admin/orders/${id}/cancel/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cancelled: true })
+    }).catch(() => {});
+    setBusy(null);
+    router.refresh();
+  }
+
   async function syncSheet() {
     if (syncing) return;
     setSyncing(true);
@@ -98,6 +111,15 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
                   title="Ivica je poslao"
                 >
                   {busy === o.id ? "…" : "✓ Ivica"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => cancelOrder(o.id)}
+                  disabled={busy === o.id}
+                  className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-400 transition hover:border-red-300 hover:text-red-500 disabled:opacity-50"
+                  title="Otkaži narudžbu (neće se poslati)"
+                >
+                  ✕
                 </button>
               </span>
             </li>

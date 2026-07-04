@@ -7,9 +7,9 @@ type Msg = { role: "user" | "assistant"; content: string };
 const SUGGESTIONS = [
   "Koliko sam danas zaradio?",
   "Što se najbolje prodaje?",
-  "Koji proizvodi su mrtvi?",
-  "Koji kupci nisu kupovali 60+ dana?",
-  "Što bih danas trebao naručiti?"
+  "Otkaži narudžbu za …",
+  "Koji kupci nisu kupovali 30+ dana?",
+  "Tko je vratio pošiljku?"
 ];
 
 export function AdminAiChat() {
