@@ -5,6 +5,7 @@ import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { AdminAiChat } from "@/components/admin/ai-chat";
 import { AdSpendForm } from "@/components/admin/ad-spend-form";
+import { ShippingQueue } from "@/components/admin/shipping-queue";
 
 export const metadata: Metadata = { title: "Dresify Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -93,6 +94,44 @@ export default async function AdminDashboard() {
           <Stat label="Poslano" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
         </div>
 
+        {/* Partner split — Igor / Ivica */}
+        <div className="mt-6">
+          <Panel title="Sažetak — podjela Igor / Ivica (50 / 50)">
+            <div className="grid gap-5 md:grid-cols-2">
+              {[
+                { label: "Ukupno (od početka)", profit: m.totalProfit, ads: m.adSpendTotal },
+                { label: "Zadnjih 30 dana", profit: m.monthProfit, ads: 0 }
+              ].map((col) => {
+                const net = col.profit - col.ads;
+                const share = net / 2;
+                return (
+                  <div key={col.label} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{col.label}</div>
+                    <div className="mt-3 space-y-1.5 text-sm">
+                      <div className="flex justify-between text-slate-600"><span>Profit (nakon nabave)</span><span className="font-semibold text-slate-900">{eur(col.profit)}</span></div>
+                      {col.ads > 0 && <div className="flex justify-between text-slate-600"><span>Reklame</span><span className="font-semibold text-red-500">−{eur(col.ads)}</span></div>}
+                      <div className="flex justify-between border-t border-slate-200 pt-1.5 text-slate-700"><span className="font-semibold">Neto za podjelu</span><span className="font-bold text-slate-900">{eur(net)}</span></div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+                        <div className="text-[11px] uppercase tracking-wider text-slate-400">Igor</div>
+                        <div className="mt-0.5 text-lg font-bold text-emerald-600">{eur(share)}</div>
+                      </div>
+                      <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+                        <div className="text-[11px] uppercase tracking-wider text-slate-400">Ivica</div>
+                        <div className="mt-0.5 text-lg font-bold text-emerald-600">{eur(share)}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mt-3 text-xs text-slate-400">
+              Profit = prodaja − nabava (6 € po dresu). Reklame se oduzimaju samo iz ukupnog obračuna. Tko je fizički pokupio pouzeće i konačni obračun gotovine i dalje pratite u Google Sheetu (Sažetak).
+            </p>
+          </Panel>
+        </div>
+
         {/* AI assistant */}
         <div className="mt-6">
           <AdminAiChat />
@@ -156,20 +195,15 @@ export default async function AdminDashboard() {
         {/* Shipping queue + win-back */}
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <Panel title={`Red za slanje (${m.pending.length}) · ${eur(m.pendingTotal)}`}>
-            {m.pending.length === 0 ? (
-              <div className="text-sm text-slate-400">Sve poslano ✅</div>
-            ) : (
-              <ul className="max-h-72 space-y-2 overflow-y-auto">
-                {m.pending.map((o) => (
-                  <li key={o.id} className="flex items-center justify-between text-sm">
-                    <span className="text-slate-700">
-                      <span className="text-slate-400">{o.createdAt.toLocaleDateString("hr-HR")}</span> · {o.customerName} <span className="text-slate-400">· {o.itemCount} kom</span>
-                    </span>
-                    <span className="font-semibold text-slate-900">{eur(o.total)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ShippingQueue
+              orders={m.pending.map((o) => ({
+                id: o.id,
+                dateLabel: o.createdAt.toLocaleDateString("hr-HR"),
+                customerName: o.customerName,
+                itemCount: o.itemCount,
+                total: o.total
+              }))}
+            />
           </Panel>
 
           <Panel title={`Vrati kupce (60+ dana bez kupnje) · ${m.inactive.length}`}>
@@ -252,7 +286,8 @@ export default async function AdminDashboard() {
                       <th className="pb-2 pr-3 font-semibold">Datum</th>
                       <th className="pb-2 pr-3 font-semibold">Kupac</th>
                       <th className="pb-2 pr-3 font-semibold">Kom</th>
-                      <th className="pb-2 font-semibold">Ukupno</th>
+                      <th className="pb-2 pr-3 font-semibold">Ukupno</th>
+                      <th className="pb-2 font-semibold"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -261,7 +296,10 @@ export default async function AdminDashboard() {
                         <td className="py-2 pr-3 text-slate-400">{o.createdAt.toLocaleDateString("hr-HR")}</td>
                         <td className="py-2 pr-3 text-slate-700">{o.customerName}</td>
                         <td className="py-2 pr-3 text-slate-500">{o.itemCount}</td>
-                        <td className="py-2 font-semibold text-slate-900">{eur(o.total)}</td>
+                        <td className="py-2 pr-3 font-semibold text-slate-900">{eur(o.total)}</td>
+                        <td className="py-2 text-right">
+                          <a href={`/admin/print/${o.id}/`} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-slate-400 hover:text-slate-800">🖨 Print</a>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
