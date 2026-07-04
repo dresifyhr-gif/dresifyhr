@@ -4,16 +4,33 @@ import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { AdminAiChat } from "@/components/admin/ai-chat";
+import { AdSpendForm } from "@/components/admin/ad-spend-form";
 
 export const metadata: Metadata = { title: "Dresify Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 
-function Stat({ label, value, profit, sub }: { label: string; value: string; profit?: string; sub?: string }) {
+function waLink(phone: string | null) {
+  if (!phone) return null;
+  let d = phone.replace(/\D/g, "");
+  if (d.startsWith("00")) d = d.slice(2);
+  else if (d.startsWith("0")) d = "385" + d.slice(1);
+  else if (!d.startsWith("385")) d = "385" + d;
+  return d.length >= 11 ? `https://wa.me/${d}` : null;
+}
+
+function Stat({ label, value, profit, sub, change }: { label: string; value: string; profit?: string; sub?: string; change?: number | null }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
+      <div className="flex items-center justify-between">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
+        {change != null && (
+          <span className={`text-[11px] font-semibold ${change >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+            {change >= 0 ? "▲" : "▼"} {Math.abs(change).toFixed(0)}%
+          </span>
+        )}
+      </div>
       <div className="mt-1 text-2xl font-bold text-slate-900">{value}</div>
       {profit && <div className="mt-0.5 text-xs font-semibold text-emerald-600">{profit} profit</div>}
       {sub && <div className="mt-0.5 text-xs text-slate-400">{sub}</div>}
@@ -69,8 +86,8 @@ export default async function AdminDashboard() {
         {/* Top stats */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
           <Stat label="Danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} sub={`${m.todayOrders} narudžbi`} />
-          <Stat label="7 dana" value={eur(m.weekRev)} profit={eur(m.weekProfit)} sub={`${m.weekOrders} narudžbi`} />
-          <Stat label="30 dana" value={eur(m.monthRev)} profit={eur(m.monthProfit)} sub={`${m.monthOrders} narudžbi`} />
+          <Stat label="7 dana" value={eur(m.weekRev)} profit={eur(m.weekProfit)} sub={`${m.weekOrders} narudžbi`} change={m.weekChange} />
+          <Stat label="30 dana" value={eur(m.monthRev)} profit={eur(m.monthProfit)} sub={`${m.monthOrders} narudžbi`} change={m.monthChange} />
           <Stat label="Ukupno" value={eur(m.totalRev)} profit={eur(m.totalProfit)} sub={`${m.orderCount} narudžbi`} />
           <Stat label="Prosj. košarica" value={eur(m.aov)} />
           <Stat label="Poslano" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
@@ -133,6 +150,92 @@ export default async function AdminDashboard() {
                 ))}
               </ul>
             )}
+          </Panel>
+        </div>
+
+        {/* Shipping queue + win-back */}
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <Panel title={`Red za slanje (${m.pending.length}) · ${eur(m.pendingTotal)}`}>
+            {m.pending.length === 0 ? (
+              <div className="text-sm text-slate-400">Sve poslano ✅</div>
+            ) : (
+              <ul className="max-h-72 space-y-2 overflow-y-auto">
+                {m.pending.map((o) => (
+                  <li key={o.id} className="flex items-center justify-between text-sm">
+                    <span className="text-slate-700">
+                      <span className="text-slate-400">{o.createdAt.toLocaleDateString("hr-HR")}</span> · {o.customerName} <span className="text-slate-400">· {o.itemCount} kom</span>
+                    </span>
+                    <span className="font-semibold text-slate-900">{eur(o.total)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+
+          <Panel title={`Vrati kupce (60+ dana bez kupnje) · ${m.inactive.length}`}>
+            {m.inactive.length === 0 ? (
+              <div className="text-sm text-slate-400">Nema neaktivnih kupaca.</div>
+            ) : (
+              <ul className="max-h-72 space-y-2 overflow-y-auto">
+                {m.inactive.map((c) => {
+                  const wa = waLink(c.phone);
+                  return (
+                    <li key={c.id} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-700">
+                        {c.name || c.phone || "—"} <span className="text-slate-400">· zadnja {c.lastOrderAt.toLocaleDateString("hr-HR")}</span>
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <span className="font-semibold text-emerald-600">{eur(c.totalSpent)}</span>
+                        {wa && (
+                          <a href={wa} target="_blank" rel="noopener noreferrer" className="rounded bg-emerald-500 px-2 py-0.5 text-[11px] font-semibold text-white hover:bg-emerald-600">
+                            WhatsApp
+                          </a>
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </Panel>
+        </div>
+
+        {/* Cities + ad ROI */}
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <Panel title="Odakle kupci (top gradovi)">
+            {m.topCities.length === 0 ? (
+              <div className="text-sm text-slate-400">Nema podataka.</div>
+            ) : (
+              <ul className="space-y-2">
+                {m.topCities.map((c) => (
+                  <li key={c.name} className="flex items-center justify-between text-sm">
+                    <span className="text-slate-700">{c.name}</span>
+                    <span className="text-slate-500">
+                      <span className="font-semibold text-slate-900">{c.count}</span> narudžbi · {eur(c.total)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+
+          <Panel title="Reklame — isplativost">
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-400">Potrošeno</div>
+                <div className="mt-1 text-lg font-bold text-slate-900">{eur(m.adSpendTotal)}</div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-400">ROAS</div>
+                <div className="mt-1 text-lg font-bold text-slate-900">{m.roas != null ? `${m.roas.toFixed(1)}×` : "—"}</div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-400">Neto profit</div>
+                <div className={`mt-1 text-lg font-bold ${m.netAfterAds >= 0 ? "text-emerald-600" : "text-red-500"}`}>{eur(m.netAfterAds)}</div>
+              </div>
+            </div>
+            <p className="mt-3 mb-2 text-xs text-slate-400">Profit nakon oduzetih reklama. ROAS = promet ÷ potrošnja.</p>
+            <AdSpendForm />
           </Panel>
         </div>
 

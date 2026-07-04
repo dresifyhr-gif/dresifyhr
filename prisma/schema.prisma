@@ -87,3 +87,14 @@ model Product {
   active    Boolean  @default(true)
   updatedAt DateTime @updatedAt
 }
+
+// Ad spend entries for ROI (Instagram/Facebook marketing).
+model AdSpend {
+  id        String   @id @default(cuid())
+  date      DateTime @default(now())
+  amount    Float
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([date])
+}
