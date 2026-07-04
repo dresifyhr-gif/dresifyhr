@@ -71,12 +71,20 @@ export default async function AdminDashboard() {
               </div>
             </div>
           </div>
-          <a
-            href="/api/admin/logout"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-sm transition hover:text-slate-800"
-          >
-            Odjava
-          </a>
+          <div className="flex items-center gap-2">
+            <a
+              href="/admin/narudzbe"
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:text-slate-900"
+            >
+              📦 Sve narudžbe
+            </a>
+            <a
+              href="/api/admin/logout"
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-sm transition hover:text-slate-800"
+            >
+              Odjava
+            </a>
+          </div>
         </div>
 
         {m.orderCount === 0 && (
