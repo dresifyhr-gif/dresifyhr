@@ -34,8 +34,8 @@ export async function buildBusinessContext(): Promise<string> {
 
   return [
     `DANAS: ${eur(m.todayRev)} prometa (profit ${eur(m.todayProfit)}), ${m.todayOrders} narudžbi.`,
-    `TJEDAN: ${eur(m.weekRev)} prometa (profit ${eur(m.weekProfit)}), ${m.weekOrders} narudžbi.`,
-    `MJESEC: ${eur(m.monthRev)} prometa (profit ${eur(m.monthProfit)}), ${m.monthOrders} narudžbi.`,
+    `ZADNJIH 7 DANA: ${eur(m.weekRev)} prometa (profit ${eur(m.weekProfit)}), ${m.weekOrders} narudžbi.`,
+    `ZADNJIH 30 DANA: ${eur(m.monthRev)} prometa (profit ${eur(m.monthProfit)}), ${m.monthOrders} narudžbi.`,
     `UKUPNO: ${eur(m.totalRev)} prometa (profit ${eur(m.totalProfit)}), ${m.orderCount} narudžbi, prosječna košarica ${eur(m.aov)}, poslano ${m.shippedCount}.`,
     ``,
     `PROMET ZADNJIH 14 DANA (dan: iznos): ${m.byDay.map((d) => `${d.day.slice(5)}: ${eur(d.total)}`).join(" · ")}`,

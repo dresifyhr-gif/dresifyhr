@@ -69,8 +69,8 @@ export default async function AdminDashboard() {
         {/* Top stats */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
           <Stat label="Danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} sub={`${m.todayOrders} narudžbi`} />
-          <Stat label="Tjedan" value={eur(m.weekRev)} profit={eur(m.weekProfit)} sub={`${m.weekOrders} narudžbi`} />
-          <Stat label="Mjesec" value={eur(m.monthRev)} profit={eur(m.monthProfit)} sub={`${m.monthOrders} narudžbi`} />
+          <Stat label="7 dana" value={eur(m.weekRev)} profit={eur(m.weekProfit)} sub={`${m.weekOrders} narudžbi`} />
+          <Stat label="30 dana" value={eur(m.monthRev)} profit={eur(m.monthProfit)} sub={`${m.monthOrders} narudžbi`} />
           <Stat label="Ukupno" value={eur(m.totalRev)} profit={eur(m.totalProfit)} sub={`${m.orderCount} narudžbi`} />
           <Stat label="Prosj. košarica" value={eur(m.aov)} />
           <Stat label="Poslano" value={String(m.shippedCount)} sub="označeno" />

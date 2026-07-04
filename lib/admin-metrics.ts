@@ -7,18 +7,12 @@ const DAY = 86_400_000;
 // Nabavna cijena po artiklu (dres). Profit = prodajna cijena − nabava.
 export const COST_PER_ITEM = 6;
 
-function startOfWeek(now: Date) {
-  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const offset = (d.getDay() + 6) % 7; // Monday = 0
-  d.setDate(d.getDate() - offset);
-  return d;
-}
-
 export async function getDashboardMetrics() {
   const now = new Date();
   const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startWeek = startOfWeek(now);
-  const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  // Rolling windows so periods are always nested (7d ≤ 30d) — no month-boundary confusion.
+  const startWeek = new Date(now.getTime() - 7 * DAY);
+  const startMonth = new Date(now.getTime() - 30 * DAY);
 
   const rev = (gte?: Date) =>
     prisma.order.aggregate({ _sum: { total: true }, _count: true, where: gte ? { createdAt: { gte } } : undefined });
