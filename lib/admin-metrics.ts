@@ -87,6 +87,22 @@ export async function getDashboardMetrics() {
   const adSpendTotal = adAll._sum.amount ?? 0;
   const pendingTotal = pending.reduce((s, o) => s + o.total, 0);
 
+  // ── Podjela po pošiljatelju (Igor / Ivica) — samo poslane narudžbe ──────────
+  const byShipper = async (who: "igor" | "ivica" | null) => {
+    const where = { status: { in: ["shipped", "done"] }, shippedBy: who };
+    const [ord, it] = await Promise.all([
+      prisma.order.aggregate({ _count: { _all: true }, _sum: { total: true }, where }),
+      prisma.orderItem.aggregate({ _count: true, _sum: { unitPrice: true }, where: { order: where } })
+    ]);
+    return { count: ord._count._all, cash: ord._sum.total ?? 0, profit: profit(it) };
+  };
+  const [igor, ivica, unassigned] = await Promise.all([byShipper("igor"), byShipper("ivica"), byShipper(null)]);
+  const shippedProfitTotal = profit(iShipped); // profit svih poslanih
+  const halfShare = shippedProfitTotal / 2;
+  // Poravnanje: tko je generirao više profita, drugom vraća pola razlike.
+  const settleAmount = Math.abs(igor.profit - ivica.profit) / 2;
+  const settleFrom = igor.profit > ivica.profit ? "igor" : ivica.profit > igor.profit ? "ivica" : null;
+
   return {
     weekChange,
     monthChange,
@@ -113,6 +129,7 @@ export async function getDashboardMetrics() {
     shippedRev: shippedAgg._sum.total ?? 0,
     shippedProfit: profit(iShipped),
     aov: orderCount ? totalRev / orderCount : 0,
+    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, settleAmount, settleFrom },
     topItems,
     bestCustomers,
     recentOrders,

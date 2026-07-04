@@ -14,6 +14,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
   const body = await request.json().catch(() => ({}));
   const shipped = body?.shipped !== false; // default: mark shipped
+  const by = body?.by === "ivica" ? "ivica" : body?.by === "igor" ? "igor" : null;
 
   const order = await prisma.order.findUnique({
     where: { id },
@@ -23,7 +24,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   await prisma.order.update({
     where: { id },
-    data: { status: shipped ? "shipped" : "new" }
+    data: shipped
+      ? { status: "shipped", shippedBy: by, shippedAt: new Date() }
+      : { status: "new", shippedBy: null, shippedAt: null }
   });
 
   // Best-effort: never block the admin action on the Sheet call.

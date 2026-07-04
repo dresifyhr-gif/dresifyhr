@@ -94,40 +94,60 @@ export default async function AdminDashboard() {
           <Stat label="Poslano" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
         </div>
 
-        {/* Partner split — Igor / Ivica */}
+        {/* Partner split — Igor / Ivica (samo poslane narudžbe) */}
         <div className="mt-6">
-          <Panel title="Sažetak — podjela Igor / Ivica (50 / 50)">
-            <div className="grid gap-5 md:grid-cols-2">
-              {[
-                { label: "Ukupno (od početka)", profit: m.totalProfit, ads: m.adSpendTotal },
-                { label: "Zadnjih 30 dana", profit: m.monthProfit, ads: 0 }
-              ].map((col) => {
-                const net = col.profit - col.ads;
-                const share = net / 2;
-                return (
-                  <div key={col.label} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{col.label}</div>
-                    <div className="mt-3 space-y-1.5 text-sm">
-                      <div className="flex justify-between text-slate-600"><span>Profit (nakon nabave)</span><span className="font-semibold text-slate-900">{eur(col.profit)}</span></div>
-                      {col.ads > 0 && <div className="flex justify-between text-slate-600"><span>Reklame</span><span className="font-semibold text-red-500">−{eur(col.ads)}</span></div>}
-                      <div className="flex justify-between border-t border-slate-200 pt-1.5 text-slate-700"><span className="font-semibold">Neto za podjelu</span><span className="font-bold text-slate-900">{eur(net)}</span></div>
-                    </div>
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <div className="rounded-lg bg-white p-3 text-center shadow-sm">
-                        <div className="text-[11px] uppercase tracking-wider text-slate-400">Igor</div>
-                        <div className="mt-0.5 text-lg font-bold text-emerald-600">{eur(share)}</div>
-                      </div>
-                      <div className="rounded-lg bg-white p-3 text-center shadow-sm">
-                        <div className="text-[11px] uppercase tracking-wider text-slate-400">Ivica</div>
-                        <div className="mt-0.5 text-lg font-bold text-emerald-600">{eur(share)}</div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+          <Panel title="Sažetak — podjela Igor / Ivica (50 / 50, samo poslano)">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Ukupni profit (poslane narudžbe)</div>
+                <div className="mt-1 text-2xl font-bold text-slate-900">{eur(m.split.shippedProfitTotal)}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-[11px] uppercase tracking-wider text-slate-400">Svakom pripada (50%)</div>
+                <div className="mt-1 text-lg font-bold text-emerald-600">{eur(m.split.halfShare)}</div>
+              </div>
             </div>
-            <p className="mt-3 text-xs text-slate-400">
-              Profit = prodaja − nabava (6 € po dresu). Reklame se oduzimaju samo iz ukupnog obračuna. Tko je fizički pokupio pouzeće i konačni obračun gotovine i dalje pratite u Google Sheetu (Sažetak).
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                { name: "Igor", color: "emerald", d: m.split.igor },
+                { name: "Ivica", color: "sky", d: m.split.ivica }
+              ].map((p) => (
+                <div key={p.name} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900">{p.name}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${p.color === "emerald" ? "bg-emerald-50 text-emerald-600" : "bg-sky-50 text-sky-600"}`}>{p.d.count} poslao</span>
+                  </div>
+                  <div className="mt-3 space-y-1.5 text-sm">
+                    <div className="flex justify-between text-slate-600"><span>Pokupio gotovine</span><span className="font-semibold text-slate-900">{eur(p.d.cash)}</span></div>
+                    <div className="flex justify-between text-slate-600"><span>Generirao profita</span><span className="font-semibold text-slate-900">{eur(p.d.profit)}</span></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Poravnanje */}
+            <div className="mt-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center">
+              {m.split.settleFrom == null ? (
+                <div className="text-sm font-semibold text-slate-600">Profit je izjednačen — nitko nikom ne duguje ✅</div>
+              ) : (
+                <div className="text-sm text-slate-700">
+                  Poravnanje profita:{" "}
+                  <span className="font-bold text-slate-900">{m.split.settleFrom === "igor" ? "Igor" : "Ivica"}</span> daje{" "}
+                  <span className="font-bold text-slate-900">{m.split.settleFrom === "igor" ? "Ivici" : "Igoru"}</span>{" "}
+                  <span className="font-bold text-emerald-600">{eur(m.split.settleAmount)}</span>{" "}
+                  <span className="text-slate-500">→ nakon toga oboje imaju {eur(m.split.halfShare)} profita.</span>
+                </div>
+              )}
+            </div>
+
+            {m.split.unassigned.count > 0 && (
+              <p className="mt-3 text-xs text-amber-600">
+                ⚠ {m.split.unassigned.count} poslanih narudžbi nema označenog pošiljatelja ({eur(m.split.unassigned.profit)} profita) — nisu uračunate u podjelu. Označi ih s „✓ Ja” ili „✓ Ivica” u redu za slanje.
+              </p>
+            )}
+            <p className="mt-2 text-xs text-slate-400">
+              Profit = prodaja − nabava (6 € po dresu). Nabava je Ivicina i ne dira se — gleda se samo čisti profit. Gotovinu pokuplja onaj tko šalje.
             </p>
           </Panel>
         </div>

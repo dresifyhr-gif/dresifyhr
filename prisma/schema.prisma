@@ -34,6 +34,8 @@ model Order {
   itemCount    Int         @default(0)
 
   status       String      @default("new") // new | shipped | done
+  shippedBy    String?     // "igor" | "ivica" — tko je fizički poslao (za obračun)
+  shippedAt    DateTime?
 
   items        OrderItem[]
   customer     Customer?   @relation(fields: [customerId], references: [id])
@@ -41,6 +43,7 @@ model Order {
 
   @@index([createdAt])
   @@index([status])
+  @@index([shippedBy])
 }
 
 model OrderItem {

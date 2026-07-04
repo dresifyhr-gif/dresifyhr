@@ -19,13 +19,13 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
   const [syncing, setSyncing] = useState(false);
   const [note, setNote] = useState<string | null>(null);
 
-  async function markShipped(id: string) {
+  async function markShipped(id: string, by: "igor" | "ivica") {
     if (busy) return;
     setBusy(id);
     await fetch(`/api/admin/orders/${id}/ship/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ shipped: true })
+      body: JSON.stringify({ shipped: true, by })
     }).catch(() => {});
     setBusy(null);
     router.refresh();
@@ -83,11 +83,21 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
                 </a>
                 <button
                   type="button"
-                  onClick={() => markShipped(o.id)}
+                  onClick={() => markShipped(o.id, "igor")}
                   disabled={busy === o.id}
-                  className="rounded-md bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
+                  className="rounded-md bg-emerald-500 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
+                  title="Ja (Igor) sam poslao"
                 >
-                  {busy === o.id ? "…" : "✓ Poslano"}
+                  {busy === o.id ? "…" : "✓ Ja"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => markShipped(o.id, "ivica")}
+                  disabled={busy === o.id}
+                  className="rounded-md bg-sky-500 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-sky-600 disabled:opacity-50"
+                  title="Ivica je poslao"
+                >
+                  {busy === o.id ? "…" : "✓ Ivica"}
                 </button>
               </span>
             </li>
