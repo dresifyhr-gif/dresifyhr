@@ -102,6 +102,7 @@ model ProductOverride {
   soldOutSizes String? // npr. "XL,XXL"
   hidden       Boolean  @default(false) // draft/sakriveno — ne prikazuje se na shopu
   badge        String? // "bestseller" | "novo" | "" (prazno = bez)
+  description  String? // vlastiti opis (paragrafi odvojeni novim redom); prazno = auto
   updatedAt    DateTime @updatedAt
 }
 

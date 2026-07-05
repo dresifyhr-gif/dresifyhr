@@ -5,7 +5,7 @@ import type { Jersey } from "@/lib/data/jerseys";
 
 // Admin-managed overrides (price / stock) merged onto the static catalog. Best-effort:
 // if the DB is unavailable or empty, the shop uses the base catalog unchanged.
-type Override = { slug: string; price: number | null; outOfStock: string | null; soldOutSizes: string | null; hidden: boolean; badge: string | null };
+type Override = { slug: string; price: number | null; outOfStock: string | null; soldOutSizes: string | null; hidden: boolean; badge: string | null; description: string | null };
 
 async function getOverrideMap(): Promise<Map<string, Override>> {
   try {
@@ -26,6 +26,7 @@ function merge(j: Jersey, ov?: Override): Jersey {
     price: ov.price != null ? ov.price : j.price,
     outOfStock,
     badge,
+    descriptionOverride: ov.description || undefined,
     soldOutSizes: ov.soldOutSizes != null ? (ov.soldOutSizes ? ov.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : []) : j.soldOutSizes
   };
 }

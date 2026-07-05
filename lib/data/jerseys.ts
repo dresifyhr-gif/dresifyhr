@@ -13,6 +13,8 @@ export type Jersey = {
   outOfStock?: "adults" | "kids" | "all";
   // Specific sizes that are sold out (e.g. ["XL","XXL"] or kids ["104","116"]).
   soldOutSizes?: string[];
+  // Admin-uređeni opis (paragrafi odvojeni \n); ako postoji, koristi se umjesto auto-opisa.
+  descriptionOverride?: string;
 };
 
 export const jerseys: Jersey[] = [

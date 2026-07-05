@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
-import { jerseys, adultSizes, kidSizes } from "@/lib/data/jerseys";
+import { jerseys, adultSizes, kidSizes, getJerseyDescription } from "@/lib/data/jerseys";
 import { JERSEY_PRICE_EUR } from "@/lib/site";
 import { repairText } from "@/lib/utils";
 
@@ -52,7 +52,9 @@ export async function GET() {
       sold,
       revenue,
       profit,
-      returns
+      returns,
+      description: ov?.description ?? "",
+      descriptionAuto: getJerseyDescription(j, "hr").join("\n\n")
     };
   });
 
@@ -76,11 +78,12 @@ export async function POST(request: Request) {
   const hidden = body?.hidden === true;
   const badge = body?.badge === "bestseller" || body?.badge === "novo" ? body.badge : null;
   const priceVal = price != null && Number.isFinite(price) ? price : null;
+  const description = typeof body?.description === "string" && body.description.trim() ? body.description.trim() : null;
 
   await prisma.productOverride.upsert({
     where: { slug },
-    create: { slug, price: priceVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge },
-    update: { price: priceVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge }
+    create: { slug, price: priceVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge, description },
+    update: { price: priceVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge, description }
   });
 
   return NextResponse.json({ ok: true });

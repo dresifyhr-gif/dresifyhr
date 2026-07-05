@@ -108,7 +108,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
             {locale === "en" ? "About" : "O proizvodu"} — {repairText(product.klub)} {repairText(product.igrac)}
           </h2>
           <div className="mt-5 space-y-4">
-            {getJerseyDescription(product, locale).map((paragraph, i) => (
+            {(product.descriptionOverride
+              ? product.descriptionOverride.split("\n").map((s) => s.trim()).filter(Boolean)
+              : getJerseyDescription(product, locale)
+            ).map((paragraph, i) => (
               <p key={i} className="text-sm leading-7 text-white/60 sm:text-[15px]">
                 {paragraph}
               </p>

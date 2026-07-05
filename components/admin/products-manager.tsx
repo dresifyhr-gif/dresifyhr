@@ -17,6 +17,8 @@ type Product = {
   revenue: number;
   profit: number;
   returns: number;
+  description: string;
+  descriptionAuto: string;
 };
 
 const eur = (n: number) => `${(n ?? 0).toFixed(0)} €`;
@@ -40,10 +42,14 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const [soldSizes, setSoldSizes] = useState<string[]>(p.soldOutSizes);
   const [hidden, setHidden] = useState(p.hidden);
   const [badge, setBadge] = useState(p.badge);
+  const [desc, setDesc] = useState(p.description || p.descriptionAuto);
+  const [showDesc, setShowDesc] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const dirty = price !== String(p.price) || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge;
+  // Ako je opis jednak auto-tekstu, spremamo prazno (vrati na automatski).
+  const descToSave = desc.trim() === p.descriptionAuto.trim() ? "" : desc;
+  const dirty = price !== String(p.price) || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || descToSave !== p.description;
 
   function toggleSize(s: string) {
     setSoldSizes((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s]));
@@ -56,7 +62,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     await fetch("/api/admin/products/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: p.slug, price: price === "" ? null : Number(price.replace(",", ".")), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge })
+      body: JSON.stringify({ slug: p.slug, price: price === "" ? null : Number(price.replace(",", ".")), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, description: descToSave })
     }).catch(() => {});
     setSaving(false);
     setSaved(true);
@@ -134,7 +140,36 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             </button>
           );
         })}
+        <button
+          type="button"
+          onClick={() => setShowDesc((v) => !v)}
+          className="ml-2 rounded px-1.5 py-0.5 text-[11px] font-medium text-slate-500 underline decoration-dotted hover:text-slate-800"
+        >
+          {showDesc ? "Sakrij opis" : "✏️ Uredi opis"}
+          {p.description ? " (uređen)" : ""}
+        </button>
       </div>
+
+      {showDesc && (
+        <div className="mt-2">
+          <textarea
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            rows={6}
+            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[13px] leading-6 text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+          />
+          <div className="mt-1 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setDesc(p.descriptionAuto)}
+              className="text-[11px] text-slate-400 underline decoration-dotted hover:text-slate-600"
+            >
+              ↺ Vrati automatski opis
+            </button>
+            <span className="text-[11px] text-slate-400">Svaki novi red = novi odlomak. Ne zaboravi „Spremi” gore.</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
