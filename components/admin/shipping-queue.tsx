@@ -11,6 +11,7 @@ export type PendingOrder = {
   customerName: string;
   itemCount: number;
   total: number;
+  items: { label: string; size: string; quantity: number }[];
 };
 
 export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
@@ -79,7 +80,8 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
       ) : (
         <ul className="max-h-96 space-y-2 overflow-y-auto">
           {orders.map((o) => (
-            <li key={o.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 px-2.5 py-2 text-sm">
+            <li key={o.id} className="rounded-lg border border-slate-100 px-2.5 py-2 text-sm">
+             <div className="flex items-center justify-between gap-2">
               <span className="min-w-0 truncate text-slate-700">
                 <span className="text-slate-400">{o.dateLabel}</span> · {o.customerName}{" "}
                 <span className="text-slate-400">· {o.itemCount} kom · {eur(o.total)}</span>
@@ -122,6 +124,17 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
                   ✕
                 </button>
               </span>
+             </div>
+             {o.items.length > 0 && (
+               <ul className="mt-1.5 space-y-0.5 border-t border-slate-100 pt-1.5">
+                 {o.items.map((it, idx) => (
+                   <li key={idx} className="text-[13px] text-slate-700">
+                     📦 {it.quantity > 1 ? `${it.quantity}× ` : ""}<span className="font-medium">{it.label}</span>
+                     {it.size ? <span className="text-slate-500"> · veličina {it.size}</span> : null}
+                   </li>
+                 ))}
+               </ul>
+             )}
             </li>
           ))}
         </ul>

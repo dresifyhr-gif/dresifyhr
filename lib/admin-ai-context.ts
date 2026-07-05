@@ -18,7 +18,7 @@ export async function buildBusinessContext(): Promise<string> {
   const inactive = await prisma.customer.findMany({
     where: { lastOrderAt: { lt: new Date(Date.now() - 30 * DAY) }, totalOrders: { gt: 0 } },
     orderBy: { totalSpent: "desc" },
-    take: 15
+    take: 8
   });
 
   const lowStock = jerseys
@@ -31,10 +31,10 @@ export async function buildBusinessContext(): Promise<string> {
       return `${label}: nema veličine ${(j.soldOutSizes ?? []).join(", ")}`;
     });
 
-  const top = m.topItems.map((t) => `${t.klub} ${t.igrac}: ${t._sum.quantity ?? 0} kom`);
-  const best = m.bestCustomers.map((c) => `${c.name ? formatCroatianName(c.name) : c.phone || "?"}: ${eur(c.totalSpent)} (${c.totalOrders} narudžbi)`);
-  const inact = inactive.map((c) => `${c.name ? formatCroatianName(c.name) : c.phone || "?"}: zadnja kupnja ${c.lastOrderAt.toLocaleDateString("hr-HR")}, ukupno ${eur(c.totalSpent)}`);
-  const ret = m.returned.map((o) => `${formatCroatianName(o.customerName)}${o.phone ? ` (${o.phone})` : ""}: ${eur(o.total)}, ${o.createdAt.toLocaleDateString("hr-HR")}`);
+  const top = m.topItems.slice(0, 5).map((t) => `${t.klub} ${t.igrac}: ${t._sum.quantity ?? 0} kom`);
+  const best = m.bestCustomers.slice(0, 5).map((c) => `${c.name ? formatCroatianName(c.name) : c.phone || "?"}: ${eur(c.totalSpent)} (${c.totalOrders} narudžbi)`);
+  const inact = inactive.map((c) => `${c.name ? formatCroatianName(c.name) : c.phone || "?"}: zadnja ${c.lastOrderAt.toLocaleDateString("hr-HR")}, ${eur(c.totalSpent)}`);
+  const ret = m.returned.slice(0, 10).map((o) => `${formatCroatianName(o.customerName)}: ${eur(o.total)}, ${o.createdAt.toLocaleDateString("hr-HR")}`);
 
   return [
     `DANAS: ${eur(m.todayRev)} prometa (profit ${eur(m.todayProfit)}), ${m.todayOrders} narudžbi.`,
@@ -50,9 +50,7 @@ export async function buildBusinessContext(): Promise<string> {
     `ZA SLANJE (čeka, nije poslano): ${m.pendingCount} narudžbi, ${eur(m.pendingTotal)}.`,
     `REKLAME: potrošeno ${eur(m.adSpendTotal)}, ROAS ${m.roas == null ? "n/a" : m.roas.toFixed(1) + "x"}, neto profit nakon reklama ${eur(m.netAfterAds)}.`,
     ``,
-    `TOP GRADOVI (grad: narudžbi, promet): ${m.topCities.slice(0, 8).map((c) => `${c.name}: ${c.count}, ${eur(c.total)}`).join(" · ") || "nema"}`,
-    ``,
-    `PROMET ZADNJIH 14 DANA (dan: iznos): ${m.byDay.map((d) => `${d.day.slice(5)}: ${eur(d.total)}`).join(" · ")}`,
+    `TOP GRADOVI (grad: narudžbi, promet): ${m.topCities.slice(0, 6).map((c) => `${c.name}: ${c.count}, ${eur(c.total)}`).join(" · ") || "nema"}`,
     ``,
     `NAJPRODAVANIJI:\n${top.length ? top.map((t, i) => `${i + 1}. ${t}`).join("\n") : "nema podataka"}`,
     ``,
@@ -62,9 +60,9 @@ export async function buildBusinessContext(): Promise<string> {
     ``,
     `VRAĆENE POŠILJKE (nije pokupljeno, gubitak dostave) — ${m.returnedCount}, ukupno ${eur(m.returnedTotal)}:\n${ret.length ? ret.join("\n") : "nema vraćenih"}`,
     ``,
-    `NISU SE PRODALI (mrtvi modeli, ${m.deadProducts.length}):\n${m.deadProducts.slice(0, 30).join(", ") || "nema"}`,
+    `NISU SE PRODALI (mrtvi modeli, ukupno ${m.deadProducts.length}):\n${m.deadProducts.slice(0, 15).join(", ") || "nema"}`,
     ``,
-    `NISKA/NEMA ZALIHA (iz kataloga):\n${lowStock.length ? lowStock.join("\n") : "sve dostupno"}`,
+    `NISKA/NEMA ZALIHA (iz kataloga):\n${lowStock.slice(0, 15).join("\n") || "sve dostupno"}`,
     ``,
     `Napomena o profitu: DRES prodaja 20 € / nabava 6 € → profit 14 €. KOMPLET (dres+kapa+lopta) prodaja 40 € / nabava 18 € → profit 22 €. Popusti smanjuju profit (računa se stvarna plaćena cijena − nabava). Svi profiti iznad su već točno izračunati.`
   ].join("\n");

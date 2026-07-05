@@ -40,7 +40,8 @@ export async function GET(request: Request) {
       status: true,
       shippedBy: true,
       reference: true,
-      tracking: true
+      tracking: true,
+      items: { select: { klub: true, igrac: true, size: true, quantity: true } }
     }
   });
 
@@ -80,7 +81,12 @@ export async function GET(request: Request) {
       total: o.total,
       status: o.status,
       shippedBy: o.shippedBy || null,
-      tracking: o.tracking || ""
+      tracking: o.tracking || "",
+      items: o.items.map((it) => ({
+        label: repairText([it.klub, it.igrac].filter(Boolean).join(" — ")),
+        size: it.size || "",
+        quantity: it.quantity
+      }))
     }))
   });
 }

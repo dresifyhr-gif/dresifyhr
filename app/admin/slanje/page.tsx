@@ -60,7 +60,12 @@ export default async function ShippingPage() {
             dateLabel: o.createdAt.toLocaleDateString("hr-HR"),
             customerName: formatCroatianName(o.customerName),
             itemCount: o.itemCount,
-            total: o.total
+            total: o.total,
+            items: o.items.map((it) => ({
+              label: repairText([it.klub, it.igrac].filter(Boolean).join(" — ")),
+              size: it.size || "",
+              quantity: it.quantity
+            }))
           }))}
         />
       </Panel>

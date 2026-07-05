@@ -16,6 +16,7 @@ type Order = {
   status: string;
   shippedBy: string | null;
   tracking: string;
+  items: { label: string; size: string; quantity: number }[];
 };
 
 function TrackingRow({ id, initial }: { id: string; initial: string }) {
@@ -176,6 +177,16 @@ export function OrdersManager() {
                       {o.address ? ` · ${o.address}` : ""}
                     </div>
                     <div className="mt-0.5 text-xs text-slate-400">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-slate-700">{eur(o.total)}</span></div>
+                    {o.items.length > 0 && (
+                      <ul className="mt-1.5 space-y-0.5">
+                        {o.items.map((it, idx) => (
+                          <li key={idx} className="text-[13px] text-slate-700">
+                            📦 {it.quantity > 1 ? `${it.quantity}× ` : ""}<span className="font-medium">{it.label}</span>
+                            {it.size ? <span className="text-slate-500"> · veličina {it.size}</span> : null}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                   <a
                     href={`/admin/print/${o.id}/`}

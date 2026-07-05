@@ -77,7 +77,7 @@ export async function getDashboardMetrics() {
     prisma.order.aggregate({ _sum: { total: true }, where: { createdAt: { gte: new Date(now.getTime() - 14 * DAY), lt: startWeek } } }),
     prisma.order.aggregate({ _sum: { total: true }, where: { createdAt: { gte: new Date(now.getTime() - 60 * DAY), lt: startMonth } } }),
     // Svi neposlani (ne kapiraj na 40) — red za slanje mora pokazati sve.
-    prisma.order.findMany({ where: { status: "new" }, orderBy: { createdAt: "asc" }, take: 500, select: { id: true, createdAt: true, customerName: true, phone: true, itemCount: true, total: true } }),
+    prisma.order.findMany({ where: { status: "new" }, orderBy: { createdAt: "asc" }, take: 500, select: { id: true, createdAt: true, customerName: true, phone: true, itemCount: true, total: true, items: { select: { klub: true, igrac: true, size: true, quantity: true } } } }),
     prisma.order.aggregate({ _count: { _all: true }, _sum: { total: true }, where: { status: "new" } }),
     // Neaktivni kupci: bez kupnje 30+ dana (win-back meta).
     prisma.customer.findMany({ where: { lastOrderAt: { lt: new Date(now.getTime() - 30 * DAY) }, totalOrders: { gt: 0 } }, orderBy: { totalSpent: "desc" }, take: 20 }),
