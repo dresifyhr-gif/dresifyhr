@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -63,8 +64,8 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
   return (
     <div className={`rounded-xl border border-slate-200 bg-white shadow-sm ${fill ? "flex h-full flex-col" : ""}`}>
       <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
-        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-900 text-[11px] font-bold text-lime-400">AI</span>
-        <span className="text-sm font-semibold text-slate-800">Poslovni asistent</span>
+        <Image src="/dresify-ai.png" alt="Dresify AI" width={28} height={28} className="h-7 w-7 object-contain" />
+        <span className="text-sm font-semibold text-slate-800">Direktor AI</span>
       </div>
 
       <div className={`overflow-y-auto px-5 py-4 ${fill ? "flex-1" : "max-h-80 min-h-[3rem]"}`}>
