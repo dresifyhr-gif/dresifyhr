@@ -15,12 +15,29 @@ const ALL_SIZES = [...adultSizes, ...kidSizes];
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
-  const overrides = new Map((await prisma.productOverride.findMany()).map((r) => [r.slug, r]));
+  const [overrideRows, soldRows, returnRows] = await Promise.all([
+    prisma.productOverride.findMany(),
+    prisma.orderItem.groupBy({ by: ["slug"], where: { order: { status: { not: "cancelled" } } }, _sum: { quantity: true, unitPrice: true }, _count: true }),
+    prisma.orderItem.groupBy({ by: ["slug"], where: { order: { status: "returned" } }, _count: true })
+  ]);
+
+  const overrides = new Map(overrideRows.map((r) => [r.slug, r]));
+  const soldMap = new Map(soldRows.map((r) => [r.slug ?? "", r]));
+  const returnMap = new Map(returnRows.map((r) => [r.slug ?? "", r._count]));
 
   const products = jerseys.map((j) => {
     const ov = overrides.get(j.slug);
     const outOfStock = ov ? (ov.outOfStock ?? "") : j.outOfStock ?? "";
     const soldOutSizes = ov ? (ov.soldOutSizes ? ov.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : []) : j.soldOutSizes ?? [];
+
+    // Per-product analytics
+    const s = soldMap.get(j.slug);
+    const sold = s?._count ?? 0;
+    const revenue = s?._sum.unitPrice ?? 0;
+    const cost = (j.liga === "Komplet" ? 18 : 6) * sold;
+    const profit = revenue - cost;
+    const returns = returnMap.get(j.slug) ?? 0;
+
     return {
       slug: j.slug,
       klub: repairText(j.klub),
@@ -31,7 +48,11 @@ export async function GET() {
       soldOutSizes,
       hidden: ov ? ov.hidden : false,
       badge: ov?.badge != null ? ov.badge : j.badge ?? "",
-      overridden: !!ov
+      overridden: !!ov,
+      sold,
+      revenue,
+      profit,
+      returns
     };
   });
 

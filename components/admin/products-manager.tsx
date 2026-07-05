@@ -13,7 +13,13 @@ type Product = {
   hidden: boolean;
   badge: string;
   overridden: boolean;
+  sold: number;
+  revenue: number;
+  profit: number;
+  returns: number;
 };
+
+const eur = (n: number) => `${(n ?? 0).toFixed(0)} €`;
 
 const BADGE_OPTIONS = [
   { value: "", label: "Bez oznake" },
@@ -63,6 +69,12 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
         <div className="min-w-0">
           <div className="font-semibold text-slate-900">{p.klub} — {p.igrac}</div>
           <div className="text-[11px] text-slate-400">{p.liga}{p.overridden ? " · uređeno" : ""}</div>
+          <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]">
+            <span className="text-slate-500">📦 {p.sold} prodano</span>
+            <span className="text-slate-500">💶 {eur(p.revenue)} prihod</span>
+            <span className="font-medium text-emerald-600">📈 {eur(p.profit)} profit</span>
+            {p.returns > 0 && <span className="font-medium text-red-500">↩ {p.returns} vraćeno</span>}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
