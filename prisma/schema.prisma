@@ -33,9 +33,10 @@ model Order {
   note         String?
   itemCount    Int         @default(0)
 
-  status       String      @default("new") // new | shipped | done
+  status       String      @default("new") // new | shipped | done | returned | cancelled
   shippedBy    String?     // "igor" | "ivica" — tko je fizički poslao (za obračun)
   shippedAt    DateTime?
+  tracking     String?     // broj pošiljke / tracking
 
   items        OrderItem[]
   customer     Customer?   @relation(fields: [customerId], references: [id])

@@ -39,7 +39,8 @@ export async function GET(request: Request) {
       total: true,
       status: true,
       shippedBy: true,
-      reference: true
+      reference: true,
+      tracking: true
     }
   });
 
@@ -78,7 +79,8 @@ export async function GET(request: Request) {
       itemCount: o.itemCount,
       total: o.total,
       status: o.status,
-      shippedBy: o.shippedBy || null
+      shippedBy: o.shippedBy || null,
+      tracking: o.tracking || ""
     }))
   });
 }

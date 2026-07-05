@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { setOrderStatusInSheet } from "@/lib/sheets";
 
 export const runtime = "nodejs";
 
@@ -14,13 +15,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const body = await request.json().catch(() => ({}));
   const returned = body?.returned !== false; // default: mark returned
 
-  const order = await prisma.order.findUnique({ where: { id }, select: { id: true } });
+  const order = await prisma.order.findUnique({
+    where: { id },
+    select: { id: true, phone: true, customerName: true, createdAt: true }
+  });
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
 
   await prisma.order.update({
     where: { id },
     data: returned ? { status: "returned" } : { status: "new", shippedBy: null, shippedAt: null }
   });
+
+  if (returned) {
+    await setOrderStatusInSheet({ phone: order.phone, name: order.customerName, createdAt: order.createdAt, note: "VRAĆENO — nije pokupljeno" });
+  }
 
   return NextResponse.json({ ok: true, returned });
 }

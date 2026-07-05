@@ -91,6 +91,37 @@ export async function markOrderShippedInSheet(order: {
 
 export type SheetShippedRow = { phone: string; by: "igor" | "ivica" | null };
 
+// Mirrors a cancel/return into the Sheet: marks the row resolved (Odradeno=TRUE so
+// it leaves the "za slanje" view) and writes a status note ("OTKAZANO"/"VRAĆENO…").
+// Requires Apps Script `action:"setStatus"`. Gated + best-effort.
+export async function setOrderStatusInSheet(order: {
+  phone?: string | null;
+  name?: string | null;
+  createdAt?: string | Date | null;
+  note: string;
+}) {
+  const url = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+  if (!url || process.env.SHEET_SYNC_ENABLED !== "1") return { ok: false, skipped: true as const };
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "setStatus",
+        phone: order.phone || "",
+        name: order.name || "",
+        createdAt: order.createdAt ? new Date(order.createdAt).toISOString() : "",
+        note: order.note
+      })
+    });
+    return { ok: res.ok };
+  } catch (error) {
+    console.error("[sheets] Failed to sync status to Google Sheet", error);
+    return { ok: false };
+  }
+}
+
 // Reads which orders are marked shipped in the Sheet (Odradeno checkbox) plus who
 // shipped them (Poslao column), so the admin queue + Igor/Ivica split reflect the
 // Sheet. Returns normalized phone + shipper. Requires the Apps Script

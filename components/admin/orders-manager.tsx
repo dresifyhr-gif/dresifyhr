@@ -15,7 +15,47 @@ type Order = {
   total: number;
   status: string;
   shippedBy: string | null;
+  tracking: string;
 };
+
+function TrackingRow({ id, initial }: { id: string; initial: string }) {
+  const [val, setVal] = useState(initial);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function save() {
+    if (saving) return;
+    setSaving(true);
+    setSaved(false);
+    await fetch(`/api/admin/orders/${id}/tracking/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tracking: val })
+    }).catch(() => {});
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  }
+
+  return (
+    <div className="mt-2 flex items-center gap-2">
+      <input
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
+        placeholder="Tracking / broj pošiljke"
+        className="flex-1 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[12px] text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+      />
+      <button
+        type="button"
+        onClick={save}
+        disabled={saving || val === initial}
+        className="rounded-md border border-slate-200 px-2.5 py-1 text-[11px] font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+      >
+        {saving ? "…" : saved ? "✓ spremljeno" : "Spremi"}
+      </button>
+    </div>
+  );
+}
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   new: { label: "čeka slanje", cls: "bg-amber-100 text-amber-700" },
@@ -148,6 +188,8 @@ export function OrdersManager() {
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                     className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-400 hover:bg-slate-50 disabled:opacity-50">↺ Vrati u nove</button>
                 </div>
+
+                <TrackingRow id={o.id} initial={o.tracking} />
               </div>
             );
           })}
