@@ -101,7 +101,9 @@ export async function setOrderStatusInSheet(order: {
   note: string;
 }) {
   const url = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
-  if (!url || process.env.SHEET_SYNC_ENABLED !== "1") return { ok: false, skipped: true as const };
+  // Separate flag: only on AFTER the Apps Script has the setStatus handler, else the
+  // current doPost would append a junk row for the unknown action.
+  if (!url || process.env.SHEET_STATUS_SYNC !== "1") return { ok: false, skipped: true as const };
 
   try {
     const res = await fetch(url, {
