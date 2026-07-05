@@ -12,6 +12,12 @@ export function waLink(phone: string | null) {
   return d.length >= 11 ? `https://wa.me/${d}` : null;
 }
 
+// wa.me link with a pre-filled message (opens WhatsApp with text ready to send).
+export function waLinkText(phone: string | null, text: string) {
+  const base = waLink(phone);
+  return base ? `${base}?text=${encodeURIComponent(text)}` : null;
+}
+
 export function Stat({
   label,
   value,
