@@ -16,7 +16,7 @@ export default async function CustomersPage() {
   const m = await getDashboardMetrics();
 
   return (
-    <AdminShell title="Kupci">
+    <AdminShell title="Kupci" subtitle="Najbolji kupci i oni koje treba vratiti">
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Najbolji kupci">
           {m.bestCustomers.length === 0 ? (

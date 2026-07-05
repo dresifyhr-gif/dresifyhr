@@ -6,31 +6,42 @@ import type { ReactNode } from "react";
 import { LayoutDashboard, Package, Send, Users, BarChart3, LogOut } from "lucide-react";
 
 const NAV = [
-  { href: "/admin", label: "Pregled", icon: LayoutDashboard },
-  { href: "/admin/narudzbe", label: "Narudžbe", icon: Package },
-  { href: "/admin/slanje", label: "Za slanje", icon: Send },
-  { href: "/admin/kupci", label: "Kupci", icon: Users },
-  { href: "/admin/analitika", label: "Analitika", icon: BarChart3 }
+  { href: "/admin", label: "Pregled", hint: "Početna", icon: LayoutDashboard },
+  { href: "/admin/narudzbe", label: "Narudžbe", hint: "Traži i mijenjaj", icon: Package },
+  { href: "/admin/slanje", label: "Za slanje", hint: "Što treba poslati", icon: Send },
+  { href: "/admin/kupci", label: "Kupci", hint: "Tko kupuje", icon: Users },
+  { href: "/admin/analitika", label: "Analitika", hint: "Brojke i trendovi", icon: BarChart3 }
 ];
 
 function isActive(pathname: string, href: string) {
   return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
 }
 
-export function AdminShell({ title, children }: { title: string; children: ReactNode }) {
+function Brand() {
+  return (
+    <Link href="/admin" className="flex items-center gap-2.5">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white">
+        D<span className="text-lime-400">R</span>
+      </div>
+      <div className="leading-tight">
+        <div className="text-[15px] font-bold tracking-tight text-slate-900">Dresify</div>
+        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Admin</div>
+      </div>
+    </Link>
+  );
+}
+
+export function AdminShell({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   const pathname = usePathname();
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white lg:flex">
-        <div className="flex items-center gap-2.5 px-5 py-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-sm font-bold text-white">
-            D<span className="text-lime-400">R</span>
-          </div>
-          <div className="text-[15px] font-bold tracking-tight">Dresify</div>
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
+        <div className="px-5 py-5">
+          <Brand />
         </div>
-        <nav className="flex-1 space-y-1 px-3 py-2">
+        <nav className="flex-1 space-y-1 px-3">
           {NAV.map((item) => {
             const active = isActive(pathname, item.href);
             const Icon = item.icon;
@@ -38,19 +49,22 @@ export function AdminShell({ title, children }: { title: string; children: React
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-                  active ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 transition ${
+                  active ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
-                <Icon className="h-[18px] w-[18px]" />
-                {item.label}
+                <Icon className={`h-[19px] w-[19px] ${active ? "text-lime-400" : "text-slate-400 group-hover:text-slate-600"}`} />
+                <span className="flex flex-col">
+                  <span className="text-sm font-semibold leading-tight">{item.label}</span>
+                  <span className={`text-[11px] leading-tight ${active ? "text-white/60" : "text-slate-400"}`}>{item.hint}</span>
+                </span>
               </Link>
             );
           })}
         </nav>
         <a
           href="/api/admin/logout"
-          className="m-3 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          className="m-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
         >
           <LogOut className="h-[18px] w-[18px]" />
           Odjava
@@ -58,33 +72,36 @@ export function AdminShell({ title, children }: { title: string; children: React
       </aside>
 
       {/* Main column */}
-      <div className="lg:pl-60">
+      <div className="lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/90 px-4 py-3.5 backdrop-blur sm:px-6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-xs font-bold text-white lg:hidden">
-              D<span className="text-lime-400">R</span>
+        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur sm:px-6">
+          <div className="flex items-center justify-between">
+            <div className="lg:hidden">
+              <Brand />
             </div>
-            <div>
-              <div className="text-base font-bold tracking-tight text-slate-900">{title}</div>
-              <div className="hidden text-xs text-slate-400 sm:block">
-                {new Date().toLocaleDateString("hr-HR", { weekday: "long", day: "numeric", month: "long" })}
-              </div>
+            <div className="hidden lg:block">
+              <h1 className="text-lg font-bold tracking-tight text-slate-900">{title}</h1>
+              {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
             </div>
+            <a
+              href="/api/admin/logout"
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-sm transition hover:text-slate-800 lg:hidden"
+            >
+              Odjava
+            </a>
           </div>
-          <a
-            href="/api/admin/logout"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-sm transition hover:text-slate-800 lg:hidden"
-          >
-            Odjava
-          </a>
+          {/* Mobile page title */}
+          <div className="mt-3 lg:hidden">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">{title}</h1>
+            {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+          </div>
         </header>
 
-        <main className="mx-auto max-w-5xl px-4 py-5 pb-24 sm:px-6 lg:pb-8">{children}</main>
+        <main className="mx-auto max-w-5xl px-4 py-5 pb-24 sm:px-6 lg:pb-10">{children}</main>
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 backdrop-blur lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
         {NAV.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;
@@ -92,13 +109,14 @@ export function AdminShell({ title, children }: { title: string; children: React
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition ${
+              className={`flex flex-col items-center gap-1 py-2 text-[10px] font-semibold transition ${
                 active ? "text-slate-900" : "text-slate-400"
               }`}
             >
-              <Icon className={`h-5 w-5 ${active ? "text-slate-900" : "text-slate-400"}`} />
+              <span className={`flex h-8 w-12 items-center justify-center rounded-full transition ${active ? "bg-slate-900" : ""}`}>
+                <Icon className={`h-[18px] w-[18px] ${active ? "text-lime-400" : "text-slate-400"}`} />
+              </span>
               {item.label}
-              {active && <span className="mt-0.5 h-0.5 w-5 rounded-full bg-lime-400" />}
             </Link>
           );
         })}

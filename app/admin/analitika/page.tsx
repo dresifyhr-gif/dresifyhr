@@ -16,7 +16,7 @@ export default async function AnalyticsPage() {
   const m = await getDashboardMetrics();
 
   return (
-    <AdminShell title="Analitika">
+    <AdminShell title="Analitika" subtitle="Što se prodaje, reklame i trendovi">
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Najprodavaniji">
           {m.topItems.length === 0 ? (

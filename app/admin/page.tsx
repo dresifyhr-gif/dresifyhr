@@ -17,7 +17,7 @@ export default async function AdminOverview() {
   const maxDay = Math.max(1, ...m.byDay.map((d) => d.total));
 
   return (
-    <AdminShell title="Pregled">
+    <AdminShell title="Pregled" subtitle="Sve najvažnije na jednom mjestu">
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
         <Stat label="Danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} sub={`${m.todayOrders} narudžbi`} />

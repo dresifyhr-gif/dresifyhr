@@ -17,7 +17,7 @@ export default async function ShippingPage() {
   const m = await getDashboardMetrics();
 
   return (
-    <AdminShell title="Za slanje">
+    <AdminShell title="Za slanje" subtitle="Narudžbe koje čekaju da ih pošalješ">
       <Panel title={`Red za slanje (${m.pending.length}) · ${eur(m.pendingTotal)}`}>
         <ShippingQueue
           orders={m.pending.map((o) => ({

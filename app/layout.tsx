@@ -19,6 +19,7 @@ import { Footer } from "@/components/site/footer";
 import { Navbar } from "@/components/site/navbar";
 import { SocialProof } from "@/components/site/social-proof";
 import { PromoCapture } from "@/components/site/promo-capture";
+import { SiteChrome } from "@/components/site/site-chrome";
 import { buildOrganizationSchema, buildWebsiteSchema, defaultMetadata } from "@/lib/seo";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -90,18 +91,27 @@ export default async function RootLayout({
         />
         <LanguageProvider initialLocale={locale}>
           <SiteProviders>
-            <div className="relative min-h-screen">
-              <AnnouncementBar />
-              <Navbar />
-              <main>{children}</main>
-              <Footer />
-              <CartDrawer />
-              <SocialProof />
-              <AddToCartModal />
-              <ContentProtection />
-              <ChatWidget />
-              <PromoCapture />
-            </div>
+            <SiteChrome
+              header={
+                <>
+                  <AnnouncementBar />
+                  <Navbar />
+                </>
+              }
+              footer={
+                <>
+                  <Footer />
+                  <CartDrawer />
+                  <SocialProof />
+                  <AddToCartModal />
+                  <ContentProtection />
+                  <ChatWidget />
+                  <PromoCapture />
+                </>
+              }
+            >
+              {children}
+            </SiteChrome>
           </SiteProviders>
         </LanguageProvider>
         <MetaPixel />
