@@ -3,29 +3,167 @@ import { redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
+import { getCeoInsights } from "@/lib/admin-ceo";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { Stat, Panel, eur } from "@/components/admin/ui";
+import { AssignShipper } from "@/components/admin/assign-shipper";
+import { Stat, Panel, eur, waLink } from "@/components/admin/ui";
+import { formatCroatianName } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Pregled — Dresify Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
+
+function greeting() {
+  const h = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Zagreb", hour: "2-digit", hour12: false }).format(new Date()));
+  if (h < 12) return "Dobro jutro";
+  if (h < 18) return "Dobar dan";
+  return "Dobra večer";
+}
+
+function Highlight({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
+      <div className="mt-1 truncate text-lg font-bold text-slate-900">{value}</div>
+      {sub && <div className="text-xs text-slate-400">{sub}</div>}
+    </div>
+  );
+}
 
 export default async function AdminOverview() {
   if (!(await isAdmin())) redirect("/admin/login/");
 
   const m = await getDashboardMetrics();
+  const ceo = await getCeoInsights(m.todayRev);
   const maxDay = Math.max(1, ...m.byDay.map((d) => d.total));
+
+  const bestProduct = m.topItems[0];
+  const topInactive = m.inactive[0];
+  const inactiveWa = topInactive ? waLink(topInactive.phone) : null;
 
   return (
     <AdminShell title="Pregled" subtitle="Sve najvažnije na jednom mjestu">
-      {/* KPI cards */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <Stat label="Danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} sub={`${m.todayOrders} narudžbi`} />
-        <Stat label="7 dana" value={eur(m.weekRev)} profit={eur(m.weekProfit)} sub={`${m.weekOrders} narudžbi`} change={m.weekChange} />
-        <Stat label="30 dana" value={eur(m.monthRev)} profit={eur(m.monthProfit)} sub={`${m.monthOrders} narudžbi`} change={m.monthChange} />
-        <Stat label="Ukupno" value={eur(m.totalRev)} profit={eur(m.totalProfit)} sub={`${m.orderCount} narudžbi`} />
-        <Stat label="Prosj. košarica" value={eur(m.aov)} />
-        <Stat label="Poslano" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
+      {/* Greeting */}
+      <div className="mb-5">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900">{greeting()}, Igore 👋</h2>
+        <p className="text-sm text-slate-500">
+          {new Date().toLocaleDateString("hr-HR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+        </p>
       </div>
+
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+        <Stat label="Promet danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} />
+        <Stat label="Nove narudžbe" value={String(m.todayOrders)} sub="danas" />
+        <Stat label="Za poslati" value={String(m.pendingCount)} sub={eur(m.pendingTotal)} />
+        <Stat label="Procjena dana" value={eur(ceo.projection)} sub="predviđeni promet" />
+        <Stat label="Poslano ukupno" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
+      </div>
+
+      {/* Highlights */}
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Highlight
+          label="Najprodavaniji"
+          value={bestProduct ? `${bestProduct.klub} — ${bestProduct.igrac}` : "—"}
+          sub={bestProduct ? `${bestProduct._sum.quantity ?? 0} kom ukupno` : undefined}
+        />
+        <Highlight
+          label="Kupac dana"
+          value={ceo.customerOfDay ? ceo.customerOfDay.name : "još nema danas"}
+          sub={ceo.customerOfDay ? eur(ceo.customerOfDay.total ?? 0) : undefined}
+        />
+        <Highlight
+          label="Najveća narudžba danas"
+          value={ceo.biggestOrderToday ? ceo.biggestOrderToday.name : "još nema danas"}
+          sub={ceo.biggestOrderToday ? eur(ceo.biggestOrderToday.total ?? 0) : undefined}
+        />
+      </div>
+
+      {/* To-do + watch */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <Panel title="Što danas trebam napraviti">
+          <ul className="space-y-2.5 text-sm">
+            {m.pendingCount > 0 && (
+              <li className="flex items-start gap-2">
+                <span>📦</span>
+                <span className="text-slate-700">
+                  Pošalji <b>{m.pendingCount}</b> narudžbi ({eur(m.pendingTotal)}) —{" "}
+                  <a href="/admin/slanje" className="font-semibold text-emerald-600 hover:underline">otvori red za slanje</a>
+                </span>
+              </li>
+            )}
+            {ceo.reorder && (
+              <li className="flex items-start gap-2">
+                <span>🛒</span>
+                <span className="text-slate-700">Naruči <b>{ceo.reorder.name}</b> — najbrže se prodaje ({ceo.reorder.qty} kom u 14 dana)</span>
+              </li>
+            )}
+            {topInactive && (
+              <li className="flex items-start gap-2">
+                <span>📞</span>
+                <span className="text-slate-700">
+                  Kontaktiraj <b>{topInactive.name ? formatCroatianName(topInactive.name) : topInactive.phone}</b> — nije kupio od {topInactive.lastOrderAt.toLocaleDateString("hr-HR")}
+                  {inactiveWa && (
+                    <> · <a href={inactiveWa} target="_blank" rel="noopener noreferrer" className="font-semibold text-emerald-600 hover:underline">WhatsApp</a></>
+                  )}
+                </span>
+              </li>
+            )}
+            {m.unassignedShipped.length > 0 && (
+              <li className="flex items-start gap-2">
+                <span>✍️</span>
+                <span className="text-slate-700">Označi <b>{m.unassignedShipped.length}</b> poslanih narudžbi (tko je poslao) — dolje ↓</span>
+              </li>
+            )}
+            {m.pendingCount === 0 && !ceo.reorder && !topInactive && m.unassignedShipped.length === 0 && (
+              <li className="text-slate-400">Sve pod kontrolom — nema hitnih zadataka ✅</li>
+            )}
+          </ul>
+        </Panel>
+
+        <Panel title="Na što trebam paziti">
+          <ul className="space-y-2.5 text-sm">
+            {m.returnedCount > 0 && (
+              <li className="flex items-start gap-2">
+                <span>↩️</span>
+                <span className="text-slate-700">Vraćene pošiljke: <b>{m.returnedCount}</b> ({eur(m.returnedTotal)}) — gubitak dostave</span>
+              </li>
+            )}
+            {ceo.declining && (
+              <li className="flex items-start gap-2">
+                <span>📉</span>
+                <span className="text-slate-700"><b>{ceo.declining.name}</b> pada ({ceo.declining.prior}→{ceo.declining.recent} kom u 14 dana)</span>
+              </li>
+            )}
+            {ceo.rising && (
+              <li className="flex items-start gap-2">
+                <span>📈</span>
+                <span className="text-slate-700"><b>{ceo.rising.name}</b> raste ({ceo.rising.prior}→{ceo.rising.recent} kom) — pojačaj zalihu</span>
+              </li>
+            )}
+            <li className="flex items-start gap-2">
+              <span>💀</span>
+              <span className="text-slate-700">Mrtvih modela: <b>{m.deadProducts.length}</b> bez ijedne prodaje — razmisli o gašenju (<a href="/admin/analitika" className="font-semibold text-slate-500 hover:underline">Analitika</a>)</span>
+            </li>
+          </ul>
+        </Panel>
+      </div>
+
+      {/* Assign shipper for the shipped-but-untagged orders */}
+      {m.unassignedShipped.length > 0 && (
+        <div className="mt-5">
+          <Panel title={`Poslane bez oznake — tko je poslao? (${m.unassignedShipped.length})`}>
+            <p className="mb-3 -mt-2 text-xs text-slate-400">Ove su poslane, ali nemaju označeno tko — klikni Igor ili Ivica da uđu u podjelu profita.</p>
+            <AssignShipper
+              orders={m.unassignedShipped.map((o) => ({
+                id: o.id,
+                dateLabel: o.createdAt.toLocaleDateString("hr-HR"),
+                customerName: formatCroatianName(o.customerName),
+                total: o.total
+              }))}
+            />
+          </Panel>
+        </div>
+      )}
 
       {/* Partner split */}
       <div className="mt-5">
@@ -70,11 +208,6 @@ export default async function AdminOverview() {
               </div>
             )}
           </div>
-          {m.split.unassigned.count > 0 && (
-            <p className="mt-3 text-xs text-amber-600">
-              ⚠ {m.split.unassigned.count} poslanih narudžbi bez pošiljatelja ({eur(m.split.unassigned.profit)}) — označi ih u „Za slanje”.
-            </p>
-          )}
         </Panel>
       </div>
 

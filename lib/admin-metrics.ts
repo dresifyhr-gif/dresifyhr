@@ -57,7 +57,7 @@ export async function getDashboardMetrics() {
   const totalRev = total._sum.total ?? 0;
 
   // ── Extras: trends, shipping queue, win-back, cities, ad ROI ──────────────
-  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned] = await Promise.all([
+  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, unassignedShipped] = await Promise.all([
     prisma.order.aggregate({ _sum: { total: true }, where: { createdAt: { gte: new Date(now.getTime() - 14 * DAY), lt: startWeek } } }),
     prisma.order.aggregate({ _sum: { total: true }, where: { createdAt: { gte: new Date(now.getTime() - 60 * DAY), lt: startMonth } } }),
     // Svi neposlani (ne kapiraj na 40) — red za slanje mora pokazati sve.
@@ -68,7 +68,9 @@ export async function getDashboardMetrics() {
     prisma.order.findMany({ select: { address: true, total: true } }),
     prisma.adSpend.aggregate({ _sum: { amount: true } }),
     // Vraćene pošiljke (nije pokupljeno) — za AI i evidenciju gubitka.
-    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true } })
+    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true } }),
+    // Poslane narudžbe bez oznake tko je poslao — treba ih dodijeliti (Igor/Ivica).
+    prisma.order.findMany({ where: { status: { in: ["shipped", "done"] }, shippedBy: null }, orderBy: { createdAt: "desc" }, take: 200, select: { id: true, createdAt: true, customerName: true, total: true } })
   ]);
 
   const pct = (cur: number, prev: number | null) => (prev && prev > 0 ? ((cur - prev) / prev) * 100 : null);
@@ -117,6 +119,7 @@ export async function getDashboardMetrics() {
     pendingTotal,
     inactive,
     returned,
+    unassignedShipped,
     returnedCount: returned.length,
     returnedTotal: returned.reduce((s, o) => s + o.total, 0),
     topCities,
