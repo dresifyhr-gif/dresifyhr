@@ -47,7 +47,7 @@ export async function buildBusinessContext(): Promise<string> {
     `PROIZVOD U PADU: ${ceo.declining ? `${ceo.declining.name} (${ceo.declining.prior}→${ceo.declining.recent} kom)` : "nema jasnog pada"}.`,
     `ZA NARUČITI (najbrže se prodaje zadnjih 14 dana): ${ceo.reorder ? `${ceo.reorder.name} (${ceo.reorder.qty} kom)` : "n/a"}.`,
     `DANAS: kupac dana ${ceo.customerOfDay ? `${ceo.customerOfDay.name} (${eur(ceo.customerOfDay.total ?? 0)})` : "još nema"}; najveća narudžba ${ceo.biggestOrderToday ? `${ceo.biggestOrderToday.name} (${eur(ceo.biggestOrderToday.total ?? 0)})` : "još nema"}; procjena dana ${eur(ceo.projection)}.`,
-    `ZA SLANJE (čeka, nije poslano): ${m.pending.length} narudžbi, ${eur(m.pendingTotal)}.`,
+    `ZA SLANJE (čeka, nije poslano): ${m.pendingCount} narudžbi, ${eur(m.pendingTotal)}.`,
     `REKLAME: potrošeno ${eur(m.adSpendTotal)}, ROAS ${m.roas == null ? "n/a" : m.roas.toFixed(1) + "x"}, neto profit nakon reklama ${eur(m.netAfterAds)}.`,
     ``,
     `TOP GRADOVI (grad: narudžbi, promet): ${m.topCities.slice(0, 8).map((c) => `${c.name}: ${c.count}, ${eur(c.total)}`).join(" · ") || "nema"}`,

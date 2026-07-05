@@ -57,10 +57,12 @@ export async function getDashboardMetrics() {
   const totalRev = total._sum.total ?? 0;
 
   // ── Extras: trends, shipping queue, win-back, cities, ad ROI ──────────────
-  const [prev7, prev30, pending, inactive, allAddr, adAll, returned] = await Promise.all([
+  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned] = await Promise.all([
     prisma.order.aggregate({ _sum: { total: true }, where: { createdAt: { gte: new Date(now.getTime() - 14 * DAY), lt: startWeek } } }),
     prisma.order.aggregate({ _sum: { total: true }, where: { createdAt: { gte: new Date(now.getTime() - 60 * DAY), lt: startMonth } } }),
-    prisma.order.findMany({ where: { status: "new" }, orderBy: { createdAt: "asc" }, take: 40, select: { id: true, createdAt: true, customerName: true, phone: true, itemCount: true, total: true } }),
+    // Svi neposlani (ne kapiraj na 40) — red za slanje mora pokazati sve.
+    prisma.order.findMany({ where: { status: "new" }, orderBy: { createdAt: "asc" }, take: 500, select: { id: true, createdAt: true, customerName: true, phone: true, itemCount: true, total: true } }),
+    prisma.order.aggregate({ _count: { _all: true }, _sum: { total: true }, where: { status: "new" } }),
     // Neaktivni kupci: bez kupnje 30+ dana (win-back meta).
     prisma.customer.findMany({ where: { lastOrderAt: { lt: new Date(now.getTime() - 30 * DAY) }, totalOrders: { gt: 0 } }, orderBy: { totalSpent: "desc" }, take: 20 }),
     prisma.order.findMany({ select: { address: true, total: true } }),
@@ -88,7 +90,8 @@ export async function getDashboardMetrics() {
   const topCities = [...cityMap.values()].sort((a, b) => b.count - a.count).slice(0, 10);
 
   const adSpendTotal = adAll._sum.amount ?? 0;
-  const pendingTotal = pending.reduce((s, o) => s + o.total, 0);
+  const pendingCount = pendingAgg._count._all;
+  const pendingTotal = pendingAgg._sum.total ?? 0;
 
   // ── Podjela po pošiljatelju (Igor / Ivica) — samo poslane narudžbe ──────────
   const byShipper = async (who: "igor" | "ivica" | null) => {
@@ -110,6 +113,7 @@ export async function getDashboardMetrics() {
     weekChange,
     monthChange,
     pending,
+    pendingCount,
     pendingTotal,
     inactive,
     returned,

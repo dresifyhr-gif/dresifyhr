@@ -18,7 +18,7 @@ export default async function ShippingPage() {
 
   return (
     <AdminShell title="Za slanje" subtitle="Narudžbe koje čekaju da ih pošalješ">
-      <Panel title={`Red za slanje (${m.pending.length}) · ${eur(m.pendingTotal)}`}>
+      <Panel title={`Red za slanje (${m.pendingCount}) · ${eur(m.pendingTotal)}`}>
         <ShippingQueue
           orders={m.pending.map((o) => ({
             id: o.id,
