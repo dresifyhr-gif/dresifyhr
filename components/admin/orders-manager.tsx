@@ -53,6 +53,17 @@ function TrackingRow({ id, initial }: { id: string; initial: string }) {
       >
         {saving ? "…" : saved ? "✓ spremljeno" : "Spremi"}
       </button>
+      {val.trim() && (
+        <a
+          href="https://posiljka.posta.hr/en"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 rounded-md bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-slate-800"
+          title="Otvori praćenje pošiljke na Hrvatskoj pošti (zalijepi broj)"
+        >
+          🔗 Prati na Pošti
+        </a>
+      )}
     </div>
   );
 }
