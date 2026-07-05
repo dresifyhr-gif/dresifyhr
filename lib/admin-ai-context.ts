@@ -66,6 +66,6 @@ export async function buildBusinessContext(): Promise<string> {
     ``,
     `NISKA/NEMA ZALIHA (iz kataloga):\n${lowStock.length ? lowStock.join("\n") : "sve dostupno"}`,
     ``,
-    `Napomena o profitu: nabavna cijena je 6 € po dresu, prodajna 20 €, dakle profit 14 € po dresu. Profit iznad je već izračunat (prodaja − nabava po artiklu).`
+    `Napomena o profitu: DRES prodaja 20 € / nabava 6 € → profit 14 €. KOMPLET (dres+kapa+lopta) prodaja 40 € / nabava 18 € → profit 22 €. Popusti smanjuju profit (računa se stvarna plaćena cijena − nabava). Svi profiti iznad su već točno izračunati.`
   ].join("\n");
 }

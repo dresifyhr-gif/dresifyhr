@@ -4,8 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { jerseys } from "@/lib/data/jerseys";
 
 const DAY = 86_400_000;
-// Nabavna cijena po artiklu (dres). Profit = prodajna cijena − nabava.
-export const COST_PER_ITEM = 6;
+// Nabavne cijene: dres 6€ (prodaja 20 → profit 14), KOMPLET 18€ (prodaja 40 → profit 22).
+export const COST_PER_ITEM = 6; // dres
+const COST_KOMPLET = 18;
+// Komplet se prepoznaje po slugu/nazivu koji sadrži "komplet".
+const kompletItemWhere = {
+  OR: [{ slug: { contains: "komplet" } }, { igrac: { contains: "komplet", mode: "insensitive" as const } }]
+};
 
 export async function getDashboardMetrics() {
   const now = new Date();
@@ -16,31 +21,42 @@ export async function getDashboardMetrics() {
 
   const rev = (gte?: Date) =>
     prisma.order.aggregate({ _sum: { total: true }, _count: true, where: gte ? { createdAt: { gte } } : undefined });
-  // Profit basis = sum of item prices − (items × cost). Uses jersey prices, not shipping.
-  const items = (gte?: Date) =>
-    prisma.orderItem.aggregate({ _sum: { unitPrice: true }, _count: true, where: gte ? { order: { createdAt: { gte } } } : undefined });
+  // Točan profit = Σ prodajne cijene artikala − popust − nabava (komplet 18€, dres 6€).
+  const profitFor = async (orderWhere: object = {}) => {
+    const [all, komplet, disc] = await Promise.all([
+      prisma.orderItem.aggregate({ _sum: { unitPrice: true }, _count: true, where: { order: orderWhere } }),
+      prisma.orderItem.count({ where: { order: orderWhere, ...kompletItemWhere } }),
+      prisma.order.aggregate({ _sum: { discount: true }, where: orderWhere })
+    ]);
+    const count = all._count;
+    const revenue = all._sum.unitPrice ?? 0;
+    const discount = disc._sum.discount ?? 0;
+    const cost = komplet * COST_KOMPLET + (count - komplet) * COST_PER_ITEM;
+    return revenue - discount - cost;
+  };
 
-  const [today, week, month, total, iToday, iWeek, iMonth, iTotal, orderCount, shippedAgg, iShipped, topItems, bestCustomers, recentOrders, windowOrders, soldSlugRows] =
+  const shippedWhere = { status: { in: ["shipped", "done"] } };
+
+  const [today, week, month, total, orderCount, shippedAgg, topItems, bestCustomers, recentOrders, windowOrders, soldSlugRows,
+    todayProfit, weekProfit, monthProfit, totalProfit, shippedProfit] =
     await Promise.all([
       rev(startToday),
       rev(startWeek),
       rev(startMonth),
       rev(),
-      items(startToday),
-      items(startWeek),
-      items(startMonth),
-      items(),
       prisma.order.count(),
-      prisma.order.aggregate({ _sum: { total: true }, _count: true, where: { status: { in: ["shipped", "done"] } } }),
-      prisma.orderItem.aggregate({ _sum: { unitPrice: true }, _count: true, where: { order: { status: { in: ["shipped", "done"] } } } }),
+      prisma.order.aggregate({ _sum: { total: true }, _count: true, where: shippedWhere }),
       prisma.orderItem.groupBy({ by: ["slug", "klub", "igrac"], _sum: { quantity: true }, orderBy: { _sum: { quantity: "desc" } }, take: 8 }),
       prisma.customer.findMany({ orderBy: { totalSpent: "desc" }, take: 8 }),
       prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 12 }),
       prisma.order.findMany({ where: { createdAt: { gte: new Date(now.getTime() - 13 * DAY) } }, select: { createdAt: true, total: true } }),
-      prisma.orderItem.findMany({ distinct: ["slug"], select: { slug: true } })
+      prisma.orderItem.findMany({ distinct: ["slug"], select: { slug: true } }),
+      profitFor({ createdAt: { gte: startToday } }),
+      profitFor({ createdAt: { gte: startWeek } }),
+      profitFor({ createdAt: { gte: startMonth } }),
+      profitFor(),
+      profitFor(shippedWhere)
     ]);
-
-  const profit = (i: { _sum: { unitPrice: number | null }; _count: number }) => (i._sum.unitPrice ?? 0) - i._count * COST_PER_ITEM;
 
   // revenue by day, last 14 days
   const byDay: { day: string; total: number }[] = [];
@@ -98,14 +114,14 @@ export async function getDashboardMetrics() {
   // ── Podjela po pošiljatelju (Igor / Ivica) — samo poslane narudžbe ──────────
   const byShipper = async (who: "igor" | "ivica" | null) => {
     const where = { status: { in: ["shipped", "done"] }, shippedBy: who };
-    const [ord, it] = await Promise.all([
+    const [ord, prof] = await Promise.all([
       prisma.order.aggregate({ _count: { _all: true }, _sum: { total: true }, where }),
-      prisma.orderItem.aggregate({ _count: true, _sum: { unitPrice: true }, where: { order: where } })
+      profitFor(where)
     ]);
-    return { count: ord._count._all, cash: ord._sum.total ?? 0, profit: profit(it) };
+    return { count: ord._count._all, cash: ord._sum.total ?? 0, profit: prof };
   };
   const [igor, ivica, unassigned] = await Promise.all([byShipper("igor"), byShipper("ivica"), byShipper(null)]);
-  const shippedProfitTotal = profit(iShipped); // profit svih poslanih
+  const shippedProfitTotal = shippedProfit; // profit svih poslanih
   const halfShare = shippedProfitTotal / 2;
   // Poravnanje: tko je generirao više profita, drugom vraća pola razlike.
   const settleAmount = Math.abs(igor.profit - ivica.profit) / 2;
@@ -125,22 +141,22 @@ export async function getDashboardMetrics() {
     topCities,
     adSpendTotal,
     roas: adSpendTotal > 0 ? totalRev / adSpendTotal : null,
-    netAfterAds: profit(iTotal) - adSpendTotal,
+    netAfterAds: totalProfit - adSpendTotal,
     todayRev: today._sum.total ?? 0,
     todayOrders: today._count,
-    todayProfit: profit(iToday),
+    todayProfit,
     weekRev: week._sum.total ?? 0,
     weekOrders: week._count,
-    weekProfit: profit(iWeek),
+    weekProfit,
     monthRev: month._sum.total ?? 0,
     monthOrders: month._count,
-    monthProfit: profit(iMonth),
+    monthProfit,
     totalRev,
-    totalProfit: profit(iTotal),
+    totalProfit,
     orderCount,
     shippedCount: shippedAgg._count,
     shippedRev: shippedAgg._sum.total ?? 0,
-    shippedProfit: profit(iShipped),
+    shippedProfit,
     aov: orderCount ? totalRev / orderCount : 0,
     split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, settleAmount, settleFrom },
     topItems,
