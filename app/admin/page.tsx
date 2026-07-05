@@ -4,9 +4,11 @@ import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { getCeoInsights } from "@/lib/admin-ceo";
+import { getOldUnshipped, OLD_UNSHIPPED_DAYS } from "@/lib/admin-winback";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AssignShipper } from "@/components/admin/assign-shipper";
 import { SettlementButton } from "@/components/admin/settlement-button";
+import { ApologyList, ReturnedList } from "@/components/admin/winback-panels";
 import { Stat, Panel, eur, waLink } from "@/components/admin/ui";
 import { formatCroatianName } from "@/lib/utils";
 
@@ -18,6 +20,10 @@ function greeting() {
   if (h < 12) return "Dobro jutro";
   if (h < 18) return "Dobar dan";
   return "Dobra večer";
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return <h3 className="mb-3 mt-8 text-sm font-bold uppercase tracking-[0.14em] text-slate-500">{children}</h3>;
 }
 
 function Highlight({ label, value, sub }: { label: string; value: string; sub?: string }) {
@@ -35,6 +41,7 @@ export default async function AdminOverview() {
 
   const m = await getDashboardMetrics();
   const ceo = await getCeoInsights(m.todayRev);
+  const oldRows = await getOldUnshipped(30);
   const maxDay = Math.max(1, ...m.byDay.map((d) => d.total));
 
   const bestProduct = m.topItems[0];
@@ -60,27 +67,10 @@ export default async function AdminOverview() {
         <Stat label="Poslano ukupno" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
       </div>
 
-      {/* Highlights */}
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Highlight
-          label="Najprodavaniji"
-          value={bestProduct ? `${bestProduct.klub} — ${bestProduct.igrac}` : "—"}
-          sub={bestProduct ? `${bestProduct._sum.quantity ?? 0} kom ukupno` : undefined}
-        />
-        <Highlight
-          label="Kupac dana"
-          value={ceo.customerOfDay ? ceo.customerOfDay.name : "još nema danas"}
-          sub={ceo.customerOfDay ? eur(ceo.customerOfDay.total ?? 0) : undefined}
-        />
-        <Highlight
-          label="Najveća narudžba danas"
-          value={ceo.biggestOrderToday ? ceo.biggestOrderToday.name : "još nema danas"}
-          sub={ceo.biggestOrderToday ? eur(ceo.biggestOrderToday.total ?? 0) : undefined}
-        />
-      </div>
+      <SectionHeading>⚡ Za danas</SectionHeading>
 
       {/* To-do + watch */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Što danas trebam napraviti">
           <ul className="space-y-2.5 text-sm">
             {m.pendingCount > 0 && (
@@ -149,6 +139,22 @@ export default async function AdminOverview() {
         </Panel>
       </div>
 
+      {/* WhatsApp apology (old unsent) + returned shipments */}
+      {(oldRows.length > 0 || m.returnedCount > 0) && (
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+          {oldRows.length > 0 && (
+            <Panel title={`Javi se kupcima — stare neposlane (${oldRows.length})`}>
+              <ApologyList rows={oldRows} />
+            </Panel>
+          )}
+          {m.returnedCount > 0 && (
+            <Panel title={`Vraćene pošiljke · ${m.returnedCount} (${eur(m.returnedTotal)})`}>
+              <ReturnedList items={m.returned} />
+            </Panel>
+          )}
+        </div>
+      )}
+
       {/* Assign shipper for the shipped-but-untagged orders */}
       {m.unassignedShipped.length > 0 && (
         <div className="mt-5">
@@ -165,6 +171,27 @@ export default async function AdminOverview() {
           </Panel>
         </div>
       )}
+
+      <SectionHeading>📊 Brojke</SectionHeading>
+
+      {/* Highlights */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Highlight
+          label="Najprodavaniji"
+          value={bestProduct ? `${bestProduct.klub} — ${bestProduct.igrac}` : "—"}
+          sub={bestProduct ? `${bestProduct._sum.quantity ?? 0} kom ukupno` : undefined}
+        />
+        <Highlight
+          label="Kupac dana"
+          value={ceo.customerOfDay ? ceo.customerOfDay.name : "još nema danas"}
+          sub={ceo.customerOfDay ? eur(ceo.customerOfDay.total ?? 0) : undefined}
+        />
+        <Highlight
+          label="Najveća narudžba danas"
+          value={ceo.biggestOrderToday ? ceo.biggestOrderToday.name : "još nema danas"}
+          sub={ceo.biggestOrderToday ? eur(ceo.biggestOrderToday.total ?? 0) : undefined}
+        />
+      </div>
 
       {/* Partner split */}
       <div className="mt-5">
