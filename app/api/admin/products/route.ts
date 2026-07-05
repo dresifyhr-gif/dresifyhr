@@ -29,6 +29,8 @@ export async function GET() {
       price: ov?.price != null ? ov.price : j.price ?? JERSEY_PRICE_EUR,
       outOfStock,
       soldOutSizes,
+      hidden: ov ? ov.hidden : false,
+      badge: ov?.badge != null ? ov.badge : j.badge ?? "",
       overridden: !!ov
     };
   });
@@ -50,11 +52,14 @@ export async function POST(request: Request) {
   const oos = body?.outOfStock;
   const outOfStock = oos === "all" || oos === "adults" || oos === "kids" ? oos : null;
   const sizes: string[] = Array.isArray(body?.soldOutSizes) ? body.soldOutSizes.filter((s: unknown) => typeof s === "string") : [];
+  const hidden = body?.hidden === true;
+  const badge = body?.badge === "bestseller" || body?.badge === "novo" ? body.badge : null;
+  const priceVal = price != null && Number.isFinite(price) ? price : null;
 
   await prisma.productOverride.upsert({
     where: { slug },
-    create: { slug, price: price != null && Number.isFinite(price) ? price : null, outOfStock, soldOutSizes: sizes.join(",") || null },
-    update: { price: price != null && Number.isFinite(price) ? price : null, outOfStock, soldOutSizes: sizes.join(",") || null }
+    create: { slug, price: priceVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge },
+    update: { price: priceVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge }
   });
 
   return NextResponse.json({ ok: true });

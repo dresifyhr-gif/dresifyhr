@@ -10,8 +10,16 @@ type Product = {
   price: number;
   outOfStock: string;
   soldOutSizes: string[];
+  hidden: boolean;
+  badge: string;
   overridden: boolean;
 };
+
+const BADGE_OPTIONS = [
+  { value: "", label: "Bez oznake" },
+  { value: "bestseller", label: "⭐ Bestseller" },
+  { value: "novo", label: "🆕 Novo" }
+];
 
 const STOCK_OPTIONS = [
   { value: "", label: "Na stanju" },
@@ -24,10 +32,12 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const [price, setPrice] = useState(String(p.price));
   const [oos, setOos] = useState(p.outOfStock);
   const [soldSizes, setSoldSizes] = useState<string[]>(p.soldOutSizes);
+  const [hidden, setHidden] = useState(p.hidden);
+  const [badge, setBadge] = useState(p.badge);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const dirty = price !== String(p.price) || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",");
+  const dirty = price !== String(p.price) || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge;
 
   function toggleSize(s: string) {
     setSoldSizes((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s]));
@@ -40,7 +50,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     await fetch("/api/admin/products/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: p.slug, price: price === "" ? null : Number(price.replace(",", ".")), outOfStock: oos, soldOutSizes: soldSizes })
+      body: JSON.stringify({ slug: p.slug, price: price === "" ? null : Number(price.replace(",", ".")), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge })
     }).catch(() => {});
     setSaving(false);
     setSaved(true);
@@ -71,6 +81,21 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
           >
             {STOCK_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
+          <select
+            value={badge}
+            onChange={(e) => setBadge(e.target.value)}
+            className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-700 outline-none focus:border-slate-400"
+          >
+            {BADGE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <button
+            type="button"
+            onClick={() => setHidden((v) => !v)}
+            title={hidden ? "Skriveno sa shopa — klikni da prikažeš" : "Prikazano — klikni da sakriješ"}
+            className={`rounded-md px-2 py-1 text-[11px] font-semibold transition ${hidden ? "bg-amber-500 text-white hover:bg-amber-600" : "border border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+          >
+            {hidden ? "🙈 Skriveno" : "👁 Vidljivo"}
+          </button>
           <button
             type="button"
             onClick={save}

@@ -100,6 +100,8 @@ model ProductOverride {
   price        Float?
   outOfStock   String? // "all" | "adults" | "kids" (prazno = na stanju)
   soldOutSizes String? // npr. "XL,XXL"
+  hidden       Boolean  @default(false) // draft/sakriveno — ne prikazuje se na shopu
+  badge        String? // "bestseller" | "novo" | "" (prazno = bez)
   updatedAt    DateTime @updatedAt
 }
 
