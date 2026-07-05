@@ -111,9 +111,13 @@ export async function getDashboardMetrics() {
   const pendingCount = pendingAgg._count._all;
   const pendingTotal = pendingAgg._sum.total ?? 0;
 
-  // ── Podjela po pošiljatelju (Igor / Ivica) — samo poslane narudžbe ──────────
+  // ── Podjela po pošiljatelju (Igor / Ivica) — poslane narudžbe OD zadnjeg poravnanja ──
+  const settlements = await prisma.settlement.findMany({ orderBy: { settledAt: "desc" }, take: 6 });
+  const lastSettlement = settlements[0] ?? null;
+  const sinceFilter = lastSettlement ? { createdAt: { gt: lastSettlement.settledAt } } : {};
+
   const byShipper = async (who: "igor" | "ivica" | null) => {
-    const where = { status: { in: ["shipped", "done"] }, shippedBy: who };
+    const where = { status: { in: ["shipped", "done"] }, shippedBy: who, ...sinceFilter };
     const [ord, prof] = await Promise.all([
       prisma.order.aggregate({ _count: { _all: true }, _sum: { total: true }, where }),
       profitFor(where)
@@ -121,7 +125,8 @@ export async function getDashboardMetrics() {
     return { count: ord._count._all, cash: ord._sum.total ?? 0, profit: prof };
   };
   const [igor, ivica, unassigned] = await Promise.all([byShipper("igor"), byShipper("ivica"), byShipper(null)]);
-  const shippedProfitTotal = shippedProfit; // profit svih poslanih
+  // Profit poslanih od zadnjeg poravnanja (baza za podjelu 50/50).
+  const shippedProfitTotal = await profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter });
   const halfShare = shippedProfitTotal / 2;
   // Poravnanje: tko je generirao više profita, drugom vraća pola razlike.
   const settleAmount = Math.abs(igor.profit - ivica.profit) / 2;
@@ -158,7 +163,7 @@ export async function getDashboardMetrics() {
     shippedRev: shippedAgg._sum.total ?? 0,
     shippedProfit,
     aov: orderCount ? totalRev / orderCount : 0,
-    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, settleAmount, settleFrom },
+    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, settleAmount, settleFrom, lastSettlement, settlements },
     topItems,
     bestCustomers,
     recentOrders,

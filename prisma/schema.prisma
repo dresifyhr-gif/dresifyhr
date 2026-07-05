@@ -92,6 +92,21 @@ model Product {
   updatedAt DateTime @updatedAt
 }
 
+// Poravnanje računa Igor ↔ Ivica. Nakon poravnanja podjela broji samo profit
+// od zadnjeg settledAt nadalje.
+model Settlement {
+  id          String   @id @default(cuid())
+  settledAt   DateTime @default(now())
+  amount      Float    @default(0) // koliko je prebačeno
+  fromPartner String? // "igor" | "ivica" — tko je platio
+  igorProfit  Float    @default(0) // snapshot na trenutak poravnanja
+  ivicaProfit Float    @default(0)
+  note        String?
+  createdAt   DateTime @default(now())
+
+  @@index([settledAt])
+}
+
 // Ad spend entries for ROI (Instagram/Facebook marketing).
 model AdSpend {
   id        String   @id @default(cuid())

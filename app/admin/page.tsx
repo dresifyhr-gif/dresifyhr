@@ -6,6 +6,7 @@ import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { getCeoInsights } from "@/lib/admin-ceo";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AssignShipper } from "@/components/admin/assign-shipper";
+import { SettlementButton } from "@/components/admin/settlement-button";
 import { Stat, Panel, eur, waLink } from "@/components/admin/ui";
 import { formatCroatianName } from "@/lib/utils";
 
@@ -170,7 +171,9 @@ export default async function AdminOverview() {
         <Panel title="Podjela Igor / Ivica (50 / 50, samo poslano)">
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Ukupni profit (poslano)</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                Profit poslanih {m.split.lastSettlement ? `od zadnjeg poravnanja (${m.split.lastSettlement.settledAt.toLocaleDateString("hr-HR")})` : "(od početka)"}
+              </div>
               <div className="mt-1 text-2xl font-bold text-slate-900">{eur(m.split.shippedProfitTotal)}</div>
             </div>
             <div className="text-right">
@@ -195,7 +198,7 @@ export default async function AdminOverview() {
               </div>
             ))}
           </div>
-          <div className="mt-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center">
+          <div className="mt-4 flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center">
             {m.split.settleFrom == null ? (
               <div className="text-sm font-semibold text-slate-600">Profit je izjednačen — nitko nikom ne duguje ✅</div>
             ) : (
@@ -207,7 +210,32 @@ export default async function AdminOverview() {
                 <span className="text-slate-500">→ oboje po {eur(m.split.halfShare)}.</span>
               </div>
             )}
+            <SettlementButton />
+            <p className="text-[11px] text-slate-400">Kad Igor i Ivica fizički poravnate novac, klikni ovo — podjela se resetira i dalje broji od tog dana.</p>
           </div>
+
+          {m.split.settlements.length > 0 && (
+            <div className="mt-4">
+              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Povijest poravnanja</div>
+              <ul className="space-y-1.5 text-sm">
+                {m.split.settlements.map((s) => (
+                  <li key={s.id} className="flex items-center justify-between text-slate-600">
+                    <span>{s.settledAt.toLocaleDateString("hr-HR")}</span>
+                    <span>
+                      {s.fromPartner ? (
+                        <>
+                          <span className="font-medium text-slate-700">{s.fromPartner === "igor" ? "Igor → Ivici" : "Ivica → Igoru"}</span>{" "}
+                          <span className="font-semibold text-slate-900">{eur(s.amount)}</span>
+                        </>
+                      ) : (
+                        <span className="text-slate-400">poravnato (0 €)</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </Panel>
       </div>
 
