@@ -34,14 +34,17 @@ export async function getOldUnshipped(limit = 100): Promise<OldUnshippedRow[]> {
       customerName: true,
       phone: true,
       total: true,
-      items: { select: { klub: true, igrac: true }, take: 3 }
+      items: { select: { klub: true, igrac: true, size: true }, take: 4 }
     }
   });
 
   return rows.map((o) => {
     const name = formatCroatianName(o.customerName);
-    const products = o.items.map((it) => repairText([it.klub, String(it.igrac || "").split("—")[0].trim()].filter(Boolean).join(" ")));
-    const product = products.slice(0, 2).join(", ") + (o.items.length > 2 ? " i još…" : "");
+    const products = o.items.map((it) => {
+      const base = repairText([it.klub, String(it.igrac || "").split("—")[0].trim()].filter(Boolean).join(" "));
+      return it.size ? `${base} (vel. ${it.size})` : base;
+    });
+    const product = products.slice(0, 3).join(", ") + (o.items.length > 3 ? " i još…" : "");
     return {
       id: o.id,
       name,
