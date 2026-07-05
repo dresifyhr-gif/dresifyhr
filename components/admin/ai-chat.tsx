@@ -5,14 +5,15 @@ import { useEffect, useRef, useState } from "react";
 type Msg = { role: "user" | "assistant"; content: string };
 
 const SUGGESTIONS = [
-  "Koliko sam danas zaradio?",
-  "Što se najbolje prodaje?",
-  "Otkaži narudžbu za …",
-  "Koji kupci nisu kupovali 30+ dana?",
-  "Tko je vratio pošiljku?"
+  "Što danas trebam napraviti?",
+  "Gdje gubim novac?",
+  "Što trebam naručiti?",
+  "Koji proizvod raste, koji pada?",
+  "Kako povećati profit ovaj mjesec?",
+  "Otkaži narudžbu za …"
 ];
 
-export function AdminAiChat() {
+export function AdminAiChat({ fill = false }: { fill?: boolean }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -60,13 +61,13 @@ export function AdminAiChat() {
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className={`rounded-xl border border-slate-200 bg-white shadow-sm ${fill ? "flex h-full flex-col" : ""}`}>
       <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
         <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-900 text-[11px] font-bold text-lime-400">AI</span>
         <span className="text-sm font-semibold text-slate-800">Poslovni asistent</span>
       </div>
 
-      <div className="max-h-80 min-h-[3rem] overflow-y-auto px-5 py-4">
+      <div className={`overflow-y-auto px-5 py-4 ${fill ? "flex-1" : "max-h-80 min-h-[3rem]"}`}>
         {messages.length === 0 ? (
           <p className="text-sm text-slate-400">Pitaj me bilo što o svom shopu — brojke, prodaji, kupcima, prijedlozima.</p>
         ) : (

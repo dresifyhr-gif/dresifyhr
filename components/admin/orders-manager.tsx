@@ -27,37 +27,57 @@ const STATUS: Record<string, { label: string; cls: string }> = {
 
 export function OrdersManager() {
   const [q, setQ] = useState("");
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [data, setData] = useState<{ orders: Order[]; total: number; pages: number }>({ orders: [], total: 0, pages: 1 });
+  const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const debounce = useRef<ReturnType<typeof setTimeout>>();
+  const sentinel = useRef<HTMLDivElement>(null);
+  const reqId = useRef(0);
 
-  const load = useCallback(async (query: string, p: number) => {
+  const fetchPage = useCallback(async (query: string, p: number, append: boolean) => {
+    const my = ++reqId.current;
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/orders/search/?q=${encodeURIComponent(query)}&page=${p}`);
       const d = await res.json();
-      if (d?.ok) setData({ orders: d.orders, total: d.total, pages: d.pages });
+      if (my !== reqId.current) return; // stale response, ignore
+      if (d?.ok) {
+        setOrders((prev) => (append ? [...prev, ...d.orders] : d.orders));
+        setTotal(d.total);
+        setPages(d.pages);
+        setPage(p);
+      }
     } catch {
       /* ignore */
     }
-    setLoading(false);
+    if (my === reqId.current) setLoading(false);
   }, []);
 
-  useEffect(() => {
-    load("", 1);
-  }, [load]);
-
-  // debounce search
+  // initial + debounced search (resets list)
   useEffect(() => {
     clearTimeout(debounce.current);
-    debounce.current = setTimeout(() => {
-      setPage(1);
-      load(q, 1);
-    }, 300);
+    debounce.current = setTimeout(() => fetchPage(q, 1, false), 300);
     return () => clearTimeout(debounce.current);
-  }, [q, load]);
+  }, [q, fetchPage]);
+
+  // infinite scroll
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loading && page < pages) {
+          fetchPage(q, page + 1, true);
+        }
+      },
+      { rootMargin: "400px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [q, page, pages, loading, fetchPage]);
 
   async function act(id: string, endpoint: string, body: object) {
     if (busy) return;
@@ -67,14 +87,9 @@ export function OrdersManager() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
     }).catch(() => {});
-    await load(q, page);
+    // refresh current list in place (keeps scroll position, updated statuses)
+    await fetchPage(q, 1, false);
     setBusy(null);
-  }
-
-  function go(p: number) {
-    const np = Math.min(data.pages, Math.max(1, p));
-    setPage(np);
-    load(q, np);
   }
 
   return (
@@ -86,18 +101,18 @@ export function OrdersManager() {
           placeholder="Traži po imenu, broju mobitela ili adresi…"
           className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white"
         />
-        <span className="shrink-0 text-xs text-slate-400">{loading ? "…" : `${data.total} narudžbi`}</span>
+        <span className="shrink-0 text-xs text-slate-400">{total} narudžbi</span>
       </div>
 
-      {data.orders.length === 0 ? (
+      {orders.length === 0 ? (
         <div className="py-8 text-center text-sm text-slate-400">{loading ? "Učitavam…" : "Nema rezultata."}</div>
       ) : (
-        <div className="space-y-2">
-          {data.orders.map((o) => {
+        <div className="grid gap-3 xl:grid-cols-2">
+          {orders.map((o) => {
             const st = STATUS[o.status] || { label: o.status, cls: "bg-slate-100 text-slate-500" };
             const isBusy = busy === o.id;
             return (
-              <div key={o.id} className="rounded-lg border border-slate-100 p-3">
+              <div key={o.id} className="rounded-lg border border-slate-200 p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -139,15 +154,10 @@ export function OrdersManager() {
         </div>
       )}
 
-      {data.pages > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-3 text-sm">
-          <button type="button" onClick={() => go(page - 1)} disabled={page <= 1}
-            className="rounded-md border border-slate-200 px-3 py-1.5 text-slate-600 disabled:opacity-40">← Prethodna</button>
-          <span className="text-slate-500">{page} / {data.pages}</span>
-          <button type="button" onClick={() => go(page + 1)} disabled={page >= data.pages}
-            className="rounded-md border border-slate-200 px-3 py-1.5 text-slate-600 disabled:opacity-40">Sljedeća →</button>
-        </div>
-      )}
+      {/* infinite-scroll sentinel */}
+      <div ref={sentinel} className="h-8" />
+      {loading && orders.length > 0 && <div className="py-3 text-center text-xs text-slate-400">Učitavam još…</div>}
+      {page >= pages && orders.length > 0 && <div className="py-3 text-center text-xs text-slate-300">— kraj popisa —</div>}
     </div>
   );
 }

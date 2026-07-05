@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { LayoutDashboard, Package, Send, Users, BarChart3, LogOut } from "lucide-react";
 
+import { AdminAiDock } from "@/components/admin/admin-ai-dock";
+
 const NAV = [
   { href: "/admin", label: "Pregled", hint: "Početna", icon: LayoutDashboard },
   { href: "/admin/narudzbe", label: "Narudžbe", hint: "Traži i mijenjaj", icon: Package },
@@ -97,8 +99,11 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
           </div>
         </header>
 
-        <main className="mx-auto max-w-5xl px-4 py-5 pb-24 sm:px-6 lg:pb-10">{children}</main>
+        <main className="mx-auto max-w-[1600px] px-4 py-5 pb-24 sm:px-6 lg:px-8 lg:pb-10">{children}</main>
       </div>
+
+      {/* Global AI assistant — available on every page */}
+      <AdminAiDock />
 
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">

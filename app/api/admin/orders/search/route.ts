@@ -55,6 +55,10 @@ export async function GET(request: Request) {
     });
   }
 
+  // Neposlane ("new") prve, ostalo po datumu (stabilan sort — prisma već vraća datum desc).
+  const rank = (s: string) => (s === "new" ? 0 : 1);
+  filtered.sort((a, b) => rank(a.status) - rank(b.status));
+
   const total = filtered.length;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);

@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
-import { AdminAiChat } from "@/components/admin/ai-chat";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Stat, Panel, eur } from "@/components/admin/ui";
 
@@ -19,7 +18,7 @@ export default async function AdminOverview() {
   return (
     <AdminShell title="Pregled" subtitle="Sve najvažnije na jednom mjestu">
       {/* KPI cards */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <Stat label="Danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} sub={`${m.todayOrders} narudžbi`} />
         <Stat label="7 dana" value={eur(m.weekRev)} profit={eur(m.weekProfit)} sub={`${m.weekOrders} narudžbi`} change={m.weekChange} />
         <Stat label="30 dana" value={eur(m.monthRev)} profit={eur(m.monthProfit)} sub={`${m.monthOrders} narudžbi`} change={m.monthChange} />
@@ -77,11 +76,6 @@ export default async function AdminOverview() {
             </p>
           )}
         </Panel>
-      </div>
-
-      {/* AI assistant */}
-      <div className="mt-5">
-        <AdminAiChat />
       </div>
 
       {/* Revenue chart */}

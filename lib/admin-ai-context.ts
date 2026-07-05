@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { jerseys } from "@/lib/data/jerseys";
 import { formatCroatianName } from "@/lib/utils";
+import { getCeoInsights } from "@/lib/admin-ceo";
 
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 const DAY = 86_400_000;
@@ -12,6 +13,7 @@ const DAY = 86_400_000;
 // assistant answers from real numbers (not guesses).
 export async function buildBusinessContext(): Promise<string> {
   const m = await getDashboardMetrics();
+  const ceo = await getCeoInsights(m.todayRev);
 
   const inactive = await prisma.customer.findMany({
     where: { lastOrderAt: { lt: new Date(Date.now() - 30 * DAY) }, totalOrders: { gt: 0 } },
@@ -41,6 +43,10 @@ export async function buildBusinessContext(): Promise<string> {
     `UKUPNO: ${eur(m.totalRev)} prometa (profit ${eur(m.totalProfit)}), ${m.orderCount} narudžbi, prosječna košarica ${eur(m.aov)}.`,
     `POSLANO (označeno kvačicom, stvarno isporučeno): ${eur(m.shippedRev)} prometa, profit ${eur(m.shippedProfit)}, ${m.shippedCount} narudžbi.`,
     `TREND: 7 dana ${m.weekChange == null ? "n/a" : (m.weekChange >= 0 ? "+" : "") + m.weekChange.toFixed(0) + "%"} vs prethodnih 7; 30 dana ${m.monthChange == null ? "n/a" : (m.monthChange >= 0 ? "+" : "") + m.monthChange.toFixed(0) + "%"} vs prethodnih 30.`,
+    `PROIZVOD U RASTU (zadnjih 14 vs prethodnih 14 dana): ${ceo.rising ? `${ceo.rising.name} (${ceo.rising.prior}→${ceo.rising.recent} kom)` : "nema jasnog rasta"}.`,
+    `PROIZVOD U PADU: ${ceo.declining ? `${ceo.declining.name} (${ceo.declining.prior}→${ceo.declining.recent} kom)` : "nema jasnog pada"}.`,
+    `ZA NARUČITI (najbrže se prodaje zadnjih 14 dana): ${ceo.reorder ? `${ceo.reorder.name} (${ceo.reorder.qty} kom)` : "n/a"}.`,
+    `DANAS: kupac dana ${ceo.customerOfDay ? `${ceo.customerOfDay.name} (${eur(ceo.customerOfDay.total ?? 0)})` : "još nema"}; najveća narudžba ${ceo.biggestOrderToday ? `${ceo.biggestOrderToday.name} (${eur(ceo.biggestOrderToday.total ?? 0)})` : "još nema"}; procjena dana ${eur(ceo.projection)}.`,
     `ZA SLANJE (čeka, nije poslano): ${m.pending.length} narudžbi, ${eur(m.pendingTotal)}.`,
     `REKLAME: potrošeno ${eur(m.adSpendTotal)}, ROAS ${m.roas == null ? "n/a" : m.roas.toFixed(1) + "x"}, neto profit nakon reklama ${eur(m.netAfterAds)}.`,
     ``,
