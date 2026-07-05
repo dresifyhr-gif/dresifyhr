@@ -64,7 +64,7 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
   return (
     <div className={`rounded-xl border border-slate-200 bg-white shadow-sm ${fill ? "flex h-full flex-col" : ""}`}>
       <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
-        <Image src="/dresify-ai.png" alt="Dresify AI" width={28} height={28} className="h-7 w-7 object-contain" />
+        <Image src="/dresify-robot.png" alt="Dresify AI" width={40} height={40} className="h-10 w-10 object-contain" />
         <span className="text-sm font-semibold text-slate-800">Direktor AI</span>
       </div>
 
@@ -73,17 +73,22 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
           <p className="text-sm text-slate-400">Pitaj me bilo što o svom shopu — brojke, prodaji, kupcima, prijedlozima.</p>
         ) : (
           <div className="space-y-3">
-            {messages.map((msg, i) => (
-              <div key={i} className={msg.role === "user" ? "text-right" : ""}>
-                <div
-                  className={`inline-block max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm ${
-                    msg.role === "user" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-800"
-                  }`}
-                >
-                  {msg.content || (loading ? "…" : "")}
+            {messages.map((msg, i) =>
+              msg.role === "user" ? (
+                <div key={i} className="text-right">
+                  <div className="inline-block max-w-[85%] whitespace-pre-wrap rounded-2xl bg-slate-900 px-3.5 py-2 text-sm text-white">
+                    {msg.content || (loading ? "…" : "")}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ) : (
+                <div key={i} className="flex items-start gap-2">
+                  <Image src="/dresify-robot.png" alt="AI" width={28} height={28} className="mt-0.5 h-7 w-7 shrink-0 object-contain" />
+                  <div className="inline-block max-w-[85%] whitespace-pre-wrap rounded-2xl bg-slate-100 px-3.5 py-2 text-sm text-slate-800">
+                    {msg.content || (loading ? "…" : "")}
+                  </div>
+                </div>
+              )
+            )}
             <div ref={endRef} />
           </div>
         )}

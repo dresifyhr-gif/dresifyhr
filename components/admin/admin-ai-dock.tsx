@@ -16,9 +16,9 @@ export function AdminAiDock() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="fixed bottom-20 right-4 z-40 flex items-center gap-2 rounded-full bg-slate-900 py-2 pl-2 pr-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition hover:bg-slate-800 lg:bottom-6 lg:right-6"
+          className="fixed bottom-20 right-4 z-40 flex items-center gap-2 rounded-full bg-slate-900 py-1.5 pl-1.5 pr-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition hover:bg-slate-800 lg:bottom-6 lg:right-6"
         >
-          <Image src="/dresify-ai.png" alt="Dresify AI" width={32} height={32} className="h-8 w-8 object-contain" />
+          <Image src="/dresify-robot.png" alt="Dresify AI" width={48} height={48} className="h-12 w-12 object-contain" />
           Direktor AI
         </button>
       )}
@@ -29,7 +29,7 @@ export function AdminAiDock() {
           <div className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-slate-50 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3.5">
               <div className="flex items-center gap-2">
-                <Image src="/dresify-ai.png" alt="Dresify AI" width={32} height={32} className="h-8 w-8 object-contain" />
+                <Image src="/dresify-robot.png" alt="Dresify AI" width={40} height={40} className="h-10 w-10 object-contain" />
                 <span className="text-sm font-bold text-slate-900">Direktor AI</span>
               </div>
               <button type="button" onClick={() => setOpen(false)} className="text-slate-400 transition hover:text-slate-700">
