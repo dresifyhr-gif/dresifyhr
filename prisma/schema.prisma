@@ -92,6 +92,16 @@ model Product {
   updatedAt DateTime @updatedAt
 }
 
+// Override kataloga iz admina (bez diranja koda): cijena + zaliha po slugu.
+// Ako postoji redak za slug, njegove vrijednosti gaze osnovni katalog.
+model ProductOverride {
+  slug         String   @id
+  price        Float?
+  outOfStock   String? // "all" | "adults" | "kids" (prazno = na stanju)
+  soldOutSizes String? // npr. "XL,XXL"
+  updatedAt    DateTime @updatedAt
+}
+
 // Poravnanje računa Igor ↔ Ivica. Nakon poravnanja podjela broji samo profit
 // od zadnjeg settledAt nadalje.
 model Settlement {

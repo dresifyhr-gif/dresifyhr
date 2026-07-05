@@ -2,6 +2,7 @@ import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { buildBreadcrumbSchema, buildItemListSchema, buildMetadata } from "@/lib/seo";
 import { jerseys } from "@/lib/data/jerseys";
+import { withOverrides } from "@/lib/data/product-overrides";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
 export const metadata = buildMetadata({
@@ -18,10 +19,10 @@ export const metadata = buildMetadata({
   ]
 });
 
-const kompleti = jerseys.filter((j) => j.liga === "Komplet");
-
 export default async function KompletiPage() {
   const { t } = await getServerTranslations();
+
+  const kompleti = (await withOverrides(jerseys)).filter((j) => j.liga === "Komplet");
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: t.productPage.breadcrumb.home, path: "/" },

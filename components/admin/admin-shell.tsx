@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Package, Send, Users, BarChart3, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Send, Users, BarChart3, Shirt, LogOut } from "lucide-react";
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
 
@@ -11,6 +11,7 @@ const NAV = [
   { href: "/admin", label: "Pregled", hint: "Početna", icon: LayoutDashboard },
   { href: "/admin/narudzbe", label: "Narudžbe", hint: "Traži i mijenjaj", icon: Package },
   { href: "/admin/slanje", label: "Za slanje", hint: "Što treba poslati", icon: Send },
+  { href: "/admin/proizvodi", label: "Proizvodi", hint: "Cijena i zaliha", icon: Shirt },
   { href: "/admin/kupci", label: "Kupci", hint: "Tko kupuje", icon: Users },
   { href: "/admin/analitika", label: "Analitika", hint: "Brojke i trendovi", icon: BarChart3 }
 ];
@@ -106,7 +107,7 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
       <AdminAiDock />
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
         {NAV.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;

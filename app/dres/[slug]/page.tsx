@@ -13,6 +13,7 @@ import {
   getPlayerCollectionForProduct
 } from "@/lib/data/seo-collections";
 import { getJerseyBySlug, getJerseyDescription, getJerseyStock, getRelatedJerseys, jerseys } from "@/lib/data/jerseys";
+import { jerseyWithOverride } from "@/lib/data/product-overrides";
 import { buildBreadcrumbSchema, buildMetadata, buildProductSchema } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 import { repairText } from "@/lib/utils";
@@ -28,6 +29,9 @@ export function generateStaticParams() {
     slug: product.slug
   }));
 }
+
+// ISR: proizvod se osvježi svakih 60s da admin promjene (cijena/zaliha) budu žive.
+export const revalidate = 60;
 
 export function generateMetadata({ params }: ProductPageProps): Metadata {
   const product = getJerseyBySlug(params.slug);
@@ -56,7 +60,7 @@ export function generateMetadata({ params }: ProductPageProps): Metadata {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { t, locale } = await getServerTranslations();
-  const product = getJerseyBySlug(params.slug);
+  const product = await jerseyWithOverride(getJerseyBySlug(params.slug));
 
   if (!product) {
     notFound();
