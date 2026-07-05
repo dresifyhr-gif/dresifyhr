@@ -6,7 +6,8 @@ import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { getOldUnshipped, OLD_UNSHIPPED_DAYS } from "@/lib/admin-winback";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { ShippingQueue } from "@/components/admin/shipping-queue";
-import { ApologyList, ReturnedList } from "@/components/admin/winback-panels";
+import { ApologyList } from "@/components/admin/apology-list";
+import { ReturnedList } from "@/components/admin/winback-panels";
 import { Panel, eur } from "@/components/admin/ui";
 import { formatCroatianName, repairText } from "@/lib/utils";
 

@@ -25,7 +25,7 @@ export type OldUnshippedRow = {
 // Orders older than OLD_DAYS still unsent — for the WhatsApp apology / win-back list.
 export async function getOldUnshipped(limit = 100): Promise<OldUnshippedRow[]> {
   const rows = await prisma.order.findMany({
-    where: { status: "new", createdAt: { lt: new Date(Date.now() - OLD_DAYS * DAY) } },
+    where: { status: "new", apologySent: false, createdAt: { lt: new Date(Date.now() - OLD_DAYS * DAY) } },
     orderBy: { createdAt: "asc" },
     take: limit,
     select: {

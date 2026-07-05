@@ -8,7 +8,8 @@ import { getOldUnshipped, OLD_UNSHIPPED_DAYS } from "@/lib/admin-winback";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AssignShipper } from "@/components/admin/assign-shipper";
 import { SettlementButton } from "@/components/admin/settlement-button";
-import { ApologyList, ReturnedList } from "@/components/admin/winback-panels";
+import { ApologyList } from "@/components/admin/apology-list";
+import { ReturnedList } from "@/components/admin/winback-panels";
 import { Stat, Panel, eur, waLink } from "@/components/admin/ui";
 import { formatCroatianName } from "@/lib/utils";
 

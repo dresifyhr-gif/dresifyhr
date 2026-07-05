@@ -37,6 +37,7 @@ model Order {
   shippedBy    String?     // "igor" | "ivica" — tko je fizički poslao (za obračun)
   shippedAt    DateTime?
   tracking     String?     // broj pošiljke / tracking
+  apologySent  Boolean     @default(false) // označeno da je isprika poslana (miče iz win-back liste)
 
   items        OrderItem[]
   customer     Customer?   @relation(fields: [customerId], references: [id])
