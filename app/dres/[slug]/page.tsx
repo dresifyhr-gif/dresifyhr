@@ -13,7 +13,7 @@ import {
   getPlayerCollectionForProduct
 } from "@/lib/data/seo-collections";
 import { getJerseyBySlug, getJerseyDescription, getJerseyStock, getRelatedJerseys, jerseys } from "@/lib/data/jerseys";
-import { jerseyWithOverride } from "@/lib/data/product-overrides";
+import { getProductBySlug } from "@/lib/data/product-overrides";
 import { buildBreadcrumbSchema, buildMetadata, buildProductSchema } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 import { repairText } from "@/lib/utils";
@@ -60,7 +60,7 @@ export function generateMetadata({ params }: ProductPageProps): Metadata {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { t, locale } = await getServerTranslations();
-  const product = await jerseyWithOverride(getJerseyBySlug(params.slug));
+  const product = await getProductBySlug(params.slug, getJerseyBySlug(params.slug));
 
   if (!product) {
     notFound();

@@ -7,7 +7,7 @@ import {
   getFeaturedPlayerCollections
 } from "@/lib/data/seo-collections";
 import { jerseys } from "@/lib/data/jerseys";
-import { withOverrides } from "@/lib/data/product-overrides";
+import { getCatalogProducts } from "@/lib/data/product-overrides";
 import { buildBreadcrumbSchema, buildItemListSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
@@ -31,7 +31,7 @@ export const metadata = buildMetadata({
 export default async function JerseysPage() {
   const { t } = await getServerTranslations();
 
-  const dresovi = (await withOverrides(jerseys)).filter((j) => j.liga !== "Komplet");
+  const dresovi = (await getCatalogProducts(jerseys)).filter((j) => j.liga !== "Komplet");
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: t.productPage.breadcrumb.home, path: "/" },

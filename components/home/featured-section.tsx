@@ -42,7 +42,7 @@ export function FeaturedSection() {
         <div className="-mx-3 sm:-mx-6 lg:mx-0">
           <div className="flex gap-3 overflow-x-auto px-3 pb-3 sm:gap-4 sm:px-6 lg:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {featuredProducts.map((product) => {
-              const gallery = getJerseyGallery(product.slug);
+              const gallery = product.images ?? getJerseyGallery(product.slug);
               const image = gallery[0]?.src;
               const badge = product.badge ?? (product.retro ? "retro" : null);
 

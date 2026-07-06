@@ -10,7 +10,7 @@ import { TrustStrip } from "@/components/home/trust-strip";
 import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { SectionHeading } from "@/components/site/section-heading";
 import { jerseys } from "@/lib/data/jerseys";
-import { withOverrides } from "@/lib/data/product-overrides";
+import { getCatalogProducts } from "@/lib/data/product-overrides";
 import { buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
@@ -48,7 +48,7 @@ export const revalidate = 120;
 export default async function HomePage() {
   const { t } = await getServerTranslations();
 
-  const dresovi = (await withOverrides(jerseys)).filter((j) => j.liga !== "Komplet");
+  const dresovi = (await getCatalogProducts(jerseys)).filter((j) => j.liga !== "Komplet");
 
   return (
     <>

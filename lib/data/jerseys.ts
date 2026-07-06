@@ -15,6 +15,10 @@ export type Jersey = {
   soldOutSizes?: string[];
   // Admin-uređeni opis (paragrafi odvojeni \n); ako postoji, koristi se umjesto auto-opisa.
   descriptionOverride?: string;
+  // Slike za custom dresove (dodane iz admina); ako postoje, koriste se umjesto statičke galerije.
+  images?: { src: string; altLabel?: string }[];
+  // Označava dres dodan kroz admin (nije u kodu).
+  isCustom?: boolean;
 };
 
 export const jerseys: Jersey[] = [

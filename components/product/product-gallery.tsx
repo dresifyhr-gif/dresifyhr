@@ -13,7 +13,7 @@ type ProductGalleryProps = {
 };
 
 export function ProductGallery({ product }: ProductGalleryProps) {
-  const gallery = getJerseyGallery(product.slug);
+  const gallery = product.images ?? getJerseyGallery(product.slug);
   const [activeIndex, setActiveIndex] = useState(0);
 
   if (gallery.length === 0) {

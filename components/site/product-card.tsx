@@ -35,7 +35,7 @@ export function ProductCard({ product, priority = false }: { product: Jersey; pr
     e.preventDefault();
     e.stopPropagation();
     if (!selectedSize) return;
-    const gallery = getJerseyGallery(product.slug);
+    const gallery = product.images ?? getJerseyGallery(product.slug);
     addItem({
       slug: product.slug,
       klub: product.klub,
