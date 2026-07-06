@@ -27,6 +27,32 @@ export function CustomProducts() {
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({ ...empty });
   const [saving, setSaving] = useState(false);
+  const [aiName, setAiName] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
+
+  async function aiFill() {
+    if (aiBusy || !aiName.trim()) return;
+    setAiBusy(true);
+    try {
+      const d = await fetch("/api/admin/generate-product/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: aiName })
+      }).then((r) => r.json());
+      if (d?.ok) {
+        setF((prev) => ({
+          ...prev,
+          klub: d.klub || prev.klub,
+          igrac: d.igrac || prev.igrac,
+          liga: LIGE.includes(d.liga) ? d.liga : prev.liga,
+          description: d.description || prev.description
+        }));
+      }
+    } catch {
+      /* ignore */
+    }
+    setAiBusy(false);
+  }
 
   async function load() {
     const d = await fetch("/api/admin/custom-products/").then((r) => r.json()).catch(() => null);
@@ -77,6 +103,23 @@ export function CustomProducts() {
 
       {open && (
         <div className="mt-4 space-y-3 rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+          <div className="rounded-lg border border-slate-900/10 bg-slate-900/5 p-3">
+            <div className="mb-1.5 text-xs font-semibold text-slate-700">🪄 AI popuni — upiši naziv, ostalo složi AI</div>
+            <div className="flex gap-2">
+              <input
+                value={aiName}
+                onChange={(e) => setAiName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); aiFill(); } }}
+                placeholder="npr. Hrvatska Modrić 2026"
+                className="flex-1 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+              />
+              <button type="button" onClick={aiFill} disabled={aiBusy || !aiName.trim()} className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:opacity-40">
+                {aiBusy ? "Slažem…" : "🪄 Popuni"}
+              </button>
+            </div>
+            <div className="mt-1 text-[11px] text-slate-400">Ispuni klub, igrača, ligu i opis. Ti dodaš cijenu i slike.</div>
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-xs font-medium text-slate-500">Klub / reprezentacija
               <input value={f.klub} onChange={(e) => setF({ ...f, klub: e.target.value })} placeholder="npr. Hrvatska" className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400" />
