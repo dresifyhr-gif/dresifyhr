@@ -26,6 +26,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const q = (url.searchParams.get("q") || "").trim();
   const status = url.searchParams.get("status") || ""; // "" | new | shipped | returned | cancelled
+  const sort = url.searchParams.get("sort") || ""; // "" (new-first) | old | new
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
 
   const all = await prisma.order.findMany({
@@ -43,7 +44,7 @@ export async function GET(request: Request) {
       shippedBy: true,
       reference: true,
       tracking: true,
-      items: { select: { klub: true, igrac: true, size: true, quantity: true } }
+      items: { select: { id: true, klub: true, igrac: true, size: true, quantity: true, unitPrice: true } }
     }
   });
 
@@ -61,9 +62,15 @@ export async function GET(request: Request) {
     });
   }
 
-  // Neposlane ("new") prve, ostalo po datumu (stabilan sort — prisma već vraća datum desc).
-  const rank = (s: string) => (s === "new" ? 0 : 1);
-  filtered.sort((a, b) => rank(a.status) - rank(b.status));
+  if (sort === "old") {
+    filtered = [...filtered].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  } else if (sort === "new") {
+    filtered = [...filtered].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  } else {
+    // Zadano: neposlane ("new") prve, ostalo po datumu (prisma već vraća datum desc; stabilan sort).
+    const rank = (s: string) => (s === "new" ? 0 : 1);
+    filtered = [...filtered].sort((a, b) => rank(a.status) - rank(b.status));
+  }
 
   const total = filtered.length;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -87,9 +94,13 @@ export async function GET(request: Request) {
       shippedBy: o.shippedBy || null,
       tracking: o.tracking || "",
       items: o.items.map((it) => ({
+        id: it.id,
+        klub: repairText(it.klub || ""),
+        igrac: repairText(it.igrac || ""),
         label: repairText([it.klub, it.igrac].filter(Boolean).join(" — ")),
         size: it.size || "",
-        quantity: it.quantity
+        quantity: it.quantity,
+        unitPrice: it.unitPrice
       }))
     }))
   });
