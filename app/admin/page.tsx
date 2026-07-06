@@ -53,7 +53,7 @@ export default async function AdminOverview() {
     <AdminShell title="Pregled" subtitle="Sve najvažnije na jednom mjestu">
       {/* Greeting */}
       <div className="mb-5">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">{greeting()}, Igore 👋</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900">{greeting()}, Gazda 👋</h2>
         <p className="text-sm text-slate-500">
           {new Date().toLocaleDateString("hr-HR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
         </p>
@@ -227,16 +227,22 @@ export default async function AdminOverview() {
               </div>
             ))}
           </div>
+          {m.split.adsSpend > 0 && (
+            <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-2.5 text-sm">
+              <span className="text-slate-600">📣 Oglasi (platio Igor) — dijeli se 50/50</span>
+              <span className="text-slate-700"><span className="font-semibold text-slate-900">{eur(m.split.adsSpend)}</span> · svakom {eur(m.split.adsSpend / 2)}</span>
+            </div>
+          )}
           <div className="mt-4 flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center">
             {m.split.settleFrom == null ? (
-              <div className="text-sm font-semibold text-slate-600">Profit je izjednačen — nitko nikom ne duguje ✅</div>
+              <div className="text-sm font-semibold text-slate-600">Sve je izjednačeno — nitko nikom ne duguje ✅</div>
             ) : (
               <div className="text-sm text-slate-700">
-                Poravnanje:{" "}
+                Za isplatu:{" "}
                 <span className="font-bold text-slate-900">{m.split.settleFrom === "igor" ? "Igor" : "Ivica"}</span> daje{" "}
                 <span className="font-bold text-slate-900">{m.split.settleFrom === "igor" ? "Ivici" : "Igoru"}</span>{" "}
                 <span className="font-bold text-emerald-600">{eur(m.split.settleAmount)}</span>{" "}
-                <span className="text-slate-500">→ oboje po {eur(m.split.halfShare)}.</span>
+                <span className="text-slate-500">(profit izjednačen + pola oglasa).</span>
               </div>
             )}
             <SettlementButton />

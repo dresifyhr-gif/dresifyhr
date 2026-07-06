@@ -131,9 +131,16 @@ export async function getDashboardMetrics() {
   // Profit poslanih od zadnjeg poravnanja (baza za podjelu 50/50).
   const shippedProfitTotal = await profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter });
   const halfShare = shippedProfitTotal / 2;
-  // Poravnanje: tko je generirao više profita, drugom vraća pola razlike.
-  const settleAmount = Math.abs(igor.profit - ivica.profit) / 2;
-  const settleFrom = igor.profit > ivica.profit ? "igor" : ivica.profit > igor.profit ? "ivica" : null;
+
+  // Oglasi (reklame) od zadnjeg poravnanja — dijele se 50/50 (plaća Igor, Ivica vraća pola).
+  const adsAgg = await prisma.adSpend.aggregate({ _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined });
+  const adsSpend = adsAgg._sum.amount ?? 0;
+
+  // Konačno poravnanje: profit-izjednačenje + pola oglasa (Igor platio → Ivica duguje pola).
+  // Pozitivno = Ivica → Igoru; negativno = Igor → Ivici.
+  const ivicaToIgor = (ivica.profit - igor.profit) / 2 + adsSpend / 2;
+  const settleAmount = Math.abs(ivicaToIgor);
+  const settleFrom = ivicaToIgor > 0.005 ? "ivica" : ivicaToIgor < -0.005 ? "igor" : null;
 
   return {
     weekChange,
@@ -167,7 +174,7 @@ export async function getDashboardMetrics() {
     shippedRev: net(shippedAgg),
     shippedProfit,
     aov: orderCount ? totalRev / orderCount : 0,
-    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, settleAmount, settleFrom, lastSettlement, settlements },
+    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, adsSpend, settleAmount, settleFrom, lastSettlement, settlements },
     topItems,
     bestCustomers,
     recentOrders,

@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { AutoPrint } from "@/components/admin/auto-print";
+import { LabelSender } from "@/components/admin/label-sender";
 import { isAdmin } from "@/lib/admin-auth";
 import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
@@ -10,13 +11,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
-
-// Pošiljatelj (fiksno) — ide na naljepnicu kao "Šalje".
-const SENDER = {
-  name: "Igor Katanić",
-  address: "Dubljevička ulica 91",
-  city: "10040 Zagreb"
-};
 
 export default async function ShippingLabelPage({ params }: { params: Promise<{ id: string }> }) {
   if (!(await isAdmin())) redirect("/admin/login/");
@@ -45,13 +39,8 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
       </div>
 
       <div className="label mx-auto w-[360px] rounded-lg border-2 border-black bg-white p-4 text-black shadow-lg">
-        {/* Šalje */}
-        <div className="text-[11px] font-bold uppercase tracking-wider text-black/60">Šalje</div>
-        <div className="mt-0.5 text-[14px] leading-5">
-          <div className="font-semibold">{SENDER.name}</div>
-          <div>{SENDER.address}</div>
-          <div>{SENDER.city}</div>
-        </div>
+        {/* Šalje — Igor ili Ivica (različite adrese) */}
+        <LabelSender defaultSender={order.shippedBy === "ivica" ? "ivica" : order.shippedBy === "igor" ? "igor" : undefined} />
 
         <div className="my-3 border-t-2 border-black" />
 
@@ -65,16 +54,9 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
 
         {/* Otkupnina */}
         {cod > 0 ? (
-          <div className="mt-3 rounded border-2 border-black px-3 py-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[13px] font-bold uppercase">Otkupnina</span>
-              <span className="text-[24px] font-bold">{eur(cod)}</span>
-            </div>
-            {order.shipping > 0 && (
-              <div className="mt-0.5 text-right text-[11px] text-black/60">
-                roba {eur(order.subtotal)}{order.discount > 0 ? ` − popust ${eur(order.discount)}` : ""} + dostava {eur(order.shipping)}
-              </div>
-            )}
+          <div className="mt-3 flex items-center justify-between rounded border-2 border-black px-3 py-2">
+            <span className="text-[13px] font-bold uppercase">Otkupnina</span>
+            <span className="text-[24px] font-bold">{eur(cod)}</span>
           </div>
         ) : null}
 
