@@ -38,7 +38,7 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900">
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
         <div className="px-5 py-5">
