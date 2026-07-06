@@ -106,6 +106,26 @@ model ProductOverride {
   updatedAt    DateTime @updatedAt
 }
 
+// Novi dresovi dodani kroz admin (ne postoje u kodu). Shop ih čita uz osnovni katalog.
+model CustomProduct {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  klub         String
+  igrac        String
+  liga         String   @default("Reprezentacija")
+  price        Float    @default(20)
+  retro        Boolean  @default(false)
+  vel          String   @default("Djeca: 104-176 · Odrasli: S-XXL")
+  badge        String?
+  outOfStock   String?
+  soldOutSizes String?
+  description  String?
+  images       String   @default("[]") // JSON niz URL-ova slika (redoslijed = galerija)
+  hidden       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 // Poravnanje računa Igor ↔ Ivica. Nakon poravnanja podjela broji samo profit
 // od zadnjeg settledAt nadalje.
 model Settlement {
