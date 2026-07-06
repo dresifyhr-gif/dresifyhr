@@ -106,6 +106,19 @@ model ProductOverride {
   updatedAt    DateTime @updatedAt
 }
 
+// Recenzije / zadovoljni kupci — slike koje su kupci slali (IG/WhatsApp), prikaz na shopu.
+model Testimonial {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  name      String?
+  text      String?
+  hidden    Boolean  @default(false)
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([hidden, sort])
+}
+
 // Novi dresovi dodani kroz admin (ne postoje u kodu). Shop ih čita uz osnovni katalog.
 model CustomProduct {
   id           String   @id @default(cuid())

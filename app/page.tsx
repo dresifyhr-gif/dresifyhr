@@ -11,6 +11,8 @@ import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { SectionHeading } from "@/components/site/section-heading";
 import { jerseys } from "@/lib/data/jerseys";
 import { getCatalogProducts } from "@/lib/data/product-overrides";
+import { getVisibleTestimonials } from "@/lib/testimonials";
+import { TestimonialsSection } from "@/components/site/testimonials-section";
 import { buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
@@ -49,6 +51,7 @@ export default async function HomePage() {
   const { t } = await getServerTranslations();
 
   const dresovi = (await getCatalogProducts(jerseys)).filter((j) => j.liga !== "Komplet");
+  const testimonials = await getVisibleTestimonials();
 
   return (
     <>
@@ -70,6 +73,7 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <TestimonialsSection items={testimonials} />
       <ReviewsSection />
       <InstagramSection />
       <FaqSection />

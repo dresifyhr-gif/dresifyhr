@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { TestimonialsManager } from "@/components/admin/testimonials-manager";
 import { Panel, eur, waLink } from "@/components/admin/ui";
 import { formatCroatianName } from "@/lib/utils";
 
@@ -17,6 +18,9 @@ export default async function CustomersPage() {
 
   return (
     <AdminShell title="Kupci" subtitle="Najbolji kupci i oni koje treba vratiti">
+      <div className="mb-5">
+        <TestimonialsManager />
+      </div>
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Najbolji kupci">
           {m.bestCustomers.length === 0 ? (
