@@ -116,6 +116,19 @@ export function formatCroatianName(value: string) {
   return cleaned.split(" ").map(titleCase).join(" ");
 }
 
+// Normalizira hrvatski broj mobitela za prikaz (naljepnica/pošta): uvijek počinje 09.
+// Rješava brojeve upisane bez vodeće nule ili s +385 / 00385.
+export function formatCroatianPhone(raw: string) {
+  let d = String(raw ?? "").replace(/\D/g, "");
+  if (!d) return String(raw ?? "");
+  if (d.startsWith("00385")) d = d.slice(5);
+  else if (d.startsWith("385")) d = d.slice(3);
+  if (!d.startsWith("0")) d = "0" + d; // mobitel bez vodeće nule → dodaj 0
+  // grupiranje radi čitljivosti: 095 887 8719
+  const m = d.match(/^(\d{3})(\d{3})(\d+)$/);
+  return m ? `${m[1]} ${m[2]} ${m[3]}` : d;
+}
+
 export function storageAvailable() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }

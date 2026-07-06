@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { formatCroatianPhone } from "@/lib/utils";
+
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 
 type Order = {
@@ -245,7 +247,7 @@ export function OrdersManager() {
                       {o.shippedBy && <span className="text-[10px] text-slate-400">({o.shippedBy})</span>}
                     </div>
                     <div className="mt-0.5 text-xs text-slate-500">
-                      {o.date} · {o.phone}
+                      {o.date} · {formatCroatianPhone(o.phone)}
                       {o.address ? ` · ${o.address}` : ""}
                     </div>
                     <div className="mt-0.5 text-xs text-slate-400">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-slate-700">{eur(o.total)}</span></div>
