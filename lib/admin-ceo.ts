@@ -21,7 +21,7 @@ export async function getCeoInsights(todayRev: number) {
   const [todayOrders, recentAgg, priorAgg] = await Promise.all([
     prisma.order.findMany({
       where: { createdAt: { gte: startToday }, status: { not: "cancelled" } },
-      select: { customerName: true, total: true }
+      select: { customerName: true, total: true, shipping: true }
     }),
     prisma.orderItem.groupBy({
       by: ["slug", "klub", "igrac"],
@@ -39,10 +39,11 @@ export async function getCeoInsights(todayRev: number) {
   let biggestOrderToday: Named | null = null;
   const spend = new Map<string, number>();
   for (const o of todayOrders) {
-    if (!biggestOrderToday || o.total > (biggestOrderToday.total ?? 0)) {
-      biggestOrderToday = { name: formatCroatianName(o.customerName), total: o.total };
+    const goods = o.total - (o.shipping ?? 0);
+    if (!biggestOrderToday || goods > (biggestOrderToday.total ?? 0)) {
+      biggestOrderToday = { name: formatCroatianName(o.customerName), total: goods };
     }
-    spend.set(o.customerName, (spend.get(o.customerName) ?? 0) + o.total);
+    spend.set(o.customerName, (spend.get(o.customerName) ?? 0) + goods);
   }
   let customerOfDay: Named | null = null;
   for (const [name, total] of spend) {

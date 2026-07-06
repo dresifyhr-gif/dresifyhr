@@ -34,6 +34,7 @@ export async function getOldUnshipped(limit = 100): Promise<OldUnshippedRow[]> {
       customerName: true,
       phone: true,
       total: true,
+      shipping: true,
       items: { select: { klub: true, igrac: true, size: true }, take: 4 }
     }
   });
@@ -49,7 +50,7 @@ export async function getOldUnshipped(limit = 100): Promise<OldUnshippedRow[]> {
       id: o.id,
       name,
       dateLabel: o.createdAt.toLocaleDateString("hr-HR"),
-      total: o.total,
+      total: o.total - (o.shipping ?? 0),
       product: product || "dres",
       wa: waLinkText(o.phone, apologyMessage(name, product || "dres"))
     };
