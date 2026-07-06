@@ -65,9 +65,16 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
 
         {/* Otkupnina */}
         {cod > 0 ? (
-          <div className="mt-3 flex items-center justify-between rounded border-2 border-black px-3 py-2">
-            <span className="text-[13px] font-bold uppercase">Otkupnina</span>
-            <span className="text-[24px] font-bold">{eur(cod)}</span>
+          <div className="mt-3 rounded border-2 border-black px-3 py-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-bold uppercase">Otkupnina</span>
+              <span className="text-[24px] font-bold">{eur(cod)}</span>
+            </div>
+            {order.shipping > 0 && (
+              <div className="mt-0.5 text-right text-[11px] text-black/60">
+                roba {eur(order.subtotal)}{order.discount > 0 ? ` − popust ${eur(order.discount)}` : ""} + dostava {eur(order.shipping)}
+              </div>
+            )}
           </div>
         ) : null}
 
