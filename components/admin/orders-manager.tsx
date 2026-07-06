@@ -77,8 +77,17 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   cancelled: { label: "otkazano", cls: "bg-slate-200 text-slate-600" }
 };
 
+const TABS = [
+  { value: "", label: "Sve" },
+  { value: "new", label: "Za slanje" },
+  { value: "shipped", label: "Poslano" },
+  { value: "returned", label: "Vraćeno" },
+  { value: "cancelled", label: "Otkazano" }
+];
+
 export function OrdersManager() {
   const [q, setQ] = useState("");
+  const [status, setStatus] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -88,12 +97,14 @@ export function OrdersManager() {
   const debounce = useRef<ReturnType<typeof setTimeout>>();
   const sentinel = useRef<HTMLDivElement>(null);
   const reqId = useRef(0);
+  const statusRef = useRef("");
+  statusRef.current = status;
 
   const fetchPage = useCallback(async (query: string, p: number, append: boolean) => {
     const my = ++reqId.current;
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/orders/search/?q=${encodeURIComponent(query)}&page=${p}`);
+      const res = await fetch(`/api/admin/orders/search/?q=${encodeURIComponent(query)}&status=${statusRef.current}&page=${p}`);
       const d = await res.json();
       if (my !== reqId.current) return; // stale response, ignore
       if (d?.ok) {
@@ -108,12 +119,12 @@ export function OrdersManager() {
     if (my === reqId.current) setLoading(false);
   }, []);
 
-  // initial + debounced search (resets list)
+  // initial + debounced search (resets list); also refetches when status tab changes
   useEffect(() => {
     clearTimeout(debounce.current);
     debounce.current = setTimeout(() => fetchPage(q, 1, false), 300);
     return () => clearTimeout(debounce.current);
-  }, [q, fetchPage]);
+  }, [q, status, fetchPage]);
 
   // infinite scroll
   useEffect(() => {
@@ -146,6 +157,18 @@ export function OrdersManager() {
 
   return (
     <div>
+      <div className="mb-3 flex flex-wrap gap-1.5">
+        {TABS.map((tb) => (
+          <button
+            key={tb.value}
+            type="button"
+            onClick={() => setStatus(tb.value)}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${status === tb.value ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+          >
+            {tb.label}
+          </button>
+        ))}
+      </div>
       <div className="mb-4 flex items-center gap-3">
         <input
           value={q}

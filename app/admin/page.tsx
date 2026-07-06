@@ -60,12 +60,13 @@ export default async function AdminOverview() {
       </div>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        <Stat label="Promet danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} />
-        <Stat label="Nove narudžbe" value={String(m.todayOrders)} sub="danas" />
-        <Stat label="Za poslati" value={String(m.pendingCount)} sub={eur(m.pendingTotal)} />
-        <Stat label="Procjena dana" value={eur(ceo.projection)} sub="predviđeni promet" />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <Stat label="Promet danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} sub={`${m.todayOrders} novih`} />
+        <Stat label="Za slanje" value={eur(m.pendingTotal)} profit={eur(m.pendingProfit)} sub={`${m.pendingCount} narudžbi`} />
         <Stat label="Poslano ukupno" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
+        <Stat label="Sve narudžbe" value={eur(m.totalRev)} profit={eur(m.totalProfit)} sub={`${m.orderCount} narudžbi`} />
+        <Stat label="Prosj. košarica" value={eur(m.aov)} />
+        <Stat label="Procjena dana" value={eur(ceo.projection)} sub="predviđeni promet" />
       </div>
 
       <SectionHeading>⚡ Za danas</SectionHeading>

@@ -82,7 +82,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             {p.returns > 0 && <span className="font-medium text-red-500">↩ {p.returns} vraćeno</span>}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1">
             <input
               value={price}

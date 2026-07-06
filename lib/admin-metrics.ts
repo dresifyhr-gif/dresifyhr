@@ -38,7 +38,7 @@ export async function getDashboardMetrics() {
   const shippedWhere = { status: { in: ["shipped", "done"] } };
 
   const [today, week, month, total, orderCount, shippedAgg, topItems, bestCustomers, recentOrders, windowOrders, soldSlugRows,
-    todayProfit, weekProfit, monthProfit, totalProfit, shippedProfit] =
+    todayProfit, weekProfit, monthProfit, totalProfit, shippedProfit, pendingProfit] =
     await Promise.all([
       rev(startToday),
       rev(startWeek),
@@ -55,7 +55,8 @@ export async function getDashboardMetrics() {
       profitFor({ createdAt: { gte: startWeek } }),
       profitFor({ createdAt: { gte: startMonth } }),
       profitFor(),
-      profitFor(shippedWhere)
+      profitFor(shippedWhere),
+      profitFor({ status: "new" })
     ]);
 
   // revenue by day, last 14 days
@@ -138,6 +139,7 @@ export async function getDashboardMetrics() {
     pending,
     pendingCount,
     pendingTotal,
+    pendingProfit,
     inactive,
     returned,
     unassignedShipped,

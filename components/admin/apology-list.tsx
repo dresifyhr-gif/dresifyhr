@@ -30,8 +30,8 @@ export function ApologyList({ rows }: { rows: OldUnshippedRow[] }) {
       </p>
       <ul className="space-y-2">
         {rows.map((o) => (
-          <li key={o.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 px-2.5 py-2 text-sm">
-            <span className="min-w-0 truncate text-slate-700">
+          <li key={o.id} className="flex flex-col items-start gap-2 rounded-lg border border-slate-100 px-2.5 py-2 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <span className="min-w-0 text-slate-700">
               <span className="text-slate-400">{o.dateLabel}</span> · {o.name}{" "}
               <span className="text-slate-400">· {o.product} · {eur(o.total)}</span>
             </span>

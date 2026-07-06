@@ -25,6 +25,7 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const q = (url.searchParams.get("q") || "").trim();
+  const status = url.searchParams.get("status") || ""; // "" | new | shipped | returned | cancelled
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
 
   const all = await prisma.order.findMany({
@@ -46,6 +47,8 @@ export async function GET(request: Request) {
   });
 
   let filtered = all;
+  if (status === "shipped") filtered = filtered.filter((o) => o.status === "shipped" || o.status === "done");
+  else if (status) filtered = filtered.filter((o) => o.status === status);
   if (q) {
     const nq = deaccent(q);
     const dq = q.replace(/\D/g, "");
