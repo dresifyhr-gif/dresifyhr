@@ -19,6 +19,7 @@ type Order = {
   status: string;
   shippedBy: string | null;
   tracking: string;
+  promoCode: string | null;
   items: { id: string; klub: string; igrac: string; label: string; size: string; quantity: number; unitPrice: number }[];
 };
 
@@ -245,6 +246,14 @@ export function OrdersManager() {
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-slate-900">{o.customerName}</span>
                       <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
+                      {o.promoCode && (
+                        <span
+                          title="Osvojena nagrada na igrici — besplatna dostava (bez +5 €)"
+                          className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700"
+                        >
+                          🎁 {o.promoCode} · bespl. dostava
+                        </span>
+                      )}
                       {o.shippedBy && <span className="text-[10px] text-slate-400">({o.shippedBy})</span>}
                     </div>
                     <div className="mt-0.5 text-xs text-slate-500">

@@ -44,6 +44,7 @@ export async function GET(request: Request) {
       shippedBy: true,
       reference: true,
       tracking: true,
+      promoCode: true,
       items: { select: { id: true, klub: true, igrac: true, size: true, quantity: true, unitPrice: true } }
     }
   });
@@ -93,6 +94,7 @@ export async function GET(request: Request) {
       status: o.status,
       shippedBy: o.shippedBy || null,
       tracking: o.tracking || "",
+      promoCode: o.promoCode || null,
       items: o.items.map((it) => ({
         id: it.id,
         klub: repairText(it.klub || ""),
