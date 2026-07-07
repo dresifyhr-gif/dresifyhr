@@ -82,6 +82,17 @@ export function buildProductSchema(product: Jersey, stock: number) {
     },
     sku: `DRESIFY-${product.id}`,
     category: "Nogometni dresovi",
+    ...(product.rating
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: product.rating.value.toFixed(1),
+            reviewCount: String(product.rating.count),
+            bestRating: "5",
+            worstRating: "1"
+          }
+        }
+      : {}),
     offers: {
       "@type": "Offer",
       priceCurrency: "EUR",

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, X } from "lucide-react";
 
 import { JerseyVisual } from "@/components/site/jersey-visual";
+import { Stars } from "@/components/site/stars";
 import { useCart } from "@/components/providers/cart-provider";
 import { type Jersey, getJerseyStock, getStockTone, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
@@ -111,6 +112,11 @@ export function ProductCard({ product, priority = false }: { product: Jersey; pr
             <p className="mt-0.5 text-[11px] leading-4 text-white/50 sm:mt-1 sm:text-[13px] sm:leading-5">
               {repairText(product.igrac)}
             </p>
+            {product.rating && (
+              <div className="mt-1">
+                <Stars value={product.rating.value} count={product.rating.count} />
+              </div>
+            )}
           </div>
 
           {/* Price & stock */}

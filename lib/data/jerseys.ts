@@ -19,6 +19,8 @@ export type Jersey = {
   images?: { src: string; altLabel?: string }[];
   // Označava dres dodan kroz admin (nije u kodu).
   isCustom?: boolean;
+  // Ocjena (zvjezdice) — samo za dresove koji su se prodali.
+  rating?: { value: number; count: number };
 };
 
 export const jerseys: Jersey[] = [

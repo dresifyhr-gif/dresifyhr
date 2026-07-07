@@ -92,21 +92,58 @@ async function getCustomJerseys(): Promise<Jersey[]> {
   }
 }
 
-// Puni katalog za shop: osnovni (s override-ima) + custom dresovi iz admina.
+// Deterministička ocjena 4.5–5.0 + plauzibilan broj recenzija iz sluga.
+function ratingFor(slug: string): { value: number; count: number } {
+  let h = 0;
+  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) | 0;
+  h = Math.abs(h);
+  const steps = [4.5, 4.6, 4.7, 4.8, 4.9, 5.0];
+  return { value: steps[h % steps.length], count: 7 + (h % 48) };
+}
+
+// Slugovi koji su se barem jednom prodali (za prikaz zvjezdica). Best-effort.
+async function getSoldSlugs(): Promise<Set<string>> {
+  try {
+    if (!process.env.DATABASE_URL) return new Set();
+    const rows = await prisma.orderItem.findMany({ distinct: ["slug"], select: { slug: true } });
+    return new Set(rows.map((r) => r.slug).filter((s): s is string => !!s));
+  } catch {
+    return new Set();
+  }
+}
+
+function withRating(j: Jersey, sold: Set<string>): Jersey {
+  return sold.has(j.slug) ? { ...j, rating: ratingFor(j.slug) } : j;
+}
+
+// Puni katalog za shop: osnovni (s override-ima) + custom dresovi iz admina, s ocjenama.
 export async function getCatalogProducts(base: Jersey[]): Promise<Jersey[]> {
-  const [withOv, custom] = await Promise.all([withOverrides(base), getCustomJerseys()]);
-  return [...custom, ...withOv];
+  const [withOv, custom, sold] = await Promise.all([withOverrides(base), getCustomJerseys(), getSoldSlugs()]);
+  return [...custom, ...withOv].map((j) => withRating(j, sold));
 }
 
 // Dohvat pojedinog proizvoda po slugu: prvo custom (DB), pa osnovni + override.
 export async function getProductBySlug(slug: string, base: Jersey | undefined): Promise<Jersey | undefined> {
+  let product: Jersey | undefined;
   try {
     if (process.env.DATABASE_URL) {
       const c = (await prisma.customProduct.findUnique({ where: { slug } })) as unknown as CustomRow | null;
-      if (c && !c.hidden) return customToJersey(c);
+      if (c && !c.hidden) product = customToJersey(c);
     }
   } catch {
     /* ignore */
   }
-  return jerseyWithOverride(base);
+  if (!product) product = await jerseyWithOverride(base);
+  if (!product) return product;
+
+  // Ocjena samo ako se dres prodao.
+  try {
+    if (process.env.DATABASE_URL) {
+      const sold = await prisma.orderItem.findFirst({ where: { slug }, select: { id: true } });
+      if (sold) product = { ...product, rating: ratingFor(slug) };
+    }
+  } catch {
+    /* ignore */
+  }
+  return product;
 }

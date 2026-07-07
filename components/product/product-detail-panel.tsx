@@ -7,6 +7,7 @@ import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
 import { StickyAddToCart } from "@/components/product/sticky-add-to-cart";
 import { SizeGuide } from "@/components/product/size-guide";
+import { Stars } from "@/components/site/stars";
 import { fbTrack } from "@/lib/fbpixel";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import {
@@ -89,6 +90,11 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
       <h1 className="mt-6 text-5xl uppercase leading-none text-white sm:text-6xl">
         {repairText(product.igrac)}
       </h1>
+      {product.rating && (
+        <div className="mt-3">
+          <Stars value={product.rating.value} count={product.rating.count} size="md" />
+        </div>
+      )}
       <p className="mt-4 text-4xl font-semibold text-accent">{productPrice}€</p>
       <p className={`mt-4 text-sm font-semibold uppercase tracking-[0.2em] ${getStockTone(stock)}`}>
         {t.product.stockWarning(stock)}
