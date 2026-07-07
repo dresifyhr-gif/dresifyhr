@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Footprints, Goal, HelpCircle, Layers, PackageOpen, Volleyball, Worm } from "lucide-react";
+import { ArrowRight, Crosshair, Footprints, Goal, HelpCircle, Layers, PackageOpen, Volleyball, Worm } from "lucide-react";
 
 import { buildMetadata } from "@/lib/seo";
 
@@ -53,6 +53,12 @@ const games = [
     title: "Super Dresify",
     desc: "Trči i skači, skupljaj dresove i preskači čunjeve. 8 = besplatna dostava, 15 = −15%, 25 = −20%.",
     Icon: Footprints
+  },
+  {
+    href: "/gadaj",
+    title: "Snajper",
+    desc: "Gađaj dresove na trakama u 40 sekundi. 12 = besplatna dostava, 22 = −15%, 32 = −20%.",
+    Icon: Crosshair
   }
 ];
 
