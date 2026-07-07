@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { AutoPrint } from "@/components/admin/auto-print";
 import { LabelSender } from "@/components/admin/label-sender";
+import { PdfLabelLink } from "@/components/admin/pdf-label-link";
 import { isAdmin } from "@/lib/admin-auth";
 import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
@@ -35,7 +36,10 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
 
       <div className="no-print mx-auto mb-4 flex max-w-[360px] items-center justify-between">
         <a href="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-800">← Nazad</a>
-        <AutoPrint />
+        <div className="flex items-center gap-2">
+          <PdfLabelLink id={id} defaultSender={order.shippedBy === "ivica" ? "ivica" : order.shippedBy === "igor" ? "igor" : undefined} />
+          <AutoPrint />
+        </div>
       </div>
 
       <div className="label mx-auto w-[360px] rounded-lg border-2 border-black bg-white p-4 text-black shadow-lg">
