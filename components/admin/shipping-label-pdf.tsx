@@ -31,7 +31,6 @@ const s = StyleSheet.create({
   codLabel: { fontSize: 12, fontWeight: "bold", textTransform: "uppercase" },
   codValue: { fontSize: 22, fontWeight: "bold" },
   footer: { marginTop: "auto" },
-  thanks: { fontSize: 13, fontWeight: "bold", textAlign: "center", marginBottom: 6 },
   meta: { flexDirection: "row", justifyContent: "space-between", fontSize: 10, color: "#555" }
 });
 
@@ -69,7 +68,6 @@ export function ShippingLabelDoc({ sender, recipientName, phone, address, cod, r
           ) : null}
 
           <View style={s.footer}>
-            <Text style={s.thanks}>Hvala na kupnji!</Text>
             <View style={s.meta}>
               <Text>#{reference}</Text>
               <Text>Pouzeće</Text>
