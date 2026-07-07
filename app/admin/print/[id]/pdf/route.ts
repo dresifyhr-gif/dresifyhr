@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import { ShippingLabelDoc } from "@/components/admin/shipping-label-pdf";
 import { isAdmin } from "@/lib/admin-auth";
-import { getOrderReference } from "@/lib/orders";
+import { codAmount, getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
 
@@ -27,7 +27,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const who = q === "ivica" || q === "igor" ? q : order.shippedBy === "ivica" ? "ivica" : "igor";
 
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
-  const cod = order.payment?.toLowerCase().includes("pouze") || !order.payment ? order.total : 0;
+  const isCod = order.payment?.toLowerCase().includes("pouze") || !order.payment;
+  const cod = isCod ? codAmount(order.total, order.shipping) : 0;
 
   const recipientName = formatCroatianName(order.customerName);
 

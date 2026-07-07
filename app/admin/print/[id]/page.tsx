@@ -4,7 +4,7 @@ import { AutoPrint } from "@/components/admin/auto-print";
 import { LabelSender } from "@/components/admin/label-sender";
 import { PdfLabelLink } from "@/components/admin/pdf-label-link";
 import { isAdmin } from "@/lib/admin-auth";
-import { getOrderReference } from "@/lib/orders";
+import { codAmount, getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
 
@@ -21,7 +21,8 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
   if (!order) notFound();
 
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
-  const cod = order.payment?.toLowerCase().includes("pouze") || !order.payment ? order.total : 0;
+  const isCod = order.payment?.toLowerCase().includes("pouze") || !order.payment;
+  const cod = isCod ? codAmount(order.total, order.shipping) : 0;
 
   return (
     <div className="min-h-screen bg-slate-100 px-4 py-8 print:bg-white print:p-0">

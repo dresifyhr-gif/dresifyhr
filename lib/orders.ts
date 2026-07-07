@@ -1,3 +1,5 @@
+import { FREE_SHIPPING_THRESHOLD_EUR, SHIPPING_PRICE_EUR } from "@/lib/site";
+
 export type FulfillmentType = "delivery";
 export type ContactChannelType = "web" | "whatsapp" | "instagram";
 
@@ -51,6 +53,15 @@ export function getOrderReference(createdAt: string) {
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   return `DRS-${year}${month}${day}-${hours}${minutes}`;
+}
+
+// Otkupnina (koliko kupac plaća pouzećem) = roba + dostava, po istoj logici kao blagajna.
+// Robustno i za uvezene narudžbe gdje dostava nije zapisana (shipping=0): preračuna se.
+// Besplatna dostava kad roba ≥ 60 €, inače 5 €.
+export function codAmount(total: number, shipping: number): number {
+  const goods = Math.max(0, (total ?? 0) - (shipping ?? 0));
+  const delivery = goods >= FREE_SHIPPING_THRESHOLD_EUR ? 0 : SHIPPING_PRICE_EUR;
+  return goods + delivery;
 }
 
 export function formatOrderTimestamp(createdAt: string) {
