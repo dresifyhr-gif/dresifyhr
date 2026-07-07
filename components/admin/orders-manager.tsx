@@ -295,12 +295,20 @@ export function OrdersManager() {
                       🖨 Naljepnica
                     </a>
                     <a
-                      href={`/admin/print/${o.id}/pdf/`}
+                      href={`/admin/print/${o.id}/pdf/?sender=igor`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="rounded-md bg-indigo-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-indigo-600"
                     >
-                      📄 PDF
+                      📄 Igor
+                    </a>
+                    <a
+                      href={`/admin/print/${o.id}/pdf/?sender=ivica`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md bg-purple-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-purple-600"
+                    >
+                      📄 Ivica
                     </a>
                   </span>
                 </div>
