@@ -18,11 +18,11 @@ const PAGE: [number, number] = [283.46, 425.2];
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 
 const s = StyleSheet.create({
-  page: { fontFamily: "PTSans", color: "#000", padding: 14 },
-  box: { flex: 1, border: "2 solid #000", borderRadius: 6, padding: 12 },
-  label: { fontSize: 9, fontWeight: "bold", letterSpacing: 1, color: "#555", textTransform: "uppercase" },
-  senderName: { fontSize: 12, fontWeight: "bold", marginTop: 2 },
-  senderLine: { fontSize: 11 },
+  page: { fontFamily: "PTSans", color: "#000", padding: 18 },
+  box: { flex: 1 },
+  label: { fontSize: 10, fontWeight: "bold", letterSpacing: 1, color: "#555", textTransform: "uppercase" },
+  senderName: { fontSize: 16, fontWeight: "bold", marginTop: 2 },
+  senderLine: { fontSize: 14 },
   divider: { borderTop: "2 solid #000", marginVertical: 12 },
   name: { fontSize: 22, fontWeight: "bold", marginTop: 2 },
   phone: { fontSize: 15, fontWeight: "bold", marginTop: 3 },

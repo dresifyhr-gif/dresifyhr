@@ -31,7 +31,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
           @page { size: 100mm 150mm; margin: 4mm; }
           html, body { background: #fff; }
           .no-print { display: none !important; }
-          .label { box-shadow: none !important; margin: 0 !important; border: 2px solid #000 !important; }
+          .label { box-shadow: none !important; margin: 0 !important; border: none !important; }
         }
       `}</style>
 
@@ -43,7 +43,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <div className="label mx-auto w-[360px] rounded-lg border-2 border-black bg-white p-4 text-black shadow-lg">
+      <div className="label mx-auto w-[360px] rounded-lg bg-white p-4 text-black shadow-lg print:shadow-none">
         {/* Šalje — Igor ili Ivica (različite adrese) */}
         <LabelSender defaultSender={order.shippedBy === "ivica" ? "ivica" : order.shippedBy === "igor" ? "igor" : undefined} />
 
