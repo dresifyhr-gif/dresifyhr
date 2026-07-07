@@ -296,14 +296,6 @@ export function OrdersManager() {
                       </a>
                     )}
                     <a
-                      href={`/admin/print/${o.id}/`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-500 hover:text-slate-800"
-                    >
-                      🖨 Naljepnica
-                    </a>
-                    <a
                       href={`/admin/print/${o.id}/pdf/?sender=igor`}
                       target="_blank"
                       rel="noopener noreferrer"
