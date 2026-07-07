@@ -249,7 +249,19 @@ export function OrdersManager() {
                     </div>
                     <div className="mt-0.5 text-xs text-slate-500">
                       {o.date} · {formatCroatianPhone(o.phone)}
-                      {o.address ? ` · ${o.address}` : ""}
+                      {o.address ? (
+                        <>
+                          {" · "}{o.address}{" "}
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="whitespace-nowrap font-medium text-emerald-600 hover:underline"
+                          >
+                            📍 Karta
+                          </a>
+                        </>
+                      ) : null}
                     </div>
                     <div className="mt-0.5 text-xs text-slate-400">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-slate-700">{eur(o.total)}</span></div>
                     {o.items.length > 0 && (
