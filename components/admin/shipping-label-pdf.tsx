@@ -30,7 +30,9 @@ const s = StyleSheet.create({
   codBox: { marginTop: 14, border: "2 solid #000", borderRadius: 4, paddingVertical: 8, paddingHorizontal: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   codLabel: { fontSize: 12, fontWeight: "bold", textTransform: "uppercase" },
   codValue: { fontSize: 22, fontWeight: "bold" },
-  footer: { marginTop: "auto", flexDirection: "row", justifyContent: "space-between", fontSize: 10, color: "#555" }
+  footer: { marginTop: "auto" },
+  thanks: { fontSize: 13, fontWeight: "bold", textAlign: "center", marginBottom: 6 },
+  meta: { flexDirection: "row", justifyContent: "space-between", fontSize: 10, color: "#555" }
 });
 
 export type LabelData = {
@@ -67,8 +69,11 @@ export function ShippingLabelDoc({ sender, recipientName, phone, address, cod, r
           ) : null}
 
           <View style={s.footer}>
-            <Text>DRESIFY · #{reference}</Text>
-            <Text>Pouzeće</Text>
+            <Text style={s.thanks}>Hvala na kupnji!</Text>
+            <View style={s.meta}>
+              <Text>#{reference}</Text>
+              <Text>Pouzeće</Text>
+            </View>
           </View>
         </View>
       </Page>

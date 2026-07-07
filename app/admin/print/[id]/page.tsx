@@ -64,8 +64,9 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
           </div>
         ) : null}
 
-        <div className="mt-3 flex items-center justify-between text-[11px] text-black/60">
-          <span>DRESIFY · #{reference}</span>
+        <div className="mt-4 text-center text-[15px] font-bold">Hvala na kupnji!</div>
+        <div className="mt-2 flex items-center justify-between text-[11px] text-black/60">
+          <span>#{reference}</span>
           <span>Pouzeće</span>
         </div>
       </div>
