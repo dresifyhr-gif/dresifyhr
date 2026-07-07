@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { formatCroatianPhone } from "@/lib/utils";
+import { waLink } from "@/components/admin/ui";
 
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 
@@ -262,14 +263,26 @@ export function OrdersManager() {
                       </ul>
                     )}
                   </div>
-                  <a
-                    href={`/admin/print/${o.id}/`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shrink-0 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-500 hover:text-slate-800"
-                  >
-                    🖨 Naljepnica
-                  </a>
+                  <span className="flex shrink-0 items-center gap-1.5">
+                    {waLink(o.phone) && (
+                      <a
+                        href={waLink(o.phone)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-md bg-emerald-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600"
+                      >
+                        💬 WhatsApp
+                      </a>
+                    )}
+                    <a
+                      href={`/admin/print/${o.id}/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-500 hover:text-slate-800"
+                    >
+                      🖨 Naljepnica
+                    </a>
+                  </span>
                 </div>
 
                 <div className="mt-2.5 flex flex-wrap gap-1.5">
