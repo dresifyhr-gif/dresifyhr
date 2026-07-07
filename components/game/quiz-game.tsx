@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { ArrowRight, Gift, RotateCcw, Trophy, Truck } from "lucide-react";
+import { useCallback, useState } from "react";
 
 import { GIFT_STORAGE_KEY } from "@/lib/promo";
 import { PROMO_STORAGE_KEY } from "@/components/site/promo-capture";
@@ -102,6 +101,30 @@ function shuffle<T>(arr: T[]): T[] {
 
 type Phase = "idle" | "playing" | "answered" | "win" | "lose" | "claimed";
 
+// Zajednički okvir-konzola (isti stil kao ostale igre).
+function Frame({ children, footer }: { children: React.ReactNode; footer?: React.ReactNode }) {
+  return (
+    <div className="flex justify-center">
+      <style>{`
+        @keyframes qzShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+        @keyframes qzFall{to{transform:translateY(320px) rotate(540deg);opacity:.2}}
+        .qz-shake{animation:qzShake .32s ease}
+      `}</style>
+      <div className="w-full max-w-[400px] overflow-hidden rounded-[22px] border border-white/12 bg-[#05070c] shadow-[0_18px_50px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center justify-between bg-black px-[18px] py-[13px]">
+          <span className="text-[20px] font-bold tracking-[1px] text-white">DRES<span className="text-accent">IFY</span></span>
+          <span className="text-[11px] font-bold uppercase tracking-[2px] text-accent">Football Kviz</span>
+        </div>
+        <div className="relative overflow-hidden px-4 py-5" style={{ background: "radial-gradient(120% 80% at 50% -10%, rgba(232,255,60,0.06), transparent 60%), linear-gradient(#0a1020,#070a12)" }}>
+          <div className="pointer-events-none absolute inset-x-0 top-2 text-center text-[9px] font-bold tracking-[6px] text-accent/40">D R E S I F Y &nbsp; A R E N A</div>
+          {children}
+        </div>
+        {footer ? <div className="px-[18px] py-[14px] text-center">{footer}</div> : null}
+      </div>
+    </div>
+  );
+}
+
 export function QuizGame() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [questions, setQuestions] = useState<Q[]>([]);
@@ -154,113 +177,72 @@ export function QuizGame() {
   // ── IDLE ──────────────────────────────────────────────────────────────
   if (phase === "idle") {
     return (
-      <div className="flex flex-col items-center gap-6 py-8 text-center">
-        <div className="inline-flex h-20 w-20 items-center justify-center rounded-full border border-accent/30 bg-accent/10 text-accent">
-          <Trophy className="h-9 w-9" />
+      <Frame footer={<p className="text-[12px] text-white/55">Treba {NEEDED}/{TOTAL_Q} točnih ⚡</p>}>
+        <div className="flex flex-col items-center gap-4 py-6 text-center">
+          <div className="text-[13px] font-bold tracking-[3px] text-accent">FOOTBALL KVIZ</div>
+          <div className="text-[22px] font-extrabold leading-tight text-white">5 pitanja, 5 točnih</div>
+          <p className="max-w-[270px] text-[13px] text-white/70">Odgovori svih {NEEDED} točno i biraš nagradu: <b className="text-accent">poklon iznenađenja</b> ili <b className="text-accent">besplatnu dostavu</b> (od 40€).</p>
+          <button type="button" onClick={startGame} className="mt-1 rounded-[12px] bg-accent px-9 py-3.5 text-[15px] font-extrabold text-black shadow-[0_8px_24px_rgba(232,255,60,0.25)] transition active:scale-[0.97]">
+            KRENI ⚽
+          </button>
         </div>
-        <div>
-          <h2 className="font-heading text-4xl uppercase tracking-[0.04em] text-white">Football Kviz</h2>
-          <p className="mt-2 text-sm leading-6 text-white/60">
-            5 pitanja · treba {NEEDED}/{TOTAL_Q} točnih odgovora · osvoji nagradu po izboru
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 rounded-[10px] border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/70">
-          <p>🎁 <span className="text-white">Poklon iznenađenja</span> uz narudžbu</p>
-          <p>🚚 <span className="text-white">Besplatna dostava</span> (na narudžbe od 40€)</p>
-          <p className="mt-1 text-xs text-white/40">Ti biraš nagradu ako pobijediš</p>
-        </div>
-        <button
-          type="button"
-          onClick={startGame}
-          className="button-primary px-10"
-        >
-          Kreni na kviz
-        </button>
-      </div>
+      </Frame>
     );
   }
 
   // ── WIN ───────────────────────────────────────────────────────────────
   if (phase === "win") {
     return (
-      <div className="flex flex-col items-center gap-6 py-8 text-center">
-        <div className="inline-flex h-20 w-20 items-center justify-center rounded-full border border-accent/40 bg-accent/15 text-accent">
-          <Trophy className="h-9 w-9" />
+      <Frame footer={<p className="text-[11px] text-white/40">Nagrada se sama primijeni na blagajni</p>}>
+        <div className="relative flex flex-col items-center gap-3 py-4 text-center">
+          {Array.from({ length: 24 }).map((_, i) => (
+            <span key={i} aria-hidden className="pointer-events-none absolute top-0 h-2.5 w-1.5 rounded-[1px]"
+              style={{ left: `${(i * 4.1) % 100}%`, background: ["#e8ff3c", "#fff", "#ff4d6d", "#3b82f6"][i % 4], animation: `qzFall ${1 + (i % 5) * 0.25}s ease-in ${(i % 7) * 0.08}s forwards` }} />
+          ))}
+          <div className="text-[13px] font-bold tracking-[3px] text-accent">POBJEDA!</div>
+          <div className="text-[26px] font-extrabold leading-none text-white">{score}/{TOTAL_Q} točnih</div>
+          <p className="text-[12px] text-white/60">Odaberi svoju nagradu:</p>
+          <div className="grid w-full gap-2.5">
+            <button type="button" onClick={claimGift} className="group flex items-center gap-3 rounded-[12px] border border-white/15 bg-white/5 p-4 text-left transition hover:border-accent/60 hover:bg-accent/10">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-accent/15 text-xl">🎁</div>
+              <div><p className="font-bold text-white">Poklon iznenađenja</p><p className="text-[11px] text-white/55">Prilaže se uz tvoju narudžbu</p></div>
+              <span className="ml-auto text-white/30 transition group-hover:translate-x-1 group-hover:text-accent">→</span>
+            </button>
+            <button type="button" onClick={claimFreeShipping} className="group flex items-center gap-3 rounded-[12px] border border-white/15 bg-white/5 p-4 text-left transition hover:border-accent/60 hover:bg-accent/10">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-accent/15 text-xl">🚚</div>
+              <div><p className="font-bold text-white">Besplatna dostava</p><p className="text-[11px] text-white/55">Na narudžbe od 40€</p></div>
+              <span className="ml-auto text-white/30 transition group-hover:translate-x-1 group-hover:text-accent">→</span>
+            </button>
+          </div>
         </div>
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-accent">Pobjeda!</p>
-          <h2 className="mt-1 font-heading text-4xl uppercase tracking-[0.04em] text-white">
-            {score}/{TOTAL_Q} točnih
-          </h2>
-          <p className="mt-2 text-sm text-white/60">Odaberi svoju nagradu:</p>
-        </div>
-
-        <div className="grid w-full max-w-sm gap-3">
-          <button
-            type="button"
-            onClick={claimGift}
-            className="group flex items-center gap-4 rounded-[12px] border border-white/15 bg-[#111] p-5 text-left transition hover:border-accent/60 hover:bg-accent/5"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-accent/10 text-accent">
-              <Gift className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="font-semibold text-white">Poklon iznenađenja</p>
-              <p className="text-xs text-white/50">Prilaže se uz tvoju narudžbu</p>
-            </div>
-            <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-white/30 transition group-hover:translate-x-1 group-hover:text-accent" />
-          </button>
-
-          <button
-            type="button"
-            onClick={claimFreeShipping}
-            className="group flex items-center gap-4 rounded-[12px] border border-white/15 bg-[#111] p-5 text-left transition hover:border-accent/60 hover:bg-accent/5"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-accent/10 text-accent">
-              <Truck className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="font-semibold text-white">Besplatna dostava</p>
-              <p className="text-xs text-white/50">Na narudžbe od 40€ · automatski na blagajni</p>
-            </div>
-            <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-white/30 transition group-hover:translate-x-1 group-hover:text-accent" />
-          </button>
-        </div>
-      </div>
+      </Frame>
     );
   }
 
   // ── CLAIMED ───────────────────────────────────────────────────────────
   if (phase === "claimed") {
     return (
-      <div className="flex flex-col items-center gap-4 py-12 text-center">
-        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-accent text-black">
-          <Trophy className="h-8 w-8" />
+      <Frame>
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-2xl text-black">🏆</div>
+          <p className="text-[22px] font-extrabold uppercase text-white">Nagrada aktivirana!</p>
+          <p className="text-[13px] text-white/50">Preusmjeravamo te na dresove…</p>
         </div>
-        <p className="font-heading text-2xl uppercase tracking-[0.04em] text-white">Nagrada aktivirana!</p>
-        <p className="text-sm text-white/50">Preusmjeravamo te na dresove…</p>
-      </div>
+      </Frame>
     );
   }
 
   // ── LOSE ──────────────────────────────────────────────────────────────
   if (phase === "lose") {
     return (
-      <div className="flex flex-col items-center gap-5 py-8 text-center">
-        <div className="inline-flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/40">
-          <RotateCcw className="h-9 w-9" />
+      <Frame>
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <div className="text-[13px] font-bold tracking-[2px] text-white/60">KRAJ IGRE</div>
+          <div className="text-[30px] font-extrabold leading-none text-white">{score}/{TOTAL_Q}</div>
+          <p className="max-w-[250px] text-[12px] text-white/60">Treba {NEEDED} točnih za nagradu. Pokušaj ponovo!</p>
+          <button type="button" onClick={startGame} className="mt-1 rounded-[12px] bg-accent px-9 py-3.5 text-[14px] font-extrabold text-black transition active:scale-[0.97]">Igraj ponovno</button>
         </div>
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-white/50">Kraj igre</p>
-          <h2 className="mt-1 font-heading text-4xl uppercase tracking-[0.04em] text-white">{score}/{TOTAL_Q} točnih</h2>
-          <p className="mt-2 text-sm text-white/60">
-            Treba {NEEDED} točnih za nagradu. Pokušaj ponovo!
-          </p>
-        </div>
-        <button type="button" onClick={startGame} className="button-primary px-10">
-          Igraj ponovno
-        </button>
-      </div>
+      </Frame>
     );
   }
 
@@ -268,54 +250,41 @@ export function QuizGame() {
   if (!q) return null;
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Progress */}
-      <div className="flex items-center justify-between text-xs uppercase tracking-[0.22em] text-white/40">
-        <span>Pitanje {current + 1} / {TOTAL_Q}</span>
-        <span className="text-accent">{score} točnih</span>
+    <Frame footer={<p className="text-[12px] text-white/55">Odaberi točan odgovor ⚽</p>}>
+      <div className="mb-4 mt-3 flex flex-col gap-3">
+        <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">
+          <span>Pitanje {current + 1} / {TOTAL_Q}</span>
+          <span className="text-accent">{score} točnih</span>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+          <div className="h-full bg-accent transition-all duration-300" style={{ width: `${(current / TOTAL_Q) * 100}%` }} />
+        </div>
+
+        <p className="mt-1 text-center text-[16px] font-semibold leading-snug text-white">{q.q}</p>
+
+        <div className="grid gap-2">
+          {q.o.map((opt, idx) => {
+            const isChosen = chosen === idx;
+            const isCorrect = idx === q.a;
+            const revealed = phase === "answered";
+
+            let cls = "w-full rounded-[10px] border px-4 py-3 text-left text-[14px] font-medium transition-all duration-200 ";
+            if (!revealed) cls += "border-white/15 bg-white/5 text-white hover:border-accent/60 hover:bg-accent/10";
+            else if (isCorrect) cls += "border-green-500 bg-green-500/15 text-green-300 shadow-[0_0_14px_rgba(34,197,94,0.35)]";
+            else if (isChosen && !isCorrect) cls += "border-red-500 bg-red-500/15 text-red-300 qz-shake";
+            else cls += "border-white/8 bg-[#0d0d0d] text-white/30";
+
+            return (
+              <button key={idx} type="button" onClick={() => pick(idx)} disabled={revealed} className={cls}>
+                <span className="mr-2 font-bold text-white/40">{["A", "B", "C", "D"][idx]}.</span>
+                {opt}
+                {revealed && isCorrect ? <span className="float-right">✓</span> : null}
+                {revealed && isChosen && !isCorrect ? <span className="float-right">✕</span> : null}
+              </button>
+            );
+          })}
+        </div>
       </div>
-      <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
-        <div
-          className="h-full bg-accent transition-all duration-300"
-          style={{ width: `${((current) / TOTAL_Q) * 100}%` }}
-        />
-      </div>
-
-      {/* Question */}
-      <p className="text-center text-lg font-semibold leading-snug text-white sm:text-xl">{q.q}</p>
-
-      {/* Options */}
-      <div className="grid gap-2.5 sm:grid-cols-2">
-        {q.o.map((opt, idx) => {
-          const isChosen = chosen === idx;
-          const isCorrect = idx === q.a;
-          const revealed = phase === "answered";
-
-          let cls = "w-full rounded-[10px] border px-4 py-3.5 text-left text-sm font-medium transition-all duration-200 ";
-          if (!revealed) {
-            cls += "border-white/15 bg-[#111] text-white hover:border-accent/60 hover:bg-accent/5";
-          } else if (isCorrect) {
-            cls += "border-green-500 bg-green-500/15 text-green-400";
-          } else if (isChosen && !isCorrect) {
-            cls += "border-red-500 bg-red-500/15 text-red-400";
-          } else {
-            cls += "border-white/8 bg-[#0d0d0d] text-white/30";
-          }
-
-          return (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => pick(idx)}
-              disabled={revealed}
-              className={cls}
-            >
-              <span className="mr-2 text-white/40">{["A", "B", "C", "D"][idx]}.</span>
-              {opt}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    </Frame>
   );
 }
