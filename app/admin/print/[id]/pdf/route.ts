@@ -29,10 +29,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
   const cod = order.payment?.toLowerCase().includes("pouze") || !order.payment ? order.total : 0;
 
+  const recipientName = formatCroatianName(order.customerName);
+
   const buffer = await renderToBuffer(
     ShippingLabelDoc({
       sender: SENDERS[who],
-      recipientName: formatCroatianName(order.customerName),
+      recipientName,
       phone: order.phone ? formatCroatianPhone(order.phone) : undefined,
       address: order.address ? repairText(order.address) : undefined,
       cod,
@@ -40,10 +42,19 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     })
   );
 
+  // Naziv fajla: "Posiljka - Ime Prezime.pdf" (UTF-8 + ASCII fallback za starije preglednike).
+  const fileName = `Posiljka - ${recipientName}.pdf`;
+  const asciiName =
+    fileName
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^\x20-\x7E]/g, "")
+      .replace(/"/g, "") || `Posiljka-${reference}.pdf`;
+
   return new NextResponse(buffer as unknown as BodyInit, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="dresify-${reference}.pdf"`,
+      "Content-Disposition": `inline; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
       "Cache-Control": "no-store"
     }
   });
