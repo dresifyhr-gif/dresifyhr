@@ -4,23 +4,23 @@ import { useEffect, useRef } from "react";
 
 import { PROMO_STORAGE_KEY } from "@/components/site/promo-capture";
 
+// DRESIFY Penalty Cup — canvas verzija. Bogata scena (stadion pod reflektorima,
+// perspektivna trava, mreža koja se trese), golman koji se baca u skoku, trag
+// lopte, čestice, screen shake. Izazov raste sa svakim penalom.
 const STAGE_HTML = `
 <style>
-@keyframes pgspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-@keyframes pgshake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,1px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-2px,1px)}}
-.pg-shake{animation:pgshake .22s ease}
 .pg-btn{transition:transform .08s ease}
 .pg-btn:active{transform:scale(0.97)}
 </style>
 <div style="display:flex;justify-content:center;">
-  <div style="width:100%;max-width:400px;background:#0b0b0b;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);font-family:inherit;box-shadow:0 18px 50px rgba(0,0,0,0.5);">
+  <div style="width:100%;max-width:400px;background:#07070a;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);font-family:inherit;box-shadow:0 18px 50px rgba(0,0,0,0.5);">
 
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:#000;">
       <span style="font-weight:700;letter-spacing:1px;color:#fff;font-size:20px;">DRES<span style="color:#e8ff3c;">IFY</span></span>
       <span style="font-size:11px;color:#e8ff3c;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Penalty Cup</span>
     </div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 18px;font-size:12px;color:rgba(255,255,255,0.6);background:#111;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 18px;font-size:12px;color:rgba(255,255,255,0.6);background:#0d0d10;">
       <span>PENAL <b id="pg_shot" style="color:#fff;font-size:15px;">1</b><span style="opacity:.5;">/5</span></span>
       <div id="pg_dots" style="display:flex;gap:5px;"></div>
       <span style="display:flex;align-items:center;gap:10px;">GOLOVI <b id="pg_goals" style="color:#e8ff3c;font-size:15px;">0</b>
@@ -28,39 +28,14 @@ const STAGE_HTML = `
       </span>
     </div>
 
-    <div id="pg_pitch" style="position:relative;width:100%;aspect-ratio:344/272;overflow:hidden;cursor:crosshair;background:repeating-linear-gradient(#2f8a37 0 8%, #2b7f33 8% 16%);">
-      <div style="position:absolute;top:0;left:0;right:0;height:10%;background:#161a20;"></div>
-      <div style="position:absolute;top:2.5%;left:0;right:0;text-align:center;font-size:9px;letter-spacing:6px;color:rgba(232,255,60,0.5);font-weight:700;">D R E S I F Y &nbsp; A R E N A</div>
-      <div style="position:absolute;top:3%;left:14%;width:10px;height:10px;border-radius:50%;background:#fffef0;box-shadow:0 0 12px 4px rgba(255,255,200,0.5);"></div>
-      <div style="position:absolute;top:3%;right:14%;width:10px;height:10px;border-radius:50%;background:#fffef0;box-shadow:0 0 12px 4px rgba(255,255,200,0.5);"></div>
+    <div id="pg_stage" style="position:relative;width:100%;aspect-ratio:360/456;overflow:hidden;background:#05070c;cursor:crosshair;touch-action:none;">
+      <canvas id="pg_canvas" style="display:block;width:100%;height:100%;"></canvas>
 
-      <div id="pg_goal" style="position:absolute;top:11%;left:8%;right:8%;height:38%;border:5px solid #f7f7f7;border-bottom:none;border-radius:6px 6px 0 0;overflow:hidden;background:linear-gradient(90deg,rgba(255,255,255,0.16) 1px,transparent 1px) 0 0/12px 12px,linear-gradient(rgba(255,255,255,0.16) 1px,transparent 1px) 0 0/12px 12px;transition:transform .12s ease;"></div>
-
-      <div style="position:absolute;bottom:0;left:0;right:0;height:30%;background:#36933c;border-top:2px solid rgba(255,255,255,0.3);"></div>
-      <div style="position:absolute;bottom:46%;left:50%;width:42%;height:16%;transform:translateX(-50%);border:2px solid rgba(255,255,255,0.2);border-top:none;border-radius:0 0 50% 50%;"></div>
-      <div style="position:absolute;bottom:11%;left:50%;width:7px;height:7px;margin-left:-3px;border-radius:50%;background:#fff;"></div>
-      <div style="position:absolute;top:15%;left:2%;font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.4);transform:rotate(-90deg);transform-origin:left;">DRESIFY</div>
-      <div style="position:absolute;top:15%;right:2%;font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.4);transform:rotate(90deg);transform-origin:right;">DRESIFY</div>
-
-      <div id="pg_aim" style="position:absolute;width:26px;height:26px;border:2px solid #e8ff3c;border-radius:50%;box-shadow:0 0 10px #e8ff3c;opacity:0;transition:opacity .15s;pointer-events:none;z-index:2;transform:translate(-50%,-50%);"></div>
-
-      <div id="pg_keeper" style="position:absolute;left:50%;top:30%;z-index:3;transform:translate(-50%,-50%);">
-        <svg width="54" height="68" viewBox="0 0 64 82"><ellipse cx="32" cy="79" rx="16" ry="3" fill="rgba(0,0,0,0.25)"/><rect x="3" y="20" width="13" height="10" rx="5" transform="rotate(-32 9 25)" fill="#16171b"/><rect x="48" y="20" width="13" height="10" rx="5" transform="rotate(32 55 25)" fill="#16171b"/><circle cx="6" cy="17" r="6" fill="#e8ff3c"/><circle cx="58" cy="17" r="6" fill="#e8ff3c"/><rect x="19" y="24" width="26" height="36" rx="8" fill="#16171b"/><text x="32" y="40" text-anchor="middle" font-family="Arial" font-size="6.5" font-weight="800"><tspan fill="#fff">DRES</tspan><tspan fill="#e8ff3c">IFY</tspan></text><text x="32" y="54" text-anchor="middle" font-family="Arial" font-size="13" font-weight="800" fill="#fff">1</text><circle cx="32" cy="14" r="9" fill="#f0c08a"/><path d="M23 12a9 9 0 0118 0z" fill="#3a2a1a"/><rect x="22" y="60" width="8" height="18" rx="3" fill="#16171b"/><rect x="34" y="60" width="8" height="18" rx="3" fill="#16171b"/><rect x="21" y="76" width="11" height="5" rx="2" fill="#e8ff3c"/><rect x="33" y="76" width="11" height="5" rx="2" fill="#e8ff3c"/></svg>
-      </div>
-
-      <div id="pg_ball" style="position:absolute;left:50%;top:86%;z-index:4;transform:translate(-50%,-50%);">
-        <div id="pg_spin" style="width:34px;height:34px;">
-          <svg width="34" height="34" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#fff" stroke="#0c0c0c" stroke-width="3"/><path d="M6 60h108" stroke="rgba(0,0,0,0.08)" stroke-width="2"/><text x="60" y="67" text-anchor="middle" font-family="Arial" font-weight="800" font-size="22" letter-spacing="-0.5"><tspan fill="#121212">DRES</tspan><tspan fill="#c9d600">IFY</tspan></text></svg>
-        </div>
-      </div>
-
-      <div id="pg_status" style="position:absolute;top:40%;left:0;right:0;text-align:center;font-size:34px;font-weight:800;letter-spacing:1px;color:#e8ff3c;opacity:0;transition:opacity .15s;pointer-events:none;z-index:5;text-shadow:0 2px 12px rgba(0,0,0,0.6);"></div>
-
-      <div id="pg_intro" style="position:absolute;inset:0;background:rgba(7,7,7,0.78);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
+      <div id="pg_intro" style="position:absolute;inset:0;background:linear-gradient(rgba(5,7,12,0.55),rgba(5,7,12,0.82));display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">DRESIFY PENALTY CUP</div>
-        <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Zabij 4 od 5 penala</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:240px;">i osvoji <b style="color:#e8ff3c;">besplatnu dostavu</b> (od 40€). Tapni u gol gdje želiš pucati.</div>
-        <button id="pg_start" class="pg-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;">START &#9917;</button>
+        <div style="font-size:23px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Zabij 4 od 5 penala</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.72);margin-bottom:18px;max-width:250px;">i osvoji <b style="color:#e8ff3c;">besplatnu dostavu</b> (od 40€). Ciljaj kuteve — golman je sve bolji!</div>
+        <button id="pg_start" class="pg-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(232,255,60,0.25);">START &#9917;</button>
         <div id="pg_best" style="margin-top:14px;font-size:11px;color:rgba(255,255,255,0.45);"></div>
       </div>
     </div>
@@ -79,41 +54,66 @@ export function PenaltyGame() {
     const root = rootRef.current;
     if (!root) return;
     const $ = (id: string) => root.querySelector<HTMLElement>("#" + id)!;
-    const pitch = $("pg_pitch"), goal = $("pg_goal"), ball = $("pg_ball"), spin = $("pg_spin");
-    const keeper = $("pg_keeper"), aim = $("pg_aim"), statusEl = $("pg_status");
+    const stage = $("pg_stage");
+    const canvas = root.querySelector<HTMLCanvasElement>("#pg_canvas")!;
+    const ctx = canvas.getContext("2d")!;
     const shotEl = $("pg_shot"), goalsEl = $("pg_goals"), dotsEl = $("pg_dots");
+    const intro = $("pg_intro"), startBtn = $("pg_start"), bestEl = $("pg_best"), muteBtn = $("pg_mute");
     let hint = $("pg_hint");
-    const intro = $("pg_intro"), startBtn = $("pg_start"), bestEl = $("pg_best");
-    const muteBtn = $("pg_mute");
     let controls = $("pg_controls");
 
-    let shot = 1, goals = 0, busy = false, playing = false, raf = 0;
+    // Logička rezolucija scene.
+    const W = 360, H = 456, SC = 2;
+    canvas.width = W * SC; canvas.height = H * SC; ctx.scale(SC, SC);
+
+    // Geometrija gola / terena.
+    const POST_L = 74, POST_R = 286, CROSS_Y = 92, LINE_Y = 176; // gol
+    const GOAL_CX = (POST_L + POST_R) / 2;
+    const HORIZON = 150;
+    const BALL_HOME = { x: W / 2, y: 416 };
+    const SPOT = { x: W / 2, y: 380 };
+
+    let shot = 1, goals = 0, playing = false, raf = 0, last = 0;
     let muted = false;
+    let phase: "idle" | "aim" | "shoot" | "result" = "idle";
     const results: (boolean | null)[] = [null, null, null, null, null];
     const BEST_KEY = "dresify_penalty_best";
     const best = () => Number(localStorage.getItem(BEST_KEY) || 0);
     bestEl.textContent = best() ? "Najbolje: " + best() + "/5" : "";
 
+    // Zvijezde + navijači (statični raspored, tvinklaju).
+    const stars = Array.from({ length: 34 }, () => ({ x: Math.random() * W, y: Math.random() * (HORIZON - 20), r: Math.random() * 1.1 + 0.3, p: Math.random() * 6 }));
+    const crowd = Array.from({ length: 150 }, () => ({ x: Math.random() * W, y: 60 + Math.random() * 70, c: Math.random(), p: Math.random() * 6 }));
+
+    // ── Zvuk (zadržano) ──────────────────────────────────────────────
     let actx: AudioContext | null = null;
     function tone(freq: number, dur: number, type: OscillatorType, vol: number, delay: number) {
       if (muted) return;
       try {
-        const ctx: AudioContext = actx || new ((window as any).AudioContext || (window as any).webkitAudioContext)();
-        actx = ctx;
-        const t0 = ctx.currentTime + delay;
-        const o = ctx.createOscillator(), g = ctx.createGain();
+        const c: AudioContext = actx || new ((window as any).AudioContext || (window as any).webkitAudioContext)();
+        actx = c; const t0 = c.currentTime + delay;
+        const o = c.createOscillator(), g = c.createGain();
         o.type = type; o.frequency.setValueAtTime(freq, t0);
         g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-        o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0 + dur);
+        o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0 + dur);
       } catch {}
     }
-    const sfxKick = () => tone(150, 0.12, "square", 0.18, 0);
-    const sfxGoal = () => { [523, 659, 784].forEach((f, i) => tone(f, 0.18, "sine", 0.2, i * 0.09)); };
-    const sfxSave = () => tone(220, 0.25, "sawtooth", 0.16, 0);
-    const sfxWhistle = () => { tone(2000, 0.15, "sine", 0.12, 0); tone(2200, 0.15, "sine", 0.12, 0.16); };
+    const sfxKick = () => { tone(150, 0.12, "square", 0.18, 0); tone(90, 0.16, "sine", 0.14, 0); };
+    const sfxGoal = () => { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.2, "sine", 0.2, i * 0.08)); };
+    const sfxSave = () => { tone(220, 0.26, "sawtooth", 0.16, 0); tone(140, 0.2, "square", 0.12, 0.02); };
+    const sfxWhistle = () => { tone(2000, 0.15, "sine", 0.12, 0); tone(2300, 0.15, "sine", 0.12, 0.16); };
+    const sfxRoar = () => { for (let i = 0; i < 6; i++) tone(300 + Math.random() * 500, 0.5, "triangle", 0.05, i * 0.02); };
     const buzz = (ms: number | number[]) => { try { (navigator as any).vibrate && navigator.vibrate(ms); } catch {} };
+    muteBtn.onclick = (e) => { e.stopPropagation(); muted = !muted; muteBtn.innerHTML = muted ? "&#128263;" : "&#9834;"; muteBtn.style.color = muted ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.55)"; };
 
-    muteBtn.onclick = () => { muted = !muted; muteBtn.innerHTML = muted ? "&#128263;" : "&#9834;"; muteBtn.style.color = muted ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.55)"; };
+    // ── Stanje animacije ─────────────────────────────────────────────
+    let shake = 0, flash = 0, roar = 0;
+    const trail: { x: number; y: number; s: number }[] = [];
+    const parts: { x: number; y: number; vx: number; vy: number; life: number; max: number; c: string; sz: number }[] = [];
+    const netRipple = { x: 0, y: 0, str: 0 };
+    const ball = { x: BALL_HOME.x, y: BALL_HOME.y, s: 1, rot: 0, t: 0, tx: 0, ty: 0, flying: false, saved: false, dead: false };
+    const keeper = { x: GOAL_CX, y: LINE_Y, dir: 0, pose: 0, tx: GOAL_CX, ty: LINE_Y, react: 0, diving: false, bob: 0 };
+    let statusText = "", statusCol = "#e8ff3c", statusT = 0;
 
     function drawDots() {
       let h = "";
@@ -125,92 +125,295 @@ export function PenaltyGame() {
     }
     drawDots();
 
-    function dims() { const r = pitch.getBoundingClientRect(); return { PW: r.width, PH: r.height, r }; }
     function setHint(html: string) { hint.innerHTML = html; }
-
-    startBtn.onclick = () => { sfxWhistle(); intro.style.display = "none"; playing = true; };
-
-    pitch.addEventListener("click", (e) => {
-      if (!playing || busy) return;
-      const { PW, PH, r } = dims();
-      const x = e.clientX - r.left, y = e.clientY - r.top;
-      if (x < PW * 0.1 || x > PW * 0.9 || y < PH * 0.13 || y > PH * 0.49) {
-        setHint('<span style="color:#ff4d6d;">Pucaj unutar gola!</span>');
-        return;
+    function burst(x: number, y: number, cols: string[], n: number, spd: number) {
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2, v = spd * (0.4 + Math.random());
+        parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1, life: 0, max: 0.5 + Math.random() * 0.6, c: cols[(Math.random() * cols.length) | 0], sz: 2 + Math.random() * 3 });
       }
-      shoot(x, y, PW, PH);
+    }
+
+    // ── Crtanje scene ────────────────────────────────────────────────
+    function drawSky(time: number) {
+      const g = ctx.createLinearGradient(0, 0, 0, HORIZON);
+      g.addColorStop(0, "#0a1330"); g.addColorStop(0.6, "#0b1020"); g.addColorStop(1, "#0d1a10");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, HORIZON + 4);
+      for (const s of stars) { const tw = 0.5 + 0.5 * Math.sin(time * 2 + s.p); ctx.globalAlpha = 0.5 * tw; ctx.fillStyle = "#dfe8ff"; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      // Reflektori (glow gore lijevo/desno).
+      for (const fx of [40, W - 40]) {
+        const fg = ctx.createRadialGradient(fx, 8, 0, fx, 8, 120);
+        fg.addColorStop(0, "rgba(255,255,225,0.18)"); fg.addColorStop(1, "rgba(255,255,225,0)");
+        ctx.fillStyle = fg; ctx.fillRect(0, 0, W, HORIZON);
+        ctx.fillStyle = "#fffef0"; ctx.beginPath(); ctx.arc(fx, 8, 4, 0, 7); ctx.fill();
+        ctx.fillStyle = "rgba(255,255,220,0.6)"; ctx.beginPath(); ctx.arc(fx, 8, 8, 0, 7); ctx.fill();
+      }
+    }
+    function drawStands(time: number) {
+      ctx.fillStyle = "#0f1218"; ctx.fillRect(0, 44, W, HORIZON - 44);
+      for (const p of crowd) {
+        const tw = 0.6 + 0.4 * Math.sin(time * 3 + p.p) + roar * 0.6;
+        ctx.globalAlpha = Math.min(1, 0.35 + 0.4 * tw);
+        ctx.fillStyle = p.c < 0.5 ? "#e8ff3c" : p.c < 0.7 ? "#3b82f6" : p.c < 0.85 ? "#ff4d6d" : "#cfd6e0";
+        ctx.fillRect(p.x, p.y, 2.4, 2.4);
+      }
+      ctx.globalAlpha = 1;
+      // Ograda / reklama.
+      ctx.fillStyle = "#05060a"; ctx.fillRect(0, HORIZON - 12, W, 12);
+      ctx.fillStyle = "rgba(232,255,60,0.5)"; ctx.font = "700 8px Arial"; ctx.textAlign = "center";
+      ctx.fillText("D R E S I F Y   A R E N A", W / 2, HORIZON - 4);
+    }
+    function drawPitch() {
+      const g = ctx.createLinearGradient(0, HORIZON, 0, H);
+      g.addColorStop(0, "#1f6b2a"); g.addColorStop(1, "#38a344");
+      ctx.fillStyle = g; ctx.fillRect(0, HORIZON, W, H - HORIZON);
+      // Perspektivne pruge (šire prema gledatelju).
+      let y = HORIZON, i = 0, band = 6;
+      while (y < H) { band = 6 + (y - HORIZON) * 0.12; if (i % 2 === 0) { ctx.fillStyle = "rgba(255,255,255,0.045)"; ctx.fillRect(0, y, W, band); } y += band; i++; }
+      // Kazneni prostor (perspektiva).
+      ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(40, H); ctx.lineTo(105, LINE_Y + 24); ctx.lineTo(W - 105, LINE_Y + 24); ctx.lineTo(W - 40, H); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(SPOT.x, SPOT.y + 6, 22, 6, 0, Math.PI, 0); ctx.stroke();
+      // Bijela crta gola.
+      ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.beginPath(); ctx.moveTo(POST_L - 6, LINE_Y); ctx.lineTo(POST_R + 6, LINE_Y); ctx.stroke();
+      // Točka penala.
+      ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(SPOT.x, SPOT.y, 3, 0, 7); ctx.fill();
+    }
+    function netNode(px: number, py: number) {
+      // Bulge mreže oko točke udarca.
+      if (netRipple.str <= 0) return { x: px, y: py };
+      const d = Math.hypot(px - netRipple.x, py - netRipple.y);
+      const b = netRipple.str * Math.exp(-(d * d) / 900);
+      return { x: px, y: py + b * 0.6, r: b };
+    }
+    function drawGoal() {
+      // Mreža (perspektivna rešetka) iza gola.
+      ctx.save();
+      ctx.beginPath(); ctx.rect(POST_L, CROSS_Y, POST_R - POST_L, LINE_Y - CROSS_Y); ctx.clip();
+      ctx.strokeStyle = "rgba(255,255,255,0.16)"; ctx.lineWidth = 1;
+      for (let gx = POST_L; gx <= POST_R; gx += 12) {
+        ctx.beginPath();
+        for (let gy = CROSS_Y; gy <= LINE_Y; gy += 6) { const n = netNode(gx, gy); (gy === CROSS_Y ? ctx.moveTo : ctx.lineTo).call(ctx, n.x, n.y); }
+        ctx.stroke();
+      }
+      for (let gy = CROSS_Y; gy <= LINE_Y; gy += 12) {
+        ctx.beginPath();
+        for (let gx = POST_L; gx <= POST_R; gx += 6) { const n = netNode(gx, gy); (gx === POST_L ? ctx.moveTo : ctx.lineTo).call(ctx, n.x, n.y); }
+        ctx.stroke();
+      }
+      ctx.restore();
+      // Okvir gola (3D).
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "rgba(0,0,0,0.35)"; ctx.lineWidth = 8;
+      ctx.beginPath(); ctx.moveTo(POST_L + 2, LINE_Y + 2); ctx.lineTo(POST_L + 2, CROSS_Y + 2); ctx.lineTo(POST_R + 2, CROSS_Y + 2); ctx.lineTo(POST_R + 2, LINE_Y + 2); ctx.stroke();
+      ctx.strokeStyle = "#f6f7f9"; ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.moveTo(POST_L, LINE_Y); ctx.lineTo(POST_L, CROSS_Y); ctx.lineTo(POST_R, CROSS_Y); ctx.lineTo(POST_R, LINE_Y); ctx.stroke();
+      ctx.strokeStyle = "rgba(255,255,255,0.9)"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(POST_L - 1.5, CROSS_Y - 2.5); ctx.lineTo(POST_R + 1.5, CROSS_Y - 2.5); ctx.stroke();
+    }
+    function drawKeeper() {
+      const k = keeper;
+      ctx.save();
+      ctx.translate(k.x, k.y);
+      const ang = k.dir * 0.9 * k.pose;
+      // Sjena.
+      ctx.save(); ctx.rotate(0); ctx.fillStyle = "rgba(0,0,0,0.28)"; ctx.beginPath(); ctx.ellipse(0, 6, 16 + 10 * k.pose, 4, 0, 0, 7); ctx.fill(); ctx.restore();
+      ctx.rotate(ang);
+      const bob = Math.sin(k.bob) * 1.2 * (1 - k.pose);
+      ctx.translate(0, bob);
+      const reach = 14 * k.pose; // ruke se pružaju u stranu pri obrani
+      // Ruke + rukavice.
+      ctx.strokeStyle = "#16171b"; ctx.lineWidth = 6; ctx.lineCap = "round";
+      for (const sgn of [-1, 1]) {
+        const ax = sgn * (10 + reach), ay = -14 - reach * 0.7;
+        ctx.beginPath(); ctx.moveTo(sgn * 8, -8); ctx.lineTo(ax, ay); ctx.stroke();
+        ctx.fillStyle = "#e8ff3c"; ctx.beginPath(); ctx.arc(ax, ay, 5.5, 0, 7); ctx.fill();
+      }
+      // Trup (dres).
+      const bg = ctx.createLinearGradient(0, -18, 0, 8); bg.addColorStop(0, "#20222a"); bg.addColorStop(1, "#101116");
+      ctx.fillStyle = bg; ctx.beginPath(); (ctx as any).roundRect(-11, -18, 22, 30, 7); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.font = "800 5.5px Arial"; ctx.textAlign = "center";
+      ctx.fillText("DRES", 0, -6); ctx.fillStyle = "#e8ff3c"; ctx.fillText("IFY", 0, -0.5);
+      ctx.fillStyle = "#fff"; ctx.font = "800 11px Arial"; ctx.fillText("1", 0, 9);
+      // Noge.
+      ctx.fillStyle = "#16171b"; ctx.fillRect(-8, 10, 6, 14); ctx.fillRect(2, 10, 6, 14);
+      ctx.fillStyle = "#e8ff3c"; ctx.fillRect(-9, 22, 8, 4); ctx.fillRect(1, 22, 8, 4);
+      // Glava.
+      ctx.fillStyle = "#f0c08a"; ctx.beginPath(); ctx.arc(0, -24, 7, 0, 7); ctx.fill();
+      ctx.fillStyle = "#3a2a1a"; ctx.beginPath(); ctx.arc(0, -26, 7, Math.PI, 0); ctx.fill();
+      ctx.restore();
+    }
+    function drawBall(x: number, y: number, s: number, rot: number) {
+      const R = 17 * s;
+      // Sjena na travi (manja kad je lopta viša → dojam visine preko skale).
+      ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.beginPath(); ctx.ellipse(x, BALL_HOME.y, 14 * s + 4, 4 * s + 1.5, 0, 0, 7); ctx.fill();
+      ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+      ctx.fillStyle = "#fff"; ctx.strokeStyle = "#0c0c0c"; ctx.lineWidth = R * 0.14;
+      ctx.beginPath(); ctx.arc(0, 0, R, 0, 7); ctx.fill(); ctx.stroke();
+      // Pentagon detalj.
+      ctx.fillStyle = "#121212"; ctx.beginPath();
+      for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI * 2 - Math.PI / 2, r = R * 0.36; const px = Math.cos(a) * r, py = Math.sin(a) * r; i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py); }
+      ctx.closePath(); ctx.fill();
+      if (s > 0.7) { ctx.fillStyle = "#e8ff3c"; ctx.font = "800 " + (R * 0.5) + "px Arial"; ctx.textAlign = "center"; ctx.fillText("D", 0, R * 0.18); }
+      ctx.restore();
+    }
+
+    function render(time: number) {
+      ctx.clearRect(0, 0, W, H);
+      ctx.save();
+      const sx = shake > 0 ? (Math.random() - 0.5) * shake : 0, sy = shake > 0 ? (Math.random() - 0.5) * shake : 0;
+      ctx.translate(sx, sy);
+
+      drawSky(time); drawStands(time); drawPitch(); drawGoal();
+
+      // Trag lopte.
+      for (let i = 0; i < trail.length; i++) { const p = trail[i]; ctx.globalAlpha = (i / trail.length) * 0.4; ctx.fillStyle = "#e8ff3c"; ctx.beginPath(); ctx.arc(p.x, p.y, 15 * p.s * (i / trail.length), 0, 7); ctx.fill(); }
+      ctx.globalAlpha = 1;
+
+      drawKeeper();
+      if (!ball.dead) drawBall(ball.x, ball.y, ball.s, ball.rot);
+
+      // Čestice.
+      for (const p of parts) { ctx.globalAlpha = Math.max(0, 1 - p.life / p.max); ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, p.sz, p.sz); }
+      ctx.globalAlpha = 1;
+
+      // Status tekst (GOOOL / OBRANA) — skalira i trese se sa scenom.
+      if (statusT > 0) {
+        const sc = 1 + (1 - Math.min(1, statusT * 3)) * 0.6;
+        ctx.save(); ctx.translate(W / 2, 150); ctx.scale(sc, sc);
+        ctx.globalAlpha = Math.min(1, statusT * 4);
+        ctx.font = "800 34px Arial"; ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillText(statusText, 2, 2);
+        ctx.fillStyle = statusCol; ctx.fillText(statusText, 0, 0);
+        ctx.restore(); ctx.globalAlpha = 1;
+      }
+
+      ctx.restore();
+
+      // Bljesak preko cijelog ekrana (gol).
+      if (flash > 0) { ctx.fillStyle = "rgba(232,255,60," + (flash * 0.35) + ")"; ctx.fillRect(0, 0, W, H); }
+    }
+
+    function update(dt: number, time: number) {
+      shake = Math.max(0, shake - dt * 40);
+      flash = Math.max(0, flash - dt * 2.5);
+      roar = Math.max(0, roar - dt * 1.5);
+      netRipple.str = Math.max(0, netRipple.str - dt * 34);
+      statusT = Math.max(0, statusT - dt);
+      keeper.bob += dt * 3;
+
+      for (let i = parts.length - 1; i >= 0; i--) { const p = parts[i]; p.life += dt; p.vy += dt * 14; p.x += p.vx; p.y += p.vy; if (p.life >= p.max) parts.splice(i, 1); }
+
+      // Golman: reakcija pa skok prema meti.
+      if (keeper.diving) {
+        keeper.react -= dt;
+        if (keeper.react <= 0) {
+          keeper.pose = Math.min(1, keeper.pose + dt * 3.4);
+          keeper.x += (keeper.tx - keeper.x) * Math.min(1, dt * 9);
+          keeper.y += (keeper.ty - keeper.y) * Math.min(1, dt * 9);
+        }
+      } else {
+        keeper.pose += (0 - keeper.pose) * Math.min(1, dt * 6);
+        keeper.x += (GOAL_CX - keeper.x) * Math.min(1, dt * 6);
+        keeper.y += (LINE_Y - keeper.y) * Math.min(1, dt * 6);
+      }
+
+      // Lopta u letu.
+      if (ball.flying) {
+        ball.t += dt / 0.66;
+        const tt = ball.t > 1 ? 1 : ball.t;
+        const e = tt; // linearno napredovanje prema golu
+        ball.x = BALL_HOME.x + (ball.tx - BALL_HOME.x) * e;
+        ball.y = BALL_HOME.y + (ball.ty - BALL_HOME.y) * e - Math.sin(Math.PI * tt) * 26;
+        ball.s = 1 - 0.5 * tt;
+        ball.rot += dt * 14;
+        trail.push({ x: ball.x, y: ball.y, s: ball.s }); if (trail.length > 9) trail.shift();
+        if (ball.t >= 1) resolveShot();
+      }
+    }
+
+    function loop(ts: number) {
+      const dt = last ? Math.min(0.05, (ts - last) / 1000) : 0.016; last = ts;
+      update(dt, ts / 1000); render(ts / 1000);
+      raf = requestAnimationFrame(loop);
+    }
+
+    // ── Tijek igre ───────────────────────────────────────────────────
+    function beginShot() {
+      phase = "aim";
+      ball.x = BALL_HOME.x; ball.y = BALL_HOME.y; ball.s = 1; ball.rot = 0; ball.t = 0; ball.flying = false; ball.dead = false;
+      keeper.diving = false; keeper.tx = GOAL_CX; keeper.ty = LINE_Y; keeper.dir = 0;
+      trail.length = 0;
+      setHint("&#9917; Tapni u gol gdje želiš pucati");
+    }
+
+    function shoot(tx: number, ty: number) {
+      phase = "shoot"; setHint("&nbsp;"); sfxKick(); buzz(15);
+      ball.tx = tx; ball.ty = ty; ball.flying = true;
+
+      // Izazov: golman jači svakim penalom. Kutevi ostaju najsigurniji.
+      const dcx = Math.min(1, Math.abs(tx - GOAL_CX) / ((POST_R - 14) - GOAL_CX));
+      const highShot = ty < (CROSS_Y + LINE_Y) / 2;
+      let saveChance = (0.20 + 0.07 * (shot - 1)) * (1 - 0.72 * dcx) * (highShot ? 0.82 : 1);
+      saveChance = Math.max(0.06, Math.min(0.7, saveChance));
+      const saved = Math.random() < saveChance;
+      ball.saved = saved;
+
+      // Golman ide prema lopti ako brani, inače pogađa krivu stranu.
+      if (saved) { keeper.tx = tx; keeper.ty = ty + 4; }
+      else {
+        const wrongSide = tx >= GOAL_CX ? -1 : 1;
+        // Ponekad pogodi stranu ali prekratko (realističnije).
+        const guessSide = Math.random() < 0.45 ? -wrongSide : wrongSide;
+        keeper.tx = GOAL_CX + guessSide * (40 + Math.random() * 55);
+        keeper.ty = LINE_Y - 6 - Math.random() * 20;
+      }
+      keeper.dir = keeper.tx >= GOAL_CX ? 1 : -1;
+      keeper.diving = true;
+      keeper.react = Math.max(0.04, 0.22 - 0.03 * (shot - 1)); // brža reakcija kasnije
+    }
+
+    function resolveShot() {
+      ball.flying = false;
+      if (ball.saved) {
+        statusText = "OBRANA!"; statusCol = "#ff4d6d"; statusT = 1.1; results[shot - 1] = false;
+        sfxSave(); buzz(60); shake = 6; ball.dead = true;
+        burst(ball.x, ball.y, ["#cfd6e0", "#8891a0"], 10, 3);
+      } else {
+        goals++; goalsEl.textContent = String(goals);
+        statusText = "GOOOL!"; statusCol = "#e8ff3c"; statusT = 1.1; results[shot - 1] = true;
+        sfxGoal(); sfxRoar(); buzz([30, 40, 60]);
+        shake = 12; flash = 1; roar = 1;
+        netRipple.x = ball.x; netRipple.y = Math.max(CROSS_Y + 6, ball.y); netRipple.str = 16;
+        burst(ball.x, ball.y, ["#e8ff3c", "#fff", "#3b82f6"], 22, 4.5);
+        ball.dead = true;
+      }
+      drawDots();
+      phase = "result";
+      setTimeout(() => {
+        if (shot >= 5) { endGame(); }
+        else { shot++; shotEl.textContent = String(shot); beginShot(); }
+      }, 1150);
+    }
+
+    stage.addEventListener("click", (e) => {
+      if (phase !== "aim") return;
+      const r = stage.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width) * W;
+      const y = ((e.clientY - r.top) / r.height) * H;
+      if (x < POST_L + 8 || x > POST_R - 8 || y < CROSS_Y + 4 || y > LINE_Y) { setHint('<span style="color:#ff4d6d;">Pucaj unutar gola!</span>'); return; }
+      shoot(x, y);
     });
 
-    function shoot(x: number, y: number, PW: number, PH: number) {
-      busy = true; setHint("&nbsp;"); sfxKick(); buzz(15);
-      aim.style.left = x + "px"; aim.style.top = y + "px"; aim.style.opacity = "1";
-
-      const xs = [0.27 * PW, 0.5 * PW, 0.73 * PW], ys = [0.30 * PH, 0.46 * PH];
-      let kx = xs[(Math.random() * 3) | 0], ky = ys[(Math.random() * 2) | 0];
-      const readChance = 0.12 + 0.06 * (shot - 1);
-      if (Math.random() < readChance) { kx = Math.max(xs[0], Math.min(xs[2], x)); ky = Math.abs(y - ys[0]) < Math.abs(y - ys[1]) ? ys[0] : ys[1]; }
-      const reach = (0.17 + 0.015 * (shot - 1)) * PW;
-
-      const ballHomeX = 0.5 * PW, ballHomeY = 0.86 * PH;
-      const keeperHomeX = 0.5 * PW, keeperHomeY = 0.30 * PH;
-      const arc = 0.2 * PH;
-      let t = 0;
-
-      function step() {
-        t += 0.02;
-        const tt = t > 1 ? 1 : t;
-        const cx = ballHomeX + (x - ballHomeX) * tt;
-        const cy = ballHomeY + (y - ballHomeY) * tt - arc * Math.sin(Math.PI * tt);
-        const s = 1 - 0.5 * tt;
-        ball.style.transform = "translate(-50%,-50%) translate(" + (cx - ballHomeX) + "px," + (cy - ballHomeY) + "px) scale(" + s + ")";
-        spin.style.transform = "rotate(" + (tt * 720) + "deg)";
-        const kt = Math.min(1, t / 0.62);
-        keeper.style.transform = "translate(-50%,-50%) translate(" + ((kx - keeperHomeX) * kt) + "px," + ((ky - keeperHomeY) * kt) + "px) rotate(" + ((kx - keeperHomeX) * 0.06 * kt) + "deg)";
-        if (t < 1) { raf = requestAnimationFrame(step); }
-        else { finish(Math.hypot(x - kx, y - ky) < reach); }
-      }
-      raf = requestAnimationFrame(step);
-    }
-
-    function finish(saved: boolean) {
-      if (saved) { statusEl.textContent = "OBRANA!"; statusEl.style.color = "#ff4d6d"; results[shot - 1] = false; sfxSave(); buzz(60); }
-      else {
-        goals++; goalsEl.textContent = String(goals); statusEl.textContent = "GOOOL!"; statusEl.style.color = "#e8ff3c";
-        results[shot - 1] = true; sfxGoal(); buzz([30, 40, 60]);
-        goal.classList.add("pg-shake"); pitch.classList.add("pg-shake");
-        setTimeout(() => { goal.classList.remove("pg-shake"); pitch.classList.remove("pg-shake"); }, 240);
-      }
-      statusEl.style.opacity = "1"; drawDots();
-      setTimeout(() => {
-        statusEl.style.opacity = "0"; aim.style.opacity = "0";
-        if (shot >= 5) { setTimeout(endGame, 300); }
-        else { shot++; shotEl.textContent = String(shot); resetShot(); }
-      }, 1050);
-    }
-
-    function resetShot() {
-      ball.style.transition = "none"; keeper.style.transition = "none";
-      ball.style.transform = "translate(-50%,-50%)"; keeper.style.transform = "translate(-50%,-50%)";
-      spin.style.transform = "rotate(0deg)";
-      void ball.offsetWidth;
-      busy = false; setHint("&#9917; Tapni u gol gdje želiš pucati");
-    }
+    startBtn.onclick = () => { sfxWhistle(); intro.style.display = "none"; playing = true; beginShot(); };
 
     function confetti() {
       const cols = ["#e8ff3c", "#fff", "#ff4d6d", "#3b82f6"];
-      const w = pitch.clientWidth;
-      for (let i = 0; i < 26; i++) {
-        const d = document.createElement("div");
-        const dur = 1 + Math.random() * 1.3;
-        d.style.cssText = "position:absolute;top:-10px;left:" + (Math.random() * w) + "px;width:7px;height:10px;background:" + cols[i % 4] + ";z-index:9;border-radius:1px;";
-        pitch.appendChild(d);
-        d.animate([{ transform: "translateY(0) rotate(0)", opacity: 1 }, { transform: "translateY(" + (pitch.clientHeight + 20) + "px) rotate(560deg)", opacity: 0.9 }], { duration: dur * 1000, easing: "ease-in" });
-        setTimeout(() => d.remove(), dur * 1000);
-      }
+      for (let i = 0; i < 40; i++) burst(Math.random() * W, -10, cols, 1, 3);
     }
 
     function endGame() {
-      playing = false;
+      phase = "idle"; playing = false;
       if (goals > best()) localStorage.setItem(BEST_KEY, String(goals));
       const win = goals >= 4;
       const bestLine = '<p style="margin:6px 0 0;text-align:center;font-size:11px;color:rgba(255,255,255,0.45);">Najbolje: ' + best() + '/5</p>';
@@ -220,8 +423,8 @@ export function PenaltyGame() {
           '<p style="margin:0 0 14px;text-align:center;font-size:13px;color:rgba(255,255,255,0.75);">Osvojio si <b style="color:#e8ff3c;font-size:18px;">besplatnu dostavu</b> (na narudžbe od 40€)!</p>' +
           '<button id="pg_shop" class="pg-btn" style="width:100%;padding:14px 0;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:14px;font-weight:800;cursor:pointer;">ISKORISTI NA SHOPU &rarr;</button>' +
           '<button id="pg_again" class="pg-btn" style="width:100%;margin-top:8px;padding:11px 0;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:transparent;color:#fff;font-size:13px;cursor:pointer;">Igraj ponovno</button>' +
-          '<p style="margin:8px 0 0;text-align:center;font-size:10px;color:rgba(255,255,255,0.35);">Besplatna dostava se sam primijeni na blagajni</p>' + bestLine;
-        confetti(); sfxGoal();
+          '<p style="margin:8px 0 0;text-align:center;font-size:10px;color:rgba(255,255,255,0.35);">Besplatna dostava se sama primijeni na blagajni</p>' + bestLine;
+        confetti(); flash = 1; sfxGoal(); sfxRoar();
       } else {
         controls.innerHTML =
           '<p style="margin:0 0 2px;text-align:center;font-size:18px;font-weight:800;color:#fff;">' + goals + '/5 golova</p>' +
@@ -236,10 +439,11 @@ export function PenaltyGame() {
         shotEl.textContent = "1"; goalsEl.textContent = "0"; drawDots();
         controls.innerHTML = '<p id="pg_hint" style="margin:0;text-align:center;font-size:13px;color:rgba(255,255,255,0.7);">&#9917; Tapni u gol gdje želiš pucati</p>';
         hint = root!.querySelector<HTMLElement>("#pg_hint")!;
-        resetShot(); playing = true;
+        playing = true; beginShot();
       };
     }
 
+    raf = requestAnimationFrame(loop);
     return () => { cancelAnimationFrame(raf); };
   }, []);
 
