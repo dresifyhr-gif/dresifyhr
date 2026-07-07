@@ -28,7 +28,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
   const isCod = order.payment?.toLowerCase().includes("pouze") || !order.payment;
-  const cod = isCod ? codAmount(order.total, order.shipping) : 0;
+  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode) : 0;
 
   const recipientName = formatCroatianName(order.customerName);
 

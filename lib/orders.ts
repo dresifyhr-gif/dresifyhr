@@ -57,11 +57,11 @@ export function getOrderReference(createdAt: string) {
 
 // Otkupnina (koliko kupac plaća pouzećem) = roba + dostava, po istoj logici kao blagajna.
 // Robustno i za uvezene narudžbe gdje dostava nije zapisana (shipping=0): preračuna se.
-// Besplatna dostava kad roba ≥ 60 €, inače 5 €.
-export function codAmount(total: number, shipping: number): number {
+// Dostava je besplatna kad: roba ≥ 60 € ILI je osvojena na igrici (promoCode postoji).
+export function codAmount(total: number, shipping: number, promoCode?: string | null): number {
   const goods = Math.max(0, (total ?? 0) - (shipping ?? 0));
-  const delivery = goods >= FREE_SHIPPING_THRESHOLD_EUR ? 0 : SHIPPING_PRICE_EUR;
-  return goods + delivery;
+  const freeDelivery = goods >= FREE_SHIPPING_THRESHOLD_EUR || Boolean(promoCode && promoCode.trim());
+  return goods + (freeDelivery ? 0 : SHIPPING_PRICE_EUR);
 }
 
 export function formatOrderTimestamp(createdAt: string) {
