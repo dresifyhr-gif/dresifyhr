@@ -13,6 +13,7 @@ type Order = {
   reference: string;
   customerName: string;
   phone: string;
+  email: string;
   address: string;
   itemCount: number;
   total: number;
@@ -272,6 +273,11 @@ export function OrdersManager() {
                         </>
                       ) : null}
                     </div>
+                    {o.email ? (
+                      <div className="mt-0.5 text-xs text-slate-500">
+                        ✉️ <a href={`mailto:${o.email}`} className="font-medium text-slate-600 hover:text-slate-800 hover:underline">{o.email}</a>
+                      </div>
+                    ) : null}
                     <div className="mt-0.5 text-xs text-slate-400">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-slate-700">{eur(o.total)}</span></div>
                     {o.items.length > 0 && (
                       <ul className="mt-1.5 space-y-0.5">
