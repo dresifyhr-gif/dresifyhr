@@ -60,6 +60,42 @@ function ItemsEditor({ orderId, items, onSaved }: { orderId: string; items: Orde
   );
 }
 
+function ContactEditor({ orderId, initial, onSaved }: { orderId: string; initial: { customerName: string; phone: string; address: string }; onSaved: () => void }) {
+  const [name, setName] = useState(initial.customerName);
+  const [phone, setPhone] = useState(initial.phone);
+  const [address, setAddress] = useState(initial.address);
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    if (saving) return;
+    setSaving(true);
+    await fetch(`/api/admin/orders/${orderId}/contact/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ customerName: name, phone, address })
+    }).catch(() => {});
+    setSaving(false);
+    onSaved();
+  }
+
+  return (
+    <div className="mt-2 space-y-2 rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
+      <label className="block text-[11px] font-medium text-slate-500">Ime i prezime
+        <input value={name} onChange={(e) => setName(e.target.value)} className="mt-0.5 w-full rounded border border-slate-200 bg-white px-2 py-1 text-[13px] outline-none focus:border-slate-400" />
+      </label>
+      <label className="block text-[11px] font-medium text-slate-500">Telefon
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" className="mt-0.5 w-full rounded border border-slate-200 bg-white px-2 py-1 text-[13px] outline-none focus:border-slate-400" />
+      </label>
+      <label className="block text-[11px] font-medium text-slate-500">Adresa (ulica, poštanski broj, mjesto)
+        <input value={address} onChange={(e) => setAddress(e.target.value)} className="mt-0.5 w-full rounded border border-slate-200 bg-white px-2 py-1 text-[13px] outline-none focus:border-slate-400" />
+      </label>
+      <button type="button" onClick={save} disabled={saving} className="rounded-md bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800 disabled:opacity-40">
+        {saving ? "Spremam…" : "Spremi podatke"}
+      </button>
+    </div>
+  );
+}
+
 function TrackingRow({ id, initial }: { id: string; initial: string }) {
   const [val, setVal] = useState(initial);
   const [saving, setSaving] = useState(false);
@@ -131,6 +167,7 @@ export function OrdersManager() {
   const [status, setStatus] = useState("");
   const [sort, setSort] = useState(""); // "" new-first | new | old
   const [editing, setEditing] = useState<string | null>(null);
+  const [editingContact, setEditingContact] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -333,10 +370,16 @@ export function OrdersManager() {
                     className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-400 hover:bg-slate-50 disabled:opacity-50">↺ Vrati u nove</button>
                   <button type="button" onClick={() => setEditing((e) => (e === o.id ? null : o.id))}
                     className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50">✏️ Uredi artikle</button>
+                  <button type="button" onClick={() => setEditingContact((e) => (e === o.id ? null : o.id))}
+                    className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50">✏️ Uredi adresu</button>
                 </div>
 
                 {editing === o.id && (
                   <ItemsEditor orderId={o.id} items={o.items} onSaved={() => { setEditing(null); fetchPage(q, 1, false); }} />
+                )}
+
+                {editingContact === o.id && (
+                  <ContactEditor orderId={o.id} initial={{ customerName: o.customerName, phone: o.phone, address: o.address }} onSaved={() => { setEditingContact(null); fetchPage(q, 1, false); }} />
                 )}
 
                 <TrackingRow id={o.id} initial={o.tracking} />
