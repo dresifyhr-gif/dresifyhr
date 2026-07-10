@@ -28,7 +28,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   const sizeOptions = getJerseySizeOptions(product);
   const gallery = product.images ?? getJerseyGallery(product.slug);
   const frontImage = gallery[0]?.src;
-  const stock = getJerseyStock(product.id);
+  const stock = getJerseyStock(product);
   const { addItem } = useCart();
   const mainButtonRef = useRef<HTMLButtonElement>(null);
   const firstAvailable = (arr: string[], segmentOut: boolean) =>

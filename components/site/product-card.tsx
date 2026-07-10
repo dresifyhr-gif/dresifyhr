@@ -13,7 +13,7 @@ import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { formatPrice, repairText } from "@/lib/utils";
 
 export function ProductCard({ product, priority = false }: { product: Jersey; priority?: boolean }) {
-  const stock = getJerseyStock(product.id);
+  const stock = getJerseyStock(product);
   const sizeOptions = getJerseySizeOptions(product);
   const { addItem } = useCart();
 

@@ -98,6 +98,7 @@ model Product {
 model ProductOverride {
   slug         String   @id
   price        Float?
+  stock        Int? // ručno postavljena količina (prazno = automatska)
   outOfStock   String? // "all" | "adults" | "kids" (prazno = na stanju)
   soldOutSizes String? // npr. "XL,XXL"
   hidden       Boolean  @default(false) // draft/sakriveno — ne prikazuje se na shopu

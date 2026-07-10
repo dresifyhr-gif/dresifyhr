@@ -21,6 +21,8 @@ export type Jersey = {
   isCustom?: boolean;
   // Ocjena (zvjezdice) — samo za dresove koji su se prodali.
   rating?: { value: number; count: number };
+  // Ručno postavljena količina (stanje) iz admina; prazno = automatska.
+  stock?: number;
 };
 
 export const jerseys: Jersey[] = [
@@ -198,8 +200,9 @@ export function getJerseyBySlug(slug: string) {
   return jerseys.find((jersey) => jersey.slug === slug);
 }
 
-export function getJerseyStock(id: number) {
-  return 2 + ((id * 7) % 5);
+export function getJerseyStock(product: { id: number; stock?: number | null }) {
+  if (product.stock != null) return product.stock;
+  return 2 + ((product.id * 7) % 5);
 }
 
 export function getStockTone(stock: number) {

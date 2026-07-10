@@ -44,6 +44,7 @@ export async function GET() {
       igrac: repairText(j.igrac),
       liga: j.liga,
       price: ov?.price != null ? ov.price : j.price ?? JERSEY_PRICE_EUR,
+      stock: ov?.stock ?? null,
       outOfStock,
       soldOutSizes,
       hidden: ov ? ov.hidden : false,
@@ -72,6 +73,9 @@ export async function POST(request: Request) {
   }
 
   const price = body?.price === null || body?.price === "" ? null : Number(body.price);
+  const stockRaw = body?.stock;
+  const stockNum = stockRaw === null || stockRaw === "" || stockRaw === undefined ? null : Math.round(Number(stockRaw));
+  const stockVal = stockNum != null && Number.isFinite(stockNum) && stockNum >= 0 ? stockNum : null;
   const oos = body?.outOfStock;
   const outOfStock = oos === "all" || oos === "adults" || oos === "kids" ? oos : null;
   const sizes: string[] = Array.isArray(body?.soldOutSizes) ? body.soldOutSizes.filter((s: unknown) => typeof s === "string") : [];
@@ -82,8 +86,8 @@ export async function POST(request: Request) {
 
   await prisma.productOverride.upsert({
     where: { slug },
-    create: { slug, price: priceVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge, description },
-    update: { price: priceVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge, description }
+    create: { slug, price: priceVal, stock: stockVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge, description },
+    update: { price: priceVal, stock: stockVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge, description }
   });
 
   return NextResponse.json({ ok: true });

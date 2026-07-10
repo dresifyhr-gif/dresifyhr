@@ -67,7 +67,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   const relatedProducts = getRelatedJerseys(product);
-  const stock = getJerseyStock(product.id);
+  const stock = getJerseyStock(product);
   const productSchema = buildProductSchema(product, stock);
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: t.productPage.breadcrumb.home, path: "/" },

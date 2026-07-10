@@ -8,6 +8,7 @@ type Product = {
   igrac: string;
   liga: string;
   price: number;
+  stock: number | null;
   outOfStock: string;
   soldOutSizes: string[];
   hidden: boolean;
@@ -38,6 +39,7 @@ const STOCK_OPTIONS = [
 
 function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const [price, setPrice] = useState(String(p.price));
+  const [stock, setStock] = useState(p.stock == null ? "" : String(p.stock));
   const [oos, setOos] = useState(p.outOfStock);
   const [soldSizes, setSoldSizes] = useState<string[]>(p.soldOutSizes);
   const [hidden, setHidden] = useState(p.hidden);
@@ -49,7 +51,8 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
 
   // Ako je opis jednak auto-tekstu, spremamo prazno (vrati na automatski).
   const descToSave = desc.trim() === p.descriptionAuto.trim() ? "" : desc;
-  const dirty = price !== String(p.price) || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || descToSave !== p.description;
+  const stockOrig = p.stock == null ? "" : String(p.stock);
+  const dirty = price !== String(p.price) || stock !== stockOrig || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || descToSave !== p.description;
 
   function toggleSize(s: string) {
     setSoldSizes((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s]));
@@ -62,7 +65,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     await fetch("/api/admin/products/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: p.slug, price: price === "" ? null : Number(price.replace(",", ".")), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, description: descToSave })
+      body: JSON.stringify({ slug: p.slug, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, description: descToSave })
     }).catch(() => {});
     setSaving(false);
     setSaved(true);
@@ -91,6 +94,17 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
               className="w-16 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
             />
             <span className="text-xs text-slate-400">€</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <input
+              value={stock}
+              onChange={(e) => setStock(e.target.value.replace(/[^0-9]/g, ""))}
+              inputMode="numeric"
+              placeholder="auto"
+              title="Količina na stanju (prazno = automatski)"
+              className="w-14 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+            />
+            <span className="text-xs text-slate-400">kom</span>
           </div>
           <select
             value={oos}
