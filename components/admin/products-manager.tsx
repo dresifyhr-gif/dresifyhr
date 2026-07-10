@@ -9,6 +9,8 @@ type Product = {
   liga: string;
   price: number;
   stock: number | null;
+  sizeStock: Record<string, number>;
+  sizeList: string[];
   outOfStock: string;
   soldOutSizes: string[];
   hidden: boolean;
@@ -40,6 +42,9 @@ const STOCK_OPTIONS = [
 function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const [price, setPrice] = useState(String(p.price));
   const [stock, setStock] = useState(p.stock == null ? "" : String(p.stock));
+  const sizeStockInit = () => Object.fromEntries((p.sizeList || []).map((s) => [s, p.sizeStock?.[s] != null ? String(p.sizeStock[s]) : ""]));
+  const [sizeStock, setSizeStock] = useState<Record<string, string>>(sizeStockInit);
+  const [showSizes, setShowSizes] = useState(false);
   const [oos, setOos] = useState(p.outOfStock);
   const [soldSizes, setSoldSizes] = useState<string[]>(p.soldOutSizes);
   const [hidden, setHidden] = useState(p.hidden);
@@ -52,7 +57,10 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   // Ako je opis jednak auto-tekstu, spremamo prazno (vrati na automatski).
   const descToSave = desc.trim() === p.descriptionAuto.trim() ? "" : desc;
   const stockOrig = p.stock == null ? "" : String(p.stock);
-  const dirty = price !== String(p.price) || stock !== stockOrig || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || descToSave !== p.description;
+  const sizeStockDirty = (p.sizeList || []).some((s) => (sizeStock[s] || "") !== (p.sizeStock?.[s] != null ? String(p.sizeStock[s]) : ""));
+  const dirty = price !== String(p.price) || stock !== stockOrig || sizeStockDirty || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || descToSave !== p.description;
+  const sizeStockTotal = (p.sizeList || []).reduce((sum, s) => sum + (Number(sizeStock[s]) || 0), 0);
+  const hasSizeStock = (p.sizeList || []).some((s) => (sizeStock[s] || "").trim() !== "");
 
   function toggleSize(s: string) {
     setSoldSizes((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s]));
@@ -65,7 +73,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     await fetch("/api/admin/products/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: p.slug, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, description: descToSave })
+      body: JSON.stringify({ slug: p.slug, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), sizeStock: Object.fromEntries((p.sizeList || []).filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])])), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, description: descToSave })
     }).catch(() => {});
     setSaving(false);
     setSaved(true);
@@ -162,7 +170,39 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
           {showDesc ? "Sakrij opis" : "✏️ Uredi opis"}
           {p.description ? " (uređen)" : ""}
         </button>
+        {p.sizeList && p.sizeList.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowSizes((v) => !v)}
+            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-slate-500 underline decoration-dotted hover:text-slate-800"
+          >
+            {showSizes ? "Sakrij količine" : "📦 Količine po veličini"}
+            {hasSizeStock ? ` (${sizeStockTotal} kom)` : ""}
+          </button>
+        )}
       </div>
+
+      {showSizes && p.sizeList && p.sizeList.length > 0 && (
+        <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
+          <div className="flex flex-wrap gap-2">
+            {p.sizeList.map((s) => (
+              <label key={s} className="flex flex-col items-center gap-0.5">
+                <span className="text-[11px] font-medium text-slate-500">{s}</span>
+                <input
+                  value={sizeStock[s] ?? ""}
+                  onChange={(e) => setSizeStock((cur) => ({ ...cur, [s]: e.target.value.replace(/[^0-9]/g, "") }))}
+                  inputMode="numeric"
+                  placeholder="–"
+                  className="w-12 rounded border border-slate-200 bg-white px-1.5 py-1 text-center text-[13px] outline-none focus:border-slate-400"
+                />
+              </label>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] text-slate-400">
+            Upiši koliko imaš po veličini. <b>0 = rasprodano</b> (kupac ne može naručiti tu veličinu). Prazno = ne pratiš tu veličinu. Ukupno: <b className="text-slate-600">{sizeStockTotal} kom</b>. Ne zaboravi „Spremi” gore.
+          </p>
+        </div>
+      )}
 
       {showDesc && (
         <div className="mt-2">

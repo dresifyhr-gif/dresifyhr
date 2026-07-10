@@ -23,6 +23,8 @@ export type Jersey = {
   rating?: { value: number; count: number };
   // Ručno postavljena količina (stanje) iz admina; prazno = automatska.
   stock?: number;
+  // Količina po veličini iz admina (npr. { S: 3, M: 5, L: 0 }); 0 = rasprodana veličina.
+  sizeStock?: Record<string, number>;
 };
 
 export const jerseys: Jersey[] = [
@@ -200,7 +202,10 @@ export function getJerseyBySlug(slug: string) {
   return jerseys.find((jersey) => jersey.slug === slug);
 }
 
-export function getJerseyStock(product: { id: number; stock?: number | null }) {
+export function getJerseyStock(product: { id: number; stock?: number | null; sizeStock?: Record<string, number> | null }) {
+  if (product.sizeStock && Object.keys(product.sizeStock).length > 0) {
+    return Object.values(product.sizeStock).reduce((sum, n) => sum + (Number.isFinite(n) ? Math.max(0, n) : 0), 0);
+  }
   if (product.stock != null) return product.stock;
   return 2 + ((product.id * 7) % 5);
 }
@@ -249,7 +254,11 @@ export function getJerseySizeOptions(product: Jersey) {
     kids: hasKids ? [...kidSizes] : [],
     adultsOutOfStock: product.outOfStock === "adults" || product.outOfStock === "all",
     kidsOutOfStock: product.outOfStock === "kids" || product.outOfStock === "all",
-    soldOutSizes: product.soldOutSizes ?? [],
+    // Rasprodane veličine = ručno označene + one koje imaju 0 kom po veličini.
+    soldOutSizes: Array.from(new Set([
+      ...(product.soldOutSizes ?? []),
+      ...(product.sizeStock ? Object.entries(product.sizeStock).filter(([, n]) => (n ?? 0) <= 0).map(([s]) => s) : [])
+    ])),
   };
 }
 
