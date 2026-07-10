@@ -116,12 +116,12 @@ function TrackingRow({ id, initial }: { id: string; initial: string }) {
   }
 
   return (
-    <div className="mt-2 flex items-center gap-2">
+    <div className="mt-2 flex flex-wrap items-center gap-2">
       <input
         value={val}
         onChange={(e) => setVal(e.target.value)}
         placeholder="Tracking / broj pošiljke"
-        className="flex-1 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[12px] text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+        className="w-full min-w-0 flex-1 basis-[140px] rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[12px] text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
       />
       <button
         type="button"
@@ -280,8 +280,8 @@ export function OrdersManager() {
             return (
               <div key={o.id} className="rounded-lg border border-slate-200 p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0 max-w-full">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span className="font-semibold text-slate-900">{o.customerName}</span>
                       <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
                       {o.promoCode && (
@@ -311,7 +311,7 @@ export function OrdersManager() {
                       ) : null}
                     </div>
                     {o.email ? (
-                      <div className="mt-0.5 text-xs text-slate-500">
+                      <div className="mt-0.5 break-all text-xs text-slate-500">
                         ✉️ <a href={`mailto:${o.email}`} className="font-medium text-slate-600 hover:text-slate-800 hover:underline">{o.email}</a>
                       </div>
                     ) : null}
@@ -327,7 +327,7 @@ export function OrdersManager() {
                       </ul>
                     )}
                   </div>
-                  <span className="flex shrink-0 items-center gap-1.5">
+                  <span className="flex flex-wrap items-center justify-end gap-1.5">
                     {waLink(o.phone) && (
                       <a
                         href={waLink(o.phone)!}
