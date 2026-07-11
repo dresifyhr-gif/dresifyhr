@@ -19,9 +19,13 @@ export async function getDashboardMetrics() {
   const startWeek = new Date(now.getTime() - 7 * DAY);
   const startMonth = new Date(now.getTime() - 30 * DAY);
 
+  // Otkazane i vraćene narudžbe NE ulaze u promet/zaradu/količine (nisu prodaja).
+  const VOID = ["cancelled", "returned"];
+  const notVoid = { status: { notIn: VOID } };
+
   // Promet = total − dostava (dostava nije prihod; naplati se i vrati kroz pouzeće).
   const rev = (gte?: Date) =>
-    prisma.order.aggregate({ _sum: { total: true, shipping: true }, _count: true, where: gte ? { createdAt: { gte } } : undefined });
+    prisma.order.aggregate({ _sum: { total: true, shipping: true }, _count: true, where: { ...(gte ? { createdAt: { gte } } : {}), ...notVoid } });
   const net = (a: { _sum: { total: number | null; shipping: number | null } }) => (a._sum.total ?? 0) - (a._sum.shipping ?? 0);
   // Točan profit = Σ prodajne cijene artikala − popust − nabava (komplet 18€, dres 6€).
   const profitFor = async (orderWhere: object = {}) => {
@@ -46,17 +50,17 @@ export async function getDashboardMetrics() {
       rev(startWeek),
       rev(startMonth),
       rev(),
-      prisma.order.count(),
+      prisma.order.count({ where: notVoid }),
       prisma.order.aggregate({ _sum: { total: true, shipping: true }, _count: true, where: shippedWhere }),
-      prisma.orderItem.groupBy({ by: ["slug", "klub", "igrac"], _sum: { quantity: true }, orderBy: { _sum: { quantity: "desc" } }, take: 8 }),
+      prisma.orderItem.groupBy({ by: ["slug", "klub", "igrac"], _sum: { quantity: true }, orderBy: { _sum: { quantity: "desc" } }, take: 8, where: { order: notVoid } }),
       prisma.customer.findMany({ orderBy: { totalSpent: "desc" }, take: 8 }),
       prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 12 }),
-      prisma.order.findMany({ where: { createdAt: { gte: new Date(now.getTime() - 13 * DAY) } }, select: { createdAt: true, total: true, shipping: true } }),
+      prisma.order.findMany({ where: { createdAt: { gte: new Date(now.getTime() - 13 * DAY) }, ...notVoid }, select: { createdAt: true, total: true, shipping: true } }),
       prisma.orderItem.findMany({ distinct: ["slug"], select: { slug: true } }),
-      profitFor({ createdAt: { gte: startToday } }),
-      profitFor({ createdAt: { gte: startWeek } }),
-      profitFor({ createdAt: { gte: startMonth } }),
-      profitFor(),
+      profitFor({ createdAt: { gte: startToday }, ...notVoid }),
+      profitFor({ createdAt: { gte: startWeek }, ...notVoid }),
+      profitFor({ createdAt: { gte: startMonth }, ...notVoid }),
+      profitFor(notVoid),
       profitFor(shippedWhere),
       profitFor({ status: "new" })
     ]);
@@ -76,7 +80,7 @@ export async function getDashboardMetrics() {
   const totalRev = net(total);
 
   // ── Extras: trends, shipping queue, win-back, cities, ad ROI ──────────────
-  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, unassignedShipped] = await Promise.all([
+  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped] = await Promise.all([
     prisma.order.aggregate({ _sum: { total: true, shipping: true }, where: { createdAt: { gte: new Date(now.getTime() - 14 * DAY), lt: startWeek } } }),
     prisma.order.aggregate({ _sum: { total: true, shipping: true }, where: { createdAt: { gte: new Date(now.getTime() - 60 * DAY), lt: startMonth } } }),
     // Svi neposlani (ne kapiraj na 40) — red za slanje mora pokazati sve.
@@ -87,7 +91,9 @@ export async function getDashboardMetrics() {
     prisma.order.findMany({ select: { address: true, total: true, shipping: true } }),
     prisma.adSpend.aggregate({ _sum: { amount: true } }),
     // Vraćene pošiljke (nije pokupljeno) — za AI i evidenciju gubitka.
-    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true } }),
+    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
+    // Otkazane narudžbe — zasebna evidencija (ne ulaze u promet/zaradu).
+    prisma.order.findMany({ where: { status: "cancelled" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
     // Poslane narudžbe bez oznake tko je poslao — treba ih dodijeliti (Igor/Ivica).
     prisma.order.findMany({ where: { status: { in: ["shipped", "done"] }, shippedBy: null }, orderBy: { createdAt: "desc" }, take: 200, select: { id: true, createdAt: true, customerName: true, total: true } })
   ]);
@@ -154,6 +160,11 @@ export async function getDashboardMetrics() {
     unassignedShipped,
     returnedCount: returned.length,
     returnedTotal: returned.reduce((s, o) => s + o.total - (o.shipping ?? 0), 0),
+    returnedQty: returned.reduce((s, o) => s + (o.itemCount ?? 0), 0),
+    cancelled: cancelled.map((o) => ({ ...o, total: o.total - (o.shipping ?? 0) })),
+    cancelledCount: cancelled.length,
+    cancelledTotal: cancelled.reduce((s, o) => s + o.total - (o.shipping ?? 0), 0),
+    cancelledQty: cancelled.reduce((s, o) => s + (o.itemCount ?? 0), 0),
     topCities,
     adSpendTotal,
     roas: adSpendTotal > 0 ? totalRev / adSpendTotal : null,

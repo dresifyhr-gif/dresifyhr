@@ -118,7 +118,13 @@ export default async function AdminOverview() {
             {m.returnedCount > 0 && (
               <li className="flex items-start gap-2">
                 <span>↩️</span>
-                <span className="text-slate-700">Vraćene pošiljke: <b>{m.returnedCount}</b> ({eur(m.returnedTotal)}) — gubitak dostave</span>
+                <span className="text-slate-700">Vraćene pošiljke: <b>{m.returnedCount}</b> · {m.returnedQty} kom ({eur(m.returnedTotal)}) — <span className="text-slate-400">nije u prometu</span></span>
+              </li>
+            )}
+            {m.cancelledCount > 0 && (
+              <li className="flex items-start gap-2">
+                <span>✖️</span>
+                <span className="text-slate-700">Otkazane narudžbe: <b>{m.cancelledCount}</b> · {m.cancelledQty} kom ({eur(m.cancelledTotal)}) — <span className="text-slate-400">nije u prometu</span></span>
               </li>
             )}
             {ceo.declining && (
@@ -141,8 +147,8 @@ export default async function AdminOverview() {
         </Panel>
       </div>
 
-      {/* WhatsApp apology (old unsent) + returned shipments */}
-      {(oldRows.length > 0 || m.returnedCount > 0) && (
+      {/* WhatsApp apology (old unsent) + returned + cancelled */}
+      {(oldRows.length > 0 || m.returnedCount > 0 || m.cancelledCount > 0) && (
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
           {oldRows.length > 0 && (
             <Panel title={`Javi se kupcima — stare neposlane (${oldRows.length})`}>
@@ -150,8 +156,13 @@ export default async function AdminOverview() {
             </Panel>
           )}
           {m.returnedCount > 0 && (
-            <Panel title={`Vraćene pošiljke · ${m.returnedCount} (${eur(m.returnedTotal)})`}>
+            <Panel title={`Vraćeno · ${m.returnedCount} · ${m.returnedQty} kom (${eur(m.returnedTotal)})`}>
               <ReturnedList items={m.returned} />
+            </Panel>
+          )}
+          {m.cancelledCount > 0 && (
+            <Panel title={`Otkazano · ${m.cancelledCount} · ${m.cancelledQty} kom (${eur(m.cancelledTotal)})`}>
+              <ReturnedList items={m.cancelled} />
             </Panel>
           )}
         </div>
