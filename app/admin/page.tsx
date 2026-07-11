@@ -212,13 +212,13 @@ export default async function AdminOverview() {
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Profit poslanih {m.split.lastSettlement ? `od zadnjeg poravnanja (${m.split.lastSettlement.settledAt.toLocaleDateString("hr-HR")})` : "(od početka)"}
+                Prikupljena gotovina {m.split.lastSettlement ? `od zadnjeg poravnanja (${m.split.lastSettlement.settledAt.toLocaleDateString("hr-HR")})` : "(od početka)"}
               </div>
-              <div className="mt-1 text-2xl font-bold text-slate-900">{eur(m.split.shippedProfitTotal)}</div>
+              <div className="mt-1 text-2xl font-bold text-slate-900">{eur(m.split.totalCollected)}</div>
             </div>
             <div className="text-right">
               <div className="text-[11px] uppercase tracking-wider text-slate-400">Svakom (50%)</div>
-              <div className="mt-1 text-lg font-bold text-emerald-600">{eur(m.split.halfShare)}</div>
+              <div className="mt-1 text-lg font-bold text-emerald-600">{eur(m.split.cashHalf)}</div>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -254,7 +254,7 @@ export default async function AdminOverview() {
                 <span className="font-bold text-slate-900">{m.split.settleFrom === "igor" ? "Igor" : "Ivica"}</span> daje{" "}
                 <span className="font-bold text-slate-900">{m.split.settleFrom === "igor" ? "Ivici" : "Igoru"}</span>{" "}
                 <span className="font-bold text-emerald-600">{eur(m.split.settleAmount)}</span>{" "}
-                <span className="text-slate-500">(profit izjednačen + pola oglasa).</span>
+                <span className="text-slate-500">(prikupljena gotovina izjednačena + pola oglasa).</span>
               </div>
             )}
             <SettlementButton />

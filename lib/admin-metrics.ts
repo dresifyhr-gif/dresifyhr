@@ -135,11 +135,12 @@ export async function getDashboardMetrics() {
   };
   const [igor, ivica, unassigned] = await Promise.all([byShipper("igor"), byShipper("ivica"), byShipper(null)]);
 
-  // Poslano + prikupljena gotovina po pošiljatelju (SVE poslano, dresovi vs kompleti odvojeno).
+  // Poslano + prikupljena gotovina po pošiljatelju OD ZADNJEG PORAVNANJA (resetira se na svako
+  // poravnanje). Kompleti se broje odvojeno od dresova (drukčija marža).
   const isKomplet = (it: { slug?: string | null; klub?: string | null; igrac?: string | null }) =>
     /komplet/i.test(it.slug || "") || /komplet/i.test(it.klub || "") || /komplet/i.test(it.igrac || "");
   const cashOrders = await prisma.order.findMany({
-    where: { status: { in: ["shipped", "done"] } },
+    where: { status: { in: ["shipped", "done"] }, ...sinceFilter },
     select: { total: true, shipping: true, shippedBy: true, cashCollected: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
   });
   const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, pending: 0 });
@@ -164,9 +165,12 @@ export async function getDashboardMetrics() {
   const adsAgg = await prisma.adSpend.aggregate({ _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined });
   const adsSpend = adsAgg._sum.amount ?? 0;
 
-  // Konačno poravnanje: profit-izjednačenje + pola oglasa (Igor platio → Ivica duguje pola).
+  // Poravnanje iz PRIKUPLJENE GOTOVINE (od zadnjeg poravnanja): tko je prikupio više daje drugom
+  // pola razlike + pola oglasa (Igor platio oglase → Ivica vraća pola).
   // Pozitivno = Ivica → Igoru; negativno = Igor → Ivici.
-  const ivicaToIgor = (ivica.profit - igor.profit) / 2 + adsSpend / 2;
+  const totalCollected = cashSplit.igor.collected + cashSplit.ivica.collected;
+  const cashHalf = totalCollected / 2;
+  const ivicaToIgor = (cashSplit.ivica.collected - cashSplit.igor.collected) / 2 + adsSpend / 2;
   const settleAmount = Math.abs(ivicaToIgor);
   const settleFrom = ivicaToIgor > 0.005 ? "ivica" : ivicaToIgor < -0.005 ? "igor" : null;
 
@@ -207,7 +211,7 @@ export async function getDashboardMetrics() {
     shippedRev: net(shippedAgg),
     shippedProfit,
     aov: orderCount ? totalRev / orderCount : 0,
-    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
+    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, cashHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
     topItems,
     bestCustomers,
     recentOrders,
