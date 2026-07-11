@@ -209,16 +209,14 @@ export default async function AdminOverview() {
       {/* Partner split */}
       <div className="mt-5">
         <Panel title="Podjela Igor / Ivica (50 / 50, samo poslano)">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Prikupljena gotovina {m.split.lastSettlement ? `od zadnjeg poravnanja (${m.split.lastSettlement.settledAt.toLocaleDateString("hr-HR")})` : "(od početka)"}
-              </div>
-              <div className="mt-1 text-2xl font-bold text-slate-900">{eur(m.split.totalCollected)}</div>
+          <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+              Podjela prikupljene gotovine {m.split.lastSettlement ? `od zadnjeg poravnanja (${m.split.lastSettlement.settledAt.toLocaleDateString("hr-HR")})` : "(od početka)"}
             </div>
-            <div className="text-right">
-              <div className="text-[11px] uppercase tracking-wider text-slate-400">Svakom (50%)</div>
-              <div className="mt-1 text-lg font-bold text-emerald-600">{eur(m.split.cashHalf)}</div>
+            <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
+              <span className="text-slate-500">Prikupljeno <b className="ml-1 text-slate-900">{eur(m.split.totalCollected)}</b></span>
+              <span className="text-slate-500">− Roba natrag Ivici <b className="ml-1 text-slate-900">{eur(m.split.collectedCost)}</b></span>
+              <span className="text-slate-500">= Marža <b className="ml-1 text-emerald-600">{eur(m.split.collectedMargin)}</b> <span className="text-slate-400">· svakom {eur(m.split.marginHalf)}</span></span>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -254,7 +252,7 @@ export default async function AdminOverview() {
                 <span className="font-bold text-slate-900">{m.split.settleFrom === "igor" ? "Igor" : "Ivica"}</span> daje{" "}
                 <span className="font-bold text-slate-900">{m.split.settleFrom === "igor" ? "Ivici" : "Igoru"}</span>{" "}
                 <span className="font-bold text-emerald-600">{eur(m.split.settleAmount)}</span>{" "}
-                <span className="text-slate-500">(prikupljena gotovina izjednačena + pola oglasa).</span>
+                <span className="text-slate-500">(roba vraćena Ivici + marža 50/50 + pola oglasa).</span>
               </div>
             )}
             <SettlementButton />

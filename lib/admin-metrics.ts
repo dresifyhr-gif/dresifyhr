@@ -165,12 +165,17 @@ export async function getDashboardMetrics() {
   const adsAgg = await prisma.adSpend.aggregate({ _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined });
   const adsSpend = adsAgg._sum.amount ?? 0;
 
-  // Poravnanje iz PRIKUPLJENE GOTOVINE (od zadnjeg poravnanja): tko je prikupio više daje drugom
-  // pola razlike + pola oglasa (Igor platio oglase → Ivica vraća pola).
-  // Pozitivno = Ivica → Igoru; negativno = Igor → Ivici.
+  // Poravnanje: Ivica je platila SVU robu → prvo joj se vrati nabava prikupljenih artikala,
+  // pa se ostatak (marža) dijeli 50/50, pa pola oglasa (Igor platio → Ivica vraća pola).
   const totalCollected = cashSplit.igor.collected + cashSplit.ivica.collected;
-  const cashHalf = totalCollected / 2;
-  const ivicaToIgor = (cashSplit.ivica.collected - cashSplit.igor.collected) / 2 + adsSpend / 2;
+  const collectedDresovi = cashSplit.igor.collectedDresovi + cashSplit.ivica.collectedDresovi;
+  const collectedKompleti = cashSplit.igor.collectedKompleti + cashSplit.ivica.collectedKompleti;
+  const collectedCost = collectedDresovi * COST_PER_ITEM + collectedKompleti * COST_KOMPLET; // Ivici nazad
+  const collectedMargin = totalCollected - collectedCost; // dijeli se 50/50
+  const marginHalf = collectedMargin / 2;
+  // Igor treba zadržati samo svoju polovicu marže; sve preko toga (koje drži) ide Ivici (roba + njena marža).
+  // Oglasi: Igor platio → Ivica vraća pola. Pozitivno = Ivica → Igoru; negativno = Igor → Ivici.
+  const ivicaToIgor = adsSpend / 2 - (cashSplit.igor.collected - marginHalf);
   const settleAmount = Math.abs(ivicaToIgor);
   const settleFrom = ivicaToIgor > 0.005 ? "ivica" : ivicaToIgor < -0.005 ? "igor" : null;
 
@@ -211,7 +216,7 @@ export async function getDashboardMetrics() {
     shippedRev: net(shippedAgg),
     shippedProfit,
     aov: orderCount ? totalRev / orderCount : 0,
-    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, cashHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
+    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, collectedCost, collectedMargin, marginHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
     topItems,
     bestCustomers,
     recentOrders,
