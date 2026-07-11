@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       tracking: true,
       promoCode: true,
       cashCollected: true,
-      items: { select: { id: true, klub: true, igrac: true, size: true, quantity: true, unitPrice: true } }
+      items: { select: { id: true, slug: true, klub: true, igrac: true, size: true, quantity: true, unitPrice: true } }
     }
   });
 
@@ -82,23 +82,28 @@ export async function GET(request: Request) {
   // Sažetak pouzeća (nad SVIM poslanim narudžbama, neovisno o pretrazi/filteru).
   // Prikupio = tko je poslao (shippedBy). Iznos = ROBA BEZ DOSTAVE (dostava nije
   // prihod — to je povrat onoga što je pošiljatelj platio iz svog džepa).
+  // Komplet (dres + hlačice + lopta + kapa) ima drukčiju maržu → broji se odvojeno od dresa.
+  const isKomplet = (it: { slug?: string | null; klub?: string | null; igrac?: string | null }) =>
+    /komplet/i.test(it.slug || "") || /komplet/i.test(it.klub || "") || /komplet/i.test(it.igrac || "");
+
   const sent = all.filter((o) => o.status === "shipped" || o.status === "done");
   const cash = {
-    pendingCount: 0, pendingTotal: 0, pendingQty: 0,
-    collectedTotal: 0, collectedQty: 0,
+    pendingCount: 0, pendingTotal: 0, pendingDresovi: 0, pendingKompleti: 0,
+    collectedTotal: 0, collectedDresovi: 0, collectedKompleti: 0,
     igorCollected: 0, ivicaCollected: 0, igorPending: 0, ivicaPending: 0,
-    igorCollectedQty: 0, ivicaCollectedQty: 0
+    igorDresovi: 0, igorKompleti: 0, ivicaDresovi: 0, ivicaKompleti: 0
   };
   for (const o of sent) {
     const amt = o.total - (o.shipping ?? 0);
-    const qty = o.itemCount ?? 0;
+    let dresovi = 0, kompleti = 0;
+    for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) kompleti += q; else dresovi += q; }
     const who = o.shippedBy === "ivica" ? "ivica" : o.shippedBy === "igor" ? "igor" : "";
     if (o.cashCollected) {
-      cash.collectedTotal += amt; cash.collectedQty += qty;
-      if (who === "igor") { cash.igorCollected += amt; cash.igorCollectedQty += qty; }
-      else if (who === "ivica") { cash.ivicaCollected += amt; cash.ivicaCollectedQty += qty; }
+      cash.collectedTotal += amt; cash.collectedDresovi += dresovi; cash.collectedKompleti += kompleti;
+      if (who === "igor") { cash.igorCollected += amt; cash.igorDresovi += dresovi; cash.igorKompleti += kompleti; }
+      else if (who === "ivica") { cash.ivicaCollected += amt; cash.ivicaDresovi += dresovi; cash.ivicaKompleti += kompleti; }
     } else {
-      cash.pendingCount++; cash.pendingTotal += amt; cash.pendingQty += qty;
+      cash.pendingCount++; cash.pendingTotal += amt; cash.pendingDresovi += dresovi; cash.pendingKompleti += kompleti;
       if (who === "igor") cash.igorPending += amt; else if (who === "ivica") cash.ivicaPending += amt;
     }
   }

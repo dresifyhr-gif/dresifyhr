@@ -7,6 +7,14 @@ import { waLink } from "@/components/admin/ui";
 
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 
+// "12 dresova + 3 kompleta" (izostavi dio koji je 0; ako oba 0 → "0 kom").
+const komLabel = (dresovi: number, kompleti: number) => {
+  const parts: string[] = [];
+  if (dresovi > 0) parts.push(`${dresovi} ${dresovi === 1 ? "dres" : "dresova"}`);
+  if (kompleti > 0) parts.push(`${kompleti} ${kompleti === 1 ? "komplet" : "kompleta"}`);
+  return parts.length ? parts.join(" + ") : "0 kom";
+};
+
 type Order = {
   id: string;
   date: string;
@@ -262,7 +270,7 @@ export function OrdersManager() {
   const [editingContact, setEditingContact] = useState<string | null>(null);
   const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingQty: number; collectedTotal: number; collectedQty: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorCollectedQty: number; ivicaCollectedQty: number } | null>(null);
+  const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingDresovi: number; pendingKompleti: number; collectedTotal: number; collectedDresovi: number; collectedKompleti: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorDresovi: number; igorKompleti: number; ivicaDresovi: number; ivicaKompleti: number } | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -343,12 +351,12 @@ export function OrdersManager() {
       {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (
         <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
-            <span>Za prikupiti (poslano): <b className="text-amber-600">{eur(cash.pendingTotal)}</b> <span className="text-slate-400">· {cash.pendingCount} narudžbi · {cash.pendingQty} kom</span></span>
-            <span>Prikupljeno: <b className="text-emerald-600">{eur(cash.collectedTotal)}</b> <span className="text-slate-400">· {cash.collectedQty} kom</span></span>
+            <span>Za prikupiti (poslano): <b className="text-amber-600">{eur(cash.pendingTotal)}</b> <span className="text-slate-400">· {cash.pendingCount} narudžbi · {komLabel(cash.pendingDresovi, cash.pendingKompleti)}</span></span>
+            <span>Prikupljeno: <b className="text-emerald-600">{eur(cash.collectedTotal)}</b> <span className="text-slate-400">· {komLabel(cash.collectedDresovi, cash.collectedKompleti)}</span></span>
           </div>
           <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-500">
-            <span>💰 Igor prikupio: <b className="text-slate-700">{eur(cash.igorCollected)}</b> <span className="text-slate-400">({cash.igorCollectedQty} kom)</span>{cash.igorPending > 0 ? <> · fali {eur(cash.igorPending)}</> : null}</span>
-            <span>💰 Ivica prikupila: <b className="text-slate-700">{eur(cash.ivicaCollected)}</b> <span className="text-slate-400">({cash.ivicaCollectedQty} kom)</span>{cash.ivicaPending > 0 ? <> · fali {eur(cash.ivicaPending)}</> : null}</span>
+            <span>💰 Igor prikupio: <b className="text-slate-700">{eur(cash.igorCollected)}</b> <span className="text-slate-400">({komLabel(cash.igorDresovi, cash.igorKompleti)})</span>{cash.igorPending > 0 ? <> · fali {eur(cash.igorPending)}</> : null}</span>
+            <span>💰 Ivica prikupila: <b className="text-slate-700">{eur(cash.ivicaCollected)}</b> <span className="text-slate-400">({komLabel(cash.ivicaDresovi, cash.ivicaKompleti)})</span>{cash.ivicaPending > 0 ? <> · fali {eur(cash.ivicaPending)}</> : null}</span>
           </div>
         </div>
       )}
