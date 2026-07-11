@@ -135,7 +135,9 @@ export async function updateOrderFieldsInSheet(order: {
   fields: Record<string, string | number>;
 }) {
   const url = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
-  if (!url || process.env.SHEET_SYNC_ENABLED !== "1") return { ok: false, skipped: true as const };
+  // Zasebna zastavica: upali tek NAKON što Apps Script ima `updateFields` handler,
+  // inače bi stari doPost dodao smeće-red za nepoznatu akciju.
+  if (!url || process.env.SHEET_FIELD_SYNC !== "1") return { ok: false, skipped: true as const };
   if (!order.fields || Object.keys(order.fields).length === 0) return { ok: false, skipped: true as const };
   try {
     const res = await fetch(url, {
