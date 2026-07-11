@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { updateOrderFieldsInSheet } from "@/lib/sheets";
+import { repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -45,6 +47,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const total = subtotal + order.shipping - order.discount;
 
   await prisma.order.update({ where: { id }, data: { subtotal, itemCount, total } });
+
+  // Zrcali izmjenu artikala u Sheet (artikli/količina/ukupno). Best-effort.
+  const artikli = items
+    .map((it, i) => `${i + 1}. ${[repairText(it.klub || ""), repairText(it.igrac || "")].filter(Boolean).join(" ")}${it.size ? " — " + it.size : ""}`)
+    .join("\n");
+  await updateOrderFieldsInSheet({
+    phone: order.phone,
+    name: order.customerName,
+    createdAt: order.createdAt,
+    fields: { Artikli: artikli, "Kolicina": itemCount, "Ukupno": subtotal }
+  });
 
   return NextResponse.json({ ok: true });
 }

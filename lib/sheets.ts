@@ -124,6 +124,38 @@ export async function markCashCollectedInSheet(order: {
   }
 }
 
+// Updates arbitrary fields of an existing order row in the Sheet (address / name /
+// phone / items…) so admin edits show up for whoever ships from the Sheet.
+// Matches the row by the ORIGINAL phone (+ date). Requires Apps Script
+// `action:"updateFields"`. Gated by SHEET_SYNC_ENABLED, best-effort.
+export async function updateOrderFieldsInSheet(order: {
+  phone?: string | null; // ORIGINAL phone (match key)
+  name?: string | null;
+  createdAt?: string | Date | null;
+  fields: Record<string, string | number>;
+}) {
+  const url = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+  if (!url || process.env.SHEET_SYNC_ENABLED !== "1") return { ok: false, skipped: true as const };
+  if (!order.fields || Object.keys(order.fields).length === 0) return { ok: false, skipped: true as const };
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "updateFields",
+        phone: order.phone || "",
+        name: order.name || "",
+        createdAt: order.createdAt ? new Date(order.createdAt).toISOString() : "",
+        fields: order.fields
+      })
+    });
+    return { ok: res.ok };
+  } catch (error) {
+    console.error("[sheets] Failed to update order fields in Google Sheet", error);
+    return { ok: false };
+  }
+}
+
 export type SheetShippedRow = { phone: string; by: "igor" | "ivica" | null };
 
 // Mirrors a cancel/return into the Sheet: marks the row resolved (Odradeno=TRUE so

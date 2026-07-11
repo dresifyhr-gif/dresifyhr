@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { updateOrderFieldsInSheet } from "@/lib/sheets";
+import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -23,5 +25,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
 
   await prisma.order.update({ where: { id }, data });
+
+  // Zrcali izmjenu u Sheet (traži red po STAROM broju + datumu). Best-effort.
+  const sheetFields: Record<string, string> = {};
+  if (data.customerName != null) sheetFields["Ime"] = formatCroatianName(data.customerName);
+  if (data.phone !== undefined) sheetFields["Telefon"] = data.phone ? formatCroatianPhone(data.phone) : "";
+  if (data.address !== undefined) sheetFields["Adresa"] = data.address ? repairText(data.address) : "";
+  await updateOrderFieldsInSheet({ phone: order.phone, name: order.customerName, createdAt: order.createdAt, fields: sheetFields });
+
   return NextResponse.json({ ok: true });
 }
