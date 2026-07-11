@@ -21,6 +21,7 @@ type Order = {
   shippedBy: string | null;
   tracking: string;
   promoCode: string | null;
+  cashCollected: boolean;
   items: { id: string; klub: string; igrac: string; label: string; size: string; quantity: number; unitPrice: number }[];
 };
 
@@ -169,6 +170,7 @@ export function OrdersManager() {
   const [editing, setEditing] = useState<string | null>(null);
   const [editingContact, setEditingContact] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; collectedTotal: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number } | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -194,6 +196,7 @@ export function OrdersManager() {
         setTotal(d.total);
         setPages(d.pages);
         setPage(p);
+        if (d.cash) setCash(d.cash);
       }
     } catch {
       /* ignore */
@@ -239,6 +242,18 @@ export function OrdersManager() {
 
   return (
     <div>
+      {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (
+        <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
+            <span>Za prikupiti (poslano): <b className="text-amber-600">{eur(cash.pendingTotal)}</b> <span className="text-slate-400">· {cash.pendingCount} narudžbi</span></span>
+            <span>Prikupljeno: <b className="text-emerald-600">{eur(cash.collectedTotal)}</b></span>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-500">
+            <span>💰 Igor prikupio: <b className="text-slate-700">{eur(cash.igorCollected)}</b>{cash.igorPending > 0 ? <> · fali {eur(cash.igorPending)}</> : null}</span>
+            <span>💰 Ivica prikupila: <b className="text-slate-700">{eur(cash.ivicaCollected)}</b>{cash.ivicaPending > 0 ? <> · fali {eur(cash.ivicaPending)}</> : null}</span>
+          </div>
+        </div>
+      )}
       <div className="mb-3 flex flex-wrap gap-1.5">
         {TABS.map((tb) => (
           <button
@@ -368,6 +383,13 @@ export function OrdersManager() {
                     className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50">✕ Otkazano</button>
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                     className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-400 hover:bg-slate-50 disabled:opacity-50">↺ Vrati u nove</button>
+                  {(o.status === "shipped" || o.status === "done") && (
+                    <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
+                      title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}
+                      className={`rounded-md px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-emerald-600 text-white hover:bg-emerald-700" : "border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"}`}>
+                      {o.cashCollected ? "💰 Prikupljeno ✓" : "💰 Prikupljeno?"}
+                    </button>
+                  )}
                   <button type="button" onClick={() => setEditing((e) => (e === o.id ? null : o.id))}
                     className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50">✏️ Uredi artikle</button>
                   <button type="button" onClick={() => setEditingContact((e) => (e === o.id ? null : o.id))}

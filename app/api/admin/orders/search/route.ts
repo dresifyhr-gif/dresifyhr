@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { getOrderReference } from "@/lib/orders";
+import { codAmount, getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
 import { formatCroatianName, repairText } from "@/lib/utils";
 
@@ -46,6 +46,7 @@ export async function GET(request: Request) {
       reference: true,
       tracking: true,
       promoCode: true,
+      cashCollected: true,
       items: { select: { id: true, klub: true, igrac: true, size: true, quantity: true, unitPrice: true } }
     }
   });
@@ -78,11 +79,28 @@ export async function GET(request: Request) {
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  // Sažetak pouzeća (nad SVIM poslanim narudžbama, neovisno o pretrazi/filteru).
+  // Prikupio = tko je poslao (shippedBy). Otkupnina = codAmount().
+  const sent = all.filter((o) => o.status === "shipped" || o.status === "done");
+  const cash = { pendingCount: 0, pendingTotal: 0, collectedTotal: 0, igorCollected: 0, ivicaCollected: 0, igorPending: 0, ivicaPending: 0 };
+  for (const o of sent) {
+    const amt = codAmount(o.total, o.shipping, o.promoCode);
+    const who = o.shippedBy === "ivica" ? "ivica" : o.shippedBy === "igor" ? "igor" : "";
+    if (o.cashCollected) {
+      cash.collectedTotal += amt;
+      if (who === "igor") cash.igorCollected += amt; else if (who === "ivica") cash.ivicaCollected += amt;
+    } else {
+      cash.pendingCount++; cash.pendingTotal += amt;
+      if (who === "igor") cash.igorPending += amt; else if (who === "ivica") cash.ivicaPending += amt;
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     page,
     pages,
     total,
+    cash,
     orders: slice.map((o) => ({
       id: o.id,
       date: o.createdAt.toLocaleDateString("hr-HR"),
@@ -97,6 +115,7 @@ export async function GET(request: Request) {
       shippedBy: o.shippedBy || null,
       tracking: o.tracking || "",
       promoCode: o.promoCode || null,
+      cashCollected: o.cashCollected,
       items: o.items.map((it) => ({
         id: it.id,
         klub: repairText(it.klub || ""),

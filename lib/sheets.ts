@@ -89,6 +89,41 @@ export async function markOrderShippedInSheet(order: {
   }
 }
 
+// Mirrors "cash collected" (pouzeće — money handed over by the courier) into the
+// Sheet's "Prikupljeno" column, plus who collected it. Requires the Apps Script
+// `action:"markCollected"` handler. Gated by SHEET_CASH_SYNC=1, best-effort.
+export async function markCashCollectedInSheet(order: {
+  phone?: string | null;
+  name?: string | null;
+  createdAt?: string | Date | null;
+  collected: boolean;
+  by?: string | null; // "igor" | "ivica" → written to "Prikupio" column
+}) {
+  const url = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+  if (!url || process.env.SHEET_CASH_SYNC !== "1") return { ok: false, skipped: true as const };
+
+  const byLabel = order.by === "ivica" ? "Ivica" : order.by === "igor" ? "Igor" : "";
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "markCollected",
+        phone: order.phone || "",
+        name: order.name || "",
+        createdAt: order.createdAt ? new Date(order.createdAt).toISOString() : "",
+        collected: order.collected,
+        by: byLabel
+      })
+    });
+    return { ok: res.ok };
+  } catch (error) {
+    console.error("[sheets] Failed to sync cash-collected to Google Sheet", error);
+    return { ok: false };
+  }
+}
+
 export type SheetShippedRow = { phone: string; by: "igor" | "ivica" | null };
 
 // Mirrors a cancel/return into the Sheet: marks the row resolved (Odradeno=TRUE so
