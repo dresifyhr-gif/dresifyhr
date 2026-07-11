@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { codAmount, getOrderReference } from "@/lib/orders";
+import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
 import { formatCroatianName, repairText } from "@/lib/utils";
 
@@ -80,17 +80,25 @@ export async function GET(request: Request) {
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // Sažetak pouzeća (nad SVIM poslanim narudžbama, neovisno o pretrazi/filteru).
-  // Prikupio = tko je poslao (shippedBy). Otkupnina = codAmount().
+  // Prikupio = tko je poslao (shippedBy). Iznos = ROBA BEZ DOSTAVE (dostava nije
+  // prihod — to je povrat onoga što je pošiljatelj platio iz svog džepa).
   const sent = all.filter((o) => o.status === "shipped" || o.status === "done");
-  const cash = { pendingCount: 0, pendingTotal: 0, collectedTotal: 0, igorCollected: 0, ivicaCollected: 0, igorPending: 0, ivicaPending: 0 };
+  const cash = {
+    pendingCount: 0, pendingTotal: 0, pendingQty: 0,
+    collectedTotal: 0, collectedQty: 0,
+    igorCollected: 0, ivicaCollected: 0, igorPending: 0, ivicaPending: 0,
+    igorCollectedQty: 0, ivicaCollectedQty: 0
+  };
   for (const o of sent) {
-    const amt = codAmount(o.total, o.shipping, o.promoCode);
+    const amt = o.total - (o.shipping ?? 0);
+    const qty = o.itemCount ?? 0;
     const who = o.shippedBy === "ivica" ? "ivica" : o.shippedBy === "igor" ? "igor" : "";
     if (o.cashCollected) {
-      cash.collectedTotal += amt;
-      if (who === "igor") cash.igorCollected += amt; else if (who === "ivica") cash.ivicaCollected += amt;
+      cash.collectedTotal += amt; cash.collectedQty += qty;
+      if (who === "igor") { cash.igorCollected += amt; cash.igorCollectedQty += qty; }
+      else if (who === "ivica") { cash.ivicaCollected += amt; cash.ivicaCollectedQty += qty; }
     } else {
-      cash.pendingCount++; cash.pendingTotal += amt;
+      cash.pendingCount++; cash.pendingTotal += amt; cash.pendingQty += qty;
       if (who === "igor") cash.igorPending += amt; else if (who === "ivica") cash.ivicaPending += amt;
     }
   }
