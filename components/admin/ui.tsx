@@ -2,6 +2,14 @@ import type { ReactNode } from "react";
 
 export const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 
+// "12 dresova + 3 kompleta" (izostavi dio koji je 0; ako oba 0 → "0 kom").
+export const komLabel = (dresovi: number, kompleti: number) => {
+  const parts: string[] = [];
+  if (dresovi > 0) parts.push(`${dresovi} ${dresovi === 1 ? "dres" : "dresova"}`);
+  if (kompleti > 0) parts.push(`${kompleti} ${kompleti === 1 ? "komplet" : "kompleta"}`);
+  return parts.length ? parts.join(" + ") : "0 kom";
+};
+
 // wa.me link from a Croatian phone number (best-effort normalization).
 export function waLink(phone: string | null) {
   if (!phone) return null;

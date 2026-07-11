@@ -10,7 +10,7 @@ import { AssignShipper } from "@/components/admin/assign-shipper";
 import { SettlementButton } from "@/components/admin/settlement-button";
 import { ApologyList } from "@/components/admin/apology-list";
 import { ReturnedList } from "@/components/admin/winback-panels";
-import { Stat, Panel, eur, waLink } from "@/components/admin/ui";
+import { Stat, Panel, eur, komLabel, waLink } from "@/components/admin/ui";
 import { formatCroatianName } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Pregled — Dresify Admin", robots: { index: false, follow: false } };
@@ -223,17 +223,18 @@ export default async function AdminOverview() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {[
-              { name: "Igor", color: "emerald", d: m.split.igor },
-              { name: "Ivica", color: "sky", d: m.split.ivica }
+              { name: "Igor", color: "emerald", c: m.split.cashSplit.igor },
+              { name: "Ivica", color: "sky", c: m.split.cashSplit.ivica }
             ].map((p) => (
               <div key={p.name} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-900">{p.name}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${p.color === "emerald" ? "bg-emerald-50 text-emerald-600" : "bg-sky-50 text-sky-600"}`}>{p.d.count} poslao</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${p.color === "emerald" ? "bg-emerald-50 text-emerald-600" : "bg-sky-50 text-sky-600"}`}>{p.c.sentCount} poslao</span>
                 </div>
                 <div className="mt-3 space-y-1.5 text-sm">
-                  <div className="flex justify-between text-slate-600"><span>Pokupio gotovine</span><span className="font-semibold text-slate-900">{eur(p.d.cash)}</span></div>
-                  <div className="flex justify-between text-slate-600"><span>Generirao profita</span><span className="font-semibold text-slate-900">{eur(p.d.profit)}</span></div>
+                  <div className="flex justify-between gap-2 text-slate-600"><span>Poslano</span><span className="text-right font-semibold text-slate-900">{komLabel(p.c.sentDresovi, p.c.sentKompleti)}</span></div>
+                  <div className="flex justify-between gap-2 text-slate-600"><span>Prikupio</span><span className="text-right font-semibold text-emerald-600">{eur(p.c.collected)} <span className="font-normal text-slate-400">({komLabel(p.c.collectedDresovi, p.c.collectedKompleti)})</span></span></div>
+                  {p.c.pending > 0 && <div className="flex justify-between gap-2 text-slate-600"><span>Za prikupit (fali)</span><span className="font-semibold text-amber-600">{eur(p.c.pending)}</span></div>}
                 </div>
               </div>
             ))}

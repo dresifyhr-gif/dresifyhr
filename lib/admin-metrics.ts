@@ -134,6 +134,28 @@ export async function getDashboardMetrics() {
     return { count: ord._count._all, cash: net(ord), profit: prof };
   };
   const [igor, ivica, unassigned] = await Promise.all([byShipper("igor"), byShipper("ivica"), byShipper(null)]);
+
+  // Poslano + prikupljena gotovina po pošiljatelju (SVE poslano, dresovi vs kompleti odvojeno).
+  const isKomplet = (it: { slug?: string | null; klub?: string | null; igrac?: string | null }) =>
+    /komplet/i.test(it.slug || "") || /komplet/i.test(it.klub || "") || /komplet/i.test(it.igrac || "");
+  const cashOrders = await prisma.order.findMany({
+    where: { status: { in: ["shipped", "done"] } },
+    select: { total: true, shipping: true, shippedBy: true, cashCollected: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
+  });
+  const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, pending: 0 });
+  const cashSplit: Record<"igor" | "ivica", ReturnType<typeof mkCash>> = { igor: mkCash(), ivica: mkCash() };
+  for (const o of cashOrders) {
+    const who = o.shippedBy === "igor" ? "igor" : o.shippedBy === "ivica" ? "ivica" : null;
+    if (!who) continue;
+    const amt = o.total - (o.shipping ?? 0);
+    let d = 0, k = 0;
+    for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) k += q; else d += q; }
+    const b = cashSplit[who];
+    b.sentCount++; b.sentDresovi += d; b.sentKompleti += k;
+    if (o.cashCollected) { b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k; }
+    else b.pending += amt;
+  }
+
   // Profit poslanih od zadnjeg poravnanja (baza za podjelu 50/50).
   const shippedProfitTotal = await profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter });
   const halfShare = shippedProfitTotal / 2;
@@ -185,7 +207,7 @@ export async function getDashboardMetrics() {
     shippedRev: net(shippedAgg),
     shippedProfit,
     aov: orderCount ? totalRev / orderCount : 0,
-    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, adsSpend, settleAmount, settleFrom, lastSettlement, settlements },
+    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
     topItems,
     bestCustomers,
     recentOrders,
