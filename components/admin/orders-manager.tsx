@@ -97,6 +97,97 @@ function ContactEditor({ orderId, initial, onSaved }: { orderId: string; initial
   );
 }
 
+type NewItem = { klub: string; igrac: string; size: string; unitPrice: string };
+
+function NewOrderForm({ onCreated }: { onCreated: () => void }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [note, setNote] = useState("");
+  const [rows, setRows] = useState<NewItem[]>([{ klub: "", igrac: "", size: "", unitPrice: "20" }]);
+  const [shipping, setShipping] = useState("5");
+  const [shippedBy, setShippedBy] = useState<"" | "igor" | "ivica">("");
+  const [status, setStatus] = useState<"new" | "shipped">("new");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+
+  const subtotal = rows.reduce((s, r) => s + (Number(r.unitPrice.replace(",", ".")) || 0), 0);
+  const total = subtotal + (Number(shipping.replace(",", ".")) || 0);
+
+  function setRow(i: number, patch: Partial<NewItem>) { setRows((rs) => rs.map((r, k) => (k === i ? { ...r, ...patch } : r))); }
+
+  async function save() {
+    if (saving) return;
+    if (!name.trim()) { setErr("Upiši ime kupca"); return; }
+    if (!rows.some((r) => r.klub.trim() || r.igrac.trim() || Number(r.unitPrice) > 0)) { setErr("Dodaj barem jedan artikl"); return; }
+    setErr(""); setSaving(true);
+    const res = await fetch("/api/admin/orders/create/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ customerName: name, phone, address, email, note, shipping, status, shippedBy: shippedBy || null, items: rows.map((r) => ({ klub: r.klub, igrac: r.igrac, size: r.size, unitPrice: r.unitPrice })) })
+    }).catch(() => null);
+    setSaving(false);
+    if (res && res.ok) {
+      setName(""); setPhone(""); setAddress(""); setEmail(""); setNote(""); setRows([{ klub: "", igrac: "", size: "", unitPrice: "20" }]); setShipping("5"); setShippedBy(""); setStatus("new");
+      onCreated();
+    } else {
+      const d = res ? await res.json().catch(() => ({})) : {};
+      setErr(d?.message || "Greška pri spremanju");
+    }
+  }
+
+  const inp = "rounded border border-slate-200 bg-white px-2 py-1.5 text-[13px] outline-none focus:border-slate-400";
+
+  return (
+    <div className="mb-4 rounded-lg border border-slate-300 bg-white p-3">
+      <div className="mb-2 text-sm font-semibold text-slate-800">➕ Nova narudžba (ručno — Instagram)</div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ime i prezime *" className={`col-span-2 ${inp}`} />
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Telefon (09…)" inputMode="tel" className={`col-span-2 ${inp}`} />
+        <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Adresa (ulica, pošt. br., mjesto)" className={`col-span-2 ${inp}`} />
+        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email (nije obavezno)" inputMode="email" className={`col-span-2 ${inp}`} />
+      </div>
+
+      <div className="mt-3 space-y-1.5">
+        <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Artikli</div>
+        {rows.map((r, i) => (
+          <div key={i} className="flex flex-wrap items-center gap-1.5">
+            <input value={r.klub} onChange={(e) => setRow(i, { klub: e.target.value })} placeholder="Klub" className={`w-28 ${inp}`} />
+            <input value={r.igrac} onChange={(e) => setRow(i, { igrac: e.target.value })} placeholder="Igrač / model" className={`min-w-[120px] flex-1 ${inp}`} />
+            <input value={r.size} onChange={(e) => setRow(i, { size: e.target.value })} placeholder="Vel." className={`w-16 ${inp}`} />
+            <input value={r.unitPrice} onChange={(e) => setRow(i, { unitPrice: e.target.value.replace(/[^0-9.,]/g, "") })} inputMode="decimal" placeholder="€" className={`w-16 ${inp}`} />
+            <button type="button" onClick={() => setRows((rs) => rs.filter((_, k) => k !== i))} disabled={rows.length === 1} className="rounded border border-red-200 px-2 py-1 text-[11px] text-red-500 hover:bg-red-50 disabled:opacity-30">✕</button>
+          </div>
+        ))}
+        <button type="button" onClick={() => setRows((rs) => [...rs, { klub: "", igrac: "", size: "", unitPrice: "20" }])} className="rounded border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50">+ Dodaj artikl</button>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
+        <label className="flex items-center gap-1 text-slate-500">Dostava <input value={shipping} onChange={(e) => setShipping(e.target.value.replace(/[^0-9.,]/g, ""))} inputMode="decimal" className={`w-14 ${inp}`} /> €</label>
+        <label className="flex items-center gap-1 text-slate-500">Šalje
+          <select value={shippedBy} onChange={(e) => setShippedBy(e.target.value as "" | "igor" | "ivica")} className={inp}>
+            <option value="">—</option><option value="igor">Igor</option><option value="ivica">Ivica</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-1 text-slate-500">Status
+          <select value={status} onChange={(e) => setStatus(e.target.value as "new" | "shipped")} className={inp}>
+            <option value="new">Nova</option><option value="shipped">Poslano</option>
+          </select>
+        </label>
+        <span className="ml-auto text-slate-500">Roba: <b className="text-slate-800">{subtotal.toFixed(0)} €</b> · Ukupno (s dostavom): <b className="text-slate-800">{total.toFixed(0)} €</b></span>
+      </div>
+
+      <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Napomena (nije obavezno)" className={`mt-2 w-full ${inp}`} />
+
+      {err ? <div className="mt-2 text-[12px] font-medium text-red-500">{err}</div> : null}
+      <button type="button" onClick={save} disabled={saving} className="mt-2 rounded-md bg-slate-900 px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-slate-800 disabled:opacity-40">
+        {saving ? "Spremam…" : "Spremi narudžbu"}
+      </button>
+    </div>
+  );
+}
+
 function TrackingRow({ id, initial }: { id: string; initial: string }) {
   const [val, setVal] = useState(initial);
   const [saving, setSaving] = useState(false);
@@ -169,6 +260,7 @@ export function OrdersManager() {
   const [sort, setSort] = useState(""); // "" new-first | new | old
   const [editing, setEditing] = useState<string | null>(null);
   const [editingContact, setEditingContact] = useState<string | null>(null);
+  const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingQty: number; collectedTotal: number; collectedQty: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorCollectedQty: number; ivicaCollectedQty: number } | null>(null);
   const [total, setTotal] = useState(0);
@@ -242,6 +334,12 @@ export function OrdersManager() {
 
   return (
     <div>
+      <div className="mb-3">
+        <button type="button" onClick={() => setShowNew((v) => !v)} className="rounded-md bg-slate-900 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-slate-800">
+          {showNew ? "✕ Zatvori" : "➕ Nova narudžba (ručno)"}
+        </button>
+      </div>
+      {showNew && <NewOrderForm onCreated={() => { setShowNew(false); fetchPage(q, 1, false); }} />}
       {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (
         <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
