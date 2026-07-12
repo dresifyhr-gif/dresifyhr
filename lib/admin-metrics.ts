@@ -139,12 +139,17 @@ export async function getDashboardMetrics() {
   // poravnanje). Kompleti se broje odvojeno od dresova (drukčija marža).
   const isKomplet = (it: { slug?: string | null; klub?: string | null; igrac?: string | null }) =>
     /komplet/i.test(it.slug || "") || /komplet/i.test(it.klub || "") || /komplet/i.test(it.igrac || "");
+  // Streetwear slugovi (besplatna dostava) — za trošak besplatnih dostava.
+  const streetwearSlugs = new Set(
+    (await prisma.customProduct.findMany({ where: { category: "streetwear" }, select: { slug: true } })).map((r) => r.slug)
+  );
   const cashOrders = await prisma.order.findMany({
     where: { status: { in: ["shipped", "done"] }, ...sinceFilter },
-    select: { total: true, shipping: true, shippedBy: true, cashCollected: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
+    select: { total: true, shipping: true, shippedBy: true, cashCollected: true, promoCode: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
   });
   const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, pending: 0 });
   const cashSplit: Record<"igor" | "ivica", ReturnType<typeof mkCash>> = { igor: mkCash(), ivica: mkCash() };
+  let freeDeliveries = 0; // prikupljene narudžbe s besplatnom dostavom (mi platili poštu ~3€)
   for (const o of cashOrders) {
     const who = o.shippedBy === "igor" ? "igor" : o.shippedBy === "ivica" ? "ivica" : null;
     if (!who) continue;
@@ -153,9 +158,15 @@ export async function getDashboardMetrics() {
     for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) k += q; else d += q; }
     const b = cashSplit[who];
     b.sentCount++; b.sentDresovi += d; b.sentKompleti += k;
-    if (o.cashCollected) { b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k; }
-    else b.pending += amt;
+    if (o.cashCollected) {
+      b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k;
+      // Besplatna dostava = roba ≥ 60€ ILI osvojeno na igrici ILI streetwear → mi platili ~3€ pošti.
+      const isFreeShip = amt >= 60 || Boolean(o.promoCode && o.promoCode.trim()) || o.items.some((it) => it.slug && streetwearSlugs.has(it.slug));
+      if (isFreeShip) freeDeliveries++;
+    } else b.pending += amt;
   }
+  const DELIVERY_COST = 3;
+  const freeShipCost = freeDeliveries * DELIVERY_COST;
 
   // Profit poslanih od zadnjeg poravnanja (baza za podjelu 50/50).
   const shippedProfitTotal = await profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter });
@@ -171,7 +182,8 @@ export async function getDashboardMetrics() {
   const collectedDresovi = cashSplit.igor.collectedDresovi + cashSplit.ivica.collectedDresovi;
   const collectedKompleti = cashSplit.igor.collectedKompleti + cashSplit.ivica.collectedKompleti;
   const collectedCost = collectedDresovi * COST_PER_ITEM + collectedKompleti * COST_KOMPLET; // Ivici nazad
-  const collectedMargin = totalCollected - collectedCost; // dijeli se 50/50
+  // Besplatne dostave: mi platili ~3€ svaku → skida se s marže (dijeli se 50/50).
+  const collectedMargin = totalCollected - collectedCost - freeShipCost;
   const marginHalf = collectedMargin / 2;
   // Igor treba zadržati samo svoju polovicu marže; sve preko toga (koje drži) ide Ivici (roba + njena marža).
   // Oglasi: Igor platio → Ivica vraća pola. Pozitivno = Ivica → Igoru; negativno = Igor → Ivici.
@@ -216,7 +228,7 @@ export async function getDashboardMetrics() {
     shippedRev: net(shippedAgg),
     shippedProfit,
     aov: orderCount ? totalRev / orderCount : 0,
-    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, collectedCost, collectedMargin, marginHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
+    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, collectedCost, freeDeliveries, freeShipCost, collectedMargin, marginHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
     topItems,
     bestCustomers,
     recentOrders,

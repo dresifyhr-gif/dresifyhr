@@ -216,6 +216,9 @@ export default async function AdminOverview() {
             <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
               <span className="text-slate-500">Prikupljeno <b className="ml-1 text-slate-900">{eur(m.split.totalCollected)}</b></span>
               <span className="text-slate-500">− Roba natrag Ivici <b className="ml-1 text-slate-900">{eur(m.split.collectedCost)}</b></span>
+              {m.split.freeDeliveries > 0 && (
+                <span className="text-slate-500">− Dostave <b className="ml-1 text-slate-900">{eur(m.split.freeShipCost)}</b> <span className="text-slate-400">({m.split.freeDeliveries} besplatnih × 3€)</span></span>
+              )}
               <span className="text-slate-500">= Marža <b className="ml-1 text-emerald-600">{eur(m.split.collectedMargin)}</b> <span className="text-slate-400">· svakom {eur(m.split.marginHalf)}</span></span>
             </div>
           </div>
