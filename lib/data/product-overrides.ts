@@ -61,7 +61,7 @@ export async function jerseyWithOverride(j: Jersey | undefined): Promise<Jersey 
 
 // ── Custom dresovi (dodani iz admina, spremljeni u DB) ────────────────────────
 type CustomRow = {
-  id: string; slug: string; klub: string; igrac: string; liga: string; price: number;
+  id: string; slug: string; category: string; klub: string; igrac: string; liga: string; price: number;
   retro: boolean; vel: string; badge: string | null; outOfStock: string | null;
   soldOutSizes: string | null; description: string | null; images: string; hidden: boolean;
 };
@@ -91,14 +91,27 @@ function customToJersey(c: CustomRow): Jersey {
     soldOutSizes: c.soldOutSizes ? c.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
     descriptionOverride: c.description || undefined,
     images: urls.map((src) => ({ src, altLabel: `${c.klub} ${c.igrac}` })),
-    isCustom: true
+    isCustom: true,
+    category: c.category || "dres"
   };
 }
 
+// Custom DRESOVI za katalog (bez streetweara).
 async function getCustomJerseys(): Promise<Jersey[]> {
   try {
     if (!process.env.DATABASE_URL) return [];
     const rows = (await prisma.customProduct.findMany({ where: { hidden: false } })) as unknown as CustomRow[];
+    return rows.map(customToJersey).filter((j) => (j.category ?? "dres") !== "streetwear");
+  } catch {
+    return [];
+  }
+}
+
+// Streetwear proizvodi (zasebna stranica /streetwear).
+export async function getStreetwearProducts(): Promise<Jersey[]> {
+  try {
+    if (!process.env.DATABASE_URL) return [];
+    const rows = (await prisma.customProduct.findMany({ where: { hidden: false, category: "streetwear" }, orderBy: { createdAt: "desc" } })) as unknown as CustomRow[];
     return rows.map(customToJersey);
   } catch {
     return [];

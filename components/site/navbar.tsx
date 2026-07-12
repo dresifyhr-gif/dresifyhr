@@ -21,6 +21,7 @@ export function Navbar() {
     { href: "/", label: t.nav.home },
     { href: "/dresovi", label: t.nav.jerseys },
     { href: "/kompleti", label: t.nav.sets },
+    { href: "/streetwear", label: "Streetwear" },
     { href: "/blog", label: t.nav.blog },
     { href: "/kontakt", label: t.nav.contact },
     { href: "/o-nama", label: t.nav.about },

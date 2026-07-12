@@ -127,6 +127,7 @@ model Testimonial {
 model CustomProduct {
   id           String   @id @default(cuid())
   slug         String   @unique
+  category     String   @default("dres") // "dres" | "streetwear"
   klub         String
   igrac        String
   liga         String   @default("Reprezentacija")

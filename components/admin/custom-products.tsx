@@ -8,6 +8,7 @@ import { ImageUploader } from "@/components/admin/image-uploader";
 type Custom = {
   id: string;
   slug: string;
+  category: string;
   klub: string;
   igrac: string;
   liga: string;
@@ -20,7 +21,7 @@ type Custom = {
 };
 
 const LIGE = ["Reprezentacija", "La Liga", "Premier Liga", "Serie A", "Bundesliga", "Ligue 1", "Saudi Pro", "Brazil", "MLS", "Komplet"];
-const empty = { id: "", klub: "", igrac: "", liga: "Reprezentacija", price: "20", retro: false, badge: "", description: "", images: [] as string[] };
+const empty = { id: "", category: "dres", klub: "", igrac: "", liga: "Reprezentacija", price: "20", retro: false, badge: "", description: "", images: [] as string[] };
 
 export function CustomProducts() {
   const [list, setList] = useState<Custom[]>([]);
@@ -61,7 +62,7 @@ export function CustomProducts() {
   useEffect(() => { load(); }, []);
 
   function edit(p: Custom) {
-    setF({ id: p.id, klub: p.klub, igrac: p.igrac, liga: p.liga, price: String(p.price), retro: p.retro, badge: p.badge || "", description: p.description || "", images: p.images });
+    setF({ id: p.id, category: p.category || "dres", klub: p.klub, igrac: p.igrac, liga: p.liga, price: String(p.price), retro: p.retro, badge: p.badge || "", description: p.description || "", images: p.images });
     setOpen(true);
   }
 
@@ -120,12 +121,29 @@ export function CustomProducts() {
             <div className="mt-1 text-[11px] text-slate-400">Ispuni klub, igrača, ligu i opis. Ti dodaš cijenu i slike.</div>
           </div>
 
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-xs font-medium text-slate-500">Kategorija:</span>
+            {[
+              { v: "dres", label: "👕 Dres" },
+              { v: "streetwear", label: "🔥 Streetwear" }
+            ].map((c) => (
+              <button
+                key={c.v}
+                type="button"
+                onClick={() => setF({ ...f, category: c.v })}
+                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : "bg-slate-900 text-white") : "border border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="text-xs font-medium text-slate-500">Klub / reprezentacija
-              <input value={f.klub} onChange={(e) => setF({ ...f, klub: e.target.value })} placeholder="npr. Hrvatska" className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400" />
+            <label className="text-xs font-medium text-slate-500">{f.category === "streetwear" ? "Brend (npr. Nike)" : "Klub / reprezentacija"}
+              <input value={f.klub} onChange={(e) => setF({ ...f, klub: e.target.value })} placeholder={f.category === "streetwear" ? "npr. Nike" : "npr. Hrvatska"} className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400" />
             </label>
-            <label className="text-xs font-medium text-slate-500">Igrač / naziv
-              <input value={f.igrac} onChange={(e) => setF({ ...f, igrac: e.target.value })} placeholder="npr. Modrić nr10 — 2026" className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400" />
+            <label className="text-xs font-medium text-slate-500">{f.category === "streetwear" ? "Model / naziv" : "Igrač / naziv"}
+              <input value={f.igrac} onChange={(e) => setF({ ...f, igrac: e.target.value })} placeholder={f.category === "streetwear" ? "npr. Cortez — bijele" : "npr. Modrić nr10 — 2026"} className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400" />
             </label>
             <label className="text-xs font-medium text-slate-500">Liga
               <select value={f.liga} onChange={(e) => setF({ ...f, liga: e.target.value })} className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-400">

@@ -44,6 +44,7 @@ export async function POST(request: Request) {
 
   const editId = typeof b?.id === "string" ? b.id : null;
   const data = {
+    category: b?.category === "streetwear" ? "streetwear" : "dres",
     klub,
     igrac,
     liga: String(b?.liga || "Reprezentacija"),
