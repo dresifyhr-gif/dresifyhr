@@ -20,3 +20,14 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ ok: true });
 }
+
+// Reset oglasa TRENUTNOG razdoblja (od zadnjeg poravnanja) → obriše te zapise, cifra pada na 0.
+export async function DELETE() {
+  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+
+  const last = await prisma.settlement.findFirst({ orderBy: { settledAt: "desc" } });
+  const where = last ? { date: { gt: last.settledAt } } : {};
+  const res = await prisma.adSpend.deleteMany({ where });
+
+  return NextResponse.json({ ok: true, deleted: res.count });
+}

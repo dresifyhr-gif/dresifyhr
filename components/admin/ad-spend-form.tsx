@@ -7,6 +7,7 @@ export function AdSpendForm() {
   const router = useRouter();
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,22 +24,41 @@ export function AdSpendForm() {
     router.refresh();
   }
 
+  async function reset() {
+    if (resetting) return;
+    if (!confirm("Resetirati oglase trenutnog razdoblja (od zadnjeg poravnanja) na 0 €?")) return;
+    setResetting(true);
+    await fetch("/api/admin/adspend/", { method: "DELETE" }).catch(() => {});
+    setResetting(false);
+    router.refresh();
+  }
+
   return (
-    <form onSubmit={submit} className="flex gap-2">
-      <input
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        inputMode="decimal"
-        placeholder="Dodaj potrošnju (€)"
-        className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
-      />
+    <div className="space-y-2">
+      <form onSubmit={submit} className="flex gap-2">
+        <input
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          inputMode="decimal"
+          placeholder="Dodaj potrošnju (€)"
+          className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+        />
+        <button
+          type="submit"
+          disabled={loading || !amount}
+          className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+        >
+          {loading ? "…" : "Dodaj"}
+        </button>
+      </form>
       <button
-        type="submit"
-        disabled={loading || !amount}
-        className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+        type="button"
+        onClick={reset}
+        disabled={resetting}
+        className="text-[12px] font-medium text-red-500 underline decoration-dotted hover:text-red-600 disabled:opacity-50"
       >
-        {loading ? "…" : "Dodaj"}
+        {resetting ? "Resetiram…" : "🗑 Resetiraj oglase (trenutno razdoblje) na 0 €"}
       </button>
-    </form>
+    </div>
   );
 }
