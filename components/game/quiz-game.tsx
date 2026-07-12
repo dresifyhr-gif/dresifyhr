@@ -92,8 +92,8 @@ const ALL_QUESTIONS: Q[] = [
   { q: "Što znači 'zaleđe' (offside) u fudbalu?", o: ["Lopta izlazi iz terena", "Napadač je ispred zadnjeg braniča pri primanju lopte", "Faul bez kartona", "Igrač napušta teren bez dozvole"], a: 1 },
 ];
 
-const TOTAL_Q = 5;
-const NEEDED = 5;
+const TOTAL_Q = 10;
+const NEEDED = 9;
 
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
@@ -180,7 +180,7 @@ export function QuizGame() {
       <Frame footer={<p className="text-[12px] text-white/55">Treba {NEEDED}/{TOTAL_Q} točnih ⚡</p>}>
         <div className="flex flex-col items-center gap-4 py-6 text-center">
           <div className="text-[13px] font-bold tracking-[3px] text-accent">FOOTBALL KVIZ</div>
-          <div className="text-[22px] font-extrabold leading-tight text-white">5 pitanja, 5 točnih</div>
+          <div className="text-[22px] font-extrabold leading-tight text-white">10 pitanja, 9 točnih</div>
           <p className="max-w-[270px] text-[13px] text-white/70">Odgovori svih {NEEDED} točno i biraš nagradu: <b className="text-accent">poklon iznenađenja</b> ili <b className="text-accent">besplatnu dostavu</b> (od 40€).</p>
           <button type="button" onClick={startGame} className="mt-1 rounded-[12px] bg-accent px-9 py-3.5 text-[15px] font-extrabold text-black shadow-[0_8px_24px_rgba(232,255,60,0.25)] transition active:scale-[0.97]">
             KRENI ⚽

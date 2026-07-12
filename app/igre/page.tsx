@@ -21,13 +21,13 @@ const games = [
   {
     href: "/flappy",
     title: "Flappy Ball",
-    desc: "Provedi loptu kroz golove — 10 = besplatna dostava, 15 = −15%, 20 = −20% (uz dostavu).",
+    desc: "Provedi loptu kroz golove — 20 = besplatna dostava, 35 = −15%, 50 = −20% (uz dostavu).",
     Icon: Volleyball
   },
   {
     href: "/kviz",
     title: "Football Kviz",
-    desc: "5 pitanja iz footballa. Odgovori 5/5 točno i osvoji nagradu po izboru.",
+    desc: "10 pitanja iz footballa. Odgovori 9/10 točno i osvoji nagradu po izboru.",
     Icon: HelpCircle
   },
   {
@@ -39,25 +39,25 @@ const games = [
   {
     href: "/zmija",
     title: "Zmija",
-    desc: "Jedi lopte i rasti. 5 = besplatna dostava, 12 = −15%, 20 = −20%.",
+    desc: "Jedi lopte i rasti. 12 = besplatna dostava, 25 = −15%, 40 = −20%.",
     Icon: Worm
   },
   {
     href: "/uhvati",
     title: "Uhvati dres",
-    desc: "Hvataj dresove u kutiju kroz 3 razine (po 20). 20 = besplatna dostava, 40 = −15%, 60 = −20%.",
+    desc: "Hvataj dresove u kutiju. 40 = besplatna dostava, 70 = −15%, 100 = −20%.",
     Icon: PackageOpen
   },
   {
     href: "/trkac",
     title: "Super Dresify",
-    desc: "Trči i skači, skupljaj dresove i preskači čunjeve. 8 = besplatna dostava, 15 = −15%, 25 = −20%.",
+    desc: "Trči i skači, skupljaj dresove i preskači čunjeve. 15 = besplatna dostava, 30 = −15%, 50 = −20%.",
     Icon: Footprints
   },
   {
     href: "/gadaj",
     title: "Snajper",
-    desc: "Gađaj dresove na trakama u 40 sekundi. 12 = besplatna dostava, 22 = −15%, 32 = −20%.",
+    desc: "Gađaj dresove na trakama u 40 sekundi. 25 = besplatna dostava, 40 = −15%, 60 = −20%.",
     Icon: Crosshair
   }
 ];

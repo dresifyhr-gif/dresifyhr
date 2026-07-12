@@ -18,7 +18,7 @@ const STAGE_HTML = `
       <span style="font-size:11px;color:#e8ff3c;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Flappy Ball</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 18px;font-size:12px;color:rgba(255,255,255,0.6);background:#0d0d10;">
-      <span>10&middot;15&middot;20 = <b style="color:#e8ff3c;">veća nagrada</b></span>
+      <span>20&middot;35&middot;50 = <b style="color:#e8ff3c;">veća nagrada</b></span>
       <span style="display:flex;align-items:center;gap:10px;">REKORD <b id="fb_best" style="color:#fff;font-size:14px;">0</b>
         <button id="fb_mute" aria-label="Zvuk" style="background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;font-size:15px;padding:0;line-height:1;">&#9834;</button>
       </span>
@@ -31,7 +31,7 @@ const STAGE_HTML = `
       <div id="fb_intro" style="position:absolute;inset:0;background:linear-gradient(rgba(5,7,12,0.5),rgba(5,7,12,0.82));display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">DRESIFY FLAPPY BALL</div>
         <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Provedi loptu kroz golove</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Tapni za skok. Što dalje prođeš, veća nagrada: <b style="color:#e8ff3c;">10&rarr;besplatna dostava</b>, 15&rarr;-15%+dostava, 20&rarr;-20%+dostava. Sve teže ide!</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Tapni za skok. Što dalje prođeš, veća nagrada: <b style="color:#e8ff3c;">20&rarr;besplatna dostava</b>, 35&rarr;-15%+dostava, 50&rarr;-20%+dostava. Sve teže ide!</div>
         <button id="fb_start" class="fb-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(232,255,60,0.25);">START &#9917;</button>
       </div>
 
@@ -96,9 +96,9 @@ export function FlappyGame() {
     function gap() { return score <= 20 ? Math.max(100, GAP0 - score * 3.0) : Math.max(74, 100 - (score - 20) * 3.2); }
     function speed() { return Math.min(6.2, 2.5 + score * 0.16); }
     function spacing() { return Math.max(135, SPACE - score * 3.2); }
-    function rewardFor(s: number) { return s >= 20 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" } : s >= 15 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" } : s >= 10 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null; }
-    function nextRewardLabel(s: number) { return s < 10 ? "besplatnu dostavu (od 40€)" : s < 15 ? "-15% + dostava (od 80€)" : s < 20 ? "-20% + dostava (od 100€)" : null; }
-    function nextRewardAt(s: number) { return s < 10 ? 10 : s < 15 ? 15 : s < 20 ? 20 : null; }
+    function rewardFor(s: number) { return s >= 50 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" } : s >= 35 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" } : s >= 20 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null; }
+    function nextRewardLabel(s: number) { return s < 20 ? "besplatnu dostavu (od 40€)" : s < 35 ? "-15% + dostava (od 80€)" : s < 50 ? "-20% + dostava (od 100€)" : null; }
+    function nextRewardAt(s: number) { return s < 20 ? 20 : s < 35 ? 35 : s < 50 ? 50 : null; }
     function spawn() { const m = 64, g = gap(); const gy = m + g / 2 + Math.random() * (H - GROUND - 2 * m - g); pipes.push({ x: W + 20, gy, passed: false }); }
     function reset() { ball = { x: 108, y: 210, vy: 0 }; pipes = []; score = 0; frame = 0; tierCode = ""; trail.length = 0; parts.length = 0; shake = 0; flash = 0; pop = 0; spawn(); }
 

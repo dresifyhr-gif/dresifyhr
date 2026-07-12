@@ -20,7 +20,7 @@ const STAGE_HTML = `
       <span style="font-size:11px;color:#e8ff3c;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Zmija</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 18px;font-size:12px;color:rgba(255,255,255,0.6);background:#0d0d10;">
-      <span>5&middot;12&middot;20 lopti = <b style="color:#e8ff3c;">veća nagrada</b></span>
+      <span>12&middot;25&middot;40 lopti = <b style="color:#e8ff3c;">veća nagrada</b></span>
       <span style="display:flex;align-items:center;gap:10px;">REKORD <b id="sn_best" style="color:#fff;font-size:14px;">0</b>
         <button id="sn_mute" aria-label="Zvuk" style="background:none;border:none;color:rgba(255,255,255,0.55);cursor:pointer;font-size:15px;padding:0;line-height:1;">&#9834;</button>
       </span>
@@ -33,7 +33,7 @@ const STAGE_HTML = `
       <div id="sn_intro" style="position:absolute;inset:0;background:linear-gradient(rgba(5,7,12,0.5),rgba(5,7,12,0.82));display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">DRESIFY ZMIJA</div>
         <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Jedi lopte i rasti</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Vodi zmiju da pojede &#9917;. Što više pojedeš, veća nagrada: <b style="color:#e8ff3c;">5&rarr;besplatna dostava</b>, 12&rarr;-15%, 20&rarr;-20%. Ne udari u zid ni u sebe!</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Vodi zmiju da pojede &#9917;. Što više pojedeš, veća nagrada: <b style="color:#e8ff3c;">12&rarr;besplatna dostava</b>, 25&rarr;-15%, 40&rarr;-20%. Ne udari u zid ni u sebe!</div>
         <button id="sn_start" class="sn-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(232,255,60,0.25);">START &#9917;</button>
       </div>
 
@@ -107,12 +107,12 @@ export function SnakeGame() {
     const parts: { x: number; y: number; vx: number; vy: number; life: number; max: number; c: string; sz: number }[] = [];
 
     function rewardFor(s: number) {
-      return s >= 20 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" }
-        : s >= 12 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" }
-        : s >= 5 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null;
+      return s >= 40 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" }
+        : s >= 25 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" }
+        : s >= 12 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null;
     }
-    const nextAt = (s: number) => s < 5 ? 5 : s < 12 ? 12 : s < 20 ? 20 : null;
-    const nextLabel = (s: number) => s < 5 ? "besplatnu dostavu (od 40€)" : s < 12 ? "-15% + dostava (od 80€)" : s < 20 ? "-20% + dostava (od 100€)" : null;
+    const nextAt = (s: number) => s < 12 ? 12 : s < 25 ? 25 : s < 40 ? 40 : null;
+    const nextLabel = (s: number) => s < 12 ? "besplatnu dostavu (od 40€)" : s < 25 ? "-15% + dostava (od 80€)" : s < 40 ? "-20% + dostava (od 100€)" : null;
 
     function randBall() {
       let c: Cell;

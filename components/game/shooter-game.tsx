@@ -33,7 +33,7 @@ const STAGE_HTML = `
       <div id="sh_intro" style="position:absolute;inset:0;background:linear-gradient(rgba(5,7,12,0.5),rgba(5,7,12,0.82));display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">DRESIFY SNAJPER</div>
         <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Gađaj dresove na traci</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:270px;">Tapni na dres da pogodiš. Imaš 40 s! Zlatni dres = 3 boda. <b style="color:#e8ff3c;">12&rarr;besplatna dostava</b>, 22&rarr;-15%, 32&rarr;-20%.</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:270px;">Tapni na dres da pogodiš. Imaš 40 s! Zlatni dres = 3 boda. <b style="color:#e8ff3c;">25&rarr;besplatna dostava</b>, 40&rarr;-15%, 60&rarr;-20%.</div>
         <button id="sh_start" class="sh-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(232,255,60,0.25);">START &#127919;</button>
       </div>
 
@@ -102,12 +102,12 @@ export function ShooterGame() {
     const crowd = Array.from({ length: 100 }, () => ({ x: Math.random() * W, y: 56 + Math.random() * 40, c: Math.random() }));
 
     function rewardFor(s: number) {
-      return s >= 32 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" }
-        : s >= 22 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" }
-        : s >= 12 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null;
+      return s >= 60 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" }
+        : s >= 40 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" }
+        : s >= 25 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null;
     }
-    const nextAt = (s: number) => s < 12 ? 12 : s < 22 ? 22 : s < 32 ? 32 : null;
-    const nextLabel = (s: number) => s < 12 ? "besplatnu dostavu (od 40€)" : s < 22 ? "-15% + dostava (od 80€)" : "-20% + dostava (od 100€)";
+    const nextAt = (s: number) => s < 25 ? 25 : s < 40 ? 40 : s < 60 ? 60 : null;
+    const nextLabel = (s: number) => s < 25 ? "besplatnu dostavu (od 40€)" : s < 40 ? "-15% + dostava (od 80€)" : "-20% + dostava (od 100€)";
 
     function reset() {
       targets = []; score = 0; timeLeft = 40; combo = 0; comboTimer = 0; elapsed = 0; spawnAcc = 0; tierCode = "";

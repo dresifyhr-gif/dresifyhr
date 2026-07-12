@@ -27,7 +27,7 @@ const STAGE_HTML = `
       <div id="rn_intro" style="position:absolute;inset:0;background:linear-gradient(rgba(5,7,12,0.5),rgba(5,7,12,0.8));display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">SUPER DRESIFY</div>
         <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Trči, skači, skupljaj dresove</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:270px;">Tapni za skok (dvaput = dvostruki skok). Skupljaj dresove, preskači čunjeve, penji se po platformama. <b style="color:#e8ff3c;">8&rarr;besplatna dostava</b>, 15&rarr;-15%, 25&rarr;-20%.</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:270px;">Tapni za skok (dvaput = dvostruki skok). Skupljaj dresove, preskači čunjeve, penji se po platformama. <b style="color:#e8ff3c;">15&rarr;besplatna dostava</b>, 30&rarr;-15%, 50&rarr;-20%.</div>
         <button id="rn_start" class="rn-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(232,255,60,0.25);">START &#127939;</button>
       </div>
 
@@ -97,12 +97,12 @@ export function RunnerGame() {
     const crowd = Array.from({ length: 120 }, () => ({ x: Math.random() * (W + 80), y: 74 + Math.random() * 46, c: Math.random() }));
 
     function rewardFor(s: number) {
-      return s >= 25 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" }
-        : s >= 15 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" }
-        : s >= 8 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null;
+      return s >= 50 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" }
+        : s >= 30 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" }
+        : s >= 15 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null;
     }
-    const nextAt = (s: number) => s < 8 ? 8 : s < 15 ? 15 : s < 25 ? 25 : null;
-    const nextLabel = (s: number) => s < 8 ? "besplatnu dostavu (od 40€)" : s < 15 ? "-15% + dostava (od 80€)" : "-20% + dostava (od 100€)";
+    const nextAt = (s: number) => s < 15 ? 15 : s < 30 ? 30 : s < 50 ? 50 : null;
+    const nextLabel = (s: number) => s < 15 ? "besplatnu dostavu (od 40€)" : s < 30 ? "-15% + dostava (od 80€)" : "-20% + dostava (od 100€)";
 
     function reset() {
       player = { y: GROUND, vy: 0, jumps: 0, rot: 0 };

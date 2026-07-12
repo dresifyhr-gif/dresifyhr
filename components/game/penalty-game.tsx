@@ -354,8 +354,8 @@ export function PenaltyGame() {
       // Izazov: golman jači svakim penalom. Kutevi ostaju najsigurniji.
       const dcx = Math.min(1, Math.abs(tx - GOAL_CX) / ((POST_R - 14) - GOAL_CX));
       const highShot = ty < (CROSS_Y + LINE_Y) / 2;
-      let saveChance = (0.20 + 0.07 * (shot - 1)) * (1 - 0.72 * dcx) * (highShot ? 0.82 : 1);
-      saveChance = Math.max(0.06, Math.min(0.7, saveChance));
+      let saveChance = (0.34 + 0.10 * (shot - 1)) * (1 - 0.60 * dcx) * (highShot ? 0.85 : 1);
+      saveChance = Math.max(0.12, Math.min(0.82, saveChance));
       const saved = Math.random() < saveChance;
       ball.saved = saved;
 

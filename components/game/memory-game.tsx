@@ -6,7 +6,7 @@ import { PROMO_STORAGE_KEY } from "@/components/site/promo-capture";
 
 // 6 football-themed symbols → 12 cards (6 pairs).
 const SYMBOLS = ["⚽", "🏆", "🥅", "🧤", "👟", "🎽"];
-const ATTEMPT_LIMIT = 12; // flips-of-second-card allowed to still win
+const ATTEMPT_LIMIT = 8; // flips-of-second-card allowed to still win (teže)
 
 type Card = { id: number; symbol: string; matched: boolean };
 type Phase = "idle" | "playing" | "win" | "lose" | "claimed";
