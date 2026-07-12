@@ -120,22 +120,24 @@ export function CustomProducts() {
               </button>
             ))}
           </div>
-          <div className="rounded-lg border border-slate-900/10 bg-slate-900/5 p-3">
-            <div className="mb-1.5 text-xs font-semibold text-slate-700">🪄 AI popuni — upiši naziv, ostalo složi AI</div>
-            <div className="flex gap-2">
-              <input
-                value={aiName}
-                onChange={(e) => setAiName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); aiFill(); } }}
-                placeholder="npr. Hrvatska Modrić 2026"
-                className="flex-1 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
-              />
-              <button type="button" onClick={aiFill} disabled={aiBusy || !aiName.trim()} className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:opacity-40">
-                {aiBusy ? "Slažem…" : "🪄 Popuni"}
-              </button>
+          {f.category === "dres" && (
+            <div className="rounded-lg border border-slate-900/10 bg-slate-900/5 p-3">
+              <div className="mb-1.5 text-xs font-semibold text-slate-700">🪄 AI popuni — upiši naziv, ostalo složi AI</div>
+              <div className="flex gap-2">
+                <input
+                  value={aiName}
+                  onChange={(e) => setAiName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); aiFill(); } }}
+                  placeholder="npr. Hrvatska Modrić 2026"
+                  className="flex-1 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+                />
+                <button type="button" onClick={aiFill} disabled={aiBusy || !aiName.trim()} className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:opacity-40">
+                  {aiBusy ? "Slažem…" : "🪄 Popuni"}
+                </button>
+              </div>
+              <div className="mt-1 text-[11px] text-slate-400">Ispuni klub, igrača, ligu i opis. Ti dodaš cijenu i slike.</div>
             </div>
-            <div className="mt-1 text-[11px] text-slate-400">Ispuni klub, igrača, ligu i opis. Ti dodaš cijenu i slike.</div>
-          </div>
+          )}
 
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-xs font-medium text-slate-500">{f.category === "streetwear" ? "Brend (npr. Nike)" : "Klub / reprezentacija"}
@@ -144,11 +146,13 @@ export function CustomProducts() {
             <label className="text-xs font-medium text-slate-500">{f.category === "streetwear" ? "Model / naziv" : "Igrač / naziv"}
               <input value={f.igrac} onChange={(e) => setF({ ...f, igrac: e.target.value })} placeholder={f.category === "streetwear" ? "npr. Cortez — bijele" : "npr. Modrić nr10 — 2026"} className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400" />
             </label>
-            <label className="text-xs font-medium text-slate-500">Liga
-              <select value={f.liga} onChange={(e) => setF({ ...f, liga: e.target.value })} className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-400">
-                {LIGE.map((l) => <option key={l} value={l}>{l}</option>)}
-              </select>
-            </label>
+            {f.category === "dres" && (
+              <label className="text-xs font-medium text-slate-500">Liga
+                <select value={f.liga} onChange={(e) => setF({ ...f, liga: e.target.value })} className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-400">
+                  {LIGE.map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+              </label>
+            )}
             <label className="text-xs font-medium text-slate-500">Cijena (€)
               <input value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} inputMode="decimal" className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400" />
               {f.category === "streetwear" && (
@@ -166,7 +170,9 @@ export function CustomProducts() {
           </div>
 
           <div className="flex items-center gap-4 text-xs text-slate-600">
-            <label className="flex items-center gap-1.5"><input type="checkbox" checked={f.retro} onChange={(e) => setF({ ...f, retro: e.target.checked })} /> Retro</label>
+            {f.category === "dres" && (
+              <label className="flex items-center gap-1.5"><input type="checkbox" checked={f.retro} onChange={(e) => setF({ ...f, retro: e.target.checked })} /> Retro</label>
+            )}
             <label className="flex items-center gap-1.5">Badge:
               <select value={f.badge} onChange={(e) => setF({ ...f, badge: e.target.value })} className="rounded border border-slate-200 bg-white px-2 py-1">
                 <option value="">Bez</option>
@@ -186,7 +192,7 @@ export function CustomProducts() {
           </div>
 
           <button type="button" onClick={save} disabled={saving || !f.klub.trim() || !f.igrac.trim()} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-40">
-            {saving ? "Spremam…" : f.id ? "Spremi izmjene" : "Spremi dres"}
+            {saving ? "Spremam…" : f.id ? "Spremi izmjene" : f.category === "streetwear" ? "🔥 Spremi streetwear" : "Spremi dres"}
           </button>
         </div>
       )}
