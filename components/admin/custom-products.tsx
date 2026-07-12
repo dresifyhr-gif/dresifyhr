@@ -90,20 +90,36 @@ export function CustomProducts() {
     <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-sm font-bold text-slate-900">Novi dresovi (dodani iz admina)</div>
-          <div className="text-xs text-slate-400">{list.length} dodano · dodaj dres sa slikama bez koda</div>
+          <div className="text-sm font-bold text-slate-900">Novi proizvodi — dresovi i streetwear</div>
+          <div className="text-xs text-slate-400">{list.length} dodano · dodaj dres ili 🔥 streetwear sa slikama</div>
         </div>
         <button
           type="button"
           onClick={() => { setF({ ...empty }); setOpen((v) => !v); }}
           className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800"
         >
-          {open ? "Zatvori" : "➕ Dodaj dres"}
+          {open ? "Zatvori" : "➕ Dodaj proizvod"}
         </button>
       </div>
 
       {open && (
         <div className="mt-4 space-y-3 rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+          <div className="flex items-center gap-2 rounded-lg border border-orange-200 bg-orange-50/50 p-2.5">
+            <span className="text-xs font-semibold text-slate-600">Što dodaješ?</span>
+            {[
+              { v: "dres", label: "👕 Dres" },
+              { v: "streetwear", label: "🔥 Streetwear" }
+            ].map((c) => (
+              <button
+                key={c.v}
+                type="button"
+                onClick={() => setF({ ...f, category: c.v, price: c.v === "streetwear" && (f.price === "20" || !f.price) ? "50" : c.v === "dres" && f.price === "50" ? "20" : f.price })}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : "bg-slate-900 text-white") : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
           <div className="rounded-lg border border-slate-900/10 bg-slate-900/5 p-3">
             <div className="mb-1.5 text-xs font-semibold text-slate-700">🪄 AI popuni — upiši naziv, ostalo složi AI</div>
             <div className="flex gap-2">
@@ -121,23 +137,6 @@ export function CustomProducts() {
             <div className="mt-1 text-[11px] text-slate-400">Ispuni klub, igrača, ligu i opis. Ti dodaš cijenu i slike.</div>
           </div>
 
-          <div className="mb-3 flex items-center gap-2">
-            <span className="text-xs font-medium text-slate-500">Kategorija:</span>
-            {[
-              { v: "dres", label: "👕 Dres" },
-              { v: "streetwear", label: "🔥 Streetwear" }
-            ].map((c) => (
-              <button
-                key={c.v}
-                type="button"
-                onClick={() => setF({ ...f, category: c.v, price: c.v === "streetwear" && (f.price === "20" || !f.price) ? "50" : c.v === "dres" && f.price === "50" ? "20" : f.price })}
-                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : "bg-slate-900 text-white") : "border border-slate-200 text-slate-500 hover:bg-slate-50"}`}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-xs font-medium text-slate-500">{f.category === "streetwear" ? "Brend (npr. Nike)" : "Klub / reprezentacija"}
               <input value={f.klub} onChange={(e) => setF({ ...f, klub: e.target.value })} placeholder={f.category === "streetwear" ? "npr. Nike" : "npr. Hrvatska"} className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400" />
@@ -152,6 +151,17 @@ export function CustomProducts() {
             </label>
             <label className="text-xs font-medium text-slate-500">Cijena (€)
               <input value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} inputMode="decimal" className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400" />
+              {f.category === "streetwear" && (
+                <span className="mt-1 flex gap-1.5">
+                  {[
+                    { p: "25", l: "Majica 25€" },
+                    { p: "30", l: "Hlačice 30€" },
+                    { p: "50", l: "Komplet 50€" }
+                  ].map((x) => (
+                    <button key={x.p} type="button" onClick={() => setF({ ...f, price: x.p })} className={`rounded px-2 py-0.5 text-[11px] font-medium transition ${f.price === x.p ? "bg-orange-500 text-white" : "border border-orange-200 text-orange-600 hover:bg-orange-50"}`}>{x.l}</button>
+                  ))}
+                </span>
+              )}
             </label>
           </div>
 
