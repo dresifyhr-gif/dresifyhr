@@ -46,6 +46,7 @@ export function ProductCard({ product, priority = false }: { product: Jersey; pr
       segmentLabel,
       imageSrc: gallery[0]?.src,
       price: product.price,
+      category: product.category,
     });
     setIsOpen(false);
   };

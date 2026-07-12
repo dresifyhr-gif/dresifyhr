@@ -13,7 +13,8 @@ import { formatEuroAmount, repairText } from "@/lib/utils";
 export function CartPageContent() {
   const { t } = useLanguage();
   const { items, subtotal, removeItem } = useCart();
-  const freeShipping = subtotal >= FREE_SHIPPING_THRESHOLD_EUR;
+  const hasStreetwear = items.some((i) => i.category === "streetwear");
+  const freeShipping = hasStreetwear || subtotal >= FREE_SHIPPING_THRESHOLD_EUR;
   const shipping = items.length && !freeShipping ? SHIPPING_PRICE_EUR : 0;
   const total = subtotal + shipping;
   const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD_EUR - subtotal);

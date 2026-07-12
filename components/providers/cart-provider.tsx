@@ -15,6 +15,7 @@ export type CartItem = {
   segmentLabel: string;
   price: number;
   imageSrc?: string;
+  category?: string; // "streetwear" → besplatna dostava
 };
 
 export type CartInput = Omit<CartItem, "id" | "price"> & { price?: number };

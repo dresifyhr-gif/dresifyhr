@@ -130,7 +130,7 @@ export function CustomProducts() {
               <button
                 key={c.v}
                 type="button"
-                onClick={() => setF({ ...f, category: c.v })}
+                onClick={() => setF({ ...f, category: c.v, price: c.v === "streetwear" && (f.price === "20" || !f.price) ? "50" : c.v === "dres" && f.price === "50" ? "20" : f.price })}
                 className={`rounded-md px-3 py-1 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : "bg-slate-900 text-white") : "border border-slate-200 text-slate-500 hover:bg-slate-50"}`}
               >
                 {c.label}

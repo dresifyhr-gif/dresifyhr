@@ -102,8 +102,10 @@ export function ContactForm() {
   // GOL15/GOL20 require €80/€100, so the classic €60 threshold already covers them.
   const promoFreeShipping =
     appliedPromo?.kind === "freeship" && orderSubtotal >= appliedPromo.minSubtotal;
+  // Streetwear ima besplatnu dostavu.
+  const hasStreetwear = items.some((i) => i.category === "streetwear");
   const freeShipping =
-    orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR || promoFreeShipping;
+    orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR || promoFreeShipping || hasStreetwear;
   const shipping = freeShipping ? 0 : selectedOption.price;
   const discount = computePromoDiscount(appliedPromo, orderSubtotal);
   const total = orderSubtotal - discount + shipping;
