@@ -3,13 +3,12 @@ import { FaqSection } from "@/components/home/faq-section";
 import { FeaturedSection } from "@/components/home/featured-section";
 import { GamesCta } from "@/components/home/games-cta";
 import { HeroSection } from "@/components/home/hero-section";
+import { HomeCatalogTabs } from "@/components/home/home-catalog-tabs";
 import { InstagramSection } from "@/components/home/instagram-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { ReviewsSection } from "@/components/home/reviews-section";
 import { StreetwearBanner } from "@/components/home/streetwear-banner";
 import { TrustStrip } from "@/components/home/trust-strip";
-import { CatalogBrowser } from "@/components/site/catalog-browser";
-import { SectionHeading } from "@/components/site/section-heading";
 import { jerseys } from "@/lib/data/jerseys";
 import { getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
 import { getVisibleTestimonials } from "@/lib/testimonials";
@@ -65,14 +64,13 @@ export default async function HomePage() {
 
       <section className="section-pad bg-[#0a0a0a]">
         <div className="page-shell">
-          <div className="hidden md:block">
-            <SectionHeading
-              kicker={t.home.catalogKicker}
-              title={t.home.catalogTitle}
-              description={t.home.catalogDesc}
-            />
-          </div>
-          <CatalogBrowser products={dresovi} compactHeader />
+          <HomeCatalogTabs
+            dresovi={dresovi}
+            streetwear={streetwear}
+            headingLabel={t.home.catalogKicker}
+            headingTitle={t.home.catalogTitle}
+            headingDesc={t.home.catalogDesc}
+          />
         </div>
       </section>
 
