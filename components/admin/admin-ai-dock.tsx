@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 
 import { AdminAiChat } from "@/components/admin/ai-chat";
 
-// Floating "Direktor AI" assistant available on every admin page.
+// Floating "Dresify AI" assistant available on every admin page.
 export function AdminAiDock() {
   const [open, setOpen] = useState(false);
 
@@ -19,7 +19,7 @@ export function AdminAiDock() {
           className="fixed bottom-20 right-4 z-40 flex items-center gap-2 rounded-full bg-slate-900 py-1.5 pl-1.5 pr-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition hover:bg-slate-800 lg:bottom-6 lg:right-6"
         >
           <Image src="/dresify-robot.png" alt="Dresify AI" width={48} height={48} className="h-12 w-12 object-contain" />
-          Direktor AI
+          Dresify AI
         </button>
       )}
 
@@ -30,7 +30,7 @@ export function AdminAiDock() {
             <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3.5">
               <div className="flex items-center gap-2">
                 <Image src="/dresify-robot.png" alt="Dresify AI" width={40} height={40} className="h-10 w-10 object-contain" />
-                <span className="text-sm font-bold text-slate-900">Direktor AI</span>
+                <span className="text-sm font-bold text-slate-900">Dresify AI</span>
               </div>
               <button type="button" onClick={() => setOpen(false)} className="text-slate-400 transition hover:text-slate-700">
                 <X className="h-5 w-5" />

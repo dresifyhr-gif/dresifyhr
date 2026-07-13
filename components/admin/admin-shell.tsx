@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Package, Send, Users, BarChart3, Shirt, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut } from "lucide-react";
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
 
 const NAV = [
   { href: "/admin", label: "Pregled", hint: "Početna", icon: LayoutDashboard },
   { href: "/admin/narudzbe", label: "Narudžbe", hint: "Traži i mijenjaj", icon: Package },
-  { href: "/admin/slanje", label: "Za slanje", hint: "Što treba poslati", icon: Send },
   { href: "/admin/proizvodi", label: "Proizvodi", hint: "Cijena i zaliha", icon: Shirt },
   { href: "/admin/kupci", label: "Kupci", hint: "Tko kupuje", icon: Users },
   { href: "/admin/analitika", label: "Analitika", hint: "Brojke i trendovi", icon: BarChart3 }

@@ -106,7 +106,7 @@ ${context}`;
   };
 
   const result = streamText({
-    model: anthropic("claude-sonnet-5"),
+    model: anthropic("claude-haiku-4-5-20251001"),
     system,
     messages: (messages as { role: "user" | "assistant"; content: string }[]).slice(-8),
     tools,
