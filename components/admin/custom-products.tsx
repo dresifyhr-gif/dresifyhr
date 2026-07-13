@@ -35,6 +35,7 @@ export function CustomProducts() {
   const [aiName, setAiName] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
   const [aiDescBusy, setAiDescBusy] = useState(false);
+  const [showList, setShowList] = useState(false); // duga lista skrivena po defaultu
 
   // Streetwear: iz brenda + modela AI složi prodajni opis.
   async function aiDesc() {
@@ -116,13 +117,24 @@ export function CustomProducts() {
           <div className="text-sm font-bold text-slate-900">Novi proizvodi — dresovi i streetwear</div>
           <div className="text-xs text-slate-400">{list.length} dodano · dodaj dres ili 🔥 streetwear sa slikama</div>
         </div>
-        <button
-          type="button"
-          onClick={() => { setF({ ...empty }); setOpen((v) => !v); }}
-          className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800"
-        >
-          {open ? "Zatvori" : "➕ Dodaj proizvod"}
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          {list.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowList((v) => !v)}
+              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+            >
+              {showList ? "Sakrij popis" : `📋 Popis (${list.length})`}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => { setF({ ...empty }); setOpen((v) => !v); }}
+            className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800"
+          >
+            {open ? "Zatvori" : "➕ Dodaj proizvod"}
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -246,8 +258,8 @@ export function CustomProducts() {
         </div>
       )}
 
-      {list.length > 0 && (
-        <ul className="mt-4 space-y-2">
+      {list.length > 0 && showList && (
+        <ul className="mt-4 max-h-[360px] space-y-2 overflow-y-auto pr-1">
           {list.map((p) => (
             <li key={p.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 p-2 text-sm">
               <span className="flex min-w-0 items-center gap-2">
