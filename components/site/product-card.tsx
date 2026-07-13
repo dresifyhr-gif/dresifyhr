@@ -106,7 +106,7 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
           {/* Name & league */}
           <div>
             <p className={`hidden text-[11px] uppercase tracking-[0.26em] sm:block ${sw ? "text-orange-500/70" : "text-white/40"}`}>
-              {repairText(product.liga)}
+              {sw ? "Streetwear" : repairText(product.liga)}
             </p>
             <h3 className={`text-[0.85rem] font-semibold uppercase leading-tight sm:mt-2 sm:text-[1.1rem] ${sw ? "text-slate-900" : "text-white"}`}>
               {repairText(product.klub)}
