@@ -145,6 +145,34 @@ export const blogPosts: BlogPost[] = [
       "Dostava ide po cijeloj Hrvatskoj i iznosi 5,00 € uz HP Paket24 uslugu s plaćanjem pouzećem. Rok isporuke je 2 do 5 radnih dana od potvrde narudžbe, a pratimo svaki paket do preuzimanja. Ako naručujete za posebnu prigodu — rođendan, poklon, natjecanje — javite nam rok i pokušat ćemo ga ispoštovati. U većini slučajeva to nije problem ako narudžba stigne dovoljno rano.",
       "Najčešće pitanje koje dobivamo je kako odabrati pravu veličinu. Odgovor je uvijek isti: ne vodite se godinama nego mjerama. Izmjerite širinu ramena ili se oslonite na majicu koja vam trenutno dobro odgovara. Dječje veličine idu od 116 do 176, odrasle od S do XL. Ako niste sigurni, pošaljite visinu i okvirnu građu na WhatsApp i predložit ćemo veličinu koja ima smisla za konkretan model koji ste odabrali. Bolje je pitati nego čekati na dostavu i otkriti da ne odgovara."
     ]
+  },
+  {
+    slug: "streetwear-kompleti-kako-nositi",
+    title: "Streetwear kompleti — kako ih nositi i zašto su postali hit",
+    description:
+      "Vodič kroz streetwear komplete: kako složiti ulični look s majicom i hlačicama, uz koje tenisice i za koje prilike najbolje stoje.",
+    publishedAt: "2026-07-08",
+    relatedSlugs: ["graffiti-black-set", "cotton-wreath-white-set", "cloud-black-set"],
+    paragraphs: [
+      "Streetwear komplet — majica i hlačice u istom stilu — postao je jedan od najlakših načina da izgledaš sređeno bez imalo truda. Umjesto da sam slažeš gornji i donji dio i pogađaš pašu li boje, dobiješ zaokružen look koji radi odmah iz vrećice. Upravo zato su ovi kompleti eksplodirali: mladi kupci žele nešto što izgleda dobro na priči, ali i uživo, u gradu, na kavi ili na druženju s ekipom. Kod nas su svi kompleti u uličnom stilu, s modernim, malo opuštenijim krojem koji odgovara današnjoj streetwear estetici.",
+      "Najsigurniji način da nosiš komplet je da ga pustiš da bude glavni komad, a sve ostalo držiš jednostavnim. Uz njega idu čiste tenisice — bijele patike gotovo uvijek rade, a ako je komplet u jačoj boji, crne ili neutralne tenisice ga smire. Dodaj jednostavan lanac, kapu ili crossbody torbicu i look je gotov. Izbjegavaj miješati previše uzoraka: kod streetweara manje je više, a komplet sam po sebi već nosi dovoljno karaktera da ne treba dodatno natrpavati.",
+      "Kompleti u neutralnim tonovima — crna, siva, bijela, maslinasta — najlakši su za kombiniranje i nose se cijele godine, pa su odličan prvi izbor ako tek ulaziš u streetwear. Jače boje poput plave, roze ili šarenih grafika su statement komadi: nose se kad želiš da te se primijeti i kad ti je look sam sebi dovoljan. Dobar trik je imati jedan neutralni komplet za svaki dan i jedan izraženiji za izlaske — tako pokriješ i opušteni i 'sređeni' streetwear.",
+      "Svi naši streetwear kompleti dolaze u veličinama XS, S, M i L za odrasle, uz besplatnu dostavu i plaćanje pouzećem po cijeloj Hrvatskoj — ne plaćaš ništa unaprijed. Ako nisi siguran koja veličina ti odgovara ili kako složiti look, javi nam se na WhatsApp i rado pomognemo. Streetwear je na kraju o samopouzdanju: uzmi komad koji ti se sviđa čim ga vidiš, obuci ga i nosi kako tebi paše."
+    ]
+  },
+  {
+    slug: "kako-odabrati-streetwear-komplet",
+    title: "Kako odabrati streetwear komplet — veličina, materijal i stil",
+    description:
+      "Praktičan vodič za odabir streetwear kompleta: kako pogoditi veličinu XS–L, na što paziti kod materijala i kroja te koji stil odgovara tebi.",
+    publishedAt: "2026-07-10",
+    relatedSlugs: ["graffiti-grey-set", "cotton-wreath-olive-set", "cloud-royal-blue-set"],
+    paragraphs: [
+      "Kod odabira streetwear kompleta tri stvari odlučuju hoćeš li ga stvarno nositi: veličina, materijal i stil. Za razliku od dresa, streetwear se najčešće nosi malo opuštenije, pa je pametno prvo odlučiti kakav fit voliš — priljubljeniji ili komotniji. Naši kompleti dolaze u veličinama XS, S, M i L za odrasle, a kroj je moderan i blago opušten, baš kako streetwear i treba stajati. Ako si između dvije veličine i voliš komotnije, uzmi veću; ako voliš čišću, uredniju liniju, ostani na svojoj standardnoj.",
+      "Najbolji način da pogodiš veličinu je da ne pogađaš. Uzmi majicu koja ti trenutno dobro stoji, raširi je na ravnu podlogu i izmjeri širinu ispod pazuha i duljinu od ramena do ruba. Kod hlačica provjeri opseg struka i duljinu nogavice na komadu koji ti odgovara. Te mjere reci nam u poruci i točno ćemo ti reći koja veličina odgovara konkretnom modelu. To je puno sigurnije nego se voditi samo osjećajem ili općim tablicama s interneta.",
+      "Materijal i kroj su ono što razlikuje komplet koji nosiš stalno od onog koji ostane u ormaru. Traži gušći, mekan pamuk koji drži oblik i ne izgleda tanko nakon par pranja — takav materijal je ugodan na koži i daje onaj 'premium' osjećaj koji se odmah primijeti. Kod kroja pazi da hlačice imaju dobar pad i da majica nije ni prekratka ni prevelika. Naši kompleti su rađeni upravo s tim balansom na umu: udobni za cijeli dan, a dovoljno uredni da izgledaju namjerno, a ne nabacano.",
+      "Na kraju, stil biraj prema sebi, ne prema trendu. Ako želiš nešto što ide uz sve i nosi se cijelu godinu, kreni od neutralnih boja. Ako želiš da komad bude glavni na looku, uzmi jaču boju ili grafiku. Svi kompleti idu uz besplatnu dostavu i plaćanje pouzećem po cijeloj Hrvatskoj, a ako ti treba pomoć oko veličine ili odabira, javi se na WhatsApp — predložit ćemo ti model i veličinu koja ima smisla za tebe."
+    ]
   }
 ];
 

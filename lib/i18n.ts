@@ -170,7 +170,7 @@ const hr = {
     kicker: "Recenzije",
     title: "Što kažu kupci",
     desc: "Kratke poruke iz stvarnih narudžbi koje nam dolaze nakon isporuke.",
-    bar: "200+ narudžbi • Dostava 24-48h • WhatsApp podrška • Novo svaki tjedan",
+    bar: "200+ narudžbi • Dostava 2–5 dana • WhatsApp podrška • Novo svaki tjedan",
   },
 
   blog: {
@@ -436,7 +436,7 @@ const en: typeof hr = {
     kicker: "Reviews",
     title: "What customers say",
     desc: "Short messages from real orders received after delivery.",
-    bar: "200+ orders • Delivery 24-48h • WhatsApp support • New every week",
+    bar: "200+ orders • Delivery 2–5 days • WhatsApp support • New every week",
   },
 
   blog: {

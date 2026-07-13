@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { blogPosts, getBlogPostBySlug, getBlogReadingTime } from "@/lib/data/blog-posts";
 import { getJerseyBySlug } from "@/lib/data/jerseys";
+import { getProductBySlug } from "@/lib/data/product-overrides";
 import { buildArticleSchema, buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { formatCroatianDate, repairText } from "@/lib/utils";
 
@@ -39,12 +40,22 @@ export function generateMetadata({ params }: BlogPostPageProps): Metadata {
   });
 }
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = getBlogPostBySlug(params.slug);
 
   if (!post) {
     notFound();
   }
+
+  // Povezani proizvodi — razrješavamo i statičke dresove i custom (streetwear).
+  const related = (
+    await Promise.all(
+      post.relatedSlugs.map(async (slug) => {
+        const product = await getProductBySlug(slug, getJerseyBySlug(slug));
+        return product ? { slug, klub: product.klub, igrac: product.igrac } : null;
+      })
+    )
+  ).filter((x): x is { slug: string; klub: string; igrac: string } => x !== null);
 
   const articleSchema = buildArticleSchema(post);
   const breadcrumbSchema = buildBreadcrumbSchema([
@@ -89,25 +100,17 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
 
           <div className="mt-10 border border-white/10 bg-[#0a0a0a] p-6">
-            <p className="text-xs uppercase tracking-[0.32em] text-white/45">Povezani dresovi</p>
+            <p className="text-xs uppercase tracking-[0.32em] text-white/45">Povezani proizvodi</p>
             <div className="mt-5 flex flex-wrap gap-3">
-              {post.relatedSlugs.map((slug) => {
-                const jersey = getJerseyBySlug(slug);
-
-                if (!jersey) {
-                  return null;
-                }
-
-                return (
-                  <Link
-                    key={slug}
-                    href={`/dres/${slug}`}
-                    className="border border-white/10 bg-[#111111] px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition duration-200 ease-out hover:border-accent hover:text-accent"
-                  >
-                    {repairText(jersey.klub)} • {repairText(jersey.igrac)}
-                  </Link>
-                );
-              })}
+              {related.map((item) => (
+                <Link
+                  key={item.slug}
+                  href={`/dres/${item.slug}`}
+                  className="border border-white/10 bg-[#111111] px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition duration-200 ease-out hover:border-accent hover:text-accent"
+                >
+                  {repairText(item.klub)} • {repairText(item.igrac)}
+                </Link>
+              ))}
             </div>
           </div>
         </article>
