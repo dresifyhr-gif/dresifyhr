@@ -9,7 +9,8 @@ export const metadata = buildMetadata({
   description:
     "Dovrši narudžbu za dresove u nekoliko klikova. Dostava pouzećem po cijeloj Hrvatskoj za 5,00€.",
   path: "/checkout",
-  keywords: ["checkout dresovi", "narudžba dresova", "plaćanje pouzećem", "dresify narudžba"]
+  keywords: ["checkout dresovi", "narudžba dresova", "plaćanje pouzećem", "dresify narudžba"],
+  noindex: true
 });
 
 export default async function CheckoutPage() {

@@ -20,6 +20,7 @@ type MetadataInput = {
   path: string;
   image?: string;
   keywords?: string[];
+  noindex?: boolean; // funnel/utility stranice (košarica, checkout) — ne indeksiraj
 };
 
 type BreadcrumbItem = {
@@ -32,7 +33,8 @@ export function buildMetadata({
   description,
   path,
   image = DEFAULT_OG_IMAGE,
-  keywords
+  keywords,
+  noindex
 }: MetadataInput): Metadata {
   const url = absoluteUrl(path);
   const imageUrl = absoluteUrl(image);
@@ -40,6 +42,7 @@ export function buildMetadata({
   return {
     title,
     description,
+    ...(noindex ? { robots: { index: false, follow: true } } : {}),
     alternates: {
       canonical: url
     },

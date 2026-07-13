@@ -8,7 +8,8 @@ export const metadata = buildMetadata({
   title: "Košarica",
   description: "Pregledaj odabrane dresove i nastavi na plaćanje.",
   path: "/kosarica",
-  keywords: ["košarica dresovi", "narudžba dresovi", "dresify košarica"]
+  keywords: ["košarica dresovi", "narudžba dresovi", "dresify košarica"],
+  noindex: true
 });
 
 export default async function CartPage() {

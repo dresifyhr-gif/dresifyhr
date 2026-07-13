@@ -7,13 +7,27 @@ import {
   getJerseyPlayerCollections
 } from "@/lib/data/seo-collections";
 import { jerseys } from "@/lib/data/jerseys";
+import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/utils";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+// Slugovi custom proizvoda (streetwear + eventualni custom dresovi) iz baze.
+// Best-effort: ako baza nije dostupna, sitemap koristi samo statički katalog.
+async function getCustomSlugs(): Promise<string[]> {
+  try {
+    if (!process.env.DATABASE_URL) return [];
+    const rows = await prisma.customProduct.findMany({ where: { hidden: false }, select: { slug: true } });
+    return rows.map((r) => r.slug);
+  } catch {
+    return [];
+  }
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = ["", "/dresovi", "/streetwear", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/igre", "/igra", "/flappy", "/gadaj"];
   const categoryRoutes = getJerseyCategoryCollections().map((collection) => collection.path);
   const clubRoutes = getJerseyClubCollections().map((collection) => collection.path);
   const playerRoutes = getJerseyPlayerCollections().map((collection) => collection.path);
+  const customSlugs = await getCustomSlugs();
 
   return [
     ...staticRoutes.map((route) => ({
@@ -38,6 +52,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     ...jerseys.map((product) => ({
       url: absoluteUrl(`/dres/${product.slug}`),
+      changeFrequency: "weekly" as const,
+      priority: 0.7
+    })),
+    ...customSlugs.map((slug) => ({
+      url: absoluteUrl(`/dres/${slug}`),
       changeFrequency: "weekly" as const,
       priority: 0.7
     })),
