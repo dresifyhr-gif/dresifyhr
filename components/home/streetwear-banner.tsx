@@ -8,8 +8,7 @@ export function StreetwearBanner() {
     <section className="bg-[#0a0a0a] px-4 pb-2 pt-6 sm:pb-4 sm:pt-8">
       <div className="page-shell">
         <Link
-          href="/#streetwear"
-          scroll
+          href="/streetwear"
           className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-6 shadow-[0_10px_40px_-12px_rgba(249,115,22,0.6)] transition hover:from-orange-400 hover:to-orange-500 sm:px-8 sm:py-8"
         >
           {/* Suptilni uzorak u pozadini */}
