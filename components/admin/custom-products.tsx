@@ -176,9 +176,15 @@ export function CustomProducts() {
 
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
             <span className="font-medium text-slate-500">Veličine:</span>
-            <button type="button" onClick={() => setF({ ...f, adults: !f.adults })} className={`rounded-md px-3 py-1 font-semibold transition ${f.adults ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-400 hover:bg-slate-50"}`}>Odrasli S–XXL</button>
-            <button type="button" onClick={() => setF({ ...f, kids: !f.kids })} className={`rounded-md px-3 py-1 font-semibold transition ${f.kids ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-400 hover:bg-slate-50"}`}>Djeca 104–176</button>
-            {!f.adults && !f.kids && <span className="text-red-500">Odaberi barem jedno</span>}
+            {f.category === "streetwear" ? (
+              <span className="rounded-md bg-orange-50 px-3 py-1 font-semibold text-orange-600">XS · S · M · L (streetwear)</span>
+            ) : (
+              <>
+                <button type="button" onClick={() => setF({ ...f, adults: !f.adults })} className={`rounded-md px-3 py-1 font-semibold transition ${f.adults ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-400 hover:bg-slate-50"}`}>Odrasli S–XXL</button>
+                <button type="button" onClick={() => setF({ ...f, kids: !f.kids })} className={`rounded-md px-3 py-1 font-semibold transition ${f.kids ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-400 hover:bg-slate-50"}`}>Djeca 104–176</button>
+                {!f.adults && !f.kids && <span className="text-red-500">Odaberi barem jedno</span>}
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-4 text-xs text-slate-600">

@@ -115,6 +115,8 @@ export const FLAGSHIP_SLUG = "hrvatska-modric-2026";
 
 export const adultSizes = ["S", "M", "L", "XL", "XXL"] as const;
 export const kidSizes = ["104", "116", "128", "140", "152", "164", "176"] as const;
+// Streetwear ide u vlastitom rasponu XS–L (bez dječjih).
+export const streetwearSizes = ["XS", "S", "M", "L"] as const;
 
 // National-team kits go up to XXL; club kits only up to XL (we don't stock club XXL).
 const NATIONAL_TEAMS = new Set(["Hrvatska", "Argentina", "Brazil", "Portugal", "Francuska", "Njemačka", "BiH"]);
@@ -244,10 +246,12 @@ export function isNationalTeam(product: Jersey) {
 }
 
 export function getJerseySizeOptions(product: Jersey) {
-  const hasKids = product.vel.includes("Djeca");
-  const hasAdults = product.vel.includes("Odrasli");
+  // Streetwear: fiksni raspon XS–L, bez dječjih.
+  const isStreetwear = product.category === "streetwear";
+  const hasKids = !isStreetwear && product.vel.includes("Djeca");
+  const hasAdults = isStreetwear || product.vel.includes("Odrasli");
   // Clubs don't carry XXL — only national teams do.
-  const adultRange = isNationalTeam(product) ? adultSizes : adultSizesNoXXL;
+  const adultRange = isStreetwear ? streetwearSizes : isNationalTeam(product) ? adultSizes : adultSizesNoXXL;
 
   return {
     hasKids,
