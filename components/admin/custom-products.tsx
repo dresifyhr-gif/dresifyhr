@@ -14,6 +14,7 @@ type Custom = {
   liga: string;
   price: number;
   retro: boolean;
+  vel?: string;
   badge: string | null;
   description: string | null;
   images: string[];
@@ -21,7 +22,10 @@ type Custom = {
 };
 
 const LIGE = ["Reprezentacija", "La Liga", "Premier Liga", "Serie A", "Bundesliga", "Ligue 1", "Saudi Pro", "Brazil", "MLS", "Komplet"];
-const empty = { id: "", category: "dres", klub: "", igrac: "", liga: "Reprezentacija", price: "20", retro: false, badge: "", description: "", images: [] as string[] };
+// Veličine: sastavi "Odrasli" / "Djeca" dio (getJerseySizeOptions gleda ove ključne riječi u vel).
+const buildVel = (adults: boolean, kids: boolean) =>
+  [kids ? "Djeca: 104-176" : "", adults ? "Odrasli: S-XXL" : ""].filter(Boolean).join(" · ") || "Odrasli: S-XXL";
+const empty = { id: "", category: "dres", klub: "", igrac: "", liga: "Reprezentacija", price: "20", retro: false, adults: true, kids: true, badge: "", description: "", images: [] as string[] };
 
 export function CustomProducts() {
   const [list, setList] = useState<Custom[]>([]);
@@ -62,7 +66,8 @@ export function CustomProducts() {
   useEffect(() => { load(); }, []);
 
   function edit(p: Custom) {
-    setF({ id: p.id, category: p.category || "dres", klub: p.klub, igrac: p.igrac, liga: p.liga, price: String(p.price), retro: p.retro, badge: p.badge || "", description: p.description || "", images: p.images });
+    const vel = p.vel || "Djeca: 104-176 · Odrasli: S-XXL";
+    setF({ id: p.id, category: p.category || "dres", klub: p.klub, igrac: p.igrac, liga: p.liga, price: String(p.price), retro: p.retro, adults: vel.includes("Odrasli"), kids: vel.includes("Djeca"), badge: p.badge || "", description: p.description || "", images: p.images });
     setOpen(true);
   }
 
@@ -72,7 +77,7 @@ export function CustomProducts() {
     await fetch("/api/admin/custom-products/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...f, price: Number(f.price.replace(",", ".")) || 20 })
+      body: JSON.stringify({ ...f, price: Number(f.price.replace(",", ".")) || 20, vel: buildVel(f.adults, f.kids) })
     }).catch(() => {});
     setSaving(false);
     setF({ ...empty });
@@ -167,6 +172,13 @@ export function CustomProducts() {
                 </span>
               )}
             </label>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+            <span className="font-medium text-slate-500">Veličine:</span>
+            <button type="button" onClick={() => setF({ ...f, adults: !f.adults })} className={`rounded-md px-3 py-1 font-semibold transition ${f.adults ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-400 hover:bg-slate-50"}`}>Odrasli S–XXL</button>
+            <button type="button" onClick={() => setF({ ...f, kids: !f.kids })} className={`rounded-md px-3 py-1 font-semibold transition ${f.kids ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-400 hover:bg-slate-50"}`}>Djeca 104–176</button>
+            {!f.adults && !f.kids && <span className="text-red-500">Odaberi barem jedno</span>}
           </div>
 
           <div className="flex items-center gap-4 text-xs text-slate-600">

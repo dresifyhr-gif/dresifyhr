@@ -47,6 +47,7 @@ export async function POST(request: Request) {
     category: b?.category === "streetwear" ? "streetwear" : "dres",
     klub,
     igrac,
+    vel: typeof b?.vel === "string" && b.vel.trim() ? b.vel.trim() : "Djeca: 104-176 · Odrasli: S-XXL",
     liga: String(b?.liga || "Reprezentacija"),
     price: Number.isFinite(Number(b?.price)) ? Number(b.price) : 20,
     retro: b?.retro === true,
