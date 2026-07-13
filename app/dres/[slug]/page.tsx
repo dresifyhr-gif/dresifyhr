@@ -33,28 +33,31 @@ export function generateStaticParams() {
 // ISR: proizvod se osvježi svakih 60s da admin promjene (cijena/zaliha) budu žive.
 export const revalidate = 60;
 
-export function generateMetadata({ params }: ProductPageProps): Metadata {
-  const product = getJerseyBySlug(params.slug);
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  // Razrješavamo i custom (streetwear) proizvode, ne samo statički katalog.
+  const product = await getProductBySlug(params.slug, getJerseyBySlug(params.slug));
 
   if (!product) {
     return buildMetadata({
-      title: "Dres nije pronađen",
-      description: "Traženi dres nije dostupan.",
+      title: "Proizvod nije pronađen",
+      description: "Traženi proizvod nije dostupan.",
       path: `/dres/${params.slug}`
     });
   }
 
+  const isStreetwear = product.category === "streetwear";
+  const klub = repairText(product.klub);
+  const igrac = repairText(product.igrac);
+
   return buildMetadata({
-    title: `${repairText(product.klub)} ${repairText(product.igrac)}`,
-    description: `${repairText(product.klub)} ${repairText(
-      product.igrac
-    )} nogometni dres za 20€. Dostava po cijeloj Hrvatskoj za 2-5 dana.`,
+    title: isStreetwear ? `${klub} ${igrac} — Streetwear` : `${klub} ${igrac}`,
+    description: isStreetwear
+      ? `${klub} ${igrac} streetwear komplet za ${product.price ?? 50}€. Besplatna dostava po cijeloj Hrvatskoj, plaćanje pouzećem.`
+      : `${klub} ${igrac} nogometni dres za 20€. Dostava po cijeloj Hrvatskoj za 2-5 dana.`,
     path: `/dres/${product.slug}`,
-    keywords: [
-      `${repairText(product.klub)} dres`.toLowerCase(),
-      `${repairText(product.igrac)} dres`.toLowerCase(),
-      "nogometni dres"
-    ]
+    keywords: isStreetwear
+      ? [`${klub} streetwear`.toLowerCase(), `${igrac} komplet`.toLowerCase(), "streetwear hrvatska"]
+      : [`${klub} dres`.toLowerCase(), `${igrac} dres`.toLowerCase(), "nogometni dres"]
   });
 }
 
