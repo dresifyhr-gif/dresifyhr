@@ -1,7 +1,45 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 import type { Jersey } from "@/lib/data/jerseys";
+
+// ── Keširani DB dohvati ───────────────────────────────────────────────────────
+// Stranice su dinamičke (i18n cookie), pa bi bez ovoga svaki klik gađao bazu više
+// puta. Kešira se u Vercel Data Cache na 60s (admin promjene vidljive unutar minute).
+const REVALIDATE = 60;
+
+const fetchOverrideRows = unstable_cache(
+  async () => {
+    if (!process.env.DATABASE_URL) return [];
+    try { return await prisma.productOverride.findMany(); } catch { return []; }
+  },
+  ["product-override-rows"],
+  { revalidate: REVALIDATE, tags: ["products"] }
+);
+
+const fetchCustomRows = unstable_cache(
+  async () => {
+    if (!process.env.DATABASE_URL) return [] as CustomRow[];
+    try { return (await prisma.customProduct.findMany({ where: { hidden: false }, orderBy: { createdAt: "desc" } })) as unknown as CustomRow[]; } catch { return [] as CustomRow[]; }
+  },
+  ["custom-product-rows"],
+  { revalidate: REVALIDATE, tags: ["products"] }
+);
+
+const fetchSoldSlugs = unstable_cache(
+  async () => {
+    if (!process.env.DATABASE_URL) return [] as string[];
+    try {
+      const rows = await prisma.orderItem.findMany({ distinct: ["slug"], select: { slug: true } });
+      return rows.map((r) => r.slug).filter((s): s is string => !!s);
+    } catch { return [] as string[]; }
+  },
+  ["sold-slugs"],
+  { revalidate: REVALIDATE, tags: ["orders"] }
+);
 
 // Admin-managed overrides (price / stock) merged onto the static catalog. Best-effort:
 // if the DB is unavailable or empty, the shop uses the base catalog unchanged.
@@ -19,13 +57,8 @@ function parseSizeStock(raw: string | null): Record<string, number> | undefined 
 }
 
 async function getOverrideMap(): Promise<Map<string, Override>> {
-  try {
-    if (!process.env.DATABASE_URL) return new Map();
-    const rows = await prisma.productOverride.findMany();
-    return new Map(rows.map((r) => [r.slug, r]));
-  } catch {
-    return new Map();
-  }
+  const rows = await fetchOverrideRows();
+  return new Map(rows.map((r) => [r.slug, r]));
 }
 
 function merge(j: Jersey, ov?: Override): Jersey {
@@ -100,24 +133,15 @@ export function customToJersey(c: CustomRow): Jersey {
 
 // Custom DRESOVI za katalog (bez streetweara).
 async function getCustomJerseys(): Promise<Jersey[]> {
-  try {
-    if (!process.env.DATABASE_URL) return [];
-    const rows = (await prisma.customProduct.findMany({ where: { hidden: false } })) as unknown as CustomRow[];
-    return rows.map(customToJersey).filter((j) => (j.category ?? "dres") !== "streetwear");
-  } catch {
-    return [];
-  }
+  const rows = await fetchCustomRows();
+  return rows.map(customToJersey).filter((j) => (j.category ?? "dres") !== "streetwear");
 }
 
-// Streetwear proizvodi (zasebna stranica /streetwear).
+// Streetwear proizvodi (zasebna stranica /streetwear). fetchCustomRows je već
+// sortiran po createdAt desc, pa filtriranje čuva redoslijed.
 export async function getStreetwearProducts(): Promise<Jersey[]> {
-  try {
-    if (!process.env.DATABASE_URL) return [];
-    const rows = (await prisma.customProduct.findMany({ where: { hidden: false, category: "streetwear" }, orderBy: { createdAt: "desc" } })) as unknown as CustomRow[];
-    return rows.map(customToJersey);
-  } catch {
-    return [];
-  }
+  const rows = await fetchCustomRows();
+  return rows.filter((c) => (c.category ?? "dres") === "streetwear").map(customToJersey);
 }
 
 // Deterministička ocjena 4.5–5.0 + plauzibilan broj recenzija iz sluga.
@@ -131,13 +155,7 @@ function ratingFor(slug: string): { value: number; count: number } {
 
 // Slugovi koji su se barem jednom prodali (za prikaz zvjezdica). Best-effort.
 async function getSoldSlugs(): Promise<Set<string>> {
-  try {
-    if (!process.env.DATABASE_URL) return new Set();
-    const rows = await prisma.orderItem.findMany({ distinct: ["slug"], select: { slug: true } });
-    return new Set(rows.map((r) => r.slug).filter((s): s is string => !!s));
-  } catch {
-    return new Set();
-  }
+  return new Set(await fetchSoldSlugs());
 }
 
 function withRating(j: Jersey, sold: Set<string>): Jersey {
@@ -150,28 +168,17 @@ export async function getCatalogProducts(base: Jersey[]): Promise<Jersey[]> {
   return [...custom, ...withOv].map((j) => withRating(j, sold));
 }
 
-// Dohvat pojedinog proizvoda po slugu: prvo custom (DB), pa osnovni + override.
-export async function getProductBySlug(slug: string, base: Jersey | undefined): Promise<Jersey | undefined> {
-  let product: Jersey | undefined;
-  try {
-    if (process.env.DATABASE_URL) {
-      const c = (await prisma.customProduct.findUnique({ where: { slug } })) as unknown as CustomRow | null;
-      if (c && !c.hidden) product = customToJersey(c);
-    }
-  } catch {
-    /* ignore */
-  }
-  if (!product) product = await jerseyWithOverride(base);
+// Dohvat pojedinog proizvoda po slugu: prvo custom, pa osnovni + override.
+// Kešira se po zahtjevu (React cache) — generateMetadata i stranica dijele isti
+// poziv umjesto dva. Svi DB dohvati idu preko keširanih fetchera (bez novih upita).
+export const getProductBySlug = cache(async (slug: string, base: Jersey | undefined): Promise<Jersey | undefined> => {
+  const customRows = await fetchCustomRows();
+  const c = customRows.find((r) => r.slug === slug);
+  let product: Jersey | undefined = c ? customToJersey(c) : await jerseyWithOverride(base);
   if (!product) return product;
 
   // Ocjena samo ako se dres prodao.
-  try {
-    if (process.env.DATABASE_URL) {
-      const sold = await prisma.orderItem.findFirst({ where: { slug }, select: { id: true } });
-      if (sold) product = { ...product, rating: ratingFor(slug) };
-    }
-  } catch {
-    /* ignore */
-  }
+  const sold = await getSoldSlugs();
+  if (sold.has(slug)) product = { ...product, rating: ratingFor(slug) };
   return product;
-}
+});
