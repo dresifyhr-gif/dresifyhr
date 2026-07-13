@@ -34,6 +34,24 @@ export function CustomProducts() {
   const [saving, setSaving] = useState(false);
   const [aiName, setAiName] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
+  const [aiDescBusy, setAiDescBusy] = useState(false);
+
+  // Streetwear: iz brenda + modela AI složi prodajni opis.
+  async function aiDesc() {
+    if (aiDescBusy || (!f.klub.trim() && !f.igrac.trim())) return;
+    setAiDescBusy(true);
+    try {
+      const d = await fetch("/api/admin/generate-streetwear/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand: f.klub, model: f.igrac, price: f.price })
+      }).then((r) => r.json());
+      if (d?.ok && d.description) setF((prev) => ({ ...prev, description: d.description }));
+    } catch {
+      /* ignore */
+    }
+    setAiDescBusy(false);
+  }
 
   async function aiFill() {
     if (aiBusy || !aiName.trim()) return;
@@ -200,7 +218,20 @@ export function CustomProducts() {
             </label>
           </div>
 
-          <label className="block text-xs font-medium text-slate-500">Opis (svaki red = odlomak)
+          <label className="block text-xs font-medium text-slate-500">
+            <span className="flex items-center justify-between">
+              <span>Opis (svaki red = odlomak)</span>
+              {f.category === "streetwear" && (
+                <button
+                  type="button"
+                  onClick={aiDesc}
+                  disabled={aiDescBusy || (!f.klub.trim() && !f.igrac.trim())}
+                  className="rounded-md bg-orange-500 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-orange-600 disabled:opacity-40"
+                >
+                  {aiDescBusy ? "AI piše…" : "🪄 AI opis"}
+                </button>
+              )}
+            </span>
             <textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} rows={4} className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-[13px] leading-6 text-slate-900 outline-none focus:border-slate-400" />
           </label>
 

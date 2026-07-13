@@ -18,7 +18,9 @@ const PAGE: [number, number] = [283.46, 425.2];
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 
 const s = StyleSheet.create({
-  page: { fontFamily: "PTSans", color: "#000", padding: 18 },
+  // Lijevi padding je veći: D100 pisač ima neispisivu lijevu zonu (~2mm) koja
+  // znala odrezati prvo veliko slovo imena (npr. "Sara" → "ara"). Guramo sadržaj dalje.
+  page: { fontFamily: "PTSans", color: "#000", paddingTop: 18, paddingBottom: 18, paddingLeft: 28, paddingRight: 14 },
   box: { flex: 1 },
   label: { fontSize: 10, fontWeight: "bold", letterSpacing: 1, color: "#555", textTransform: "uppercase" },
   senderName: { fontSize: 16, fontWeight: "bold", marginTop: 2 },

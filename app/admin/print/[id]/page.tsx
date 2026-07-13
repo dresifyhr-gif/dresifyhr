@@ -43,7 +43,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <div className="label mx-auto w-[360px] rounded-lg bg-white p-4 text-black shadow-lg print:shadow-none">
+      <div className="label mx-auto w-[360px] rounded-lg bg-white p-4 pl-7 text-black shadow-lg print:shadow-none">
         {/* Šalje — Igor ili Ivica (različite adrese) */}
         <LabelSender defaultSender={order.shippedBy === "ivica" ? "ivica" : order.shippedBy === "igor" ? "igor" : undefined} />
 
