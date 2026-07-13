@@ -60,10 +60,10 @@ export async function jerseyWithOverride(j: Jersey | undefined): Promise<Jersey 
 }
 
 // ── Custom dresovi (dodani iz admina, spremljeni u DB) ────────────────────────
-type CustomRow = {
+export type CustomRow = {
   id: string; slug: string; category: string; klub: string; igrac: string; liga: string; price: number;
-  retro: boolean; vel: string; badge: string | null; outOfStock: string | null;
-  soldOutSizes: string | null; description: string | null; images: string; hidden: boolean;
+  retro: boolean; vel: string; badge: string | null; stock: number | null; sizeStock: string | null;
+  outOfStock: string | null; soldOutSizes: string | null; description: string | null; images: string; hidden: boolean;
 };
 
 function slugHashId(slug: string): number {
@@ -72,7 +72,7 @@ function slugHashId(slug: string): number {
   return 900000 + (Math.abs(h) % 90000); // stabilan sintetički id (izvan raspona kataloga)
 }
 
-function customToJersey(c: CustomRow): Jersey {
+export function customToJersey(c: CustomRow): Jersey {
   const badge = c.badge === "bestseller" || c.badge === "novo" ? c.badge : undefined;
   const outOfStock = c.outOfStock === "all" || c.outOfStock === "adults" || c.outOfStock === "kids" ? c.outOfStock : undefined;
   let urls: string[] = [];
@@ -87,6 +87,8 @@ function customToJersey(c: CustomRow): Jersey {
     vel: c.vel,
     price: c.price,
     badge,
+    stock: c.stock ?? undefined,
+    sizeStock: parseSizeStock(c.sizeStock),
     outOfStock,
     soldOutSizes: c.soldOutSizes ? c.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
     descriptionOverride: c.description || undefined,

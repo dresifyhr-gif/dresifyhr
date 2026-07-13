@@ -135,6 +135,8 @@ model CustomProduct {
   retro        Boolean  @default(false)
   vel          String   @default("Djeca: 104-176 · Odrasli: S-XXL")
   badge        String?
+  stock        Int? // ručno postavljena ukupna količina (prazno = automatska); ako ima sizeStock, računa se zbroj
+  sizeStock    String? // JSON količina po veličini, npr. {"S":3,"M":5,"L":0}; 0 = rasprodana veličina
   outOfStock   String?
   soldOutSizes String?
   description  String?

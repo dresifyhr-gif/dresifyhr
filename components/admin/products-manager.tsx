@@ -7,6 +7,8 @@ type Product = {
   klub: string;
   igrac: string;
   liga: string;
+  category: string;
+  custom: boolean;
   price: number;
   stock: number | null;
   sizeStock: Record<string, number>;
@@ -40,6 +42,9 @@ const STOCK_OPTIONS = [
 ];
 
 function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
+  // Streetwear/custom prikazuje samo svoje veličine (XS–L); dresovi svoje.
+  const rowSizes = p.sizeList && p.sizeList.length ? p.sizeList : sizes;
+  const isStreetwear = p.category === "streetwear";
   const [price, setPrice] = useState(String(p.price));
   const [stock, setStock] = useState(p.stock == null ? "" : String(p.stock));
   const sizeStockInit = () => Object.fromEntries((p.sizeList || []).map((s) => [s, p.sizeStock?.[s] != null ? String(p.sizeStock[s]) : ""]));
@@ -84,8 +89,11 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     <div className="rounded-lg border border-slate-200 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
-          <div className="font-semibold text-slate-900">{p.klub} — {p.igrac}</div>
-          <div className="text-[11px] text-slate-400">{p.liga}{p.overridden ? " · uređeno" : ""}</div>
+          <div className="flex items-center gap-2 font-semibold text-slate-900">
+            {isStreetwear && <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-600">🔥 Street</span>}
+            <span>{p.klub} — {p.igrac}</span>
+          </div>
+          <div className="text-[11px] text-slate-400">{p.liga}{p.overridden && !p.custom ? " · uređeno" : ""}</div>
           <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]">
             <span className="text-slate-500">📦 {p.sold} prodano</span>
             <span className="text-slate-500">💶 {eur(p.revenue)} prihod</span>
@@ -149,7 +157,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
 
       <div className="mt-2 flex flex-wrap items-center gap-1">
         <span className="mr-1 text-[11px] text-slate-400">Rasprodane veličine:</span>
-        {sizes.map((s) => {
+        {rowSizes.map((s) => {
           const on = soldSizes.includes(s);
           return (
             <button
@@ -250,7 +258,7 @@ export function ProductsManager() {
   const filtered = useMemo(() => {
     const nq = q.trim().toLowerCase();
     if (!nq) return products;
-    return products.filter((p) => `${p.klub} ${p.igrac} ${p.liga}`.toLowerCase().includes(nq));
+    return products.filter((p) => `${p.klub} ${p.igrac} ${p.liga} ${p.category}`.toLowerCase().includes(nq));
   }, [q, products]);
 
   return (
@@ -259,10 +267,10 @@ export function ProductsManager() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Traži dres (klub, igrač, liga)…"
+          placeholder="Traži proizvod (klub, igrač, liga, streetwear)…"
           className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
         />
-        <span className="shrink-0 text-xs text-slate-400">{loading ? "…" : `${filtered.length} dresova`}</span>
+        <span className="shrink-0 text-xs text-slate-400">{loading ? "…" : `${filtered.length} proizvoda`}</span>
       </div>
       {loading ? (
         <div className="py-8 text-center text-sm text-slate-400">Učitavam…</div>

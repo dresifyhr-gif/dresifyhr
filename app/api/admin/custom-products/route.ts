@@ -43,7 +43,9 @@ export async function POST(request: Request) {
   while (taken.has(slug)) slug = `${base}-${n++}`;
 
   const editId = typeof b?.id === "string" ? b.id : null;
-  const data = {
+  // Osnovna polja kojima gospodari gornja forma. Zaliha/stanje (stock, sizeStock,
+  // outOfStock, soldOutSizes, hidden) drži lista "Proizvodi" — ne diramo ih pri uređivanju.
+  const coreData = {
     category: b?.category === "streetwear" ? "streetwear" : "dres",
     klub,
     igrac,
@@ -52,18 +54,15 @@ export async function POST(request: Request) {
     price: Number.isFinite(Number(b?.price)) ? Number(b.price) : 20,
     retro: b?.retro === true,
     badge: b?.badge === "bestseller" || b?.badge === "novo" ? b.badge : null,
-    outOfStock: b?.outOfStock === "all" || b?.outOfStock === "adults" || b?.outOfStock === "kids" ? b.outOfStock : null,
-    soldOutSizes: Array.isArray(b?.soldOutSizes) ? b.soldOutSizes.join(",") || null : null,
     description: typeof b?.description === "string" && b.description.trim() ? b.description.trim() : null,
-    images: JSON.stringify(images),
-    hidden: b?.hidden === true
+    images: JSON.stringify(images)
   };
 
   if (editId) {
-    await prisma.customProduct.update({ where: { id: editId }, data });
+    await prisma.customProduct.update({ where: { id: editId }, data: coreData });
     return NextResponse.json({ ok: true, id: editId });
   }
-  const created = await prisma.customProduct.create({ data: { ...data, slug } });
+  const created = await prisma.customProduct.create({ data: { ...coreData, slug } });
   return NextResponse.json({ ok: true, id: created.id, slug });
 }
 

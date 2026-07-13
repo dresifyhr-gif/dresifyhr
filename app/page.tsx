@@ -6,11 +6,12 @@ import { HeroSection } from "@/components/home/hero-section";
 import { InstagramSection } from "@/components/home/instagram-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { ReviewsSection } from "@/components/home/reviews-section";
+import { StreetwearBanner } from "@/components/home/streetwear-banner";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { SectionHeading } from "@/components/site/section-heading";
 import { jerseys } from "@/lib/data/jerseys";
-import { getCatalogProducts } from "@/lib/data/product-overrides";
+import { getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
 import { getVisibleTestimonials } from "@/lib/testimonials";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import { buildMetadata } from "@/lib/seo";
@@ -51,12 +52,14 @@ export default async function HomePage() {
   const { t } = await getServerTranslations();
 
   const dresovi = (await getCatalogProducts(jerseys)).filter((j) => j.liga !== "Komplet");
+  const streetwear = await getStreetwearProducts();
   const testimonials = await getVisibleTestimonials();
 
   return (
     <>
       <HeroSection />
       <TrustStrip />
+      {streetwear.length > 0 && <StreetwearBanner />}
       <FeaturedSection />
       <GamesCta />
 

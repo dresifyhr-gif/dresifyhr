@@ -2,18 +2,19 @@ import { NextResponse } from "next/server";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
-import { jerseys, adultSizes, kidSizes, getJerseyDescription, getJerseySizeOptions } from "@/lib/data/jerseys";
+import { jerseys, adultSizes, kidSizes, streetwearSizes, getJerseyDescription, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { JERSEY_PRICE_EUR } from "@/lib/site";
+import { customToJersey, type CustomRow } from "@/lib/data/product-overrides";
 import { repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const ALL_SIZES = [...adultSizes, ...kidSizes];
+const ALL_SIZES = [...streetwearSizes.filter((s) => !(adultSizes as readonly string[]).includes(s)), ...adultSizes, ...kidSizes];
 
-// Stvarne veličine koje taj dres ima (za editor: samo relevantne).
-function sizeListFor(j: (typeof jerseys)[number]): string[] {
-  const so = getJerseySizeOptions(j);
+// Stvarne veličine koje taj proizvod ima (za editor: samo relevantne).
+function sizeListFor(j: { category?: string; vel: string; liga: string; klub: string; outOfStock?: string; soldOutSizes?: string[] }): string[] {
+  const so = getJerseySizeOptions(j as Parameters<typeof getJerseySizeOptions>[0]);
   return [...so.adults, ...so.kids];
 }
 
@@ -29,12 +30,25 @@ function parseSizeStockObj(raw: string | null): Record<string, number> {
   } catch { return {}; }
 }
 
+// Očisti sizeStock objekt iz body-ja, zadrži samo brojeve za dopuštene veličine.
+function cleanSizeStock(input: unknown, allowed: Set<string>): string | null {
+  if (!input || typeof input !== "object") return null;
+  const clean: Record<string, number> = {};
+  for (const [k, v] of Object.entries(input as Record<string, unknown>)) {
+    if (!allowed.has(k)) continue;
+    const n = Number(v);
+    if (Number.isFinite(n) && String(v).trim() !== "") clean[k] = Math.max(0, Math.round(n));
+  }
+  return Object.keys(clean).length ? JSON.stringify(clean) : null;
+}
+
 // Lists the catalog with effective price/stock (base merged with admin override).
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
-  const [overrideRows, soldRows, returnRows] = await Promise.all([
+  const [overrideRows, customRows, soldRows, returnRows] = await Promise.all([
     prisma.productOverride.findMany(),
+    prisma.customProduct.findMany({ orderBy: { createdAt: "desc" } }) as unknown as Promise<CustomRow[]>,
     prisma.orderItem.groupBy({ by: ["slug"], where: { order: { status: { not: "cancelled" } } }, _sum: { quantity: true, unitPrice: true }, _count: true }),
     prisma.orderItem.groupBy({ by: ["slug"], where: { order: { status: "returned" } }, _count: true })
   ]);
@@ -43,7 +57,7 @@ export async function GET() {
   const soldMap = new Map(soldRows.map((r) => [r.slug ?? "", r]));
   const returnMap = new Map(returnRows.map((r) => [r.slug ?? "", r._count]));
 
-  const products = jerseys.map((j) => {
+  const jerseyProducts = jerseys.map((j) => {
     const ov = overrides.get(j.slug);
     const outOfStock = ov ? (ov.outOfStock ?? "") : j.outOfStock ?? "";
     const soldOutSizes = ov ? (ov.soldOutSizes ? ov.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : []) : j.soldOutSizes ?? [];
@@ -61,6 +75,8 @@ export async function GET() {
       klub: repairText(j.klub),
       igrac: repairText(j.igrac),
       liga: j.liga,
+      category: j.category ?? "dres",
+      custom: false,
       price: ov?.price != null ? ov.price : j.price ?? JERSEY_PRICE_EUR,
       stock: ov?.stock ?? null,
       sizeStock: parseSizeStockObj(ov?.sizeStock ?? null),
@@ -79,7 +95,42 @@ export async function GET() {
     };
   });
 
-  return NextResponse.json({ ok: true, products, sizes: ALL_SIZES });
+  // Custom proizvodi (dresovi + streetwear iz admina) — iste kontrole kao dresovi.
+  const customProducts = customRows.map((c) => {
+    const jersey = customToJersey(c);
+    const streetwear = (c.category ?? "dres") === "streetwear";
+    const s = soldMap.get(c.slug);
+    const sold = s?._count ?? 0;
+    const revenue = s?._sum.unitPrice ?? 0;
+    const cost = (streetwear || c.liga === "Komplet" ? 18 : 6) * sold;
+    const returns = returnMap.get(c.slug) ?? 0;
+
+    return {
+      slug: c.slug,
+      klub: repairText(c.klub),
+      igrac: repairText(c.igrac),
+      liga: streetwear ? "Streetwear" : c.liga,
+      category: c.category ?? "dres",
+      custom: true,
+      price: c.price,
+      stock: c.stock ?? null,
+      sizeStock: parseSizeStockObj(c.sizeStock ?? null),
+      sizeList: sizeListFor(jersey as unknown as { category?: string; vel: string; liga: string; klub: string }),
+      outOfStock: c.outOfStock ?? "",
+      soldOutSizes: c.soldOutSizes ? c.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : [],
+      hidden: c.hidden,
+      badge: c.badge ?? "",
+      overridden: true,
+      sold,
+      revenue,
+      profit: revenue - cost,
+      returns,
+      description: c.description ?? "",
+      descriptionAuto: ""
+    };
+  });
+
+  return NextResponse.json({ ok: true, products: [...customProducts, ...jerseyProducts], sizes: ALL_SIZES });
 }
 
 // Saves an override for one product (full desired state for price/stock).
@@ -88,28 +139,12 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => ({}));
   const slug = String(body?.slug || "");
-  if (!slug || !jerseys.some((j) => j.slug === slug)) {
-    return NextResponse.json({ ok: false, message: "Nepoznat proizvod" }, { status: 400 });
-  }
+  if (!slug) return NextResponse.json({ ok: false, message: "Nepoznat proizvod" }, { status: 400 });
 
   const price = body?.price === null || body?.price === "" ? null : Number(body.price);
   const stockRaw = body?.stock;
   const stockNum = stockRaw === null || stockRaw === "" || stockRaw === undefined ? null : Math.round(Number(stockRaw));
   const stockVal = stockNum != null && Number.isFinite(stockNum) && stockNum >= 0 ? stockNum : null;
-
-  // Količina po veličini: primi objekt {S:3,...}, zadrži samo brojeve za stvarne veličine dresa.
-  const allowedSizes = new Set(sizeListFor(jerseys.find((j) => j.slug === slug)!));
-  let sizeStockVal: string | null = null;
-  if (body?.sizeStock && typeof body.sizeStock === "object") {
-    const clean: Record<string, number> = {};
-    for (const [k, v] of Object.entries(body.sizeStock as Record<string, unknown>)) {
-      if (!allowedSizes.has(k)) continue;
-      const n = Number(v);
-      if (Number.isFinite(n) && String(v).trim() !== "") clean[k] = Math.max(0, Math.round(n));
-    }
-    sizeStockVal = Object.keys(clean).length ? JSON.stringify(clean) : null;
-  }
-
   const oos = body?.outOfStock;
   const outOfStock = oos === "all" || oos === "adults" || oos === "kids" ? oos : null;
   const sizes: string[] = Array.isArray(body?.soldOutSizes) ? body.soldOutSizes.filter((s: unknown) => typeof s === "string") : [];
@@ -117,6 +152,35 @@ export async function POST(request: Request) {
   const badge = body?.badge === "bestseller" || body?.badge === "novo" ? body.badge : null;
   const priceVal = price != null && Number.isFinite(price) ? price : null;
   const description = typeof body?.description === "string" && body.description.trim() ? body.description.trim() : null;
+
+  // Custom proizvod (dres ili streetwear) → uređujemo CustomProduct redak izravno.
+  const custom = (await prisma.customProduct.findUnique({ where: { slug } })) as unknown as CustomRow | null;
+  if (custom) {
+    const allowedSizes = new Set(sizeListFor(customToJersey(custom) as unknown as { category?: string; vel: string; liga: string; klub: string }));
+    const sizeStockVal = cleanSizeStock(body?.sizeStock, allowedSizes);
+    await prisma.customProduct.update({
+      where: { slug },
+      data: {
+        // custom cijena je obavezna (Float) — ako je prazno, zadrži postojeću
+        ...(priceVal != null ? { price: priceVal } : {}),
+        stock: stockVal,
+        sizeStock: sizeStockVal,
+        outOfStock,
+        soldOutSizes: sizes.join(",") || null,
+        hidden,
+        badge,
+        description
+      }
+    });
+    return NextResponse.json({ ok: true });
+  }
+
+  // Inače je katalog dres → ProductOverride.
+  const jersey = jerseys.find((j) => j.slug === slug);
+  if (!jersey) return NextResponse.json({ ok: false, message: "Nepoznat proizvod" }, { status: 400 });
+
+  const allowedSizes = new Set(sizeListFor(jersey));
+  const sizeStockVal = cleanSizeStock(body?.sizeStock, allowedSizes);
 
   await prisma.productOverride.upsert({
     where: { slug },
