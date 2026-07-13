@@ -80,7 +80,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
     <div className="border border-white/10 bg-[#111111] p-5 sm:p-8">
       <div className="flex flex-wrap items-center gap-3">
         <span className="border border-accent bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-black">
-          {repairText(product.liga)}
+          {product.category === "streetwear" ? "Streetwear" : repairText(product.liga)}
         </span>
         <span className="border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
           {repairText(product.klub)}

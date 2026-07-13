@@ -69,9 +69,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const relatedProducts = getRelatedJerseys(product);
   const stock = getJerseyStock(product);
   const productSchema = buildProductSchema(product, stock);
+  const isStreetwear = product.category === "streetwear";
+  const catLabel = isStreetwear ? "Streetwear" : t.productPage.breadcrumb.jerseys;
+  const catPath = isStreetwear ? "/streetwear" : "/dresovi";
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: t.productPage.breadcrumb.home, path: "/" },
-    { name: t.productPage.breadcrumb.jerseys, path: "/dresovi" },
+    { name: catLabel, path: catPath },
     { name: `${repairText(product.klub)} ${repairText(product.igrac)}`, path: `/dres/${product.slug}` }
   ]);
   const clubCollection = getClubCollectionForProduct(product);
@@ -93,7 +96,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <Breadcrumbs
           items={[
             { label: t.productPage.breadcrumb.home, href: "/" },
-            { label: t.productPage.breadcrumb.jerseys, href: "/dresovi" },
+            { label: catLabel, href: catPath },
             { label: `${repairText(product.klub)} ${repairText(product.igrac)}` }
           ]}
         />
