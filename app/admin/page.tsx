@@ -40,9 +40,9 @@ function Highlight({ label, value, sub }: { label: string; value: string; sub?: 
 export default async function AdminOverview() {
   if (!(await isAdmin())) redirect("/admin/login/");
 
-  const m = await getDashboardMetrics();
+  // Metrike i "stari neposlani" su neovisni → paralelno; CEO insights ovisi o prometu pa ide nakon.
+  const [m, oldRows] = await Promise.all([getDashboardMetrics(), getOldUnshipped(30)]);
   const ceo = await getCeoInsights(m.todayRev);
-  const oldRows = await getOldUnshipped(30);
   const maxDay = Math.max(1, ...m.byDay.map((d) => d.total));
 
   const bestProduct = m.topItems[0];

@@ -43,6 +43,22 @@ export async function getDashboardMetrics() {
 
   const shippedWhere = { status: { in: ["shipped", "done"] } };
 
+  // Neovisne grupe upita kreću ODMAH (paralelno), await kasnije — bez sekvencijalnih barijera.
+  const extrasP = Promise.all([
+    prisma.order.aggregate({ _sum: { total: true, shipping: true }, where: { createdAt: { gte: new Date(now.getTime() - 14 * DAY), lt: startWeek } } }),
+    prisma.order.aggregate({ _sum: { total: true, shipping: true }, where: { createdAt: { gte: new Date(now.getTime() - 60 * DAY), lt: startMonth } } }),
+    prisma.order.findMany({ where: { status: "new" }, orderBy: { createdAt: "asc" }, take: 500, select: { id: true, createdAt: true, customerName: true, phone: true, itemCount: true, total: true, shipping: true, items: { select: { klub: true, igrac: true, size: true, quantity: true } } } }),
+    prisma.order.aggregate({ _count: { _all: true }, _sum: { total: true, shipping: true }, where: { status: "new" } }),
+    prisma.customer.findMany({ where: { lastOrderAt: { lt: new Date(now.getTime() - 30 * DAY) }, totalOrders: { gt: 0 } }, orderBy: { totalSpent: "desc" }, take: 20 }),
+    prisma.order.findMany({ select: { address: true, total: true, shipping: true } }),
+    prisma.adSpend.aggregate({ _sum: { amount: true } }),
+    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
+    prisma.order.findMany({ where: { status: "cancelled" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
+    prisma.order.findMany({ where: { status: { in: ["shipped", "done"] }, shippedBy: null }, orderBy: { createdAt: "desc" }, take: 200, select: { id: true, createdAt: true, customerName: true, total: true } })
+  ]);
+  const settlementsP = prisma.settlement.findMany({ orderBy: { settledAt: "desc" }, take: 6 });
+  const streetwearP = prisma.customProduct.findMany({ where: { category: "streetwear" }, select: { slug: true } });
+
   const [today, week, month, total, orderCount, shippedAgg, topItems, bestCustomers, recentOrders, windowOrders, soldSlugRows,
     todayProfit, weekProfit, monthProfit, totalProfit, shippedProfit, pendingProfit] =
     await Promise.all([
@@ -79,24 +95,8 @@ export async function getDashboardMetrics() {
 
   const totalRev = net(total);
 
-  // ── Extras: trends, shipping queue, win-back, cities, ad ROI ──────────────
-  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped] = await Promise.all([
-    prisma.order.aggregate({ _sum: { total: true, shipping: true }, where: { createdAt: { gte: new Date(now.getTime() - 14 * DAY), lt: startWeek } } }),
-    prisma.order.aggregate({ _sum: { total: true, shipping: true }, where: { createdAt: { gte: new Date(now.getTime() - 60 * DAY), lt: startMonth } } }),
-    // Svi neposlani (ne kapiraj na 40) — red za slanje mora pokazati sve.
-    prisma.order.findMany({ where: { status: "new" }, orderBy: { createdAt: "asc" }, take: 500, select: { id: true, createdAt: true, customerName: true, phone: true, itemCount: true, total: true, shipping: true, items: { select: { klub: true, igrac: true, size: true, quantity: true } } } }),
-    prisma.order.aggregate({ _count: { _all: true }, _sum: { total: true, shipping: true }, where: { status: "new" } }),
-    // Neaktivni kupci: bez kupnje 30+ dana (win-back meta).
-    prisma.customer.findMany({ where: { lastOrderAt: { lt: new Date(now.getTime() - 30 * DAY) }, totalOrders: { gt: 0 } }, orderBy: { totalSpent: "desc" }, take: 20 }),
-    prisma.order.findMany({ select: { address: true, total: true, shipping: true } }),
-    prisma.adSpend.aggregate({ _sum: { amount: true } }),
-    // Vraćene pošiljke (nije pokupljeno) — za AI i evidenciju gubitka.
-    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
-    // Otkazane narudžbe — zasebna evidencija (ne ulaze u promet/zaradu).
-    prisma.order.findMany({ where: { status: "cancelled" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
-    // Poslane narudžbe bez oznake tko je poslao — treba ih dodijeliti (Igor/Ivica).
-    prisma.order.findMany({ where: { status: { in: ["shipped", "done"] }, shippedBy: null }, orderBy: { createdAt: "desc" }, take: 200, select: { id: true, createdAt: true, customerName: true, total: true } })
-  ]);
+  // ── Extras (trends, shipping queue, win-back, cities, ad ROI): već pokrenuto gore, samo await ──
+  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped] = await extrasP;
 
   const pct = (cur: number, prev: number | null) => (prev && prev > 0 ? ((cur - prev) / prev) * 100 : null);
   const weekChange = pct(net(week), net(prev7));
@@ -121,7 +121,7 @@ export async function getDashboardMetrics() {
   const pendingTotal = net(pendingAgg);
 
   // ── Podjela po pošiljatelju (Igor / Ivica) — poslane narudžbe OD zadnjeg poravnanja ──
-  const settlements = await prisma.settlement.findMany({ orderBy: { settledAt: "desc" }, take: 6 });
+  const settlements = await settlementsP;
   const lastSettlement = settlements[0] ?? null;
   const sinceFilter = lastSettlement ? { createdAt: { gt: lastSettlement.settledAt } } : {};
 
@@ -133,20 +133,25 @@ export async function getDashboardMetrics() {
     ]);
     return { count: ord._count._all, cash: net(ord), profit: prof };
   };
-  const [igor, ivica, unassigned] = await Promise.all([byShipper("igor"), byShipper("ivica"), byShipper(null)]);
-
   // Poslano + prikupljena gotovina po pošiljatelju OD ZADNJEG PORAVNANJA (resetira se na svako
   // poravnanje). Kompleti se broje odvojeno od dresova (drukčija marža).
   const isKomplet = (it: { slug?: string | null; klub?: string | null; igrac?: string | null }) =>
     /komplet/i.test(it.slug || "") || /komplet/i.test(it.klub || "") || /komplet/i.test(it.igrac || "");
   // Streetwear slugovi (besplatna dostava) — za trošak besplatnih dostava.
-  const streetwearSlugs = new Set(
-    (await prisma.customProduct.findMany({ where: { category: "streetwear" }, select: { slug: true } })).map((r) => r.slug)
-  );
-  const cashOrders = await prisma.order.findMany({
-    where: { status: { in: ["shipped", "done"] }, ...sinceFilter },
-    select: { total: true, shipping: true, shippedBy: true, cashCollected: true, promoCode: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
-  });
+  const streetwearSlugs = new Set((await streetwearP).map((r) => r.slug));
+
+  // ── Faza B: sve ovisi o sinceFilter → jedan paralelni batch (bez sekvencijalnih upita) ──
+  const [igor, ivica, unassigned, cashOrders, shippedProfitTotal, adsAgg] = await Promise.all([
+    byShipper("igor"),
+    byShipper("ivica"),
+    byShipper(null),
+    prisma.order.findMany({
+      where: { status: { in: ["shipped", "done"] }, ...sinceFilter },
+      select: { total: true, shipping: true, shippedBy: true, cashCollected: true, promoCode: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
+    }),
+    profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter }),
+    prisma.adSpend.aggregate({ _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined })
+  ]);
   const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, pending: 0 });
   const cashSplit: Record<"igor" | "ivica", ReturnType<typeof mkCash>> = { igor: mkCash(), ivica: mkCash() };
   let freeDeliveries = 0; // prikupljene narudžbe s besplatnom dostavom (mi platili poštu ~3€)
@@ -168,12 +173,8 @@ export async function getDashboardMetrics() {
   const DELIVERY_COST = 3;
   const freeShipCost = freeDeliveries * DELIVERY_COST;
 
-  // Profit poslanih od zadnjeg poravnanja (baza za podjelu 50/50).
-  const shippedProfitTotal = await profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter });
+  // Profit poslanih i oglasi od zadnjeg poravnanja — oboje već dohvaćeno u Fazi B.
   const halfShare = shippedProfitTotal / 2;
-
-  // Oglasi (reklame) od zadnjeg poravnanja — dijele se 50/50 (plaća Igor, Ivica vraća pola).
-  const adsAgg = await prisma.adSpend.aggregate({ _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined });
   const adsSpend = adsAgg._sum.amount ?? 0;
 
   // Poravnanje: Ivica je platila SVU robu → prvo joj se vrati nabava prikupljenih artikala,
