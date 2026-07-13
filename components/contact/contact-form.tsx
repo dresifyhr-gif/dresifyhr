@@ -39,8 +39,9 @@ type FormState = {
 };
 
 
+// Svjetlija (tamno siva, ne bijela) polja + upisani tekst u neon žutoj (tema).
 const inputClass =
-  "w-full rounded-[8px] border border-white/10 bg-[#0d0d0d] px-4 py-3 text-sm text-white placeholder:text-white/25 outline-none transition duration-150 focus:border-accent/50 focus:bg-[#111] focus:ring-1 focus:ring-accent/15";
+  "w-full rounded-[8px] border border-white/15 bg-[#1f1f1f] px-4 py-3 text-sm font-medium text-accent caret-accent placeholder:font-normal placeholder:text-white/35 outline-none transition duration-150 focus:border-accent/60 focus:bg-[#262626] focus:ring-1 focus:ring-accent/20";
 
 function StepLabel({ number, title }: { number: string; title: string }) {
   return (
@@ -311,7 +312,7 @@ export function ContactForm() {
                   className={`relative flex items-start gap-3 rounded-[10px] border p-4 text-left transition-all duration-150 ${
                     active
                       ? "border-accent/50 bg-accent/8 ring-1 ring-accent/20"
-                      : "border-white/8 bg-[#0d0d0d] hover:border-white/20"
+                      : "border-white/12 bg-[#1f1f1f] hover:border-white/25"
                   }`}
                 >
                   {active && (

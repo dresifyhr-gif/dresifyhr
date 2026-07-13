@@ -60,7 +60,6 @@ export default async function HomePage() {
       <TrustStrip />
       {streetwear.length > 0 && <StreetwearBanner />}
       <FeaturedSection />
-      <GamesCta />
 
       <section className="section-pad bg-[#0a0a0a]">
         <div className="page-shell">
@@ -73,6 +72,8 @@ export default async function HomePage() {
           />
         </div>
       </section>
+
+      <GamesCta />
 
       <TestimonialsSection items={testimonials} />
       <ReviewsSection />
