@@ -14,7 +14,8 @@ import { formatEuroAmount, repairText } from "@/lib/utils";
 export function CartDrawer() {
   const { items, subtotal, isDrawerOpen, closeDrawer, removeItem, clearCart } = useCart();
   const { t } = useLanguage();
-  const freeShipping = subtotal >= FREE_SHIPPING_THRESHOLD_EUR;
+  const hasStreetwear = items.some((i) => i.category === "streetwear"); // streetwear = besplatna dostava
+  const freeShipping = hasStreetwear || subtotal >= FREE_SHIPPING_THRESHOLD_EUR;
   const shipping = items.length && !freeShipping ? SHIPPING_PRICE_EUR : 0;
   const total = subtotal + shipping;
   const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD_EUR - subtotal);
@@ -123,7 +124,7 @@ export function CartDrawer() {
                   <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                     <div
                       className="h-full rounded-full bg-accent transition-all duration-500 ease-out"
-                      style={{ width: `${Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD_EUR) * 100)}%` }}
+                      style={{ width: `${freeShipping ? 100 : Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD_EUR) * 100)}%` }}
                     />
                   </div>
                 </div>

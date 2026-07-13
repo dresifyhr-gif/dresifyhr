@@ -19,8 +19,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (!(await isAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
   const { id } = await params;
-  const order = await prisma.order.findUnique({ where: { id } });
+  const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
   if (!order) return new NextResponse("Not found", { status: 404 });
+
+  // Streetwear = uvijek besplatna dostava (i kad je roba < 60 €).
+  const slugs = order.items.map((i) => i.slug).filter((s): s is string => !!s);
+  const hasStreetwear = slugs.length > 0 && (await prisma.customProduct.count({ where: { category: "streetwear", slug: { in: slugs } } })) > 0;
 
   const url = new URL(req.url);
   const q = url.searchParams.get("sender");
@@ -28,7 +32,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
   const isCod = order.payment?.toLowerCase().includes("pouze") || !order.payment;
-  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode) : 0;
+  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode, hasStreetwear) : 0;
 
   const recipientName = formatCroatianName(order.customerName);
 

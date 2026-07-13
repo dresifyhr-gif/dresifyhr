@@ -31,22 +31,22 @@ export function AddToCartModal() {
             onClick={closeAddModal}
           />
 
-          <div className="fixed inset-0 z-[60] grid place-items-center p-4 sm:p-6">
+          <div className="fixed inset-0 z-[60] grid place-items-center p-3 sm:p-6">
             <motion.div
               initial={{ opacity: 0, y: 18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 18, scale: 0.98 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="my-auto w-full max-w-[860px] rounded-[18px] border border-white/10 bg-[#111111] p-6 shadow-[0_40px_90px_rgba(0,0,0,0.52)] sm:p-8"
+              className="my-auto max-h-[92vh] w-full max-w-[860px] overflow-y-auto rounded-[18px] border border-white/10 bg-[#111111] p-4 shadow-[0_40px_90px_rgba(0,0,0,0.52)] sm:p-8"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#1f8f4e]/18 text-[#68d391]">
-                    <CheckCircle2 className="h-6 w-6" />
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1f8f4e]/18 text-[#68d391] sm:h-12 sm:w-12">
+                    <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6" />
                   </span>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-white/45">{t.addedModal.label}</p>
-                    <h2 className="mt-1 font-heading text-[2.15rem] uppercase leading-none text-white sm:text-[2.5rem]">
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-white/45 sm:text-xs">{t.addedModal.label}</p>
+                    <h2 className="mt-0.5 font-heading text-lg uppercase leading-tight text-white sm:mt-1 sm:text-[2.5rem] sm:leading-none">
                       {t.addedModal.title}
                     </h2>
                   </div>
@@ -55,16 +55,16 @@ export function AddToCartModal() {
                 <button
                   type="button"
                   onClick={closeAddModal}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-[4px] border border-white/10 bg-[#0a0a0a] text-white/70 transition duration-200 ease-out hover:border-accent hover:text-accent"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] border border-white/10 bg-[#0a0a0a] text-white/70 transition duration-200 ease-out hover:border-accent hover:text-accent sm:h-10 sm:w-10"
                   aria-label={t.addedModal.close}
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
-              <div className="mt-6 rounded-[14px] border border-white/10 bg-[#0a0a0a] p-5 sm:p-6">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                  <div className="relative h-36 w-32 shrink-0 overflow-hidden rounded-[10px] border border-white/10 bg-[#111111] sm:h-40 sm:w-36">
+              <div className="mt-4 rounded-[14px] border border-white/10 bg-[#0a0a0a] p-3.5 sm:mt-6 sm:p-6">
+                <div className="flex flex-row items-center gap-3 sm:gap-5">
+                  <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-[10px] border border-white/10 bg-[#111111] sm:h-40 sm:w-36">
                     {recentlyAddedItem.imageSrc ? (
                       <Image
                         src={recentlyAddedItem.imageSrc}
@@ -81,37 +81,37 @@ export function AddToCartModal() {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs uppercase tracking-[0.24em] text-white/45">
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-white/45 sm:text-xs">
                       {recentlyAddedItem.segmentLabel}
                     </p>
-                    <h3 className="mt-2 font-heading text-[2.2rem] uppercase leading-none text-white sm:text-[2.75rem]">
+                    <h3 className="mt-1 font-heading text-xl uppercase leading-none text-white sm:mt-2 sm:text-[2.75rem]">
                       {repairText(recentlyAddedItem.klub)}
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-white/60 sm:text-base">
+                    <p className="mt-1 text-[13px] leading-5 text-white/60 sm:mt-2 sm:text-base sm:leading-6">
                       {repairText(recentlyAddedItem.igrac)}
                     </p>
+                  </div>
+                </div>
 
-                    <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-[8px] border border-white/10 bg-[#111111] px-4 py-3.5">
-                        <span className="block text-[11px] uppercase tracking-[0.2em] text-white/40">{t.addedModal.size}</span>
-                        <span className="mt-1 block text-base font-semibold text-white">{recentlyAddedItem.size}</span>
-                      </div>
-                      <div className="rounded-[8px] border border-white/10 bg-[#111111] px-4 py-3.5">
-                        <span className="block text-[11px] uppercase tracking-[0.2em] text-white/40">{t.addedModal.qty}</span>
-                        <span className="mt-1 block text-base font-semibold text-white">1</span>
-                      </div>
-                      <div className="rounded-[8px] border border-accent/20 bg-accent/10 px-4 py-3.5">
-                        <span className="block text-[11px] uppercase tracking-[0.2em] text-accent/70">{t.addedModal.total}</span>
-                        <span className="mt-1 block text-base font-semibold text-accent">
-                          {formatEuroAmount(recentlyAddedItem.price)}
-                        </span>
-                      </div>
-                    </div>
+                <div className="mt-4 grid grid-cols-3 gap-2 sm:mt-5 sm:gap-3">
+                  <div className="rounded-[8px] border border-white/10 bg-[#111111] px-2.5 py-2 sm:px-4 sm:py-3.5">
+                    <span className="block text-[10px] uppercase tracking-[0.15em] text-white/40 sm:text-[11px] sm:tracking-[0.2em]">{t.addedModal.size}</span>
+                    <span className="mt-0.5 block text-sm font-semibold text-white sm:mt-1 sm:text-base">{recentlyAddedItem.size}</span>
+                  </div>
+                  <div className="rounded-[8px] border border-white/10 bg-[#111111] px-2.5 py-2 sm:px-4 sm:py-3.5">
+                    <span className="block text-[10px] uppercase tracking-[0.15em] text-white/40 sm:text-[11px] sm:tracking-[0.2em]">{t.addedModal.qty}</span>
+                    <span className="mt-0.5 block text-sm font-semibold text-white sm:mt-1 sm:text-base">1</span>
+                  </div>
+                  <div className="rounded-[8px] border border-accent/20 bg-accent/10 px-2.5 py-2 sm:px-4 sm:py-3.5">
+                    <span className="block text-[10px] uppercase tracking-[0.15em] text-accent/70 sm:text-[11px] sm:tracking-[0.2em]">{t.addedModal.total}</span>
+                    <span className="mt-0.5 block text-sm font-semibold text-accent sm:mt-1 sm:text-base">
+                      {formatEuroAmount(recentlyAddedItem.price)}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="mt-4 grid gap-2 sm:mt-6 sm:grid-cols-3">
                 <button type="button" onClick={closeAddModal} className="button-secondary w-full">
                   {t.addedModal.continueShopping}
                 </button>

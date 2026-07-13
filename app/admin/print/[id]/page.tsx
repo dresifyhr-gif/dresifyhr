@@ -17,12 +17,16 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
   if (!(await isAdmin())) redirect("/admin/login/");
 
   const { id } = await params;
-  const order = await prisma.order.findUnique({ where: { id } });
+  const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
   if (!order) notFound();
+
+  // Streetwear = uvijek besplatna dostava (i kad je roba < 60 €).
+  const slugs = order.items.map((i) => i.slug).filter((s): s is string => !!s);
+  const hasStreetwear = slugs.length > 0 && (await prisma.customProduct.count({ where: { category: "streetwear", slug: { in: slugs } } })) > 0;
 
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
   const isCod = order.payment?.toLowerCase().includes("pouze") || !order.payment;
-  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode) : 0;
+  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode, hasStreetwear) : 0;
 
   return (
     <div className="min-h-screen bg-slate-100 px-4 py-8 print:bg-white print:p-0">
