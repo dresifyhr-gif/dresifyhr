@@ -53,7 +53,7 @@ export default async function StreetwearPage() {
         {products.length > 0 ? (
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
             {products.map((p, i) => (
-              <ProductCard key={p.slug} product={p} priority={i < 5} />
+              <ProductCard key={p.slug} product={p} priority={i < 5} theme="streetwear" />
             ))}
           </div>
         ) : (
