@@ -42,15 +42,52 @@ function renderRich(text: string): ReactNode[] {
   return nodes;
 }
 
+const STORE_KEY = "dresify-ai-chat";
+const KEEP = 40; // koliko poruka čuvamo lokalno
+
 export function AdminAiChat({ fill = false }: { fill?: boolean }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [restored, setRestored] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+
+  // Vrati prethodni razgovor (preživi zatvaranje chata, prelazak stranice i osvježavanje).
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (Array.isArray(saved)) setMessages(saved.filter((m) => m?.role && typeof m.content === "string"));
+      }
+    } catch {
+      /* ignore */
+    }
+    setRestored(true);
+  }, []);
+
+  // Spremi razgovor nakon svake promjene (tek kad je prethodni vraćen, da ga ne pregazimo).
+  useEffect(() => {
+    if (!restored || loading) return;
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(messages.slice(-KEEP)));
+    } catch {
+      /* ignore */
+    }
+  }, [messages, restored, loading]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  function newChat() {
+    setMessages([]);
+    try {
+      localStorage.removeItem(STORE_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
 
   async function ask(question: string) {
     const q = question.trim();
@@ -94,6 +131,16 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
       <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
         <Image src="/dresify-robot.png" alt="Dresify AI" width={40} height={40} className="h-10 w-10 object-contain" />
         <span className="text-sm font-semibold text-slate-800">Dresify AI</span>
+        {messages.length > 0 && (
+          <button
+            type="button"
+            onClick={newChat}
+            title="Obriši razgovor i kreni ispočetka"
+            className="ml-auto rounded-md border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+          >
+            🗑 Novi razgovor
+          </button>
+        )}
       </div>
 
       <div className={`overflow-y-auto px-5 py-4 ${fill ? "flex-1" : "max-h-80 min-h-[3rem]"}`}>
