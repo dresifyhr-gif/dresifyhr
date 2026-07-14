@@ -3,6 +3,7 @@ import { streamText, tool, stepCountIs, jsonSchema } from "ai";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { buildBusinessContext } from "@/lib/admin-ai-context";
+import { getOldUnshipped } from "@/lib/admin-winback";
 import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
 import { formatCroatianName } from "@/lib/utils";
@@ -39,6 +40,13 @@ MOŽEŠ RJEŠAVATI NARUDŽBE preko alata:
 - Nakon otkazivanja potvrdi: ime kupca, iznos i referencu, i napomeni da se neće poslati i da je nestala iz reda za slanje.
 - Ako je narudžba VEĆ POSLANA, to nije otkazivanje nego vraćena pošiljka — reci korisniku da to označi kao "vraćeno".
 - NIKAD ne otkazuj narudžbu bez jasnog jednog podudaranja i ne izmišljaj ID-eve.
+
+ISPRIKA ZA NEPOSLANE NARUDŽBE (kupci kojima kasnimo sa slanjem):
+- Kad korisnik traži da kontaktira / ispriča se kupcima kojima narudžba nije poslana, pozovi "listUnshippedApologies".
+- Za svaku vrati kupca i NJEGOV GOTOV WhatsApp link (whatsappLink) kao Markdown poveznicu: [Pošalji Ime](link). Poruka je već složena (isprika + ponuda da pošaljemo odmah ili otkažemo).
+- TI NE ŠALJEŠ poruke sam — korisnik klikne link i pošalje iz WhatsAppa. To je namjerno (kontrola je kod njega).
+- Ako neki kupac nema broj (whatsappLink je null), reci to i preskoči ga.
+- Kad korisnik kaže da je poslao poruku nekome, pozovi "markApologySent" s tim ID-em da izađe s liste.
 
 === STVARNI PODACI (trenutno stanje) ===
 ${context}`;
@@ -101,6 +109,40 @@ ${context}`;
           iznos: eur(order.total),
           referenca: order.reference || getOrderReference(order.createdAt.toISOString())
         };
+      }
+    }),
+    listUnshippedApologies: tool({
+      description:
+        "Nabroji stare NEPOSLANE narudžbe (starije od 14 dana) kojima još nije poslana isprika. Za svaku vrati ime, proizvod, iznos i GOTOV WhatsApp link s ispričnom porukom. Korisnik klikne link da pošalje poruku — ti NE šalješ sam.",
+      inputSchema: jsonSchema<Record<string, never>>({ type: "object", properties: {} }),
+      execute: async () => {
+        const rows = await getOldUnshipped(50);
+        return {
+          count: rows.length,
+          orders: rows.map((r) => ({
+            id: r.id,
+            ime: r.name,
+            proizvod: r.product,
+            datum: r.dateLabel,
+            iznos: eur(r.total),
+            whatsappLink: r.wa
+          }))
+        };
+      }
+    }),
+    markApologySent: tool({
+      description:
+        "Označi da je isprika poslana za narudžbu (po ID-u iz listUnshippedApologies) — izlazi s liste isprika. Narudžba ostaje 'nova' (i dalje se može poslati ako kupac potvrdi). Pozovi TEK kad korisnik kaže da je poslao poruku.",
+      inputSchema: jsonSchema<{ orderId: string }>({
+        type: "object",
+        properties: { orderId: { type: "string", description: "ID narudžbe iz listUnshippedApologies" } },
+        required: ["orderId"]
+      }),
+      execute: async ({ orderId }) => {
+        const order = await prisma.order.findUnique({ where: { id: orderId }, select: { id: true, customerName: true } });
+        if (!order) return { ok: false, error: "Narudžba s tim ID-em ne postoji." };
+        await prisma.order.update({ where: { id: orderId }, data: { apologySent: true } });
+        return { ok: true, ime: formatCroatianName(order.customerName) };
       }
     })
   };

@@ -10,7 +10,7 @@ const OLD_DAYS = 14; // narudžbe starije od ovoliko dana koje još nisu poslane
 export const OLD_UNSHIPPED_DAYS = OLD_DAYS;
 
 function apologyMessage(name: string, product: string) {
-  return `Pozdrav ${name} 👋\n\nJavljamo se iz Dresify shopa. Iskreno se ispričavamo — zbog velike gužve na početku nažalost nismo uspjeli poslati tvoju narudžbu (${product}).\n\nAko si i dalje zainteresiran/a, rado ćemo ti je poslati odmah. Samo nam javi! 🙏`;
+  return `Pozdrav ${name} 👋\n\nJavljamo se iz Dresify shopa. Iskreno se ispričavamo — zbog neočekivane gužve dogodio nam se propust i nažalost nismo na vrijeme poslali tvoju narudžbu (${product}).\n\nAko još želiš, možemo ti je poslati odmah. Ako si se predomislio/la, samo javi pa otkažemo — bez brige. Još jednom se ispričavamo! 🙏`;
 }
 
 export type OldUnshippedRow = {

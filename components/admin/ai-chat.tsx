@@ -1,18 +1,46 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const SUGGESTIONS = [
   "Što danas trebam napraviti?",
+  "Isprike za neposlane narudžbe",
   "Gdje gubim novac?",
   "Što trebam naručiti?",
   "Koji proizvod raste, koji pada?",
-  "Kako povećati profit ovaj mjesec?",
   "Otkaži narudžbu za …"
 ];
+
+// Pretvara Markdown [tekst](url) i gole URL-ove u klikabilne linkove (npr. WhatsApp).
+function renderRich(text: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const re = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s]+)/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) nodes.push(text.slice(last, m.index));
+    const url = m[2] ?? m[3];
+    const label = m[1] ?? m[3];
+    nodes.push(
+      <a
+        key={key++}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-semibold text-emerald-600 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-700"
+      >
+        {label}
+      </a>
+    );
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) nodes.push(text.slice(last));
+  return nodes;
+}
 
 export function AdminAiChat({ fill = false }: { fill?: boolean }) {
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -84,7 +112,7 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
                 <div key={i} className="flex items-start gap-2">
                   <Image src="/dresify-robot.png" alt="AI" width={28} height={28} className="mt-0.5 h-7 w-7 shrink-0 object-contain" />
                   <div className="inline-block max-w-[85%] whitespace-pre-wrap rounded-2xl bg-slate-100 px-3.5 py-2 text-sm text-slate-800">
-                    {msg.content || (loading ? "…" : "")}
+                    {msg.content ? renderRich(msg.content) : (loading ? "…" : "")}
                   </div>
                 </div>
               )
