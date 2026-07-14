@@ -14,7 +14,15 @@ const kompletItemWhere = {
 
 export async function getDashboardMetrics() {
   const now = new Date();
-  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Početak današnjeg dana po Europe/Zagreb (Vercel radi u UTC-u) kao UTC instant —
+  // inače bi "promet danas" u ranim satima gledao krivi (UTC) dan.
+  const zp = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zagreb", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
+  const zGet = (t: string) => Number(zp.find((p) => p.type === t)!.value);
+  const zagrebOffsetMin = Math.round(
+    (new Date(now.toLocaleString("en-US", { timeZone: "Europe/Zagreb" })).getTime() -
+      new Date(now.toLocaleString("en-US", { timeZone: "UTC" })).getTime()) / 60000
+  );
+  const startToday = new Date(Date.UTC(zGet("year"), zGet("month") - 1, zGet("day")) - zagrebOffsetMin * 60000);
   // Rolling windows so periods are always nested (7d ≤ 30d) — no month-boundary confusion.
   const startWeek = new Date(now.getTime() - 7 * DAY);
   const startMonth = new Date(now.getTime() - 30 * DAY);

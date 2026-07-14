@@ -55,7 +55,7 @@ export default async function AdminOverview() {
       <div className="mb-5">
         <h2 className="text-2xl font-bold tracking-tight text-slate-900">{greeting()}, Gazda 👋</h2>
         <p className="text-sm text-slate-500">
-          {new Date().toLocaleDateString("hr-HR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          {new Date().toLocaleDateString("hr-HR", { timeZone: "Europe/Zagreb", weekday: "long", day: "numeric", month: "long", year: "numeric" })}
         </p>
       </div>
 
