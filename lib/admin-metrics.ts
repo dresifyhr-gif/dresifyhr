@@ -7,6 +7,9 @@ const DAY = 86_400_000;
 // Nabavne cijene: dres 6€ (prodaja 20 → profit 14), KOMPLET 18€ (prodaja 40 → profit 22).
 export const COST_PER_ITEM = 6; // dres
 const COST_KOMPLET = 18;
+// Vraćena pošiljka (kupac je nije preuzeo) — poštarina tamo-natrag koju mi plaćamo.
+// Skida se s ukupnog profita, a u podjeli sa zajedničke marže (dakle po 2 € svakome).
+const RETURN_COST = 4;
 // Komplet se prepoznaje po slugu/nazivu koji sadrži "komplet".
 const kompletItemWhere = {
   OR: [{ slug: { contains: "komplet" } }, { igrac: { contains: "komplet", mode: "insensitive" as const } }]
@@ -62,7 +65,9 @@ export async function getDashboardMetrics() {
     prisma.adSpend.aggregate({ _sum: { amount: true } }),
     prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
     prisma.order.findMany({ where: { status: "cancelled" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
-    prisma.order.findMany({ where: { status: { in: ["shipped", "done"] }, shippedBy: null }, orderBy: { createdAt: "desc" }, take: 200, select: { id: true, createdAt: true, customerName: true, total: true } })
+    prisma.order.findMany({ where: { status: { in: ["shipped", "done"] }, shippedBy: null }, orderBy: { createdAt: "desc" }, take: 200, select: { id: true, createdAt: true, customerName: true, total: true } }),
+    // Točan ukupan broj vraćenih (lista gore je ograničena na 50) — za trošak povrata.
+    prisma.order.count({ where: { status: "returned" } })
   ]);
   const settlementsP = prisma.settlement.findMany({ orderBy: { settledAt: "desc" }, take: 6 });
   const streetwearP = prisma.customProduct.findMany({ where: { category: "streetwear" }, select: { slug: true } });
@@ -104,7 +109,10 @@ export async function getDashboardMetrics() {
   const totalRev = net(total);
 
   // ── Extras (trends, shipping queue, win-back, cities, ad ROI): već pokrenuto gore, samo await ──
-  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped] = await extrasP;
+  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll] = await extrasP;
+
+  // Trošak vraćenih pošiljki (4 € po povratu) — skida se s ukupnog profita.
+  const returnLossTotal = returnedCountAll * RETURN_COST;
 
   const pct = (cur: number, prev: number | null) => (prev && prev > 0 ? ((cur - prev) / prev) * 100 : null);
   const weekChange = pct(net(week), net(prev7));
@@ -149,7 +157,7 @@ export async function getDashboardMetrics() {
   const streetwearSlugs = new Set((await streetwearP).map((r) => r.slug));
 
   // ── Faza B: sve ovisi o sinceFilter → jedan paralelni batch (bez sekvencijalnih upita) ──
-  const [igor, ivica, unassigned, cashOrders, shippedProfitTotal, adsAgg] = await Promise.all([
+  const [igor, ivica, unassigned, cashOrders, shippedProfitTotal, adsAgg, returnedSinceCount] = await Promise.all([
     byShipper("igor"),
     byShipper("ivica"),
     byShipper(null),
@@ -158,7 +166,9 @@ export async function getDashboardMetrics() {
       select: { total: true, shipping: true, shippedBy: true, cashCollected: true, promoCode: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
     }),
     profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter }),
-    prisma.adSpend.aggregate({ _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined })
+    prisma.adSpend.aggregate({ _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined }),
+    // Vraćene pošiljke OD ZADNJEG PORAVNANJA — njihov trošak (4 € svaka) skida se sa zajedničke marže.
+    prisma.order.count({ where: { status: "returned", ...sinceFilter } })
   ]);
   const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, pending: 0 });
   const cashSplit: Record<"igor" | "ivica", ReturnType<typeof mkCash>> = { igor: mkCash(), ivica: mkCash() };
@@ -180,6 +190,8 @@ export async function getDashboardMetrics() {
   }
   const DELIVERY_COST = 3;
   const freeShipCost = freeDeliveries * DELIVERY_COST;
+  // Vraćene pošiljke od zadnjeg poravnanja: 4 € svaka, skida se sa zajedničke marže (po 2 € svakome).
+  const returnLossSettle = returnedSinceCount * RETURN_COST;
 
   // Profit poslanih i oglasi od zadnjeg poravnanja — oboje već dohvaćeno u Fazi B.
   const halfShare = shippedProfitTotal / 2;
@@ -191,8 +203,9 @@ export async function getDashboardMetrics() {
   const collectedDresovi = cashSplit.igor.collectedDresovi + cashSplit.ivica.collectedDresovi;
   const collectedKompleti = cashSplit.igor.collectedKompleti + cashSplit.ivica.collectedKompleti;
   const collectedCost = collectedDresovi * COST_PER_ITEM + collectedKompleti * COST_KOMPLET; // Ivici nazad
-  // Besplatne dostave: mi platili ~3€ svaku → skida se s marže (dijeli se 50/50).
-  const collectedMargin = totalCollected - collectedCost - freeShipCost;
+  // Besplatne dostave (~3€) i vraćene pošiljke (4€) su naši troškovi → skidaju se s marže
+  // prije podjele, pa ih oboje snose pola-pola (npr. povrat = 2€ Igor + 2€ Ivica).
+  const collectedMargin = totalCollected - collectedCost - freeShipCost - returnLossSettle;
   const marginHalf = collectedMargin / 2;
   // Igor treba zadržati samo svoju polovicu marže; sve preko toga (koje drži) ide Ivici (roba + njena marža).
   // Oglasi: Igor platio → Ivica vraća pola. Pozitivno = Ivica → Igoru; negativno = Igor → Ivici.
@@ -210,7 +223,7 @@ export async function getDashboardMetrics() {
     inactive,
     returned: returned.map((o) => ({ ...o, total: o.total - (o.shipping ?? 0) })),
     unassignedShipped,
-    returnedCount: returned.length,
+    returnedCount: returnedCountAll,
     returnedTotal: returned.reduce((s, o) => s + o.total - (o.shipping ?? 0), 0),
     returnedQty: returned.reduce((s, o) => s + (o.itemCount ?? 0), 0),
     cancelled: cancelled.map((o) => ({ ...o, total: o.total - (o.shipping ?? 0) })),
@@ -220,7 +233,10 @@ export async function getDashboardMetrics() {
     topCities,
     adSpendTotal,
     roas: adSpendTotal > 0 ? totalRev / adSpendTotal : null,
-    netAfterAds: totalProfit - adSpendTotal,
+    netAfterAds: totalProfit - returnLossTotal - adSpendTotal,
+    // Trošak vraćenih pošiljki (4 € po povratu) — već skinut s totalProfit.
+    returnLossTotal,
+    returnCostEach: RETURN_COST,
     todayRev: net(today),
     todayOrders: today._count,
     todayProfit,
@@ -231,13 +247,14 @@ export async function getDashboardMetrics() {
     monthOrders: month._count,
     monthProfit,
     totalRev,
-    totalProfit,
+    // Ukupni profit UMANJEN za trošak vraćenih pošiljki (4 € svaka).
+    totalProfit: totalProfit - returnLossTotal,
     orderCount,
     shippedCount: shippedAgg._count,
     shippedRev: net(shippedAgg),
     shippedProfit,
     aov: orderCount ? totalRev / orderCount : 0,
-    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, collectedCost, freeDeliveries, freeShipCost, collectedMargin, marginHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
+    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, collectedCost, freeDeliveries, freeShipCost, returnedSinceCount, returnLossSettle, returnCostEach: RETURN_COST, collectedMargin, marginHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
     topItems,
     bestCustomers,
     recentOrders,

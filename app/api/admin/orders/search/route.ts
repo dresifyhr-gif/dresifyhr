@@ -26,6 +26,8 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const q = (url.searchParams.get("q") || "").trim();
   const status = url.searchParams.get("status") || ""; // "" | new | shipped | returned | cancelled
+  const shipper = url.searchParams.get("shipper") || ""; // "" | igor | ivica  (tko je poslao)
+  const cashF = url.searchParams.get("cash") || ""; // "" | collected | pending  (naplata poslanih)
   const sort = url.searchParams.get("sort") || ""; // "" (new-first) | old | new
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
 
@@ -51,18 +53,29 @@ export async function GET(request: Request) {
     }
   });
 
+  const isSent = (s: string) => s === "shipped" || s === "done";
+
   let filtered = all;
-  if (status === "shipped") filtered = filtered.filter((o) => o.status === "shipped" || o.status === "done");
+  if (status === "shipped") filtered = filtered.filter((o) => isSent(o.status));
   else if (status) filtered = filtered.filter((o) => o.status === status);
   if (q) {
     const nq = deaccent(q);
     const dq = q.replace(/\D/g, "");
-    filtered = all.filter((o) => {
+    // Pretraga se primjenjuje NA VEĆ FILTRIRANO (prije je resetirala status filter).
+    filtered = filtered.filter((o) => {
       const inName = deaccent(o.customerName).includes(nq);
       const inAddr = deaccent(o.address || "").includes(nq);
       const inPhone = dq.length >= 3 && String(o.phone || "").replace(/\D/g, "").includes(dq);
       return inName || inAddr || inPhone;
     });
+  }
+  // Tko je poslao (Igor / Ivica).
+  if (shipper === "igor" || shipper === "ivica") {
+    filtered = filtered.filter((o) => o.shippedBy === shipper);
+  }
+  // Naplata — odnosi se samo na POSLANE narudžbe.
+  if (cashF === "collected" || cashF === "pending") {
+    filtered = filtered.filter((o) => isSent(o.status) && (cashF === "collected" ? o.cashCollected : !o.cashCollected));
   }
 
   if (sort === "old") {

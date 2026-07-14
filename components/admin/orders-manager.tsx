@@ -265,6 +265,8 @@ const TABS = [
 export function OrdersManager() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
+  const [shipper, setShipper] = useState(""); // "" | igor | ivica
+  const [cashF, setCashF] = useState(""); // "" | collected | pending
   const [sort, setSort] = useState(""); // "" new-first | new | old
   const [editing, setEditing] = useState<string | null>(null);
   const [editingContact, setEditingContact] = useState<string | null>(null);
@@ -283,12 +285,18 @@ export function OrdersManager() {
   statusRef.current = status;
   const sortRef = useRef("");
   sortRef.current = sort;
+  const shipperRef = useRef("");
+  shipperRef.current = shipper;
+  const cashRef = useRef("");
+  cashRef.current = cashF;
 
   const fetchPage = useCallback(async (query: string, p: number, append: boolean) => {
     const my = ++reqId.current;
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/orders/search/?q=${encodeURIComponent(query)}&status=${statusRef.current}&sort=${sortRef.current}&page=${p}`);
+      const res = await fetch(
+        `/api/admin/orders/search/?q=${encodeURIComponent(query)}&status=${statusRef.current}&shipper=${shipperRef.current}&cash=${cashRef.current}&sort=${sortRef.current}&page=${p}`
+      );
       const d = await res.json();
       if (my !== reqId.current) return; // stale response, ignore
       if (d?.ok) {
@@ -309,7 +317,7 @@ export function OrdersManager() {
     clearTimeout(debounce.current);
     debounce.current = setTimeout(() => fetchPage(q, 1, false), 300);
     return () => clearTimeout(debounce.current);
-  }, [q, status, sort, fetchPage]);
+  }, [q, status, shipper, cashF, sort, fetchPage]);
 
   // infinite scroll
   useEffect(() => {
@@ -372,6 +380,46 @@ export function OrdersManager() {
           </button>
         ))}
       </div>
+
+      {/* Odvojeno po pošiljatelju i po naplati — za organizirano praćenje */}
+      <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-400">Poslao</span>
+          {[{ v: "", l: "Svi" }, { v: "igor", l: "Igor" }, { v: "ivica", l: "Ivica" }].map((o) => (
+            <button
+              key={o.v}
+              type="button"
+              onClick={() => setShipper(o.v)}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${shipper === o.v ? "bg-slate-900 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+            >
+              {o.l}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-400">Naplata</span>
+          {[{ v: "", l: "Sve" }, { v: "collected", l: "💰 Prikupljeno" }, { v: "pending", l: "⏳ Nije prikupljeno" }].map((o) => (
+            <button
+              key={o.v}
+              type="button"
+              onClick={() => setCashF(o.v)}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${cashF === o.v ? "bg-slate-900 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+            >
+              {o.l}
+            </button>
+          ))}
+        </div>
+        {(shipper || cashF) && (
+          <button
+            type="button"
+            onClick={() => { setShipper(""); setCashF(""); }}
+            className="ml-auto text-[11px] font-semibold text-slate-400 underline decoration-dotted hover:text-slate-700"
+          >
+            ↺ Poništi
+          </button>
+        )}
+      </div>
+
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <input
           value={q}
