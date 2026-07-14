@@ -26,9 +26,24 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const toDelete = order.items.filter((it) => !keepIds.has(it.id)).map((it) => it.id);
   if (toDelete.length) await prisma.orderItem.deleteMany({ where: { id: { in: toDelete } } });
 
-  // Update kept items
+  // Update kept items; items WITHOUT an id are NEW → create them.
   for (const it of incoming) {
-    if (!it.id) continue;
+    if (!it.id) {
+      const klub = typeof it.klub === "string" ? it.klub.trim() : "";
+      const igrac = typeof it.igrac === "string" ? it.igrac.trim() : "";
+      if (!klub && !igrac) continue; // prazan red — preskoči
+      await prisma.orderItem.create({
+        data: {
+          orderId: id,
+          klub: klub || null,
+          igrac: igrac || null,
+          size: typeof it.size === "string" ? it.size.trim() || null : null,
+          quantity: 1,
+          unitPrice: Number.isFinite(Number(it.unitPrice)) ? Number(it.unitPrice) : 0
+        }
+      });
+      continue;
+    }
     await prisma.orderItem.update({
       where: { id: it.id },
       data: {

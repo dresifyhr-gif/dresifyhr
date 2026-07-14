@@ -39,13 +39,26 @@ function ItemsEditor({ orderId, items, onSaved }: { orderId: string; items: Orde
   const [rows, setRows] = useState<EditItem[]>(items.map((it) => ({ id: it.id, klub: it.klub, igrac: it.igrac, size: it.size, unitPrice: String(it.unitPrice) })));
   const [saving, setSaving] = useState(false);
 
+  // Novi redovi imaju privremeni id ("new:…") koji se NE šalje serveru — server ih tada stvara.
+  function addRow() {
+    setRows((rs) => [...rs, { id: `new:${Date.now()}:${rs.length}`, klub: "", igrac: "", size: "", unitPrice: "20" }]);
+  }
+
   async function save() {
     if (saving) return;
     setSaving(true);
     await fetch(`/api/admin/orders/${orderId}/items/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: rows.map((r) => ({ id: r.id, klub: r.klub, igrac: r.igrac, size: r.size, unitPrice: Number(r.unitPrice.replace(",", ".")) || 0 })) })
+      body: JSON.stringify({
+        items: rows.map((r) => ({
+          ...(r.id.startsWith("new:") ? {} : { id: r.id }),
+          klub: r.klub,
+          igrac: r.igrac,
+          size: r.size,
+          unitPrice: Number(r.unitPrice.replace(",", ".")) || 0
+        }))
+      })
     }).catch(() => {});
     setSaving(false);
     onSaved();
@@ -62,9 +75,14 @@ function ItemsEditor({ orderId, items, onSaved }: { orderId: string; items: Orde
           <button type="button" onClick={() => setRows((rs) => rs.filter((_, k) => k !== i))} className="rounded border border-red-200 px-2 py-1 text-[11px] text-red-500 hover:bg-red-50">✕</button>
         </div>
       ))}
-      <button type="button" onClick={save} disabled={saving} className="rounded-md bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800 disabled:opacity-40">
-        {saving ? "Spremam…" : "Spremi artikle"}
-      </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <button type="button" onClick={addRow} className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">
+          ➕ Dodaj artikl
+        </button>
+        <button type="button" onClick={save} disabled={saving} className="rounded-md bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800 disabled:opacity-40">
+          {saving ? "Spremam…" : "Spremi artikle"}
+        </button>
+      </div>
     </div>
   );
 }
