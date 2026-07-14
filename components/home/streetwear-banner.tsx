@@ -4,26 +4,28 @@ import { ArrowRight } from "lucide-react";
 
 // Naslovni banner koji vodi na /streetwear — ključno za mobilnu vidljivost
 // (većina kupaca ne otvara izbornik, gleda naslovnu). Bijelo-narančasti identitet.
+// Mobilna: kompaktno (samo STREETWEAR + gumb). Desktop: opis + slike kompleta.
 export function StreetwearBanner({ images = [] }: { images?: string[] }) {
-  const tiles = images.filter(Boolean).slice(0, 3);
+  const tiles = images.filter(Boolean).slice(0, 5);
 
   return (
     <section className="bg-[#0a0a0a] px-4 pb-2 pt-6 sm:pb-4 sm:pt-8">
       <div className="page-shell">
         <Link
           href="/streetwear"
-          className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-6 shadow-[0_10px_40px_-12px_rgba(249,115,22,0.6)] transition hover:from-orange-400 hover:to-orange-500 sm:px-8 sm:py-8"
+          className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-4 shadow-[0_10px_40px_-12px_rgba(249,115,22,0.6)] transition hover:from-orange-400 hover:to-orange-500 sm:px-8 sm:py-8"
         >
           {/* Suptilni uzorak u pozadini */}
           <span aria-hidden className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
           <span aria-hidden className="pointer-events-none absolute -bottom-12 left-1/3 h-40 w-40 rounded-full bg-black/10 blur-2xl" />
 
           <div className="relative shrink-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/80">Novo u ponudi</p>
-            <h2 className="mt-1 font-heading text-3xl uppercase leading-none text-white sm:text-5xl">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-white/80 sm:text-[11px]">Novo u ponudi</p>
+            <h2 className="mt-0.5 font-heading text-3xl uppercase leading-none text-white sm:mt-1 sm:text-5xl">
               STREET<span className="text-slate-900">WEAR</span>
             </h2>
-            <p className="mt-2 max-w-md text-[13px] leading-5 text-white/90 sm:text-sm">
+            {/* Opis samo na širem ekranu — mobilna ostaje kratka */}
+            <p className="mt-2 hidden max-w-md text-[13px] leading-5 text-white/90 sm:block sm:text-sm">
               Kompleti u uličnom stilu — majica + hlačice. Veličine XS–L, besplatna dostava, plaćanje pouzećem.
             </p>
           </div>
@@ -35,7 +37,7 @@ export function StreetwearBanner({ images = [] }: { images?: string[] }) {
                 <div
                   key={src}
                   className="relative h-24 w-24 overflow-hidden rounded-xl border-2 border-white/70 bg-white shadow-lg transition-transform duration-200 group-hover:-translate-y-0.5 xl:h-28 xl:w-28"
-                  style={{ marginLeft: i === 0 ? 0 : "-1.5rem", rotate: `${(i - 1) * 5}deg`, zIndex: tiles.length - i }}
+                  style={{ marginLeft: i === 0 ? 0 : "-1.25rem", rotate: `${(i - (tiles.length - 1) / 2) * 4}deg`, zIndex: tiles.length - i }}
                 >
                   <Image src={src} alt="Dresify streetwear komplet" fill sizes="112px" className="object-contain p-1.5" />
                 </div>

@@ -106,7 +106,7 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
       <AdminAiDock />
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
         {NAV.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;

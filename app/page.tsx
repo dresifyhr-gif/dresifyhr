@@ -60,7 +60,7 @@ export default async function HomePage() {
       <TrustStrip />
       {streetwear.length > 0 && (
         <StreetwearBanner
-          images={streetwear.map((p) => p.images?.[0]?.src).filter((s): s is string => !!s).slice(0, 3)}
+          images={streetwear.map((p) => p.images?.[0]?.src).filter((s): s is string => !!s).slice(0, 5)}
         />
       )}
       <FeaturedSection />
