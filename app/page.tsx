@@ -58,7 +58,11 @@ export default async function HomePage() {
     <>
       <HeroSection />
       <TrustStrip />
-      {streetwear.length > 0 && <StreetwearBanner />}
+      {streetwear.length > 0 && (
+        <StreetwearBanner
+          images={streetwear.map((p) => p.images?.[0]?.src).filter((s): s is string => !!s).slice(0, 3)}
+        />
+      )}
       <FeaturedSection />
 
       <section className="section-pad bg-[#0a0a0a]">

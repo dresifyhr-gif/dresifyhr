@@ -1,9 +1,12 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 // Naslovni banner koji vodi na /streetwear — ključno za mobilnu vidljivost
 // (većina kupaca ne otvara izbornik, gleda naslovnu). Bijelo-narančasti identitet.
-export function StreetwearBanner() {
+export function StreetwearBanner({ images = [] }: { images?: string[] }) {
+  const tiles = images.filter(Boolean).slice(0, 3);
+
   return (
     <section className="bg-[#0a0a0a] px-4 pb-2 pt-6 sm:pb-4 sm:pt-8">
       <div className="page-shell">
@@ -15,7 +18,7 @@ export function StreetwearBanner() {
           <span aria-hidden className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
           <span aria-hidden className="pointer-events-none absolute -bottom-12 left-1/3 h-40 w-40 rounded-full bg-black/10 blur-2xl" />
 
-          <div className="relative">
+          <div className="relative shrink-0">
             <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/80">Novo u ponudi</p>
             <h2 className="mt-1 font-heading text-3xl uppercase leading-none text-white sm:text-5xl">
               STREET<span className="text-slate-900">WEAR</span>
@@ -25,7 +28,22 @@ export function StreetwearBanner() {
             </p>
           </div>
 
-          <span className="relative flex shrink-0 items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition group-hover:bg-black sm:px-5 sm:text-sm">
+          {/* Slike kompleta — preklapajuće bijele pločice (samo na širem ekranu) */}
+          {tiles.length > 0 && (
+            <div className="relative ml-auto hidden shrink-0 items-center lg:flex">
+              {tiles.map((src, i) => (
+                <div
+                  key={src}
+                  className="relative h-24 w-24 overflow-hidden rounded-xl border-2 border-white/70 bg-white shadow-lg transition-transform duration-200 group-hover:-translate-y-0.5 xl:h-28 xl:w-28"
+                  style={{ marginLeft: i === 0 ? 0 : "-1.5rem", rotate: `${(i - 1) * 5}deg`, zIndex: tiles.length - i }}
+                >
+                  <Image src={src} alt="Dresify streetwear komplet" fill sizes="112px" className="object-contain p-1.5" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <span className="relative ml-4 flex shrink-0 items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition group-hover:bg-black sm:px-5 sm:text-sm">
             Pogledaj
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </span>
