@@ -140,6 +140,9 @@ export async function getDashboardMetrics() {
   const settlements = await settlementsP;
   const lastSettlement = settlements[0] ?? null;
   const sinceFilter = lastSettlement ? { createdAt: { gt: lastSettlement.settledAt } } : {};
+  // Gotovina ulazi u podjelu tek kad je označena kao prikupljena, ne prema
+  // datumu kada je kupac prvotno napravio narudžbu.
+  const collectedSinceFilter = lastSettlement ? { cashCollectedAt: { gt: lastSettlement.settledAt } } : {};
 
   const byShipper = async (who: "igor" | "ivica" | null) => {
     const where = { status: { in: ["shipped", "done"] }, shippedBy: who, ...sinceFilter };
@@ -157,13 +160,17 @@ export async function getDashboardMetrics() {
   const streetwearSlugs = new Set((await streetwearP).map((r) => r.slug));
 
   // ── Faza B: sve ovisi o sinceFilter → jedan paralelni batch (bez sekvencijalnih upita) ──
-  const [igor, ivica, unassigned, cashOrders, shippedProfitTotal, adsAgg, returnedSinceCount] = await Promise.all([
+  const [igor, ivica, unassigned, cashOrders, collectedCashOrders, shippedProfitTotal, adsAgg, returnedSinceCount] = await Promise.all([
     byShipper("igor"),
     byShipper("ivica"),
     byShipper(null),
     prisma.order.findMany({
       where: { status: { in: ["shipped", "done"] }, ...sinceFilter },
       select: { total: true, shipping: true, shippedBy: true, cashCollected: true, promoCode: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
+    }),
+    prisma.order.findMany({
+      where: { status: { in: ["shipped", "done"] }, cashCollected: true, ...collectedSinceFilter },
+      select: { total: true, shipping: true, shippedBy: true, promoCode: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
     }),
     profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter }),
     prisma.adSpend.aggregate({ _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined }),
@@ -181,12 +188,19 @@ export async function getDashboardMetrics() {
     for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) k += q; else d += q; }
     const b = cashSplit[who];
     b.sentCount++; b.sentDresovi += d; b.sentKompleti += k;
-    if (o.cashCollected) {
-      b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k;
-      // Besplatna dostava = roba ≥ 60€ ILI osvojeno na igrici ILI streetwear → mi platili ~3€ pošti.
-      const isFreeShip = amt >= 60 || Boolean(o.promoCode && o.promoCode.trim()) || o.items.some((it) => it.slug && streetwearSlugs.has(it.slug));
-      if (isFreeShip) freeDeliveries++;
-    } else b.pending += amt;
+    if (!o.cashCollected) b.pending += amt;
+  }
+  for (const o of collectedCashOrders) {
+    const who = o.shippedBy === "igor" ? "igor" : o.shippedBy === "ivica" ? "ivica" : null;
+    if (!who) continue;
+    const amt = o.total - (o.shipping ?? 0);
+    let d = 0, k = 0;
+    for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) k += q; else d += q; }
+    const b = cashSplit[who];
+    b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k;
+    // Besplatna dostava = roba ≥ 60€ ILI osvojeno na igrici ILI streetwear → mi platili ~3€ pošti.
+    const isFreeShip = amt >= 60 || Boolean(o.promoCode && o.promoCode.trim()) || o.items.some((it) => it.slug && streetwearSlugs.has(it.slug));
+    if (isFreeShip) freeDeliveries++;
   }
   const DELIVERY_COST = 3;
   const freeShipCost = freeDeliveries * DELIVERY_COST;

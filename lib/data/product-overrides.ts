@@ -43,7 +43,17 @@ const fetchSoldSlugs = unstable_cache(
 
 // Admin-managed overrides (price / stock) merged onto the static catalog. Best-effort:
 // if the DB is unavailable or empty, the shop uses the base catalog unchanged.
-type Override = { slug: string; price: number | null; stock: number | null; sizeStock: string | null; outOfStock: string | null; soldOutSizes: string | null; hidden: boolean; badge: string | null; description: string | null };
+type Override = { slug: string; klub: string | null; igrac: string | null; liga: string | null; images: string | null; price: number | null; stock: number | null; sizeStock: string | null; outOfStock: string | null; soldOutSizes: string | null; hidden: boolean; badge: string | null; description: string | null };
+
+// JSON niz URL-ova slika iz override-a (prazno = originalne slike iz /public).
+function parseImages(raw: string | null): string[] | undefined {
+  if (!raw) return undefined;
+  try {
+    const arr = JSON.parse(raw);
+    const urls = Array.isArray(arr) ? arr.filter((u): u is string => typeof u === "string" && !!u) : [];
+    return urls.length ? urls : undefined;
+  } catch { return undefined; }
+}
 
 function parseSizeStock(raw: string | null): Record<string, number> | undefined {
   if (!raw) return undefined;
@@ -65,8 +75,16 @@ function merge(j: Jersey, ov?: Override): Jersey {
   if (!ov) return j;
   const outOfStock = ov.outOfStock === "all" || ov.outOfStock === "adults" || ov.outOfStock === "kids" ? ov.outOfStock : undefined;
   const badge = ov.badge === "bestseller" || ov.badge === "novo" ? ov.badge : undefined;
+  const klub = ov.klub?.trim() || j.klub;
+  const igrac = ov.igrac?.trim() || j.igrac;
+  const imgUrls = parseImages(ov.images);
   return {
     ...j,
+    klub,
+    igrac,
+    liga: ov.liga?.trim() || j.liga,
+    // Uređene slike zamjenjuju originalne; prazno = ostaju originalne iz /public.
+    images: imgUrls ? imgUrls.map((src) => ({ src, altLabel: `${klub} ${igrac}` })) : j.images,
     price: ov.price != null ? ov.price : j.price,
     stock: ov.stock != null ? ov.stock : j.stock,
     sizeStock: parseSizeStock(ov.sizeStock) ?? j.sizeStock,

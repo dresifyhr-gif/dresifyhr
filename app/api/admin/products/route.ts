@@ -18,6 +18,15 @@ function sizeListFor(j: { category?: string; vel: string; liga: string; klub: st
   return [...so.adults, ...so.kids];
 }
 
+// JSON niz URL-ova slika (prazno = originalne slike iz /public za statičke dresove).
+function parseImagesArr(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((u): u is string => typeof u === "string" && !!u) : [];
+  } catch { return []; }
+}
+
 // Sirovi JSON string → objekt {S:3,...} (za prikaz u editoru).
 function parseSizeStockObj(raw: string | null): Record<string, number> {
   if (!raw) return {};
@@ -72,9 +81,11 @@ export async function GET() {
 
     return {
       slug: j.slug,
-      klub: repairText(j.klub),
-      igrac: repairText(j.igrac),
-      liga: j.liga,
+      // Override može promijeniti naziv/ligu/slike; prazno = original iz kataloga.
+      klub: repairText(ov?.klub || j.klub),
+      igrac: repairText(ov?.igrac || j.igrac),
+      liga: ov?.liga || j.liga,
+      images: parseImagesArr(ov?.images ?? null),
       category: j.category ?? "dres",
       custom: false,
       price: ov?.price != null ? ov.price : j.price ?? JERSEY_PRICE_EUR,
@@ -110,6 +121,7 @@ export async function GET() {
       klub: repairText(c.klub),
       igrac: repairText(c.igrac),
       liga: streetwear ? "Streetwear" : c.liga,
+      images: parseImagesArr(c.images ?? null),
       category: c.category ?? "dres",
       custom: true,
       price: c.price,
@@ -153,6 +165,15 @@ export async function POST(request: Request) {
   const priceVal = price != null && Number.isFinite(price) ? price : null;
   const description = typeof body?.description === "string" && body.description.trim() ? body.description.trim() : null;
 
+  // Osnovni podaci i slike — šalju se samo kad ih admin mijenja (undefined = ne diraj).
+  const txt = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+  const klubIn = txt(body?.klub);
+  const igracIn = txt(body?.igrac);
+  const ligaIn = txt(body?.liga);
+  const imagesIn = Array.isArray(body?.images)
+    ? (body.images as unknown[]).filter((u): u is string => typeof u === "string" && !!u)
+    : undefined;
+
   // Custom proizvod (dres ili streetwear) → uređujemo CustomProduct redak izravno.
   const custom = (await prisma.customProduct.findUnique({ where: { slug } })) as unknown as CustomRow | null;
   if (custom) {
@@ -163,6 +184,10 @@ export async function POST(request: Request) {
       data: {
         // custom cijena je obavezna (Float) — ako je prazno, zadrži postojeću
         ...(priceVal != null ? { price: priceVal } : {}),
+        ...(klubIn ? { klub: klubIn } : {}),
+        ...(igracIn ? { igrac: igracIn } : {}),
+        ...(ligaIn ? { liga: ligaIn } : {}),
+        ...(imagesIn ? { images: JSON.stringify(imagesIn) } : {}),
         stock: stockVal,
         sizeStock: sizeStockVal,
         outOfStock,
@@ -182,10 +207,31 @@ export async function POST(request: Request) {
   const allowedSizes = new Set(sizeListFor(jersey));
   const sizeStockVal = cleanSizeStock(body?.sizeStock, allowedSizes);
 
+  // Naziv/liga/slike: prazno = ostaje original iz kataloga (ne spremamo isti tekst bez potrebe).
+  const klubVal = klubIn && klubIn !== repairText(jersey.klub) ? klubIn : null;
+  const igracVal = igracIn && igracIn !== repairText(jersey.igrac) ? igracIn : null;
+  const ligaVal = ligaIn && ligaIn !== jersey.liga ? ligaIn : null;
+  const imagesVal = imagesIn ? (imagesIn.length ? JSON.stringify(imagesIn) : null) : undefined;
+
+  const data = {
+    klub: klubVal,
+    igrac: igracVal,
+    liga: ligaVal,
+    ...(imagesVal !== undefined ? { images: imagesVal } : {}),
+    price: priceVal,
+    stock: stockVal,
+    sizeStock: sizeStockVal,
+    outOfStock,
+    soldOutSizes: sizes.join(",") || null,
+    hidden,
+    badge,
+    description
+  };
+
   await prisma.productOverride.upsert({
     where: { slug },
-    create: { slug, price: priceVal, stock: stockVal, sizeStock: sizeStockVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge, description },
-    update: { price: priceVal, stock: stockVal, sizeStock: sizeStockVal, outOfStock, soldOutSizes: sizes.join(",") || null, hidden, badge, description }
+    create: { slug, ...data },
+    update: data
   });
 
   return NextResponse.json({ ok: true });

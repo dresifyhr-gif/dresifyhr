@@ -2,11 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { ImageUploader } from "@/components/admin/image-uploader";
+
+const LIGE = ["Reprezentacija", "La Liga", "Premier Liga", "Serie A", "Bundesliga", "Ligue 1", "Saudi Pro", "Brazil", "MLS", "Komplet", "Streetwear"];
+
 type Product = {
   slug: string;
   klub: string;
   igrac: string;
   liga: string;
+  images: string[];
   category: string;
   custom: boolean;
   price: number;
@@ -56,6 +61,11 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const [badge, setBadge] = useState(p.badge);
   const [desc, setDesc] = useState(p.description || p.descriptionAuto);
   const [showDesc, setShowDesc] = useState(false);
+  const [klub, setKlub] = useState(p.klub);
+  const [igrac, setIgrac] = useState(p.igrac);
+  const [liga, setLiga] = useState(p.liga);
+  const [images, setImages] = useState<string[]>(p.images || []);
+  const [showEdit, setShowEdit] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -63,7 +73,8 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const descToSave = desc.trim() === p.descriptionAuto.trim() ? "" : desc;
   const stockOrig = p.stock == null ? "" : String(p.stock);
   const sizeStockDirty = (p.sizeList || []).some((s) => (sizeStock[s] || "") !== (p.sizeStock?.[s] != null ? String(p.sizeStock[s]) : ""));
-  const dirty = price !== String(p.price) || stock !== stockOrig || sizeStockDirty || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || descToSave !== p.description;
+  const imagesDirty = images.join("|") !== (p.images || []).join("|");
+  const dirty = price !== String(p.price) || stock !== stockOrig || sizeStockDirty || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || descToSave !== p.description || klub !== p.klub || igrac !== p.igrac || liga !== p.liga || imagesDirty;
   const sizeStockTotal = (p.sizeList || []).reduce((sum, s) => sum + (Number(sizeStock[s]) || 0), 0);
   const hasSizeStock = (p.sizeList || []).some((s) => (sizeStock[s] || "").trim() !== "");
 
@@ -78,7 +89,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     await fetch("/api/admin/products/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: p.slug, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), sizeStock: Object.fromEntries((p.sizeList || []).filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])])), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, description: descToSave })
+      body: JSON.stringify({ slug: p.slug, klub, igrac, liga, images, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), sizeStock: Object.fromEntries((p.sizeList || []).filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])])), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, description: descToSave })
     }).catch(() => {});
     setSaving(false);
     setSaved(true);
@@ -172,8 +183,16 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
         })}
         <button
           type="button"
+          onClick={() => setShowEdit((v) => !v)}
+          className="ml-2 rounded px-1.5 py-0.5 text-[11px] font-semibold text-violet-600 underline decoration-dotted hover:text-violet-800"
+        >
+          {showEdit ? "Sakrij podatke" : "🖼 Naziv i slike"}
+          {images.length > 0 ? ` (${images.length})` : ""}
+        </button>
+        <button
+          type="button"
           onClick={() => setShowDesc((v) => !v)}
-          className="ml-2 rounded px-1.5 py-0.5 text-[11px] font-medium text-slate-500 underline decoration-dotted hover:text-slate-800"
+          className="rounded px-1.5 py-0.5 text-[11px] font-medium text-slate-500 underline decoration-dotted hover:text-slate-800"
         >
           {showDesc ? "Sakrij opis" : "✏️ Uredi opis"}
           {p.description ? " (uređen)" : ""}
@@ -189,6 +208,27 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
           </button>
         )}
       </div>
+
+      {showEdit && (
+        <div className="mt-2 rounded-lg border border-violet-200 bg-violet-50/40 p-2.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <input value={klub} onChange={(e) => setKlub(e.target.value)} placeholder="Klub / brend" className="w-36 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
+            <input value={igrac} onChange={(e) => setIgrac(e.target.value)} placeholder="Igrač / model" className="min-w-[150px] flex-1 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
+            <select value={liga} onChange={(e) => setLiga(e.target.value)} className="rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400">
+              {(LIGE.includes(liga) ? LIGE : [liga, ...LIGE]).map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </div>
+          <div className="mt-2">
+            <ImageUploader value={images} onChange={setImages} slug={p.slug} />
+          </div>
+          <p className="mt-1.5 text-[11px] text-slate-500">
+            {p.custom
+              ? "Slike i naziv ovog proizvoda. Prva slika je glavna."
+              : "Ostavi slike prazno = koriste se originalne iz kataloga. Dodaj slike da ih zamijeniš. Prva je glavna."}
+            {" "}Ne zaboravi „Spremi” gore.
+          </p>
+        </div>
+      )}
 
       {showSizes && p.sizeList && p.sizeList.length > 0 && (
         <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">

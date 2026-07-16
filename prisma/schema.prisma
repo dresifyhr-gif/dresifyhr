@@ -99,6 +99,12 @@ model Product {
 // Ako postoji redak za slug, njegove vrijednosti gaze osnovni katalog.
 model ProductOverride {
   slug         String   @id
+  // Uređivanje osnovnih podataka i slika za dresove iz statičkog kataloga
+  // (custom proizvodi to imaju na svom CustomProduct retku). Prazno = ostaje original.
+  klub         String?
+  igrac        String?
+  liga         String?
+  images       String? // JSON niz URL-ova; prazno = originalne slike iz /public
   price        Float?
   stock        Int? // ručno postavljena ukupna količina (prazno = automatska); ako ima sizeStock, računa se zbroj
   sizeStock    String? // JSON količina po veličini, npr. {"S":3,"M":5,"L":0}; 0 = rasprodana veličina
