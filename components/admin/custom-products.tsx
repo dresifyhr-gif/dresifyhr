@@ -35,7 +35,51 @@ export function CustomProducts() {
   const [aiName, setAiName] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
   const [aiDescBusy, setAiDescBusy] = useState(false);
+  const [aiImgBusy, setAiImgBusy] = useState(false);
+  const [aiImgInfo, setAiImgInfo] = useState<{ seen: string; confidence: string } | null>(null);
   const [showList, setShowList] = useState(false); // duga lista skrivena po defaultu
+
+  // Iz SLIKE proizvoda AI pročita klub, igrača + broj, ligu, boje i složi opis.
+  async function aiFromImage(url?: string) {
+    const img = url || f.images[0];
+    if (!img || aiImgBusy) return;
+    setAiImgBusy(true);
+    setAiImgInfo(null);
+    try {
+      const d = await fetch("/api/admin/analyze-image/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl: img })
+      }).then((r) => r.json());
+      if (d?.ok) {
+        setF((prev) => ({
+          ...prev,
+          category: d.category || prev.category,
+          klub: d.klub || prev.klub,
+          igrac: d.igrac || prev.igrac,
+          liga: LIGE.includes(d.liga) ? d.liga : prev.liga,
+          retro: d.retro === true,
+          badge: d.badge || prev.badge,
+          description: d.description || prev.description,
+          // streetwear je 50 € — postavi samo ako je cijena još zadana
+          price: d.category === "streetwear" && (prev.price === "20" || !prev.price) ? "50" : prev.price
+        }));
+        setAiImgInfo({ seen: String(d.seen || ""), confidence: String(d.confidence || "") });
+      } else {
+        setAiImgInfo({ seen: d?.message || "AI nije uspio pročitati sliku.", confidence: "low" });
+      }
+    } catch {
+      setAiImgInfo({ seen: "Greška pri čitanju slike.", confidence: "low" });
+    }
+    setAiImgBusy(false);
+  }
+
+  // Prva ubačena slika automatski pokreće AI (samo ako polja još nisu popunjena).
+  function onImages(images: string[]) {
+    const firstAdded = images.length > 0 && f.images.length === 0;
+    setF((prev) => ({ ...prev, images }));
+    if (firstAdded && !f.klub.trim() && !f.igrac.trim()) aiFromImage(images[0]);
+  }
 
   // Streetwear: iz brenda + modela AI složi prodajni opis.
   async function aiDesc() {
@@ -248,8 +292,31 @@ export function CustomProducts() {
           </label>
 
           <div>
-            <div className="mb-1 text-xs font-medium text-slate-500">Slike</div>
-            <ImageUploader value={f.images} onChange={(images) => setF({ ...f, images })} slug={f.klub && f.igrac ? "custom" : undefined} />
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-500">Slike</span>
+              {f.images.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => aiFromImage()}
+                  disabled={aiImgBusy}
+                  title="AI pročita sliku i popuni klub, igrača, broj, ligu i opis"
+                  className="rounded-md bg-violet-600 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-violet-700 disabled:opacity-40"
+                >
+                  {aiImgBusy ? "AI gleda sliku…" : "🪄 Popuni iz slike"}
+                </button>
+              )}
+            </div>
+            <ImageUploader value={f.images} onChange={onImages} slug={f.klub && f.igrac ? "custom" : undefined} />
+            {aiImgBusy && (
+              <p className="mt-1.5 text-[11px] font-medium text-violet-600">🪄 AI čita sliku — popunjavam polja…</p>
+            )}
+            {!aiImgBusy && aiImgInfo && (
+              <p className={`mt-1.5 text-[11px] ${aiImgInfo.confidence === "low" ? "text-amber-600" : "text-slate-500"}`}>
+                {aiImgInfo.confidence === "low" ? "⚠️ " : "👁 "}
+                {aiImgInfo.seen}
+                {aiImgInfo.confidence === "low" && " — provjeri podatke prije spremanja."}
+              </p>
+            )}
           </div>
 
           <button type="button" onClick={save} disabled={saving || !f.klub.trim() || !f.igrac.trim()} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-40">
