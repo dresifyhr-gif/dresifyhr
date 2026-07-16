@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { BulkAdd } from "@/components/admin/bulk-add";
 import { ImageUploader } from "@/components/admin/image-uploader";
 
 type Custom = {
@@ -38,6 +39,7 @@ export function CustomProducts() {
   const [aiImgBusy, setAiImgBusy] = useState(false);
   const [aiImgInfo, setAiImgInfo] = useState<{ seen: string; confidence: string } | null>(null);
   const [showList, setShowList] = useState(false); // duga lista skrivena po defaultu
+  const [showBulk, setShowBulk] = useState(false);
 
   // Iz SLIKE proizvoda AI pročita klub, igrača + broj, ligu, boje i složi opis.
   async function aiFromImage(url?: string) {
@@ -173,6 +175,13 @@ export function CustomProducts() {
           )}
           <button
             type="button"
+            onClick={() => setShowBulk((v) => !v)}
+            className="rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-violet-700"
+          >
+            {showBulk ? "Zatvori" : "📦 Masovno"}
+          </button>
+          <button
+            type="button"
             onClick={() => { setF({ ...empty }); setOpen((v) => !v); }}
             className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800"
           >
@@ -180,6 +189,8 @@ export function CustomProducts() {
           </button>
         </div>
       </div>
+
+      {showBulk && <BulkAdd onDone={load} />}
 
       {open && (
         <div className="mt-4 space-y-3 rounded-lg border border-slate-200 bg-slate-50/60 p-4">
