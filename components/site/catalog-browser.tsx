@@ -226,14 +226,24 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
         const rightHR = right.klub === "Hrvatska";
         if (leftHR !== rightHR) return leftHR ? -1 : 1;
 
-        const leftHasImage = hasJerseyGallery(left.slug);
-        const rightHasImage = hasJerseyGallery(right.slug);
+        // Grupiranje po IGRAČU ima prednost: svi dresovi istog kluba i igrača
+        // moraju biti jedan do drugog, bez obzira ima li dres fotografiju ili
+        // ne (npr. svih 7 Yamala zajedno, i onaj bez slike). Zato prvo klub…
+        const byClub = repairText(left.klub).localeCompare(repairText(right.klub), "hr");
+        if (byClub !== 0) return byClub;
 
-        if (leftHasImage !== rightHasImage) {
-          return leftHasImage ? -1 : 1;
-        }
+        // …pa igrač.
+        const byPlayer = repairText(left.igrac).localeCompare(repairText(right.igrac), "hr");
+        if (byPlayer !== 0) return byPlayer;
 
-        return repairText(left.klub).localeCompare(repairText(right.klub), "hr");
+        // Tek unutar istog igrača: varijanta s fotografijom ide ispred one bez
+        // (slike su i u bazi za custom dresove, ne samo u statičkoj galeriji).
+        const leftHasImage = (left.images?.length ?? 0) > 0 || hasJerseyGallery(left.slug);
+        const rightHasImage = (right.images?.length ?? 0) > 0 || hasJerseyGallery(right.slug);
+        if (leftHasImage !== rightHasImage) return leftHasImage ? -1 : 1;
+
+        // Stabilan konačni redoslijed varijanti istog igrača.
+        return left.slug.localeCompare(right.slug);
       });
   }, [
     products,
