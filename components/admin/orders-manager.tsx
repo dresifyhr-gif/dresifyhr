@@ -133,7 +133,7 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [rows, setRows] = useState<NewItem[]>([{ klub: "", igrac: "", size: "", unitPrice: "20" }]);
-  const [shipping, setShipping] = useState("5");
+  const [shipping, setShipping] = useState("7");
   const [shippedBy, setShippedBy] = useState<"" | "igor" | "ivica">("");
   const [status, setStatus] = useState<"new" | "shipped">("new");
   const [saving, setSaving] = useState(false);
@@ -156,7 +156,7 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
     }).catch(() => null);
     setSaving(false);
     if (res && res.ok) {
-      setName(""); setPhone(""); setAddress(""); setEmail(""); setNote(""); setRows([{ klub: "", igrac: "", size: "", unitPrice: "20" }]); setShipping("5"); setShippedBy(""); setStatus("new");
+      setName(""); setPhone(""); setAddress(""); setEmail(""); setNote(""); setRows([{ klub: "", igrac: "", size: "", unitPrice: "20" }]); setShipping("7"); setShippedBy(""); setStatus("new");
       onCreated();
     } else {
       const d = res ? await res.json().catch(() => ({})) : {};
@@ -369,10 +369,17 @@ export function OrdersManager() {
 
   return (
     <div>
-      <div className="mb-3">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <button type="button" onClick={() => setShowNew((v) => !v)} className="rounded-md bg-slate-900 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-slate-800">
           {showNew ? "✕ Zatvori" : "➕ Nova narudžba (ručno)"}
         </button>
+        <a
+          href={`/api/admin/export/orders/?q=${encodeURIComponent(q)}&status=${status}&shipper=${shipper}&cash=${cashF}`}
+          className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-[12px] font-semibold text-emerald-700 transition hover:bg-emerald-100"
+          title="Preuzmi trenutačno filtrirane narudžbe kao CSV (Excel) — za knjigovođu/obrt"
+        >
+          ⬇️ Izvezi CSV{total > 0 ? ` (${total})` : ""}
+        </a>
       </div>
       {showNew && <NewOrderForm onCreated={() => { setShowNew(false); fetchPage(q, 1, false); }} />}
       {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (
