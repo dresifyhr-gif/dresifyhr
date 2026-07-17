@@ -113,7 +113,8 @@ export async function getDashboardMetrics() {
   // ── Extras (trends, shipping queue, win-back, cities, ad ROI): već pokrenuto gore, samo await ──
   const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll] = await extrasP;
 
-  // Trošak vraćenih pošiljki (4 € po povratu) — skida se s ukupnog profita.
+  // Trošak vraćenih pošiljki (RETURN_COST po povratu) — trenutno 0 € jer ne
+  // plaćamo poštarinu za povrat; ostaje u formuli za slučaj da se to promijeni.
   const returnLossTotal = returnedCountAll * RETURN_COST;
 
   const pct = (cur: number, prev: number | null) => (prev && prev > 0 ? ((cur - prev) / prev) * 100 : null);
@@ -250,7 +251,7 @@ export async function getDashboardMetrics() {
     adSpendTotal,
     roas: adSpendTotal > 0 ? totalRev / adSpendTotal : null,
     netAfterAds: totalProfit - returnLossTotal - adSpendTotal,
-    // Trošak vraćenih pošiljki (4 € po povratu) — već skinut s totalProfit.
+    // Trošak vraćenih pošiljki (RETURN_COST po povratu, trenutno 0 €).
     returnLossTotal,
     returnCostEach: RETURN_COST,
     todayRev: net(today),
