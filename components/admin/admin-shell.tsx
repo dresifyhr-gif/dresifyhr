@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search } from "lucide-react";
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
+import { CommandPalette } from "@/components/admin/command-palette";
 
 const NAV = [
   { href: "/admin", label: "Pregled", hint: "Početna", icon: LayoutDashboard },
@@ -85,12 +86,24 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
               <h1 className="text-lg font-bold tracking-tight text-slate-900">{title}</h1>
               {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
             </div>
-            <a
-              href="/api/admin/logout"
-              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-sm transition hover:text-slate-800 lg:hidden"
-            >
-              Odjava
-            </a>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
+                className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-400 shadow-sm transition hover:text-slate-700"
+                title="Globalno pretraživanje (⌘K)"
+              >
+                <Search className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Traži…</span>
+                <kbd className="hidden rounded border border-slate-200 px-1 py-0.5 text-[9px] font-semibold text-slate-400 sm:inline">⌘K</kbd>
+              </button>
+              <a
+                href="/api/admin/logout"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-sm transition hover:text-slate-800 lg:hidden"
+              >
+                Odjava
+              </a>
+            </div>
           </div>
           {/* Mobile page title */}
           <div className="mt-3 lg:hidden">
@@ -104,6 +117,9 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
 
       {/* Global AI assistant — available on every page */}
       <AdminAiDock />
+
+      {/* Globalno pretraživanje (⌘K) */}
+      <CommandPalette />
 
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">

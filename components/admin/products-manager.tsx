@@ -292,6 +292,12 @@ export function ProductsManager() {
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Početni pojam iz URL-a (?q=…) — kad ⌘K paleta skoči na proizvod.
+  useEffect(() => {
+    const urlQ = new URLSearchParams(window.location.search).get("q");
+    if (urlQ) setQ(urlQ);
+  }, []);
+
   useEffect(() => {
     fetch("/api/admin/products/")
       .then((r) => r.json())

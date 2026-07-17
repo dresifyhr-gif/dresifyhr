@@ -331,6 +331,12 @@ export function OrdersManager() {
     if (my === reqId.current) setLoading(false);
   }, []);
 
+  // Početni pojam iz URL-a (?q=…) — kad ⌘K paleta skoči na kupca.
+  useEffect(() => {
+    const urlQ = new URLSearchParams(window.location.search).get("q");
+    if (urlQ) setQ(urlQ);
+  }, []);
+
   // initial + debounced search (resets list); also refetches when status tab changes
   useEffect(() => {
     clearTimeout(debounce.current);
