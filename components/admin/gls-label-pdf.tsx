@@ -63,7 +63,8 @@ export function GlsLabelDoc({ recipientName, reference, qrDataUrl, instagramHand
 
           <View style={s.divider} />
 
-          <Text style={s.thanks}>Hvala na narudžbi! 🔥</Text>
+          {/* Bez emojija — PTSans nema te znakove pa se ispišu kao smeće ("=%"). */}
+          <Text style={s.thanks}>Hvala na narudžbi!</Text>
           <Text style={s.thanksSub}>Nadamo se da ćeš uživati u dresu.{"\n"}Ako nešto ne štima — samo se javi.</Text>
 
           <View style={s.igBox}>
