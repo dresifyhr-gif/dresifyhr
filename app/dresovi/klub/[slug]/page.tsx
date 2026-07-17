@@ -16,14 +16,14 @@ type ClubPageProps = {
   };
 };
 
-export function generateStaticParams() {
-  return getJerseyClubCollections().map((collection) => ({
+export async function generateStaticParams() {
+  return (await getJerseyClubCollections()).map((collection) => ({
     slug: collection.slug
   }));
 }
 
-export function generateMetadata({ params }: ClubPageProps): Metadata {
-  const collection = getJerseyClubBySlug(params.slug);
+export async function generateMetadata({ params }: ClubPageProps): Promise<Metadata> {
+  const collection = await getJerseyClubBySlug(params.slug);
 
   if (!collection) {
     return buildMetadata({
@@ -41,8 +41,8 @@ export function generateMetadata({ params }: ClubPageProps): Metadata {
   });
 }
 
-export default function ClubPage({ params }: ClubPageProps) {
-  const collection = getJerseyClubBySlug(params.slug);
+export default async function ClubPage({ params }: ClubPageProps) {
+  const collection = await getJerseyClubBySlug(params.slug);
 
   if (!collection) {
     notFound();
@@ -68,12 +68,12 @@ export default function ClubPage({ params }: ClubPageProps) {
         {
           title: "Kupuj po kategoriji",
           description: "Brzo preskoči na retro, dječje ili reprezentativne modele iz kataloga.",
-          collections: getFeaturedCategoryCollections()
+          collections: await getFeaturedCategoryCollections()
         },
         {
           title: "Povezani igrači",
           description: "Usporedi modele po igračima koji najčešće privlače klik i pretragu.",
-          collections: getFeaturedPlayerCollections(6)
+          collections: await getFeaturedPlayerCollections(6)
         }
       ]}
     />

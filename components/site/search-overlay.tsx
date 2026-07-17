@@ -1,26 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, X } from "lucide-react";
 
-import { jerseys } from "@/lib/data/jerseys";
 import { repairText } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
 
-function normalize(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
+type Hit = { slug: string; klub: string; igrac: string; liga: string };
 
 export function SearchOverlay() {
   const { locale } = useLanguage();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Hit[]>([]);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const reqId = useRef(0);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -46,16 +43,27 @@ export function SearchOverlay() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const results = useMemo(() => {
-    const q = normalize(query.trim());
-    if (!q) return [];
-    const terms = q.split(/\s+/);
-    return jerseys
-      .filter((j) => {
-        const haystack = normalize(`${j.klub} ${j.igrac} ${j.liga}`);
-        return terms.every((term) => haystack.includes(term));
-      })
-      .slice(0, 8);
+  // Pretraga ide na server (cijeli katalog: statički + custom + streetwear).
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const my = ++reqId.current;
+    const id = setTimeout(async () => {
+      try {
+        const d = await fetch(`/api/search/?q=${encodeURIComponent(q)}`).then((r) => r.json());
+        if (my !== reqId.current) return; // stariji odgovor — ignoriraj
+        setResults(d?.ok ? d.results : []);
+      } catch {
+        if (my === reqId.current) setResults([]);
+      }
+      if (my === reqId.current) setLoading(false);
+    }, 220);
+    return () => clearTimeout(id);
   }, [query]);
 
   const placeholder = locale === "en" ? "Search jerseys, clubs, players…" : "Traži dres, klub, igrača…";
@@ -114,14 +122,16 @@ export function SearchOverlay() {
                 </div>
 
                 <div className="max-h-[55vh] overflow-y-auto">
-                  {query.trim() && results.length === 0 ? (
-                    <p className="px-5 py-8 text-center text-sm text-white/45">{noResults}</p>
-                  ) : !query.trim() ? (
+                  {!query.trim() ? (
                     <p className="px-5 py-8 text-center text-sm text-white/35">{hint}</p>
+                  ) : loading ? (
+                    <p className="px-5 py-8 text-center text-sm text-white/35">{locale === "en" ? "Searching…" : "Tražim…"}</p>
+                  ) : results.length === 0 ? (
+                    <p className="px-5 py-8 text-center text-sm text-white/45">{noResults}</p>
                   ) : (
                     <ul className="py-2">
                       {results.map((j) => (
-                        <li key={j.id}>
+                        <li key={j.slug}>
                           <Link
                             href={`/dres/${j.slug}`}
                             onClick={() => setOpen(false)}

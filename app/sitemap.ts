@@ -24,9 +24,9 @@ async function getCustomSlugs(): Promise<string[]> {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = ["", "/dresovi", "/streetwear", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/igre", "/igra", "/flappy", "/gadaj"];
-  const categoryRoutes = getJerseyCategoryCollections().map((collection) => collection.path);
-  const clubRoutes = getJerseyClubCollections().map((collection) => collection.path);
-  const playerRoutes = getJerseyPlayerCollections().map((collection) => collection.path);
+  const categoryRoutes = (await getJerseyCategoryCollections()).map((collection) => collection.path);
+  const clubRoutes = (await getJerseyClubCollections()).map((collection) => collection.path);
+  const playerRoutes = (await getJerseyPlayerCollections()).map((collection) => collection.path);
   const customSlugs = await getCustomSlugs();
 
   return [

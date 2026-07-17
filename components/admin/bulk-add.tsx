@@ -273,7 +273,7 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
                           <p className="mt-1 text-[11px] font-semibold text-amber-700">⚠️ Vjerojatno već postoji: {r.dup} — odznačeno da se ne duplicira</p>
                         )}
                         {r.seen && !r.dup && (
-                          <p className={`mt-1 text-[11px] ${r.confidence === "low" ? "text-amber-600" : "text-slate-400"}`}>
+                          <p className={`mt-1 break-words text-[11px] ${r.confidence === "low" ? "text-amber-600" : "text-slate-400"}`}>
                             {r.confidence === "low" ? "⚠️ " : "👁 "}{r.seen}
                           </p>
                         )}

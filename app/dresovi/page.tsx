@@ -64,17 +64,17 @@ export default async function JerseysPage() {
           <SeoLinkGrid
             title={t.catalog.byCategory}
             description={t.catalog.byCategoryDesc}
-            collections={getFeaturedCategoryCollections()}
+            collections={await getFeaturedCategoryCollections()}
           />
           <SeoLinkGrid
             title={t.catalog.topClubs}
             description={t.catalog.topClubsDesc}
-            collections={getFeaturedClubCollections()}
+            collections={await getFeaturedClubCollections()}
           />
           <SeoLinkGrid
             title={t.catalog.popularPlayers}
             description={t.catalog.popularPlayersDesc}
-            collections={getFeaturedPlayerCollections()}
+            collections={await getFeaturedPlayerCollections()}
           />
         </div>
       </div>

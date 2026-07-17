@@ -16,14 +16,14 @@ type CategoryPageProps = {
   };
 };
 
-export function generateStaticParams() {
-  return getJerseyCategoryCollections().map((collection) => ({
+export async function generateStaticParams() {
+  return (await getJerseyCategoryCollections()).map((collection) => ({
     slug: collection.slug
   }));
 }
 
-export function generateMetadata({ params }: CategoryPageProps): Metadata {
-  const collection = getJerseyCategoryBySlug(params.slug);
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const collection = await getJerseyCategoryBySlug(params.slug);
 
   if (!collection) {
     return buildMetadata({
@@ -41,8 +41,8 @@ export function generateMetadata({ params }: CategoryPageProps): Metadata {
   });
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
-  const collection = getJerseyCategoryBySlug(params.slug);
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const collection = await getJerseyCategoryBySlug(params.slug);
 
   if (!collection) {
     notFound();
@@ -68,12 +68,12 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         {
           title: "Najtraženiji klubovi",
           description: "Klupske landing stranice koje vode prema modelima s najviše interesa.",
-          collections: getFeaturedClubCollections(8)
+          collections: await getFeaturedClubCollections(8)
         },
         {
           title: "Popularni igrači",
           description: "Otvori igračke landing stranice i usporedi modele po najjačim upitima.",
-          collections: getFeaturedPlayerCollections(6)
+          collections: await getFeaturedPlayerCollections(6)
         }
       ]}
     />

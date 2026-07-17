@@ -80,9 +80,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     { name: catLabel, path: catPath },
     { name: `${repairText(product.klub)} ${repairText(product.igrac)}`, path: `/dres/${product.slug}` }
   ]);
-  const clubCollection = getClubCollectionForProduct(product);
-  const playerCollection = getPlayerCollectionForProduct(product);
-  const categoryCollections = getCategoryCollectionsForProduct(product).slice(0, 5);
+  const clubCollection = await getClubCollectionForProduct(product);
+  const playerCollection = await getPlayerCollectionForProduct(product);
+  const categoryCollections = (await getCategoryCollectionsForProduct(product)).slice(0, 5);
 
   return (
     <section className="section-pad bg-[#0a0a0a]">

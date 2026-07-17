@@ -101,8 +101,8 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-2 font-semibold text-slate-900">
-            {isStreetwear && <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-600">🔥 Street</span>}
-            <span>{p.klub} — {p.igrac}</span>
+            {isStreetwear && <span className="shrink-0 rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-600">🔥 Street</span>}
+            <span className="truncate">{p.klub} — {p.igrac}</span>
           </div>
           <div className="text-[11px] text-slate-400">{p.liga}{p.overridden && !p.custom ? " · uređeno" : ""}</div>
           <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]">
@@ -214,7 +214,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
           <div className="flex flex-wrap items-center gap-1.5">
             <input value={klub} onChange={(e) => setKlub(e.target.value)} placeholder="Klub / brend" className="w-36 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
             <input value={igrac} onChange={(e) => setIgrac(e.target.value)} placeholder="Igrač / model" className="min-w-[150px] flex-1 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
-            <select value={liga} onChange={(e) => setLiga(e.target.value)} className="rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400">
+            <select value={liga} onChange={(e) => setLiga(e.target.value)} className="w-32 max-w-full shrink-0 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400">
               {(LIGE.includes(liga) ? LIGE : [liga, ...LIGE]).map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>

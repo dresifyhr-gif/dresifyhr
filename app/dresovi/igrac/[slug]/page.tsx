@@ -16,14 +16,14 @@ type PlayerPageProps = {
   };
 };
 
-export function generateStaticParams() {
-  return getJerseyPlayerCollections().map((collection) => ({
+export async function generateStaticParams() {
+  return (await getJerseyPlayerCollections()).map((collection) => ({
     slug: collection.slug
   }));
 }
 
-export function generateMetadata({ params }: PlayerPageProps): Metadata {
-  const collection = getJerseyPlayerBySlug(params.slug);
+export async function generateMetadata({ params }: PlayerPageProps): Promise<Metadata> {
+  const collection = await getJerseyPlayerBySlug(params.slug);
 
   if (!collection) {
     return buildMetadata({
@@ -41,8 +41,8 @@ export function generateMetadata({ params }: PlayerPageProps): Metadata {
   });
 }
 
-export default function PlayerPage({ params }: PlayerPageProps) {
-  const collection = getJerseyPlayerBySlug(params.slug);
+export default async function PlayerPage({ params }: PlayerPageProps) {
+  const collection = await getJerseyPlayerBySlug(params.slug);
 
   if (!collection) {
     notFound();
@@ -68,12 +68,12 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         {
           title: "Najtraženiji klubovi",
           description: "Otvori klubove u kojima se ovaj tip modela najčešće traži i usporedi ponudu.",
-          collections: getFeaturedClubCollections(8)
+          collections: await getFeaturedClubCollections(8)
         },
         {
           title: "Kupuj po kategoriji",
           description: "Skoči na retro, dječje i reprezentativne grupe koje dodatno šire long-tail pretrage.",
-          collections: getFeaturedCategoryCollections()
+          collections: await getFeaturedCategoryCollections()
         }
       ]}
     />

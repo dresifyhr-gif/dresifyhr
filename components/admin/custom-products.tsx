@@ -219,7 +219,7 @@ export function CustomProducts() {
                   onChange={(e) => setAiName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); aiFill(); } }}
                   placeholder="npr. Hrvatska Modrić 2026"
-                  className="flex-1 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+                  className="min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
                 />
                 <button type="button" onClick={aiFill} disabled={aiBusy || !aiName.trim()} className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:opacity-40">
                   {aiBusy ? "Slažem…" : "🪄 Popuni"}
@@ -322,7 +322,7 @@ export function CustomProducts() {
               <p className="mt-1.5 text-[11px] font-medium text-violet-600">🪄 AI čita sliku — popunjavam polja…</p>
             )}
             {!aiImgBusy && aiImgInfo && (
-              <p className={`mt-1.5 text-[11px] ${aiImgInfo.confidence === "low" ? "text-amber-600" : "text-slate-500"}`}>
+              <p className={`mt-1.5 break-words text-[11px] ${aiImgInfo.confidence === "low" ? "text-amber-600" : "text-slate-500"}`}>
                 {aiImgInfo.confidence === "low" ? "⚠️ " : "👁 "}
                 {aiImgInfo.seen}
                 {aiImgInfo.confidence === "low" && " — provjeri podatke prije spremanja."}

@@ -1,4 +1,5 @@
 import { jerseys, type Jersey } from "@/lib/data/jerseys";
+import { getCatalogProducts } from "@/lib/data/product-overrides";
 
 type CollectionDefinition = {
   slug: string;
@@ -23,13 +24,14 @@ export type JerseyCollection = {
 
 function buildCollections(
   prefix: "kategorija" | "klub" | "igrac",
-  definitions: CollectionDefinition[]
+  definitions: CollectionDefinition[],
+  products: Jersey[]
 ) {
   return definitions
     .map((definition) => ({
       ...definition,
       path: `/dresovi/${prefix}/${definition.slug}`,
-      products: jerseys.filter(definition.filter)
+      products: products.filter(definition.filter)
     }))
     .filter((collection) => collection.products.length > 0);
 }
@@ -40,6 +42,14 @@ const slugStartsWith =
   (...prefixes: string[]) =>
   (product: Jersey) =>
     prefixes.some((prefix) => product.slug.startsWith(prefix));
+// Klupski hubovi gađaju NAZIV kluba, ne slug prefiks — tako u hub sjednu i
+// dresovi dodani iz admina (njihov slug je drukčiji, npr. "manchester-united-sesko").
+const norm = (v: string) =>
+  String(v || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").trim();
+const klubIs =
+  (...names: string[]) =>
+  (product: Jersey) =>
+    names.some((n) => norm(product.klub) === norm(n));
 const playerNameIncludes =
   (...terms: string[]) =>
   (product: Jersey) => {
@@ -115,7 +125,7 @@ const clubDefinitions: CollectionDefinition[] = [
       "FC Barcelona dresovi s Yamalom, Messijem, Ronaldinhom i ostalim traženim imenima u jednom DRESIFY katalogu.",
     intro:
       "Barcelona je jedan od najtraženijih klubova u cijelom shopu, pa ova landing stranica skuplja aktualne i retro modele na jednom mjestu. Kupci najčešće ovdje traže Yamal, Messi, Ronaldinho i statement boje koje odmah odskaču na slici i uživo.",
-    filter: slugStartsWith("barcelona-")
+    filter: klubIs("FC Barcelona")
   },
   {
     slug: "real-madrid",
@@ -126,7 +136,7 @@ const clubDefinitions: CollectionDefinition[] = [
       "Real Madrid dresovi s Ronaldom, Mbappéom, Bellinghamom, Ramosom i Gülerom za djecu i odrasle.",
     intro:
       "Real Madrid landing stranica namijenjena je kupcima koji žele pregled svih bijelih, posebnih i finalnih modela na jednom mjestu. To uključuje aktualne zvijezde, velike europske trenutke i nekoliko retro komada koji redovito ulaze u top pretrage.",
-    filter: slugStartsWith("real-")
+    filter: klubIs("Real Madrid")
   },
   {
     slug: "brazil",
@@ -137,7 +147,7 @@ const clubDefinitions: CollectionDefinition[] = [
       "Brazil dresovi s Neymarom, Ronaldinhom, Peléom, Kakáom i Robertom Carlosom u posebnoj i retro ponudi.",
     intro:
       "Brazil je stalni evergreen u katalogu jer prolazi i kod klinaca i kod kupaca koji biraju poklon. Na ovoj stranici su skupljeni svi žuti, crni, plavi i retro modeli koji imaju jak identitet i visoku traženost.",
-    filter: slugStartsWith("brazil-")
+    filter: klubIs("Brazil")
   },
   {
     slug: "hrvatska",
@@ -148,7 +158,7 @@ const clubDefinitions: CollectionDefinition[] = [
       "Hrvatska dresovi s Modrićem i drugim traženim varijantama za kupce koji traže domaću reprezentaciju i brzu dostavu po Hrvatskoj.",
     intro:
       "Hrvatska je jedna od najvažnijih SEO i prodajnih kategorija za lokalnu publiku. Zato smo na ovu stranicu izdvojili sve dostupne domaće modele koji se najčešće traže za djecu, poklon i osobnu narudžbu.",
-    filter: slugStartsWith("hrvatska-")
+    filter: klubIs("Hrvatska")
   },
   {
     slug: "argentina",
@@ -159,7 +169,7 @@ const clubDefinitions: CollectionDefinition[] = [
       "Argentina dresovi s Messijem, uključujući crna posebna izdanja i Svjetsko prvenstvo 2022, za djecu i odrasle.",
     intro:
       "Argentina i Messi imaju konstantnu potražnju jer spajaju ogroman igrački status i prepoznatljiv vizual. Ova stranica okuplja sve argentinske modele i olakšava kupcu da u nekoliko klikova dođe do pravog izdanja.",
-    filter: slugStartsWith("argentina-")
+    filter: klubIs("Argentina")
   },
   {
     slug: "psg",
@@ -170,7 +180,7 @@ const clubDefinitions: CollectionDefinition[] = [
       "PSG dresovi s Hakimijem, Ronaldinhom, Douéom i Kvaratskheliom za kupce koji traže francuske klupske modele s jačim vizualom.",
     intro:
       "PSG modeli dobro prolaze kod kupaca koji žele tamnije i modernije dresove, kao i kod onih koji traže nešto drukčije od standardnih domaćih garnitura. Na jednom mjestu skupljamo aktualna i retro izdanja s najvećim interesom.",
-    filter: slugStartsWith("psg-")
+    filter: klubIs("PSG")
   },
   {
     slug: "bayern-munchen",
@@ -181,7 +191,7 @@ const clubDefinitions: CollectionDefinition[] = [
       "Bayern München dresovi s Musialom i posebnim izdanjima za kupce koji traže Bundesliga favorite u dječjim i odraslim veličinama.",
     intro:
       "Bayern landing stranica objedinjuje crvene i posebne modele koji su čest izbor za Bundesliga publiku. Dobra je za kupce koji znaju klub, ali žele brzo vidjeti sve dostupne varijante bez dodatnog filtriranja.",
-    filter: slugStartsWith("bayern-")
+    filter: klubIs("Bayern München", "Bayern Munich")
   },
   {
     slug: "manchester-united",
@@ -192,7 +202,7 @@ const clubDefinitions: CollectionDefinition[] = [
       "Manchester United dresovi s Ronaldom u UCL i retro izdanjima za kupce koji traže prepoznatljive crvene i crne modele.",
     intro:
       "Manchester United modeli ulaze među najjače pretrage kad netko traži Ronaldo dres s jačom nostalgijom i europskim kontekstom. Ovdje su skupljene upravo te varijante koje najbolje prolaze u shopu.",
-    filter: slugStartsWith("manutd-")
+    filter: klubIs("Manchester United")
   },
   {
     slug: "inter-miami",
@@ -203,7 +213,73 @@ const clubDefinitions: CollectionDefinition[] = [
       "Inter Miami dresovi s Messijem za sve koji traže rozi MLS hit model u dječjim i odraslim veličinama.",
     intro:
       "Inter Miami je odličan long-tail SEO ulaz jer kupci često traže baš Messi rozi dres. Ova stranica cilja te pretrage i odmah vodi prema konkretnom modelu koji je vizualno prepoznatljiv na prvi pogled.",
-    filter: slugStartsWith("intermiami-")
+    filter: klubIs("Inter Miami")
+  },
+  {
+    slug: "bih",
+    label: "BiH",
+    heading: "BiH dresovi",
+    title: "BiH dresovi — reprezentacija Bosne i Hercegovine",
+    description:
+      "BiH dresovi s Džekom, Bajraktarevićem i Alajbegovićem — reprezentacija Bosne i Hercegovine uz dostavu po cijeloj Hrvatskoj.",
+    intro:
+      "Reprezentacija Bosne i Hercegovine ima vjernu publiku i kod nas i u susjedstvu, a zanimanje raste oko kvalifikacija i velikih turnira. Na ovoj stranici skupljeni su svi dostupni BiH modeli — od aktualnih izdanja do imena koja se najviše traže.",
+    filter: klubIs("BiH", "Bosna i Hercegovina")
+  },
+  {
+    slug: "spanjolska",
+    label: "Španjolska",
+    heading: "Španjolska dresovi",
+    title: "Španjolska dresovi — reprezentacija",
+    description:
+      "Španjolska dresovi s Yamalom u bijeloj i crvenoj varijanti, za djecu i odrasle, uz plaćanje pouzećem.",
+    intro:
+      "Španjolska je uz Yamala postala jedna od najtraženijih reprezentacija kod mlađih kupaca. Ovdje su okupljeni svi španjolski modeli koje držimo, s naglaskom na aktualna izdanja koja se najbrže okreću.",
+    filter: klubIs("Španjolska", "Spain")
+  },
+  {
+    slug: "francuska",
+    label: "Francuska",
+    heading: "Francuska dresovi",
+    title: "Francuska dresovi — reprezentacija",
+    description:
+      "Francuska dresovi s Mbappéom, Oliseom i Zidaneom — od aktualnih izdanja do retro klasika.",
+    intro:
+      "Francuska spaja aktualne zvijezde i jedan od najkultnijih retro komada u cijelom katalogu. Na ovoj stranici su svi francuski modeli koje držimo, pa je lako usporediti nova izdanja i klasike.",
+    filter: klubIs("Francuska", "France")
+  },
+  {
+    slug: "austrija",
+    label: "Austrija",
+    heading: "Austrija dresovi",
+    title: "Austrija dresovi — reprezentacija",
+    description:
+      "Austrija dresovi sa Sabitzerom — reprezentativni model uz dostavu po cijeloj Hrvatskoj i plaćanje pouzećem.",
+    intro:
+      "Austrijska reprezentacija je rjeđi izbor, pa je zanimljiva onima koji žele dres koji se ne viđa na svakom uglu. Ovdje su svi austrijski modeli koje trenutno držimo.",
+    filter: klubIs("Austrija", "Austria")
+  },
+  {
+    slug: "liverpool",
+    label: "Liverpool",
+    heading: "Liverpool dresovi",
+    title: "Liverpool dresovi",
+    description:
+      "Liverpool dresovi u dječjim i odraslim veličinama, uz fiksnu cijenu i dostavu po cijeloj Hrvatskoj.",
+    intro:
+      "Liverpool ima stabilnu navijačku bazu u Hrvatskoj i redovito ulazi u pretrage tijekom sezone Premier lige. Na ovoj stranici su svi Liverpool modeli koje držimo na jednom mjestu.",
+    filter: klubIs("Liverpool")
+  },
+  {
+    slug: "ac-milan",
+    label: "AC Milan",
+    heading: "AC Milan dresovi",
+    title: "AC Milan dresovi",
+    description:
+      "AC Milan dresovi s Modrićem, Maldinijem i Ibrahimovićem — aktualna i retro izdanja.",
+    intro:
+      "AC Milan je posebno zanimljiv otkad Modrić nosi crveno-crni dres, pa se traži i kod domaćih navijača. Ovdje su okupljeni svi Milan modeli, od aktualnih do retro komada s jakim karakterom.",
+    filter: klubIs("AC Milan", "Milan")
   }
 ];
 
@@ -276,66 +352,69 @@ const playerDefinitions: CollectionDefinition[] = [
   }
 ];
 
-const categoryCollections = buildCollections("kategorija", categoryDefinitions);
-const clubCollections = buildCollections("klub", clubDefinitions);
-const playerCollections = buildCollections("igrac", playerDefinitions);
-
-export function getJerseyCategoryCollections() {
-  return categoryCollections;
+// Kolekcije se grade nad CIJELIM katalogom (statički dresovi + izmjene iz admina
+// + dresovi dodani iz admina). Prije su gledale samo statički niz, pa novi
+// proizvodi nisu ulazili u klupske/igračke hubove. Katalog je keširan (60s).
+async function allJerseys(): Promise<Jersey[]> {
+  return getCatalogProducts(jerseys);
 }
 
-export function getJerseyCategoryBySlug(slug: string) {
-  return categoryCollections.find((collection) => collection.slug === slug);
+export async function getJerseyCategoryCollections() {
+  return buildCollections("kategorija", categoryDefinitions, await allJerseys());
 }
 
-export function getJerseyClubCollections() {
-  return clubCollections;
+export async function getJerseyCategoryBySlug(slug: string) {
+  return (await getJerseyCategoryCollections()).find((collection) => collection.slug === slug);
 }
 
-export function getJerseyClubBySlug(slug: string) {
-  return clubCollections.find((collection) => collection.slug === slug);
+export async function getJerseyClubCollections() {
+  return buildCollections("klub", clubDefinitions, await allJerseys());
 }
 
-export function getJerseyPlayerCollections() {
-  return playerCollections;
+export async function getJerseyClubBySlug(slug: string) {
+  return (await getJerseyClubCollections()).find((collection) => collection.slug === slug);
 }
 
-export function getJerseyPlayerBySlug(slug: string) {
-  return playerCollections.find((collection) => collection.slug === slug);
+export async function getJerseyPlayerCollections() {
+  return buildCollections("igrac", playerDefinitions, await allJerseys());
 }
 
-export function getFeaturedCategoryCollections(limit = 5) {
-  return [...categoryCollections]
+export async function getJerseyPlayerBySlug(slug: string) {
+  return (await getJerseyPlayerCollections()).find((collection) => collection.slug === slug);
+}
+
+export async function getFeaturedCategoryCollections(limit = 5) {
+  return [...(await getJerseyCategoryCollections())]
     .sort((left, right) => right.products.length - left.products.length)
     .slice(0, limit);
 }
 
-export function getFeaturedClubCollections(limit = 8) {
-  return [...clubCollections]
+export async function getFeaturedClubCollections(limit = 8) {
+  return [...(await getJerseyClubCollections())]
     .sort((left, right) => right.products.length - left.products.length)
     .slice(0, limit);
 }
 
-export function getFeaturedPlayerCollections(limit = 6) {
-  return [...playerCollections]
+export async function getFeaturedPlayerCollections(limit = 6) {
+  return [...(await getJerseyPlayerCollections())]
     .sort((left, right) => right.products.length - left.products.length)
     .slice(0, limit);
 }
 
-export function getClubCollectionForProduct(product: Jersey) {
-  return clubCollections.find((collection) =>
+export async function getClubCollectionForProduct(product: Jersey) {
+  return (await getJerseyClubCollections()).find((collection) =>
     collection.products.some((item) => item.slug === product.slug)
   );
 }
 
-export function getPlayerCollectionForProduct(product: Jersey) {
-  return playerCollections.find((collection) =>
+export async function getPlayerCollectionForProduct(product: Jersey) {
+  return (await getJerseyPlayerCollections()).find((collection) =>
     collection.products.some((item) => item.slug === product.slug)
   );
 }
 
-export function getCategoryCollectionsForProduct(product: Jersey) {
-  return categoryCollections.filter((collection) =>
+export async function getCategoryCollectionsForProduct(product: Jersey) {
+  return (await getJerseyCategoryCollections()).filter((collection) =>
     collection.products.some((item) => item.slug === product.slug)
   );
 }
