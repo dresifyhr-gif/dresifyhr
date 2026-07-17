@@ -25,7 +25,7 @@ export function ProductFaq({ product, locale = "hr" }: { product: Jersey; locale
         },
         {
           q: "How much is shipping and how long does it take?",
-          a: "Shipping is €5.00 across Croatia (free for orders from €60), dispatched in 2–5 business days via HP Paket24."
+          a: "Shipping is €7.00 across Croatia (free for orders from €60), dispatched in 2–5 business days via GLS."
         },
         {
           q: `How do I pay for the ${klub} jersey?`,
@@ -49,7 +49,7 @@ export function ProductFaq({ product, locale = "hr" }: { product: Jersey; locale
         },
         {
           q: "Koliko košta dostava i koliko traje?",
-          a: "Dostava je 5,00 € po cijeloj Hrvatskoj (besplatna za narudžbe od 60 €), uz isporuku 2–5 radnih dana putem HP Paket24."
+          a: "Dostava je 7,00 € po cijeloj Hrvatskoj (besplatna za narudžbe od 60 €), uz isporuku 2–5 radnih dana putem GLS."
         },
         {
           q: `Kako plaćam ${klub} dres?`,

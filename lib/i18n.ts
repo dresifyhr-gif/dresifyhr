@@ -10,7 +10,7 @@ export const HR_COUNTRIES = new Set(["HR", "BA", "RS", "SI", "ME", "MK"]);
 const hr = {
   announcement: [
     "🏆 SP 2026 je tu — navijaj u svom dresu! Reprezentacije od 20€",
-    "📦 Dostava pouzećem po cijeloj Hrvatskoj — 5,00€",
+    "📦 Dostava pouzećem po cijeloj Hrvatskoj — 7,00€",
     "⚡ Novo svaki tjedan — provjeri katalog",
     "💬 Naruči na WhatsApp — odgovaramo u sat vremena",
   ],
@@ -255,7 +255,7 @@ const hr = {
     email: "Email adresa",
     step2: "Način dostave",
     deliveryCod: "Dostava pouzećem",
-    deliveryCodDesc: "HP Paket24, plaćanje pri preuzimanju",
+    deliveryCodDesc: "GLS dostava, plaćanje pri preuzimanju",
     street: "Ulica i kućni broj",
     city: "Grad",
     zip: "Poštanski broj",
@@ -279,7 +279,7 @@ const hr = {
 const en: typeof hr = {
   announcement: [
     "🏆 World Cup 2026 is here — cheer in your jersey! National teams from €20",
-    "📦 Cash on delivery across Croatia — 5.00€",
+    "📦 Cash on delivery across Croatia — 7.00€",
     "⚡ New drops every week — check the catalog",
     "💬 Order on WhatsApp — we reply within the hour",
   ],
@@ -519,7 +519,7 @@ const en: typeof hr = {
     email: "Email address",
     step2: "Delivery method",
     deliveryCod: "Cash on delivery",
-    deliveryCodDesc: "HP Paket24, pay on receipt",
+    deliveryCodDesc: "GLS delivery, pay on receipt",
     street: "Street and house number",
     city: "City",
     zip: "Postal code",

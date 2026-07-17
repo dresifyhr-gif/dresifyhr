@@ -82,9 +82,11 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
   }
 
   async function addFiles(files: FileList | File[]) {
-    const list = await loadExisting();
+    // Kopiraj listu ODMAH: FileList je živ objekt i nestane čim se input resetira
+    // ili drop event završi — čitanje nakon awaita bi dalo praznu listu.
     const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
     if (!arr.length) return;
+    const list = await loadExisting();
 
     const fresh: Row[] = arr.map((f, i) => ({
       key: `${Date.now()}-${i}-${f.name}`,
@@ -204,7 +206,7 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
 
       <div
         onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files); }}
+        onDrop={(e) => { e.preventDefault(); const f = Array.from(e.dataTransfer.files); if (f.length) addFiles(f); }}
         onClick={() => inputRef.current?.click()}
         className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 border-dashed border-violet-300 bg-white p-5 text-center text-sm transition hover:border-violet-500"
       >
@@ -217,7 +219,7 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
           accept="image/*"
           multiple
           className="hidden"
-          onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }}
+          onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) addFiles(f); }}
         />
       </div>
 

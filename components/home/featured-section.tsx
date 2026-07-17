@@ -3,26 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { jerseys } from "@/lib/data/jerseys";
+import type { Jersey } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { formatPrice, repairText } from "@/lib/utils";
 
-const FEATURED_SLUGS = [
-  "hrvatska-modric-2026",
-  "milan-modric",
-  "alnassr-ronaldo-zuti",
-  "argentina-messi-retro",
-  "bayern-kane-crveni",
-  "dortmund-adeyemi",
-  "atletico-griezmann",
-  "real-bellingham",
-];
-
-const featuredProducts = FEATURED_SLUGS
-  .map((slug) => jerseys.find((j) => j.slug === slug))
-  .filter(Boolean) as typeof jerseys;
-
-export function FeaturedSection() {
+// Proizvodi dolaze sa servera (ručni odabir iz admina) — vidi getFeaturedProducts.
+export function FeaturedSection({ products }: { products: Jersey[] }) {
+  const featuredProducts = products;
+  if (!featuredProducts.length) return null;
   return (
     <section className="section-pad bg-[#111111]">
       <div className="page-shell">

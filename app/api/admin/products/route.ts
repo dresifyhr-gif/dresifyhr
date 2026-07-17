@@ -96,6 +96,7 @@ export async function GET() {
       soldOutSizes,
       hidden: ov ? ov.hidden : false,
       badge: ov?.badge != null ? ov.badge : j.badge ?? "",
+      featured: ov ? ov.featured : Boolean(j.featured),
       overridden: !!ov,
       sold,
       revenue,
@@ -132,6 +133,7 @@ export async function GET() {
       soldOutSizes: c.soldOutSizes ? c.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : [],
       hidden: c.hidden,
       badge: c.badge ?? "",
+      featured: Boolean(c.featured),
       overridden: true,
       sold,
       revenue,
@@ -162,6 +164,7 @@ export async function POST(request: Request) {
   const sizes: string[] = Array.isArray(body?.soldOutSizes) ? body.soldOutSizes.filter((s: unknown) => typeof s === "string") : [];
   const hidden = body?.hidden === true;
   const badge = body?.badge === "bestseller" || body?.badge === "novo" ? body.badge : null;
+  const featured = body?.featured === true;
   const priceVal = price != null && Number.isFinite(price) ? price : null;
   const description = typeof body?.description === "string" && body.description.trim() ? body.description.trim() : null;
 
@@ -194,6 +197,7 @@ export async function POST(request: Request) {
         soldOutSizes: sizes.join(",") || null,
         hidden,
         badge,
+        featured,
         description
       }
     });
@@ -225,6 +229,7 @@ export async function POST(request: Request) {
     soldOutSizes: sizes.join(",") || null,
     hidden,
     badge,
+    featured,
     description
   };
 

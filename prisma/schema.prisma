@@ -112,6 +112,7 @@ model ProductOverride {
   soldOutSizes String? // npr. "XL,XXL"
   hidden       Boolean  @default(false) // draft/sakriveno — ne prikazuje se na shopu
   badge        String? // "bestseller" | "novo" | "" (prazno = bez)
+  featured     Boolean  @default(false) // ručno odabran za "Najprodavaniji dresovi" na naslovnici
   description  String? // vlastiti opis (paragrafi odvojeni novim redom); prazno = auto
   updatedAt    DateTime @updatedAt
 }
@@ -141,6 +142,7 @@ model CustomProduct {
   retro        Boolean  @default(false)
   vel          String   @default("Djeca: 104-176 · Odrasli: S-XXL")
   badge        String?
+  featured     Boolean  @default(false) // ručno odabran za "Najprodavaniji dresovi" na naslovnici
   stock        Int? // ručno postavljena ukupna količina (prazno = automatska); ako ima sizeStock, računa se zbroj
   sizeStock    String? // JSON količina po veličini, npr. {"S":3,"M":5,"L":0}; 0 = rasprodana veličina
   outOfStock   String?

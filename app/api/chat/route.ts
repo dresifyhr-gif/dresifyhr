@@ -13,7 +13,7 @@ Kontakt: WhatsApp +385 97 604 7510 | Instagram @dresify.hr | Email dresify.hr@gm
 === CIJENE ===
 - Svaki dres: 20€
 - Komplet (dres + hlačice + lopta + kapa): 40€
-- Dostava: 5,00€ pouzećem (HP Paket24), 2–5 radnih dana
+- Dostava: 7,00€ pouzećem (GLS), 2–5 radnih dana
 - Besplatna dostava za narudžbe 60€ i više
 - Plaćanje isključivo pouzećem (gotovina pri preuzimanju, bez kartice)
 

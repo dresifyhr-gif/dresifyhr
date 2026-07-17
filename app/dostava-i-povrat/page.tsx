@@ -9,7 +9,7 @@ import { WHATSAPP_URL } from "@/lib/site";
 export const metadata: Metadata = buildMetadata({
   title: "Dostava i povrat",
   description:
-    "Sve o dostavi i povratu: HP Paket24 dostava 2–5 radnih dana, plaćanje pouzećem, besplatna dostava preko 60 €, jednostavna zamjena i povrat.",
+    "Sve o dostavi i povratu: GLS dostava 2–5 radnih dana, plaćanje pouzećem, besplatna dostava preko 60 €, jednostavna zamjena i povrat.",
   path: "/dostava-i-povrat"
 });
 
@@ -17,7 +17,7 @@ const deliveryItems = [
   {
     icon: Truck,
     title: "Kako šaljemo",
-    text: "Sve narudžbe šaljemo putem HP Paket24 kurirske službe na svaku adresu u Hrvatskoj."
+    text: "Sve narudžbe šaljemo putem GLS kurirske službe na svaku adresu u Hrvatskoj."
   },
   {
     icon: Clock,
@@ -32,7 +32,7 @@ const deliveryItems = [
   {
     icon: MapPin,
     title: "Cijena dostave",
-    text: "Dostava je 5,00 € po cijeloj Hrvatskoj. Za narudžbe preko 60 € dostava je besplatna."
+    text: "Dostava je 7,00 € po cijeloj Hrvatskoj. Za narudžbe preko 60 € dostava je besplatna."
   }
 ];
 

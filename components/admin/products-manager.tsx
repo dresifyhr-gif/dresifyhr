@@ -22,6 +22,7 @@ type Product = {
   soldOutSizes: string[];
   hidden: boolean;
   badge: string;
+  featured: boolean;
   overridden: boolean;
   sold: number;
   revenue: number;
@@ -59,6 +60,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const [soldSizes, setSoldSizes] = useState<string[]>(p.soldOutSizes);
   const [hidden, setHidden] = useState(p.hidden);
   const [badge, setBadge] = useState(p.badge);
+  const [featured, setFeatured] = useState(p.featured);
   const [desc, setDesc] = useState(p.description || p.descriptionAuto);
   const [showDesc, setShowDesc] = useState(false);
   const [klub, setKlub] = useState(p.klub);
@@ -74,7 +76,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const stockOrig = p.stock == null ? "" : String(p.stock);
   const sizeStockDirty = (p.sizeList || []).some((s) => (sizeStock[s] || "") !== (p.sizeStock?.[s] != null ? String(p.sizeStock[s]) : ""));
   const imagesDirty = images.join("|") !== (p.images || []).join("|");
-  const dirty = price !== String(p.price) || stock !== stockOrig || sizeStockDirty || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || descToSave !== p.description || klub !== p.klub || igrac !== p.igrac || liga !== p.liga || imagesDirty;
+  const dirty = price !== String(p.price) || stock !== stockOrig || sizeStockDirty || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || featured !== p.featured || descToSave !== p.description || klub !== p.klub || igrac !== p.igrac || liga !== p.liga || imagesDirty;
   const sizeStockTotal = (p.sizeList || []).reduce((sum, s) => sum + (Number(sizeStock[s]) || 0), 0);
   const hasSizeStock = (p.sizeList || []).some((s) => (sizeStock[s] || "").trim() !== "");
 
@@ -89,7 +91,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     await fetch("/api/admin/products/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: p.slug, klub, igrac, liga, images, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), sizeStock: Object.fromEntries((p.sizeList || []).filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])])), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, description: descToSave })
+      body: JSON.stringify({ slug: p.slug, klub, igrac, liga, images, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), sizeStock: Object.fromEntries((p.sizeList || []).filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])])), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, featured, description: descToSave })
     }).catch(() => {});
     setSaving(false);
     setSaved(true);
@@ -154,6 +156,14 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             className={`rounded-md px-2 py-1 text-[11px] font-semibold transition ${hidden ? "bg-amber-500 text-white hover:bg-amber-600" : "border border-slate-200 text-slate-500 hover:bg-slate-50"}`}
           >
             {hidden ? "🙈 Skriveno" : "👁 Vidljivo"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setFeatured((v) => !v)}
+            title={featured ? "Prikazan u 'Najprodavaniji dresovi' na naslovnici — klikni da makneš" : "Klikni da ga staviš u 'Najprodavaniji dresovi' na naslovnici"}
+            className={`shrink-0 rounded-md px-2 py-1 text-[11px] font-semibold transition ${featured ? "bg-orange-500 text-white hover:bg-orange-600" : "border border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+          >
+            {featured ? "🔥 Najprodavaniji" : "🔥 Dodaj u top"}
           </button>
           <button
             type="button"

@@ -10,6 +10,8 @@ export type Jersey = {
   vel: string;
   price?: number;
   badge?: "bestseller" | "novo";
+  // Ručno odabran u adminu za sekciju "Najprodavaniji dresovi" na naslovnici.
+  featured?: boolean;
   outOfStock?: "adults" | "kids" | "all";
   // Specific sizes that are sold out (e.g. ["XL","XXL"] or kids ["104","116"]).
   soldOutSizes?: string[];

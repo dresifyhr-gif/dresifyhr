@@ -43,7 +43,7 @@ const fetchSoldSlugs = unstable_cache(
 
 // Admin-managed overrides (price / stock) merged onto the static catalog. Best-effort:
 // if the DB is unavailable or empty, the shop uses the base catalog unchanged.
-type Override = { slug: string; klub: string | null; igrac: string | null; liga: string | null; images: string | null; price: number | null; stock: number | null; sizeStock: string | null; outOfStock: string | null; soldOutSizes: string | null; hidden: boolean; badge: string | null; description: string | null };
+type Override = { slug: string; klub: string | null; igrac: string | null; liga: string | null; images: string | null; price: number | null; stock: number | null; sizeStock: string | null; outOfStock: string | null; soldOutSizes: string | null; hidden: boolean; badge: string | null; description: string | null; featured?: boolean };
 
 // JSON niz URL-ova slika iz override-a (prazno = originalne slike iz /public).
 function parseImages(raw: string | null): string[] | undefined {
@@ -90,6 +90,7 @@ function merge(j: Jersey, ov?: Override): Jersey {
     sizeStock: parseSizeStock(ov.sizeStock) ?? j.sizeStock,
     outOfStock,
     badge,
+    featured: ov.featured ?? j.featured,
     descriptionOverride: ov.description || undefined,
     soldOutSizes: ov.soldOutSizes != null ? (ov.soldOutSizes ? ov.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : []) : j.soldOutSizes
   };
@@ -115,6 +116,7 @@ export type CustomRow = {
   id: string; slug: string; category: string; klub: string; igrac: string; liga: string; price: number;
   retro: boolean; vel: string; badge: string | null; stock: number | null; sizeStock: string | null;
   outOfStock: string | null; soldOutSizes: string | null; description: string | null; images: string; hidden: boolean;
+  featured?: boolean;
 };
 
 function slugHashId(slug: string): number {
@@ -138,6 +140,7 @@ export function customToJersey(c: CustomRow): Jersey {
     vel: c.vel,
     price: c.price,
     badge,
+    featured: Boolean(c.featured),
     stock: c.stock ?? undefined,
     sizeStock: parseSizeStock(c.sizeStock),
     outOfStock,
@@ -184,6 +187,28 @@ function withRating(j: Jersey, sold: Set<string>): Jersey {
 export async function getCatalogProducts(base: Jersey[]): Promise<Jersey[]> {
   const [withOv, custom, sold] = await Promise.all([withOverrides(base), getCustomJerseys(), getSoldSlugs()]);
   return [...custom, ...withOv].map((j) => withRating(j, sold));
+}
+
+// Zadani "Najprodavaniji" ako Gazda još nije ručno označio nijedan proizvod.
+const DEFAULT_FEATURED_SLUGS = [
+  "hrvatska-modric-2026",
+  "milan-modric",
+  "alnassr-ronaldo-zuti",
+  "argentina-messi-retro",
+  "bayern-kane-crveni",
+  "dortmund-adeyemi",
+  "atletico-griezmann",
+  "real-bellingham"
+];
+
+// Proizvodi za sekciju "Najprodavaniji dresovi" na naslovnici.
+// Ručno označeni u adminu (featured); ako ih nema, koristi se zadani popis.
+export async function getFeaturedProducts(base: Jersey[], limit = 12): Promise<Jersey[]> {
+  const all = await getCatalogProducts(base);
+  const picked = all.filter((j) => j.featured);
+  if (picked.length) return picked.slice(0, limit);
+  const bySlug = new Map(all.map((j) => [j.slug, j]));
+  return DEFAULT_FEATURED_SLUGS.map((s) => bySlug.get(s)).filter((j): j is Jersey => Boolean(j));
 }
 
 // Dohvat pojedinog proizvoda po slugu: prvo custom, pa osnovni + override.

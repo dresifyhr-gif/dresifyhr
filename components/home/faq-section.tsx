@@ -13,7 +13,7 @@ const FAQ_HR = [
   },
   {
     q: "Koliko košta i traje dostava?",
-    a: "Dostava je 5,00 € po cijeloj Hrvatskoj putem HP Paket24 kurirske službe. Rok isporuke je 2–5 radnih dana od potvrde narudžbe.",
+    a: "Dostava je 7,00 € po cijeloj Hrvatskoj putem GLS kurirske službe. Rok isporuke je 2–5 radnih dana od potvrde narudžbe.",
   },
   {
     q: "Dolaze li dječji dresovi s hlačicama?",
@@ -48,7 +48,7 @@ const FAQ_EN = [
   },
   {
     q: "How much is shipping and how long does it take?",
-    a: "Shipping is €5.00 across Croatia via HP Paket24 courier. Delivery takes 2–5 business days from order confirmation.",
+    a: "Shipping is €7.00 across Croatia via GLS courier. Delivery takes 2–5 business days from order confirmation.",
   },
   {
     q: "Do kids' jerseys come with shorts?",

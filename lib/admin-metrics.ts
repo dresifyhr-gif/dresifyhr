@@ -179,7 +179,7 @@ export async function getDashboardMetrics() {
   ]);
   const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, pending: 0 });
   const cashSplit: Record<"igor" | "ivica", ReturnType<typeof mkCash>> = { igor: mkCash(), ivica: mkCash() };
-  let freeDeliveries = 0; // prikupljene narudžbe s besplatnom dostavom (mi platili poštu ~3€)
+  let freeDeliveries = 0; // prikupljene narudžbe s besplatnom dostavom (mi platili dostavu ~5€)
   for (const o of cashOrders) {
     const who = o.shippedBy === "igor" ? "igor" : o.shippedBy === "ivica" ? "ivica" : null;
     if (!who) continue;
@@ -198,11 +198,11 @@ export async function getDashboardMetrics() {
     for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) k += q; else d += q; }
     const b = cashSplit[who];
     b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k;
-    // Besplatna dostava = roba ≥ 60€ ILI osvojeno na igrici ILI streetwear → mi platili ~3€ pošti.
+    // Besplatna dostava = roba ≥ 60€ ILI osvojeno na igrici ILI streetwear → mi platili ~5€ pošti.
     const isFreeShip = amt >= 60 || Boolean(o.promoCode && o.promoCode.trim()) || o.items.some((it) => it.slug && streetwearSlugs.has(it.slug));
     if (isFreeShip) freeDeliveries++;
   }
-  const DELIVERY_COST = 3;
+  const DELIVERY_COST = 5;
   const freeShipCost = freeDeliveries * DELIVERY_COST;
   // Vraćene pošiljke od zadnjeg poravnanja: 4 € svaka, skida se sa zajedničke marže (po 2 € svakome).
   const returnLossSettle = returnedSinceCount * RETURN_COST;
@@ -217,7 +217,7 @@ export async function getDashboardMetrics() {
   const collectedDresovi = cashSplit.igor.collectedDresovi + cashSplit.ivica.collectedDresovi;
   const collectedKompleti = cashSplit.igor.collectedKompleti + cashSplit.ivica.collectedKompleti;
   const collectedCost = collectedDresovi * COST_PER_ITEM + collectedKompleti * COST_KOMPLET; // Ivici nazad
-  // Besplatne dostave (~3€) i vraćene pošiljke (4€) su naši troškovi → skidaju se s marže
+  // Besplatne dostave (~5€) i vraćene pošiljke (4€) su naši troškovi → skidaju se s marže
   // prije podjele, pa ih oboje snose pola-pola (npr. povrat = 2€ Igor + 2€ Ivica).
   const collectedMargin = totalCollected - collectedCost - freeShipCost - returnLossSettle;
   const marginHalf = collectedMargin / 2;

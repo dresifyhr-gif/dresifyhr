@@ -10,7 +10,7 @@ import { ReviewsSection } from "@/components/home/reviews-section";
 import { StreetwearBanner } from "@/components/home/streetwear-banner";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { jerseys } from "@/lib/data/jerseys";
-import { getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
+import { getFeaturedProducts, getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
 import { getVisibleTestimonials } from "@/lib/testimonials";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import { buildMetadata } from "@/lib/seo";
@@ -63,7 +63,7 @@ export default async function HomePage() {
           images={streetwear.map((p) => p.images?.[0]?.src).filter((s): s is string => !!s).slice(0, 5)}
         />
       )}
-      <FeaturedSection />
+      <FeaturedSection products={await getFeaturedProducts(jerseys)} />
 
       <section className="section-pad bg-[#0a0a0a]">
         <div className="page-shell">
