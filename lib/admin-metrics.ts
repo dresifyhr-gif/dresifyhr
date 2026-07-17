@@ -138,7 +138,7 @@ export async function getDashboardMetrics() {
   const riskyCustomers = [...riskMap.values()]
     .filter((c) => c.failed > 0)
     .sort((a, b) => b.failed - a.failed || b.lastAt.getTime() - a.lastAt.getTime())
-    .slice(0, 40)
+    .slice(0, 200)
     .map((c) => ({ name: c.name, phone: c.phone, failed: c.failed, collected: c.collected }));
 
   // Trošak vraćenih pošiljki (RETURN_COST po povratu) — trenutno 0 € jer ne
