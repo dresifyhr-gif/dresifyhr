@@ -15,7 +15,9 @@ export async function GET() {
 }
 
 const numOrNull = (v: unknown) => {
-  const n = Number(String(v ?? "").replace(",", "."));
+  const s = String(v ?? "").trim();
+  if (!s) return null; // prazno = koristi zadanu vrijednost (ne 0!)
+  const n = Number(s.replace(",", "."));
   return Number.isFinite(n) && n >= 0 ? n : null;
 };
 const strOrNull = (v: unknown) => {
