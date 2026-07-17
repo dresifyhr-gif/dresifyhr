@@ -158,12 +158,14 @@ export function CustomProducts() {
 
   return (
     <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="flex items-center justify-between">
-        <div>
+      {/* Na mobitelu naslov i gumbi idu jedno ispod drugog — u istom redu bi
+          gumbi stisnuli naslov na jednu riječ po retku. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <div className="text-sm font-bold text-slate-900">Novi proizvodi — dresovi i streetwear</div>
           <div className="text-xs text-slate-400">{list.length} dodano · dodaj dres ili 🔥 streetwear sa slikama</div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
           {list.length > 0 && (
             <button
               type="button"
