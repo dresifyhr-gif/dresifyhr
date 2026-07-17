@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from "react";
 
-const SENDERS = {
+type Who = "igor" | "ivica";
+type Sender = { name: string; address: string; city: string };
+type Senders = Record<Who, Sender>;
+
+const DEFAULT_SENDERS: Senders = {
   igor: { name: "Igor Katanić", address: "Dubljevička ulica 91", city: "10040 Zagreb" },
   ivica: { name: "Ivica Karamatić", address: "Katoro 54", city: "52470 Umag" }
-} as const;
-
-type Who = keyof typeof SENDERS;
+};
 
 // Sender block on the shipping label — pick Igor or Ivica (different addresses).
 // Remembers the choice per device (Ivica's phone/PC defaults to Ivica).
-export function LabelSender({ defaultSender }: { defaultSender?: Who }) {
+// Podaci pošiljatelja dolaze iz Postavki (prop); fallback na zadane.
+export function LabelSender({ defaultSender, senders }: { defaultSender?: Who; senders?: Senders }) {
+  const SENDERS = senders ?? DEFAULT_SENDERS;
   const [who, setWho] = useState<Who>(defaultSender ?? "igor");
 
   useEffect(() => {

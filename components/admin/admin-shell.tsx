@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search } from "lucide-react";
+import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings } from "lucide-react";
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
 import { CommandPalette } from "@/components/admin/command-palette";
@@ -97,6 +97,13 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
                 <span className="hidden sm:inline">Traži…</span>
                 <kbd className="hidden rounded border border-slate-200 px-1 py-0.5 text-[9px] font-semibold text-slate-400 sm:inline">⌘K</kbd>
               </button>
+              <Link
+                href="/admin/postavke"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:text-slate-700"
+                title="Postavke"
+              >
+                <Settings className="h-4 w-4" />
+              </Link>
               <a
                 href="/api/admin/logout"
                 className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-sm transition hover:text-slate-800 lg:hidden"

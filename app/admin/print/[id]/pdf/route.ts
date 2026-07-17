@@ -5,19 +5,16 @@ import { ShippingLabelDoc } from "@/components/admin/shipping-label-pdf";
 import { isAdmin } from "@/lib/admin-auth";
 import { codAmount, getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/settings";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const SENDERS = {
-  igor: { name: "Igor Katanić", address: "Dubljevička ulica 91", city: "10040 Zagreb" },
-  ivica: { name: "Ivica Karamatić", address: "Katoro 54", city: "52470 Umag" }
-} as const;
-
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
+  const SENDERS = (await getSettings()).senders;
   const { id } = await params;
   const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
   if (!order) return new NextResponse("Not found", { status: 404 });

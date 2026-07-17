@@ -179,3 +179,28 @@ model AdSpend {
 
   @@index([date])
 }
+
+// Postavke shopa — jedan redak (id="singleton"). Uređuje se u adminu (Postavke),
+// pa se cijene/adrese mijenjaju bez diranja koda. Prazno/null = koristi default iz lib/site.ts.
+model Settings {
+  id                  String   @id @default("singleton")
+  // Dostava i naplata
+  shippingPrice       Float?   // ukupna cijena dostave kupcu (npr. 7)
+  freeShipThreshold   Float?   // roba ≥ ovoga = besplatna dostava (npr. 60)
+  // Nabava (za profit/poravnanje)
+  costDres            Float?   // nabavna cijena dresa (npr. 6)
+  costKomplet         Float?   // nabavna cijena kompleta (npr. 18)
+  // Pošiljatelji (naljepnice)
+  igorName            String?
+  igorAddress         String?
+  igorCity            String?
+  ivicaName           String?
+  ivicaAddress        String?
+  ivicaCity           String?
+  // Posao (naljepnice / budući računi)
+  iban                String?
+  businessName        String?
+  contactPhone        String?
+  contactEmail        String?
+  updatedAt           DateTime @updatedAt
+}

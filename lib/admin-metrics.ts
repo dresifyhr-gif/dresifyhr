@@ -2,11 +2,10 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import { jerseys } from "@/lib/data/jerseys";
+import { getSettings } from "@/lib/settings";
 
 const DAY = 86_400_000;
-// Nabavne cijene: dres 6€ (prodaja 20 → profit 14), KOMPLET 18€ (prodaja 40 → profit 22).
-export const COST_PER_ITEM = 6; // dres
-const COST_KOMPLET = 18;
+// Nabavne cijene (dres/komplet) dolaze iz Postavki — vidi getSettings().
 // Vraćena pošiljka (kupac je nije preuzeo) — poštarina tamo-natrag koju mi plaćamo.
 // Skida se s ukupnog profita, a u podjeli sa zajedničke marže (dakle po 2 € svakome).
 // Povrat pošiljke više ne košta (ne plaćamo poštarinu za vraćeni paket) → 0 €.
@@ -19,6 +18,8 @@ const kompletItemWhere = {
 
 export async function getDashboardMetrics() {
   const now = new Date();
+  // Nabavne cijene iz Postavki (fallback na zadane) — utječu na profit i poravnanje.
+  const { costDres, costKomplet } = await getSettings();
   // Početak današnjeg dana po Europe/Zagreb (Vercel radi u UTC-u) kao UTC instant —
   // inače bi "promet danas" u ranim satima gledao krivi (UTC) dan.
   const zp = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zagreb", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
@@ -50,7 +51,7 @@ export async function getDashboardMetrics() {
     const count = all._count;
     const revenue = all._sum.unitPrice ?? 0;
     const discount = disc._sum.discount ?? 0;
-    const cost = komplet * COST_KOMPLET + (count - komplet) * COST_PER_ITEM;
+    const cost = komplet * costKomplet + (count - komplet) * costDres;
     return revenue - discount - cost;
   };
 
@@ -247,7 +248,7 @@ export async function getDashboardMetrics() {
   const totalCollected = cashSplit.igor.collected + cashSplit.ivica.collected;
   const collectedDresovi = cashSplit.igor.collectedDresovi + cashSplit.ivica.collectedDresovi;
   const collectedKompleti = cashSplit.igor.collectedKompleti + cashSplit.ivica.collectedKompleti;
-  const collectedCost = collectedDresovi * COST_PER_ITEM + collectedKompleti * COST_KOMPLET; // Ivici nazad
+  const collectedCost = collectedDresovi * costDres + collectedKompleti * costKomplet; // Ivici nazad
   // Besplatne dostave (~5€) i vraćene pošiljke (4€) su naši troškovi → skidaju se s marže
   // prije podjele, pa ih oboje snose pola-pola (npr. povrat = 2€ Igor + 2€ Ivica).
   const collectedMargin = totalCollected - collectedCost - freeShipCost - returnLossSettle;

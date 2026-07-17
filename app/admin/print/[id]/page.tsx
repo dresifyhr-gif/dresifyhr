@@ -6,6 +6,7 @@ import { PdfLabelLink } from "@/components/admin/pdf-label-link";
 import { isAdmin } from "@/lib/admin-auth";
 import { codAmount, getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/settings";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -58,7 +59,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
 
       <div className="label mx-auto w-[360px] rounded-lg bg-white p-4 pl-7 text-black shadow-lg print:shadow-none">
         {/* Šalje — Igor ili Ivica (različite adrese) */}
-        <LabelSender defaultSender={order.shippedBy === "ivica" ? "ivica" : order.shippedBy === "igor" ? "igor" : undefined} />
+        <LabelSender defaultSender={order.shippedBy === "ivica" ? "ivica" : order.shippedBy === "igor" ? "igor" : undefined} senders={(await getSettings()).senders} />
 
         <div className="my-3 border-t-2 border-black" />
 
