@@ -43,6 +43,15 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
         <a href="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-800">← Nazad</a>
         <div className="flex items-center gap-2">
           <PdfLabelLink id={id} defaultSender={order.shippedBy === "ivica" ? "ivica" : order.shippedBy === "igor" ? "igor" : undefined} />
+          <a
+            href={`/admin/print/${id}/gls/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="GLS naljepnica: ime kupca + logo + QR na Instagram (adresu radi GLS)"
+            className="rounded-md bg-orange-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-orange-600"
+          >
+            🚚 GLS
+          </a>
           <AutoPrint />
         </div>
       </div>

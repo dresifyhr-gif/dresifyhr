@@ -541,6 +541,15 @@ export function OrdersManager() {
                     >
                       📄 Ivica
                     </a>
+                    <a
+                      href={`/admin/print/${o.id}/gls/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="GLS naljepnica: ime kupca + logo + QR na Instagram (adresu radi GLS)"
+                      className="rounded-md bg-orange-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-orange-600"
+                    >
+                      🚚 GLS
+                    </a>
                   </span>
                 </div>
 
