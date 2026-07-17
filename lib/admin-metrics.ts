@@ -9,7 +9,9 @@ export const COST_PER_ITEM = 6; // dres
 const COST_KOMPLET = 18;
 // Vraćena pošiljka (kupac je nije preuzeo) — poštarina tamo-natrag koju mi plaćamo.
 // Skida se s ukupnog profita, a u podjeli sa zajedničke marže (dakle po 2 € svakome).
-const RETURN_COST = 4;
+// Povrat pošiljke više ne košta (ne plaćamo poštarinu za vraćeni paket) → 0 €.
+// Ostaje kao konstanta da se lako vrati ako se to ikad promijeni.
+const RETURN_COST = 0;
 // Komplet se prepoznaje po slugu/nazivu koji sadrži "komplet".
 const kompletItemWhere = {
   OR: [{ slug: { contains: "komplet" } }, { igrac: { contains: "komplet", mode: "insensitive" as const } }]

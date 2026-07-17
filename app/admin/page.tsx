@@ -118,7 +118,7 @@ export default async function AdminOverview() {
             {m.returnedCount > 0 && (
               <li className="flex items-start gap-2">
                 <span>↩️</span>
-                <span className="text-slate-700">Vraćene pošiljke: <b>{m.returnedCount}</b> · {m.returnedQty} kom ({eur(m.returnedTotal)}) — <span className="text-slate-400">nije u prometu</span> · <b className="text-red-600">−{eur(m.returnLossTotal)}</b> <span className="text-slate-400">poštarine ({m.returnCostEach}€ po povratu)</span></span>
+                <span className="text-slate-700">Vraćene pošiljke: <b>{m.returnedCount}</b> · {m.returnedQty} kom ({eur(m.returnedTotal)}) — <span className="text-slate-400">nije u prometu</span></span>
               </li>
             )}
             {m.cancelledCount > 0 && (
@@ -216,7 +216,7 @@ export default async function AdminOverview() {
             <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
               <span className="text-slate-500">Prikupljeno <b className="ml-1 text-slate-900">{eur(m.split.totalCollected)}</b></span>
               <span className="text-slate-500">− Roba natrag Ivici <b className="ml-1 text-slate-900">{eur(m.split.collectedCost)}</b></span>
-              {m.split.returnedSinceCount > 0 && (
+              {m.split.returnLossSettle > 0 && (
                 <span className="text-slate-500">− Povrati <b className="ml-1 text-red-600">{eur(m.split.returnLossSettle)}</b> <span className="text-slate-400">({m.split.returnedSinceCount} vraćenih × {m.split.returnCostEach}€ · po {m.split.returnCostEach / 2}€ svakome)</span></span>
               )}
               {m.split.freeDeliveries > 0 && (
