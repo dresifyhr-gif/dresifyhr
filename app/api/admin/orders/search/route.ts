@@ -55,6 +55,41 @@ export async function GET(request: Request) {
 
   const isSent = (s: string) => s === "shipped" || s === "done";
 
+  // ── Rizik kupca ─────────────────────────────────────────────────────────
+  // Normaliziraj broj na same znamenke (bez prefiksa 385/0) da isti kupac s
+  // različitim zapisom broja bude prepoznat kao jedna osoba.
+  const phoneKey = (p?: string | null) => {
+    let d = String(p || "").replace(/\D/g, "");
+    if (d.startsWith("385")) d = d.slice(3);
+    if (d.startsWith("0")) d = d.slice(1);
+    return d; // npr. "912345678"
+  };
+  // Po telefonu izbroji koliko je narudžbi propalo (otkazano ili vraćeno) i
+  // koliko ih je uspješno preuzeto (naplaćeno pouzeće). Cijela povijest kupca.
+  const historyByPhone = new Map<string, { failed: number; collected: number; total: number }>();
+  for (const o of all) {
+    const key = phoneKey(o.phone);
+    if (!key) continue;
+    const h = historyByPhone.get(key) || { failed: 0, collected: 0, total: 0 };
+    h.total++;
+    if (o.status === "cancelled" || o.status === "returned") h.failed++;
+    else if (isSent(o.status) && o.cashCollected) h.collected++;
+    historyByPhone.set(key, h);
+  }
+  // Rizik POJEDINE narudžbe = propale narudžbe tog broja BEZ trenutne
+  // (zanima nas ima li kupac RANIJE odbijanja, ne broji se ova narudžba).
+  const riskFor = (o: { phone?: string | null; status: string }) => {
+    const key = phoneKey(o.phone);
+    const h = key ? historyByPhone.get(key) : null;
+    if (!h) return { failed: 0, collected: 0, priorOrders: 0 };
+    const isThisFailed = o.status === "cancelled" || o.status === "returned";
+    return {
+      failed: h.failed - (isThisFailed ? 1 : 0), // ranija odbijanja
+      collected: h.collected,
+      priorOrders: h.total - 1
+    };
+  };
+
   let filtered = all;
   if (status === "shipped") filtered = filtered.filter((o) => isSent(o.status));
   else if (status) filtered = filtered.filter((o) => o.status === status);
@@ -142,6 +177,7 @@ export async function GET(request: Request) {
       tracking: o.tracking || "",
       promoCode: o.promoCode || null,
       cashCollected: o.cashCollected,
+      risk: riskFor(o),
       items: o.items.map((it) => ({
         id: it.id,
         klub: repairText(it.klub || ""),

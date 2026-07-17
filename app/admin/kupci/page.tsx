@@ -68,6 +68,37 @@ export default async function CustomersPage() {
       </div>
 
       <div className="mt-5">
+        <Panel title={`Rizični kupci (odbili pouzeće) · ${m.riskyCustomers.length}`}>
+          {m.riskyCustomers.length === 0 ? (
+            <div className="text-sm text-slate-400">Nema rizičnih kupaca — svi uredno preuzimaju. 👌</div>
+          ) : (
+            <ul className="max-h-96 space-y-2 overflow-y-auto">
+              {m.riskyCustomers.map((c, i) => {
+                const wa = waLink(c.phone);
+                return (
+                  <li key={`${c.phone}-${i}`} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="min-w-0 truncate text-slate-700">
+                      {c.name ? formatCroatianName(c.name) : c.phone || "—"}
+                      {c.phone ? <span className="text-slate-400"> · {c.phone}</span> : null}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-2">
+                      <span className="rounded bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-700">{c.failed}× odbio</span>
+                      {c.collected > 0 && <span className="text-[11px] text-emerald-600">{c.collected}× ok</span>}
+                      {wa && (
+                        <a href={wa} target="_blank" rel="noopener noreferrer" className="rounded bg-emerald-500 px-2 py-0.5 text-[11px] font-semibold text-white hover:bg-emerald-600">
+                          WhatsApp
+                        </a>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Panel>
+      </div>
+
+      <div className="mt-5">
         <Panel title="Odakle kupci (top gradovi)">
           {m.topCities.length === 0 ? (
             <div className="text-sm text-slate-400">Nema podataka.</div>

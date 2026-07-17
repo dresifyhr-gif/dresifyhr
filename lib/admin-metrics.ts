@@ -69,7 +69,10 @@ export async function getDashboardMetrics() {
     prisma.order.findMany({ where: { status: "cancelled" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
     prisma.order.findMany({ where: { status: { in: ["shipped", "done"] }, shippedBy: null }, orderBy: { createdAt: "desc" }, take: 200, select: { id: true, createdAt: true, customerName: true, total: true } }),
     // Točan ukupan broj vraćenih (lista gore je ograničena na 50) — za trošak povrata.
-    prisma.order.count({ where: { status: "returned" } })
+    prisma.order.count({ where: { status: "returned" } }),
+    // Rizik po kupcu: minimalna polja SVIH narudžbi (mali skup) — grupira se po
+    // telefonu u JS-u da izračunamo tko je odbijao pouzeće.
+    prisma.order.findMany({ select: { customerName: true, phone: true, status: true, cashCollected: true, createdAt: true } })
   ]);
   const settlementsP = prisma.settlement.findMany({ orderBy: { settledAt: "desc" }, take: 6 });
   const streetwearP = prisma.customProduct.findMany({ where: { category: "streetwear" }, select: { slug: true } });
@@ -111,7 +114,32 @@ export async function getDashboardMetrics() {
   const totalRev = net(total);
 
   // ── Extras (trends, shipping queue, win-back, cities, ad ROI): već pokrenuto gore, samo await ──
-  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll] = await extrasP;
+  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll, riskRows] = await extrasP;
+
+  // ── Rizični kupci ─────────────────────────────────────────────────────────
+  // Grupiraj sve narudžbe po telefonu (normaliziran na znamenke bez 385/0) i
+  // izbroji propale (otkazano/vraćeno) vs. uredno preuzete. Rizičan = ≥1 propala.
+  const riskPhoneKey = (p?: string | null) => {
+    let d = String(p || "").replace(/\D/g, "");
+    if (d.startsWith("385")) d = d.slice(3);
+    if (d.startsWith("0")) d = d.slice(1);
+    return d;
+  };
+  const riskMap = new Map<string, { name: string; phone: string; failed: number; collected: number; lastAt: Date }>();
+  for (const o of riskRows) {
+    const key = riskPhoneKey(o.phone);
+    if (!key) continue;
+    const cur = riskMap.get(key) || { name: o.customerName || o.phone || "—", phone: o.phone || "", failed: 0, collected: 0, lastAt: o.createdAt };
+    if (o.status === "cancelled" || o.status === "returned") cur.failed++;
+    else if ((o.status === "shipped" || o.status === "done") && o.cashCollected) cur.collected++;
+    if (o.createdAt >= cur.lastAt) { cur.lastAt = o.createdAt; cur.name = o.customerName || cur.name; cur.phone = o.phone || cur.phone; }
+    riskMap.set(key, cur);
+  }
+  const riskyCustomers = [...riskMap.values()]
+    .filter((c) => c.failed > 0)
+    .sort((a, b) => b.failed - a.failed || b.lastAt.getTime() - a.lastAt.getTime())
+    .slice(0, 40)
+    .map((c) => ({ name: c.name, phone: c.phone, failed: c.failed, collected: c.collected }));
 
   // Trošak vraćenih pošiljki (RETURN_COST po povratu) — trenutno 0 € jer ne
   // plaćamo poštarinu za povrat; ostaje u formuli za slučaj da se to promijeni.
@@ -274,6 +302,7 @@ export async function getDashboardMetrics() {
     split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, collectedCost, freeDeliveries, freeShipCost, returnedSinceCount, returnLossSettle, returnCostEach: RETURN_COST, collectedMargin, marginHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
     topItems,
     bestCustomers,
+    riskyCustomers,
     recentOrders,
     byDay,
     deadProducts

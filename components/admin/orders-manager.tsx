@@ -30,6 +30,7 @@ type Order = {
   tracking: string;
   promoCode: string | null;
   cashCollected: boolean;
+  risk?: { failed: number; collected: number; priorOrders: number };
   items: { id: string; klub: string; igrac: string; label: string; size: string; quantity: number; unitPrice: number }[];
 };
 
@@ -480,6 +481,14 @@ export function OrdersManager() {
                         </span>
                       )}
                       {o.shippedBy && <span className="text-[10px] text-slate-400">({o.shippedBy})</span>}
+                      {o.risk && o.risk.failed > 0 && (
+                        <span
+                          title={`Ovaj broj je ranije ${o.risk.failed}× odbio pouzeće (otkazano/vraćeno)${o.risk.collected > 0 ? `, a ${o.risk.collected}× uredno preuzeo` : ""}. Provjeri prije slanja.`}
+                          className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-700"
+                        >
+                          ⚠️ Rizičan · {o.risk.failed}× odbio{o.risk.collected > 0 ? ` · ${o.risk.collected}× ok` : ""}
+                        </span>
+                      )}
                     </div>
                     <div className="mt-0.5 text-xs text-slate-500">
                       {o.date} · {formatCroatianPhone(o.phone)}
