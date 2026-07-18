@@ -297,6 +297,8 @@ export function OrdersManager() {
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
   const debounce = useRef<ReturnType<typeof setTimeout>>();
   const sentinel = useRef<HTMLDivElement>(null);
   const reqId = useRef(0);
@@ -371,6 +373,30 @@ export function OrdersManager() {
     // refresh current list in place (keeps scroll position, updated statuses)
     await fetchPage(q, 1, false);
     setBusy(null);
+  }
+
+  function toggleSel(id: string) {
+    setSelected((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  async function bulk(action: "ship" | "collect", by?: "igor" | "ivica") {
+    if (bulkBusy || selected.size === 0) return;
+    const ids = [...selected];
+    const label = action === "ship" ? `označiti POSLANO${by ? ` (${by})` : ""}` : "označiti NAPLAĆENO";
+    if (!window.confirm(`Za ${ids.length} narudžbi: ${label}?`)) return;
+    setBulkBusy(true);
+    await fetch("/api/admin/orders/bulk/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, action, by })
+    }).catch(() => {});
+    setSelected(new Set());
+    await fetchPage(q, 1, false);
+    setBulkBusy(false);
   }
 
   return (
@@ -471,6 +497,20 @@ export function OrdersManager() {
         <span className="shrink-0 text-xs text-slate-400">{total} narudžbi</span>
       </div>
 
+      {/* Skupne akcije — pojave se kad je nešto označeno */}
+      {selected.size > 0 && (
+        <div className="sticky top-2 z-10 mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-300 bg-slate-900 px-3 py-2 text-white shadow-lg">
+          <span className="text-sm font-semibold">{selected.size} označeno</span>
+          <span className="text-white/40">·</span>
+          <span className="text-xs text-white/70">Označi poslano:</span>
+          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "igor")} className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-semibold hover:bg-white/20 disabled:opacity-50">📦 Igor</button>
+          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "ivica")} className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-semibold hover:bg-white/20 disabled:opacity-50">📦 Ivica</button>
+          <span className="text-white/40">·</span>
+          <button type="button" disabled={bulkBusy} onClick={() => bulk("collect")} className="rounded-md bg-emerald-500 px-2.5 py-1 text-xs font-semibold hover:bg-emerald-600 disabled:opacity-50">💰 Naplaćeno</button>
+          <button type="button" onClick={() => setSelected(new Set())} className="ml-auto rounded-md px-2 py-1 text-xs text-white/60 hover:text-white">Odznači</button>
+        </div>
+      )}
+
       {orders.length === 0 ? (
         <div className="py-8 text-center text-sm text-slate-400">{loading ? "Učitavam…" : "Nema rezultata."}</div>
       ) : (
@@ -479,9 +519,17 @@ export function OrdersManager() {
             const st = STATUS[o.status] || { label: o.status, cls: "bg-slate-100 text-slate-500" };
             const isBusy = busy === o.id;
             return (
-              <div key={o.id} className="rounded-lg border border-slate-200 p-3">
+              <div key={o.id} className={`rounded-lg border p-3 ${selected.has(o.id) ? "border-slate-400 bg-slate-50" : "border-slate-200"}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0 max-w-full">
+                  <div className="flex min-w-0 max-w-full items-start gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(o.id)}
+                      onChange={() => toggleSel(o.id)}
+                      className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-slate-900"
+                      title="Označi za skupnu akciju"
+                    />
+                    <div className="min-w-0 max-w-full">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       {phoneKey(o.phone) ? (
                         <a href={`/admin/kupci/${phoneKey(o.phone)}`} className="font-semibold text-slate-900 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500" title="Otvori profil kupca">{o.customerName}</a>
@@ -539,6 +587,7 @@ export function OrdersManager() {
                         ))}
                       </ul>
                     )}
+                    </div>
                   </div>
                   <span className="flex flex-wrap items-center justify-end gap-1.5">
                     {waLink(o.phone) && (
