@@ -252,11 +252,11 @@ function TrackingRow({ id, initial }: { id: string; initial: string }) {
       </button>
       {val.trim() && (
         <a
-          href="https://gls-group.com/HR/hr/pracenje-posiljke/"
+          href="https://posiljka.posta.hr/en"
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0 rounded-md bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-slate-800"
-          title="Otvori GLS praćenje pošiljke (zalijepi broj)"
+          title="Otvori praćenje na Hrvatskoj pošti (za HP pošiljke; GLS tracking dolazi na email)"
         >
           🔗 Prati na Pošti
         </a>
