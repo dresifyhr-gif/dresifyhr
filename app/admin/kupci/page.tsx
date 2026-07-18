@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin-auth";
@@ -6,7 +7,19 @@ import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { TestimonialsManager } from "@/components/admin/testimonials-manager";
 import { Panel, eur, waLink } from "@/components/admin/ui";
-import { formatCroatianName } from "@/lib/utils";
+import { formatCroatianName, phoneKey } from "@/lib/utils";
+
+// Ime kupca kao poveznica na profil (ako ima telefon).
+function CustomerLink({ name, phone }: { name?: string | null; phone?: string | null }) {
+  const label = name ? formatCroatianName(name) : phone || "—";
+  const key = phoneKey(phone);
+  if (!key) return <span className="text-slate-700">{label}</span>;
+  return (
+    <Link href={`/admin/kupci/${key}`} className="font-medium text-slate-700 underline decoration-slate-300 underline-offset-2 hover:text-slate-900 hover:decoration-slate-500">
+      {label}
+    </Link>
+  );
+}
 
 export const metadata: Metadata = { title: "Kupci — Dresify Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -29,8 +42,8 @@ export default async function CustomersPage() {
             <ul className="space-y-2.5">
               {m.bestCustomers.map((c) => (
                 <li key={c.id} className="flex items-center justify-between text-sm">
-                  <span className="text-slate-700">
-                    {c.name ? formatCroatianName(c.name) : c.phone || "—"} <span className="text-slate-400">· {c.totalOrders}×</span>
+                  <span className="min-w-0 truncate">
+                    <CustomerLink name={c.name} phone={c.phone} /> <span className="text-slate-400">· {c.totalOrders}×</span>
                   </span>
                   <span className="font-semibold text-emerald-600">{eur(c.totalSpent)}</span>
                 </li>
@@ -48,8 +61,8 @@ export default async function CustomersPage() {
                 const wa = waLink(c.phone);
                 return (
                   <li key={c.id} className="flex items-center justify-between gap-2 text-sm">
-                    <span className="min-w-0 truncate text-slate-700">
-                      {c.name ? formatCroatianName(c.name) : c.phone || "—"} <span className="text-slate-400">· {c.lastOrderAt.toLocaleDateString("hr-HR")}</span>
+                    <span className="min-w-0 truncate">
+                      <CustomerLink name={c.name} phone={c.phone} /> <span className="text-slate-400">· {c.lastOrderAt.toLocaleDateString("hr-HR")}</span>
                     </span>
                     <span className="flex shrink-0 items-center gap-2">
                       <span className="font-semibold text-emerald-600">{eur(c.totalSpent)}</span>
@@ -77,8 +90,8 @@ export default async function CustomersPage() {
                 const wa = waLink(c.phone);
                 return (
                   <li key={`${c.phone}-${i}`} className="flex items-center justify-between gap-2 text-sm">
-                    <span className="min-w-0 truncate text-slate-700">
-                      {c.name ? formatCroatianName(c.name) : c.phone || "—"}
+                    <span className="min-w-0 truncate">
+                      <CustomerLink name={c.name} phone={c.phone} />
                       {c.phone ? <span className="text-slate-400"> · {c.phone}</span> : null}
                     </span>
                     <span className="flex shrink-0 items-center gap-2">

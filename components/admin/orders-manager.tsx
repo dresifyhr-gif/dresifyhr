@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { formatCroatianPhone } from "@/lib/utils";
+import { formatCroatianPhone, phoneKey } from "@/lib/utils";
 import { waLink } from "@/components/admin/ui";
 
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
@@ -483,7 +483,11 @@ export function OrdersManager() {
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0 max-w-full">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span className="font-semibold text-slate-900">{o.customerName}</span>
+                      {phoneKey(o.phone) ? (
+                        <a href={`/admin/kupci/${phoneKey(o.phone)}`} className="font-semibold text-slate-900 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500" title="Otvori profil kupca">{o.customerName}</a>
+                      ) : (
+                        <span className="font-semibold text-slate-900">{o.customerName}</span>
+                      )}
                       <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
                       {o.promoCode && (
                         <span

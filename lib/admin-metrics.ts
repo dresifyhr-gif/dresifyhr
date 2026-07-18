@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { jerseys } from "@/lib/data/jerseys";
 import { getSettings } from "@/lib/settings";
+import { phoneKey } from "@/lib/utils";
 
 const DAY = 86_400_000;
 // Nabavne cijene (dres/komplet) dolaze iz Postavki — vidi getSettings().
@@ -118,17 +119,11 @@ export async function getDashboardMetrics() {
   const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll, riskRows] = await extrasP;
 
   // ── Rizični kupci ─────────────────────────────────────────────────────────
-  // Grupiraj sve narudžbe po telefonu (normaliziran na znamenke bez 385/0) i
-  // izbroji propale (otkazano/vraćeno) vs. uredno preuzete. Rizičan = ≥1 propala.
-  const riskPhoneKey = (p?: string | null) => {
-    let d = String(p || "").replace(/\D/g, "");
-    if (d.startsWith("385")) d = d.slice(3);
-    if (d.startsWith("0")) d = d.slice(1);
-    return d;
-  };
+  // Grupiraj sve narudžbe po telefonu (phoneKey iz lib/utils) i izbroji propale
+  // (otkazano/vraćeno) vs. uredno preuzete. Rizičan = ≥1 propala.
   const riskMap = new Map<string, { name: string; phone: string; failed: number; collected: number; lastAt: Date }>();
   for (const o of riskRows) {
-    const key = riskPhoneKey(o.phone);
+    const key = phoneKey(o.phone);
     if (!key) continue;
     const cur = riskMap.get(key) || { name: o.customerName || o.phone || "—", phone: o.phone || "", failed: 0, collected: 0, lastAt: o.createdAt };
     if (o.status === "cancelled" || o.status === "returned") cur.failed++;

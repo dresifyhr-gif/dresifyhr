@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
-import { formatCroatianName, repairText } from "@/lib/utils";
+import { formatCroatianName, phoneKey, repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,15 +56,7 @@ export async function GET(request: Request) {
   const isSent = (s: string) => s === "shipped" || s === "done";
 
   // ── Rizik kupca ─────────────────────────────────────────────────────────
-  // Normaliziraj broj na same znamenke (bez prefiksa 385/0) da isti kupac s
-  // različitim zapisom broja bude prepoznat kao jedna osoba.
-  const phoneKey = (p?: string | null) => {
-    let d = String(p || "").replace(/\D/g, "");
-    if (d.startsWith("385")) d = d.slice(3);
-    if (d.startsWith("0")) d = d.slice(1);
-    return d; // npr. "912345678"
-  };
-  // Po telefonu izbroji koliko je narudžbi propalo (otkazano ili vraćeno) i
+  // Po telefonu (phoneKey iz lib/utils) izbroji koliko je narudžbi propalo (otkazano ili vraćeno) i
   // koliko ih je uspješno preuzeto (naplaćeno pouzeće). Cijela povijest kupca.
   const historyByPhone = new Map<string, { failed: number; collected: number; total: number }>();
   for (const o of all) {

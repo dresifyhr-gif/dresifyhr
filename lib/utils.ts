@@ -116,6 +116,16 @@ export function formatCroatianName(value: string) {
   return cleaned.split(" ").map(titleCase).join(" ");
 }
 
+// Ključ kupca iz telefona: same znamenke bez prefiksa 385/0, da isti kupac
+// zapisan različito (+385, 0…, 00385) bude jedna osoba. Prazno ako nema broja.
+export function phoneKey(raw?: string | null): string {
+  let d = String(raw ?? "").replace(/\D/g, "");
+  if (d.startsWith("00385")) d = d.slice(5);
+  else if (d.startsWith("385")) d = d.slice(3);
+  if (d.startsWith("0")) d = d.slice(1);
+  return d;
+}
+
 // Normalizira hrvatski broj mobitela za prikaz (naljepnica/pošta): uvijek počinje 09.
 // Rješava brojeve upisane bez vodeće nule ili s +385 / 00385.
 export function formatCroatianPhone(raw: string) {
