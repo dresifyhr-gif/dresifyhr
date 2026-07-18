@@ -20,7 +20,7 @@ const kompletItemWhere = {
 export async function getDashboardMetrics() {
   const now = new Date();
   // Nabavne cijene iz Postavki (fallback na zadane) — utječu na profit i poravnanje.
-  const { costDres, costKomplet } = await getSettings();
+  const { costDres, costKomplet, costStreetwear } = await getSettings();
   // Početak današnjeg dana po Europe/Zagreb (Vercel radi u UTC-u) kao UTC instant —
   // inače bi "promet danas" u ranim satima gledao krivi (UTC) dan.
   const zp = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zagreb", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
@@ -42,17 +42,23 @@ export async function getDashboardMetrics() {
   const rev = (gte?: Date) =>
     prisma.order.aggregate({ _sum: { total: true, shipping: true }, _count: true, where: { ...(gte ? { createdAt: { gte } } : {}), ...notVoid } });
   const net = (a: { _sum: { total: number | null; shipping: number | null } }) => (a._sum.total ?? 0) - (a._sum.shipping ?? 0);
+  // Streetwear slugovi trebaju i profitu (svoja nabava) — kreće odmah, paralelno.
+  const streetwearP = prisma.customProduct.findMany({ where: { category: "streetwear" }, select: { slug: true } });
   // Točan profit = Σ prodajne cijene artikala − popust − nabava (komplet 18€, dres 6€).
   const profitFor = async (orderWhere: object = {}) => {
-    const [all, komplet, disc] = await Promise.all([
+    const sw = [...streetwearSlugs];
+    const [all, komplet, street, disc] = await Promise.all([
       prisma.orderItem.aggregate({ _sum: { unitPrice: true }, _count: true, where: { order: orderWhere } }),
-      prisma.orderItem.count({ where: { order: orderWhere, ...kompletItemWhere } }),
+      // Komplet BEZ streetweara (streetwear ima svoju nabavu, da se ne broji dvaput).
+      prisma.orderItem.count({ where: { order: orderWhere, ...kompletItemWhere, ...(sw.length ? { slug: { notIn: sw } } : {}) } }),
+      sw.length ? prisma.orderItem.count({ where: { order: orderWhere, slug: { in: sw } } }) : Promise.resolve(0),
       prisma.order.aggregate({ _sum: { discount: true }, where: orderWhere })
     ]);
     const count = all._count;
     const revenue = all._sum.unitPrice ?? 0;
     const discount = disc._sum.discount ?? 0;
-    const cost = komplet * costKomplet + (count - komplet) * costDres;
+    // Tri nabavne cijene: streetwear (prodaja 50€), komplet (40€), dres (20€).
+    const cost = street * costStreetwear + komplet * costKomplet + (count - street - komplet) * costDres;
     return revenue - discount - cost;
   };
 
@@ -77,7 +83,9 @@ export async function getDashboardMetrics() {
     prisma.order.findMany({ select: { customerName: true, phone: true, status: true, cashCollected: true, createdAt: true } })
   ]);
   const settlementsP = prisma.settlement.findMany({ orderBy: { settledAt: "desc" }, take: 6 });
-  const streetwearP = prisma.customProduct.findMany({ where: { category: "streetwear" }, select: { slug: true } });
+  // Treba i profitu (streetwear ima svoju nabavu) i besplatnim dostavama —
+  // mora biti spremno PRIJE profitFor poziva ispod.
+  const streetwearSlugs = new Set((await streetwearP).map((r) => r.slug));
 
   const [today, week, month, total, orderCount, shippedAgg, topItems, bestCustomers, recentOrders, windowOrders, soldSlugRows,
     todayProfit, weekProfit, monthProfit, totalProfit, shippedProfit, pendingProfit] =
@@ -183,9 +191,6 @@ export async function getDashboardMetrics() {
   // poravnanje). Kompleti se broje odvojeno od dresova (drukčija marža).
   const isKomplet = (it: { slug?: string | null; klub?: string | null; igrac?: string | null }) =>
     /komplet/i.test(it.slug || "") || /komplet/i.test(it.klub || "") || /komplet/i.test(it.igrac || "");
-  // Streetwear slugovi (besplatna dostava) — za trošak besplatnih dostava.
-  const streetwearSlugs = new Set((await streetwearP).map((r) => r.slug));
-
   // ── Faza B: sve ovisi o sinceFilter → jedan paralelni batch (bez sekvencijalnih upita) ──
   const [igor, ivica, unassigned, cashOrders, collectedCashOrders, shippedProfitTotal, adsAgg, returnedSinceCount] = await Promise.all([
     byShipper("igor"),
@@ -204,7 +209,7 @@ export async function getDashboardMetrics() {
     // Vraćene pošiljke OD ZADNJEG PORAVNANJA — njihov trošak (4 € svaka) skida se sa zajedničke marže.
     prisma.order.count({ where: { status: "returned", ...sinceFilter } })
   ]);
-  const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, pending: 0 });
+  const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, sentStreet: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, collectedStreet: 0, pending: 0 });
   const cashSplit: Record<"igor" | "ivica", ReturnType<typeof mkCash>> = { igor: mkCash(), ivica: mkCash() };
   let freeDeliveries = 0; // prikupljene narudžbe s besplatnom dostavom (mi platili dostavu ~5€)
   for (const o of cashOrders) {
@@ -212,9 +217,10 @@ export async function getDashboardMetrics() {
     if (!who) continue;
     const amt = o.total - (o.shipping ?? 0);
     let d = 0, k = 0;
-    for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) k += q; else d += q; }
+    let s = 0;
+    for (const it of o.items) { const q = it.quantity || 1; if (it.slug && streetwearSlugs.has(it.slug)) s += q; else if (isKomplet(it)) k += q; else d += q; }
     const b = cashSplit[who];
-    b.sentCount++; b.sentDresovi += d; b.sentKompleti += k;
+    b.sentCount++; b.sentDresovi += d; b.sentKompleti += k; b.sentStreet += s;
     if (!o.cashCollected) b.pending += amt;
   }
   for (const o of collectedCashOrders) {
@@ -222,9 +228,10 @@ export async function getDashboardMetrics() {
     if (!who) continue;
     const amt = o.total - (o.shipping ?? 0);
     let d = 0, k = 0;
-    for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) k += q; else d += q; }
+    let s = 0;
+    for (const it of o.items) { const q = it.quantity || 1; if (it.slug && streetwearSlugs.has(it.slug)) s += q; else if (isKomplet(it)) k += q; else d += q; }
     const b = cashSplit[who];
-    b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k;
+    b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k; b.collectedStreet += s;
     // Besplatna dostava = roba ≥ 60€ ILI osvojeno na igrici ILI streetwear → mi platili ~5€ pošti.
     const isFreeShip = amt >= 60 || Boolean(o.promoCode && o.promoCode.trim()) || o.items.some((it) => it.slug && streetwearSlugs.has(it.slug));
     if (isFreeShip) freeDeliveries++;
@@ -243,7 +250,8 @@ export async function getDashboardMetrics() {
   const totalCollected = cashSplit.igor.collected + cashSplit.ivica.collected;
   const collectedDresovi = cashSplit.igor.collectedDresovi + cashSplit.ivica.collectedDresovi;
   const collectedKompleti = cashSplit.igor.collectedKompleti + cashSplit.ivica.collectedKompleti;
-  const collectedCost = collectedDresovi * costDres + collectedKompleti * costKomplet; // Ivici nazad
+  const collectedStreet = cashSplit.igor.collectedStreet + cashSplit.ivica.collectedStreet;
+  const collectedCost = collectedDresovi * costDres + collectedKompleti * costKomplet + collectedStreet * costStreetwear; // Ivici nazad
   // Besplatne dostave (~5€) i vraćene pošiljke (4€) su naši troškovi → skidaju se s marže
   // prije podjele, pa ih oboje snose pola-pola (npr. povrat = 2€ Igor + 2€ Ivica).
   const collectedMargin = totalCollected - collectedCost - freeShipCost - returnLossSettle;

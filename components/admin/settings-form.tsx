@@ -7,6 +7,7 @@ type Settings = {
   freeShipThreshold: number;
   costDres: number;
   costKomplet: number;
+  costStreetwear: number;
   senders: { igor: { name: string; address: string; city: string }; ivica: { name: string; address: string; city: string } };
   iban: string;
   businessName: string;
@@ -62,6 +63,7 @@ export function SettingsForm() {
         freeShipThreshold: s.freeShipThreshold,
         costDres: s.costDres,
         costKomplet: s.costKomplet,
+        costStreetwear: s.costStreetwear,
         igorName: s.senders.igor.name, igorAddress: s.senders.igor.address, igorCity: s.senders.igor.city,
         ivicaName: s.senders.ivica.name, ivicaAddress: s.senders.ivica.address, ivicaCity: s.senders.ivica.city,
         iban: s.iban, businessName: s.businessName, contactPhone: s.contactPhone, contactEmail: s.contactEmail
@@ -74,8 +76,8 @@ export function SettingsForm() {
 
   return (
     <div className="space-y-4">
-      <Card title="Nabavne cijene" hint="Utječu na profit i poravnanje. Prodaja: dres 20€, komplet 40€.">
-        <div className="grid gap-3 sm:grid-cols-2">
+      <Card title="Nabavne cijene" hint="Utječu na profit i poravnanje. Prodaja: dres 20€, komplet 40€, streetwear 50€.">
+        <div className="grid gap-3 sm:grid-cols-3">
           <div>
             <span className={label}>Nabava dresa (€)</span>
             <input value={s.costDres} onChange={setNum("costDres")} inputMode="decimal" className={inp} />
@@ -83,6 +85,10 @@ export function SettingsForm() {
           <div>
             <span className={label}>Nabava kompleta (€)</span>
             <input value={s.costKomplet} onChange={setNum("costKomplet")} inputMode="decimal" className={inp} />
+          </div>
+          <div>
+            <span className={label}>Nabava streetweara (€)</span>
+            <input value={s.costStreetwear} onChange={setNum("costStreetwear")} inputMode="decimal" className={inp} />
           </div>
         </div>
       </Card>

@@ -10,7 +10,8 @@ import {
   CONTACT_PHONE_DISPLAY,
   SITE_NAME,
   COST_DRES_EUR,
-  COST_KOMPLET_EUR
+  COST_KOMPLET_EUR,
+  COST_STREETWEAR_EUR
 } from "@/lib/site";
 
 // Efektivne postavke shopa: DB vrijednost ako postoji, inače default iz koda.
@@ -20,6 +21,7 @@ export type ShopSettings = {
   freeShipThreshold: number;
   costDres: number;
   costKomplet: number;
+  costStreetwear: number;
   senders: {
     igor: { name: string; address: string; city: string };
     ivica: { name: string; address: string; city: string };
@@ -36,6 +38,7 @@ const DEFAULTS: ShopSettings = {
   freeShipThreshold: FREE_SHIPPING_THRESHOLD_EUR,
   costDres: COST_DRES_EUR,
   costKomplet: COST_KOMPLET_EUR,
+  costStreetwear: COST_STREETWEAR_EUR,
   senders: {
     igor: { name: "Igor Katanić", address: "Dubljevička ulica 91", city: "10040 Zagreb" },
     ivica: { name: "Ivica Karamatić", address: "Katoro 54", city: "52470 Umag" }
@@ -70,6 +73,7 @@ export async function getSettings(): Promise<ShopSettings> {
     freeShipThreshold: num(r.freeShipThreshold, DEFAULTS.freeShipThreshold),
     costDres: num(r.costDres, DEFAULTS.costDres),
     costKomplet: num(r.costKomplet, DEFAULTS.costKomplet),
+    costStreetwear: num(r.costStreetwear, DEFAULTS.costStreetwear),
     senders: {
       igor: {
         name: str(r.igorName, DEFAULTS.senders.igor.name),

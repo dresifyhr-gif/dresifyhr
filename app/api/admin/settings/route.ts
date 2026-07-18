@@ -34,6 +34,7 @@ export async function POST(request: Request) {
     freeShipThreshold: numOrNull(b?.freeShipThreshold),
     costDres: numOrNull(b?.costDres),
     costKomplet: numOrNull(b?.costKomplet),
+    costStreetwear: numOrNull(b?.costStreetwear),
     igorName: strOrNull(b?.igorName),
     igorAddress: strOrNull(b?.igorAddress),
     igorCity: strOrNull(b?.igorCity),

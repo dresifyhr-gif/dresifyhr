@@ -190,6 +190,7 @@ model Settings {
   // Nabava (za profit/poravnanje)
   costDres            Float?   // nabavna cijena dresa (npr. 6)
   costKomplet         Float?   // nabavna cijena kompleta (npr. 18)
+  costStreetwear      Float?   // nabavna cijena streetwear kompleta (prodaja 50 €)
   // Pošiljatelji (naljepnice)
   igorName            String?
   igorAddress         String?
