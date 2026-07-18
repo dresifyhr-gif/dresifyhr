@@ -50,7 +50,17 @@ export async function getDashboardMetrics() {
     const [all, komplet, street, disc] = await Promise.all([
       prisma.orderItem.aggregate({ _sum: { unitPrice: true }, _count: true, where: { order: orderWhere } }),
       // Komplet BEZ streetweara (streetwear ima svoju nabavu, da se ne broji dvaput).
-      prisma.orderItem.count({ where: { order: orderWhere, ...kompletItemWhere, ...(sw.length ? { slug: { notIn: sw } } : {}) } }),
+      // NULL-sigurno: `slug NOT IN (...)` je u SQL-u NULL za retke bez sluga, pa bi
+      // ih tiho izbacio iz brojanja — zato eksplicitno dopuštamo slug = null.
+      prisma.orderItem.count({
+        where: {
+          order: orderWhere,
+          AND: [
+            kompletItemWhere,
+            ...(sw.length ? [{ OR: [{ slug: null }, { slug: { notIn: sw } }] }] : [])
+          ]
+        }
+      }),
       sw.length ? prisma.orderItem.count({ where: { order: orderWhere, slug: { in: sw } } }) : Promise.resolve(0),
       prisma.order.aggregate({ _sum: { discount: true }, where: orderWhere })
     ]);
