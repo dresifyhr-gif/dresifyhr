@@ -66,21 +66,21 @@ function ItemsEditor({ orderId, items, onSaved }: { orderId: string; items: Orde
   }
 
   return (
-    <div className="mt-2 space-y-2 rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
+    <div className="a-sub mt-2 space-y-2 p-2.5">
       {rows.map((r, i) => (
         <div key={r.id} className="flex flex-wrap items-center gap-1.5">
-          <input value={r.klub} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, klub: e.target.value } : x)))} placeholder="Klub" className="w-28 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
-          <input value={r.igrac} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, igrac: e.target.value } : x)))} placeholder="Igrač / model" className="min-w-[120px] flex-1 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
-          <input value={r.size} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, size: e.target.value } : x)))} placeholder="Vel." className="w-14 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
-          <input value={r.unitPrice} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, unitPrice: e.target.value } : x)))} inputMode="decimal" className="w-14 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
-          <button type="button" onClick={() => setRows((rs) => rs.filter((_, k) => k !== i))} className="rounded border border-red-200 px-2 py-1 text-[11px] text-red-500 hover:bg-red-50">✕</button>
+          <input value={r.klub} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, klub: e.target.value } : x)))} placeholder="Klub" className="a-input w-28 px-2 py-1 text-[12px]" />
+          <input value={r.igrac} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, igrac: e.target.value } : x)))} placeholder="Igrač / model" className="a-input min-w-[120px] flex-1 px-2 py-1 text-[12px]" />
+          <input value={r.size} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, size: e.target.value } : x)))} placeholder="Vel." className="a-input w-14 px-2 py-1 text-[12px]" />
+          <input value={r.unitPrice} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, unitPrice: e.target.value } : x)))} inputMode="decimal" className="a-input w-14 px-2 py-1 text-[12px]" />
+          <button type="button" onClick={() => setRows((rs) => rs.filter((_, k) => k !== i))} className="a-btn-sm a-btn-danger px-2 py-1 text-[11px]">✕</button>
         </div>
       ))}
       <div className="flex flex-wrap items-center gap-2">
-        <button type="button" onClick={addRow} className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">
+        <button type="button" onClick={addRow} className="a-btn-sm px-3 py-1.5 text-[11px]">
           ➕ Dodaj artikl
         </button>
-        <button type="button" onClick={save} disabled={saving} className="rounded-md bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800 disabled:opacity-40">
+        <button type="button" onClick={save} disabled={saving} className="a-btn a-btn-primary px-3 py-1.5 text-[11px]">
           {saving ? "Spremam…" : "Spremi artikle"}
         </button>
       </div>
@@ -107,17 +107,17 @@ function ContactEditor({ orderId, initial, onSaved }: { orderId: string; initial
   }
 
   return (
-    <div className="mt-2 space-y-2 rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
-      <label className="block text-[11px] font-medium text-slate-500">Ime i prezime
-        <input value={name} onChange={(e) => setName(e.target.value)} className="mt-0.5 w-full rounded border border-slate-200 bg-white px-2 py-1 text-[13px] outline-none focus:border-slate-400" />
+    <div className="a-sub mt-2 space-y-2 p-2.5">
+      <label className="block text-[11px] font-medium text-[#6e6e73]">Ime i prezime
+        <input value={name} onChange={(e) => setName(e.target.value)} className="a-input mt-0.5 w-full px-2 py-1 text-[13px]" />
       </label>
-      <label className="block text-[11px] font-medium text-slate-500">Telefon
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" className="mt-0.5 w-full rounded border border-slate-200 bg-white px-2 py-1 text-[13px] outline-none focus:border-slate-400" />
+      <label className="block text-[11px] font-medium text-[#6e6e73]">Telefon
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" className="a-input mt-0.5 w-full px-2 py-1 text-[13px]" />
       </label>
-      <label className="block text-[11px] font-medium text-slate-500">Adresa (ulica, poštanski broj, mjesto)
-        <input value={address} onChange={(e) => setAddress(e.target.value)} className="mt-0.5 w-full rounded border border-slate-200 bg-white px-2 py-1 text-[13px] outline-none focus:border-slate-400" />
+      <label className="block text-[11px] font-medium text-[#6e6e73]">Adresa (ulica, poštanski broj, mjesto)
+        <input value={address} onChange={(e) => setAddress(e.target.value)} className="a-input mt-0.5 w-full px-2 py-1 text-[13px]" />
       </label>
-      <button type="button" onClick={save} disabled={saving} className="rounded-md bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800 disabled:opacity-40">
+      <button type="button" onClick={save} disabled={saving} className="a-btn a-btn-primary px-3 py-1.5 text-[11px]">
         {saving ? "Spremam…" : "Spremi podatke"}
       </button>
     </div>
@@ -164,11 +164,11 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
     }
   }
 
-  const inp = "rounded border border-slate-200 bg-white px-2 py-1.5 text-[13px] outline-none focus:border-slate-400";
+  const inp = "rounded border border-black/[0.06] bg-white px-2 py-1.5 text-[13px] outline-none focus:border-slate-400";
 
   return (
-    <div className="mb-4 rounded-lg border border-slate-300 bg-white p-3">
-      <div className="mb-2 text-sm font-semibold text-slate-800">➕ Nova narudžba (ručno — Instagram)</div>
+    <div className="mb-4 rounded-[12px] border border-black/[0.12] bg-white p-3">
+      <div className="mb-2 text-sm font-semibold text-[#1d1d1f]">➕ Nova narudžba (ručno — Instagram)</div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ime i prezime *" className={`col-span-2 ${inp}`} />
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Telefon (09…)" inputMode="tel" className={`col-span-2 ${inp}`} />
@@ -177,38 +177,38 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
       </div>
 
       <div className="mt-3 space-y-1.5">
-        <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Artikli</div>
+        <div className="text-[11px] font-medium uppercase tracking-wide text-[#8e8e93]">Artikli</div>
         {rows.map((r, i) => (
           <div key={i} className="flex flex-wrap items-center gap-1.5">
             <input value={r.klub} onChange={(e) => setRow(i, { klub: e.target.value })} placeholder="Klub" className={`w-28 ${inp}`} />
             <input value={r.igrac} onChange={(e) => setRow(i, { igrac: e.target.value })} placeholder="Igrač / model" className={`min-w-[120px] flex-1 ${inp}`} />
             <input value={r.size} onChange={(e) => setRow(i, { size: e.target.value })} placeholder="Vel." className={`w-16 ${inp}`} />
             <input value={r.unitPrice} onChange={(e) => setRow(i, { unitPrice: e.target.value.replace(/[^0-9.,]/g, "") })} inputMode="decimal" placeholder="€" className={`w-16 ${inp}`} />
-            <button type="button" onClick={() => setRows((rs) => rs.filter((_, k) => k !== i))} disabled={rows.length === 1} className="rounded border border-red-200 px-2 py-1 text-[11px] text-red-500 hover:bg-red-50 disabled:opacity-30">✕</button>
+            <button type="button" onClick={() => setRows((rs) => rs.filter((_, k) => k !== i))} disabled={rows.length === 1} className="a-btn-sm a-btn-danger px-2 py-1 text-[11px]">✕</button>
           </div>
         ))}
-        <button type="button" onClick={() => setRows((rs) => [...rs, { klub: "", igrac: "", size: "", unitPrice: "20" }])} className="rounded border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50">+ Dodaj artikl</button>
+        <button type="button" onClick={() => setRows((rs) => [...rs, { klub: "", igrac: "", size: "", unitPrice: "20" }])} className="a-btn-sm px-2 py-1 text-[11px]">+ Dodaj artikl</button>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
-        <label className="flex items-center gap-1 text-slate-500">Dostava <input value={shipping} onChange={(e) => setShipping(e.target.value.replace(/[^0-9.,]/g, ""))} inputMode="decimal" className={`w-14 ${inp}`} /> €</label>
-        <label className="flex items-center gap-1 text-slate-500">Šalje
+        <label className="flex items-center gap-1 text-[#6e6e73]">Dostava <input value={shipping} onChange={(e) => setShipping(e.target.value.replace(/[^0-9.,]/g, ""))} inputMode="decimal" className={`w-14 ${inp}`} /> €</label>
+        <label className="flex items-center gap-1 text-[#6e6e73]">Šalje
           <select value={shippedBy} onChange={(e) => setShippedBy(e.target.value as "" | "igor" | "ivica")} className={inp}>
             <option value="">—</option><option value="igor">Igor</option><option value="ivica">Ivica</option>
           </select>
         </label>
-        <label className="flex items-center gap-1 text-slate-500">Status
+        <label className="flex items-center gap-1 text-[#6e6e73]">Status
           <select value={status} onChange={(e) => setStatus(e.target.value as "new" | "shipped")} className={inp}>
             <option value="new">Nova</option><option value="shipped">Poslano</option>
           </select>
         </label>
-        <span className="ml-auto text-slate-500">Roba: <b className="text-slate-800">{subtotal.toFixed(0)} €</b> · Ukupno (s dostavom): <b className="text-slate-800">{total.toFixed(0)} €</b></span>
+        <span className="ml-auto text-[#6e6e73]">Roba: <b className="text-[#1d1d1f]">{subtotal.toFixed(0)} €</b> · Ukupno (s dostavom): <b className="text-[#1d1d1f]">{total.toFixed(0)} €</b></span>
       </div>
 
       <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Napomena (nije obavezno)" className={`mt-2 w-full ${inp}`} />
 
       {err ? <div className="mt-2 text-[12px] font-medium text-red-500">{err}</div> : null}
-      <button type="button" onClick={save} disabled={saving} className="mt-2 rounded-md bg-slate-900 px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-slate-800 disabled:opacity-40">
+      <button type="button" onClick={save} disabled={saving} className="a-btn a-btn-primary mt-2 px-4 py-1.5 text-[12px]">
         {saving ? "Spremam…" : "Spremi narudžbu"}
       </button>
     </div>
@@ -240,13 +240,13 @@ function TrackingRow({ id, initial }: { id: string; initial: string }) {
         value={val}
         onChange={(e) => setVal(e.target.value)}
         placeholder="Tracking / broj pošiljke"
-        className="w-full min-w-0 flex-1 basis-[140px] rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[12px] text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+        className="w-full min-w-0 flex-1 basis-[140px] rounded-[10px] border border-black/[0.06] bg-black/[0.03] px-2.5 py-1 text-[12px] text-[#1d1d1f] outline-none focus:border-slate-400 focus:bg-white"
       />
       <button
         type="button"
         onClick={save}
         disabled={saving || val === initial}
-        className="rounded-md border border-slate-200 px-2.5 py-1 text-[11px] font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+        className="rounded-[10px] border border-black/[0.06] px-2.5 py-1 text-[11px] font-medium text-[#6e6e73] transition hover:bg-black/[0.03] disabled:opacity-40"
       >
         {saving ? "…" : saved ? "✓ spremljeno" : "Spremi"}
       </button>
@@ -255,7 +255,7 @@ function TrackingRow({ id, initial }: { id: string; initial: string }) {
           href="https://posiljka.posta.hr/en"
           target="_blank"
           rel="noopener noreferrer"
-          className="shrink-0 rounded-md bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-slate-800"
+          className="shrink-0 rounded-[10px] bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-slate-800"
           title="Otvori praćenje na Hrvatskoj pošti (za HP pošiljke; GLS tracking dolazi na email)"
         >
           🔗 Prati na Pošti
@@ -270,7 +270,7 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   shipped: { label: "poslano", cls: "bg-emerald-100 text-emerald-700" },
   done: { label: "gotovo", cls: "bg-emerald-100 text-emerald-700" },
   returned: { label: "vraćeno", cls: "bg-red-100 text-red-700" },
-  cancelled: { label: "otkazano", cls: "bg-slate-200 text-slate-600" }
+  cancelled: { label: "otkazano", cls: "bg-slate-200 text-[#6e6e73]" }
 };
 
 const TABS = [
@@ -402,12 +402,12 @@ export function OrdersManager() {
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => setShowNew((v) => !v)} className="rounded-md bg-slate-900 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-slate-800">
+        <button type="button" onClick={() => setShowNew((v) => !v)} className="a-btn a-btn-primary px-3 py-1.5 text-[12px]">
           {showNew ? "✕ Zatvori" : "➕ Nova narudžba (ručno)"}
         </button>
         <a
           href={`/api/admin/export/orders/?q=${encodeURIComponent(q)}&status=${status}&shipper=${shipper}&cash=${cashF}`}
-          className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-[12px] font-semibold text-emerald-700 transition hover:bg-emerald-100"
+          className="rounded-[10px] border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-[12px] font-semibold text-emerald-700 transition hover:bg-emerald-100"
           title="Preuzmi trenutačno filtrirane narudžbe kao CSV (Excel) — za knjigovođu/obrt"
         >
           ⬇️ Izvezi CSV{total > 0 ? ` (${total})` : ""}
@@ -415,14 +415,14 @@ export function OrdersManager() {
       </div>
       {showNew && <NewOrderForm onCreated={() => { setShowNew(false); fetchPage(q, 1, false); }} />}
       {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (
-        <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+        <div className="a-sub mb-4 p-3">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
-            <span>Za prikupiti (poslano): <b className="text-amber-600">{eur(cash.pendingTotal)}</b> <span className="text-slate-400">· {cash.pendingCount} narudžbi · {komLabel(cash.pendingDresovi, cash.pendingKompleti)}</span></span>
-            <span>Prikupljeno: <b className="text-emerald-600">{eur(cash.collectedTotal)}</b> <span className="text-slate-400">· {komLabel(cash.collectedDresovi, cash.collectedKompleti)}</span></span>
+            <span>Za prikupiti (poslano): <b className="text-amber-600">{eur(cash.pendingTotal)}</b> <span className="text-[#8e8e93]">· {cash.pendingCount} narudžbi · {komLabel(cash.pendingDresovi, cash.pendingKompleti)}</span></span>
+            <span>Prikupljeno: <b className="text-emerald-600">{eur(cash.collectedTotal)}</b> <span className="text-[#8e8e93]">· {komLabel(cash.collectedDresovi, cash.collectedKompleti)}</span></span>
           </div>
-          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-500">
-            <span>💰 Igor prikupio: <b className="text-slate-700">{eur(cash.igorCollected)}</b> <span className="text-slate-400">({komLabel(cash.igorDresovi, cash.igorKompleti)})</span>{cash.igorPending > 0 ? <> · fali {eur(cash.igorPending)}</> : null}</span>
-            <span>💰 Ivica prikupila: <b className="text-slate-700">{eur(cash.ivicaCollected)}</b> <span className="text-slate-400">({komLabel(cash.ivicaDresovi, cash.ivicaKompleti)})</span>{cash.ivicaPending > 0 ? <> · fali {eur(cash.ivicaPending)}</> : null}</span>
+          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-[#6e6e73]">
+            <span>💰 Igor prikupio: <b className="text-[#1d1d1f]">{eur(cash.igorCollected)}</b> <span className="text-[#8e8e93]">({komLabel(cash.igorDresovi, cash.igorKompleti)})</span>{cash.igorPending > 0 ? <> · fali {eur(cash.igorPending)}</> : null}</span>
+            <span>💰 Ivica prikupila: <b className="text-[#1d1d1f]">{eur(cash.ivicaCollected)}</b> <span className="text-[#8e8e93]">({komLabel(cash.ivicaDresovi, cash.ivicaKompleti)})</span>{cash.ivicaPending > 0 ? <> · fali {eur(cash.ivicaPending)}</> : null}</span>
           </div>
         </div>
       )}
@@ -432,7 +432,7 @@ export function OrdersManager() {
             key={tb.value}
             type="button"
             onClick={() => setStatus(tb.value)}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${status === tb.value ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${status === tb.value ? "bg-slate-900 text-white" : "border border-black/[0.06] text-[#6e6e73] hover:bg-black/[0.03]"}`}
           >
             {tb.label}
           </button>
@@ -440,28 +440,28 @@ export function OrdersManager() {
       </div>
 
       {/* Odvojeno po pošiljatelju i po naplati — za organizirano praćenje */}
-      <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2">
+      <div className="a-sub mb-3 flex flex-wrap items-center gap-x-5 gap-y-2 px-3 py-2">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-400">Poslao</span>
+          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Poslao</span>
           {[{ v: "", l: "Svi" }, { v: "igor", l: "Igor" }, { v: "ivica", l: "Ivica" }].map((o) => (
             <button
               key={o.v}
               type="button"
               onClick={() => setShipper(o.v)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${shipper === o.v ? "bg-slate-900 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${shipper === o.v ? "bg-slate-900 text-white" : "border border-black/[0.06] bg-white text-[#6e6e73] hover:bg-black/[0.03]"}`}
             >
               {o.l}
             </button>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-400">Naplata</span>
+          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Naplata</span>
           {[{ v: "", l: "Sve" }, { v: "collected", l: "💰 Prikupljeno" }, { v: "pending", l: "⏳ Nije prikupljeno" }].map((o) => (
             <button
               key={o.v}
               type="button"
               onClick={() => setCashF(o.v)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${cashF === o.v ? "bg-slate-900 text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${cashF === o.v ? "bg-slate-900 text-white" : "border border-black/[0.06] bg-white text-[#6e6e73] hover:bg-black/[0.03]"}`}
             >
               {o.l}
             </button>
@@ -471,7 +471,7 @@ export function OrdersManager() {
           <button
             type="button"
             onClick={() => { setShipper(""); setCashF(""); }}
-            className="ml-auto text-[11px] font-semibold text-slate-400 underline decoration-dotted hover:text-slate-700"
+            className="ml-auto text-[11px] font-semibold text-[#8e8e93] underline decoration-dotted hover:text-[#1d1d1f]"
           >
             ↺ Poništi
           </button>
@@ -483,58 +483,58 @@ export function OrdersManager() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Traži po imenu, broju mobitela ili adresi…"
-          className="min-w-[180px] flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white"
+          className="a-input min-w-[180px] flex-1 px-3.5 py-2.5 text-sm"
         />
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400"
+          className="shrink-0 rounded-[12px] border border-black/[0.06] bg-black/[0.03] px-3 py-2.5 text-sm text-[#1d1d1f] outline-none focus:border-slate-400"
         >
           <option value="">Zadano (za slanje prvo)</option>
           <option value="new">Najnovije prvo</option>
           <option value="old">Najstarije prvo</option>
         </select>
-        <span className="shrink-0 text-xs text-slate-400">{total} narudžbi</span>
+        <span className="shrink-0 text-xs text-[#8e8e93]">{total} narudžbi</span>
       </div>
 
       {/* Skupne akcije — pojave se kad je nešto označeno */}
       {selected.size > 0 && (
-        <div className="sticky top-2 z-10 mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-300 bg-slate-900 px-3 py-2 text-white shadow-lg">
+        <div className="sticky top-2 z-10 mb-3 flex flex-wrap items-center gap-2 rounded-[12px] border border-black/[0.12] bg-slate-900 px-3 py-2 text-white shadow-lg">
           <span className="text-sm font-semibold">{selected.size} označeno</span>
           <span className="text-white/40">·</span>
           <span className="text-xs text-white/70">Označi poslano:</span>
-          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "igor")} className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-semibold hover:bg-white/20 disabled:opacity-50">📦 Igor</button>
-          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "ivica")} className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-semibold hover:bg-white/20 disabled:opacity-50">📦 Ivica</button>
+          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "igor")} className="rounded-[10px] bg-white/10 px-2.5 py-1 text-xs font-semibold hover:bg-white/20 disabled:opacity-50">📦 Igor</button>
+          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "ivica")} className="rounded-[10px] bg-white/10 px-2.5 py-1 text-xs font-semibold hover:bg-white/20 disabled:opacity-50">📦 Ivica</button>
           <span className="text-white/40">·</span>
-          <button type="button" disabled={bulkBusy} onClick={() => bulk("collect")} className="rounded-md bg-emerald-500 px-2.5 py-1 text-xs font-semibold hover:bg-emerald-600 disabled:opacity-50">💰 Naplaćeno</button>
-          <button type="button" onClick={() => setSelected(new Set())} className="ml-auto rounded-md px-2 py-1 text-xs text-white/60 hover:text-white">Odznači</button>
+          <button type="button" disabled={bulkBusy} onClick={() => bulk("collect")} className="a-btn-sm a-btn-ok px-2.5 py-1 text-xs">💰 Naplaćeno</button>
+          <button type="button" onClick={() => setSelected(new Set())} className="ml-auto rounded-[10px] px-2 py-1 text-xs text-white/60 hover:text-white">Odznači</button>
         </div>
       )}
 
       {orders.length === 0 ? (
-        <div className="py-8 text-center text-sm text-slate-400">{loading ? "Učitavam…" : "Nema rezultata."}</div>
+        <div className="py-8 text-center text-sm text-[#8e8e93]">{loading ? "Učitavam…" : "Nema rezultata."}</div>
       ) : (
         <div className="grid gap-3 xl:grid-cols-2">
           {orders.map((o) => {
-            const st = STATUS[o.status] || { label: o.status, cls: "bg-slate-100 text-slate-500" };
+            const st = STATUS[o.status] || { label: o.status, cls: "bg-black/[0.06] text-[#6e6e73]" };
             const isBusy = busy === o.id;
             return (
-              <div key={o.id} className={`rounded-lg border p-3 ${selected.has(o.id) ? "border-slate-400 bg-slate-50" : "border-slate-200"}`}>
+              <div key={o.id} className={`a-row p-3 ${selected.has(o.id) ? "!border-black/20 !bg-black/[0.03]" : ""}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="flex min-w-0 max-w-full items-start gap-2">
                     <input
                       type="checkbox"
                       checked={selected.has(o.id)}
                       onChange={() => toggleSel(o.id)}
-                      className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-slate-900"
+                      className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-[#1d1d1f]"
                       title="Označi za skupnu akciju"
                     />
                     <div className="min-w-0 max-w-full">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       {phoneKey(o.phone) ? (
-                        <a href={`/admin/kupci/${phoneKey(o.phone)}`} className="font-semibold text-slate-900 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500" title="Otvori profil kupca">{o.customerName}</a>
+                        <a href={`/admin/kupci/${phoneKey(o.phone)}`} className="font-semibold text-[#1d1d1f] underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500" title="Otvori profil kupca">{o.customerName}</a>
                       ) : (
-                        <span className="font-semibold text-slate-900">{o.customerName}</span>
+                        <span className="font-semibold text-[#1d1d1f]">{o.customerName}</span>
                       )}
                       <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
                       {o.promoCode && (
@@ -545,7 +545,7 @@ export function OrdersManager() {
                           🎁 {o.promoCode} · bespl. dostava
                         </span>
                       )}
-                      {o.shippedBy && <span className="text-[10px] text-slate-400">({o.shippedBy})</span>}
+                      {o.shippedBy && <span className="text-[10px] text-[#8e8e93]">({o.shippedBy})</span>}
                       {o.risk && o.risk.failed >= (o.risk.min ?? 1) && o.risk.failed > 0 && (
                         <span
                           title={`Ovaj broj je ranije ${o.risk.failed}× odbio pouzeće (otkazano/vraćeno)${o.risk.collected > 0 ? `, a ${o.risk.collected}× uredno preuzeo` : ""}. Provjeri prije slanja.`}
@@ -555,7 +555,7 @@ export function OrdersManager() {
                         </span>
                       )}
                     </div>
-                    <div className="mt-0.5 text-xs text-slate-500">
+                    <div className="mt-0.5 text-xs text-[#6e6e73]">
                       {o.date} · {formatCroatianPhone(o.phone)}
                       {o.address ? (
                         <>
@@ -572,17 +572,17 @@ export function OrdersManager() {
                       ) : null}
                     </div>
                     {o.email ? (
-                      <div className="mt-0.5 break-all text-xs text-slate-500">
-                        ✉️ <a href={`mailto:${o.email}`} className="font-medium text-slate-600 hover:text-slate-800 hover:underline">{o.email}</a>
+                      <div className="mt-0.5 break-all text-xs text-[#6e6e73]">
+                        ✉️ <a href={`mailto:${o.email}`} className="font-medium text-[#6e6e73] hover:text-[#1d1d1f] hover:underline">{o.email}</a>
                       </div>
                     ) : null}
-                    <div className="mt-0.5 text-xs text-slate-400">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-slate-700">{eur(o.total)}</span></div>
+                    <div className="mt-0.5 text-xs text-[#8e8e93]">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-[#1d1d1f]">{eur(o.total)}</span></div>
                     {o.items.length > 0 && (
                       <ul className="mt-1.5 space-y-0.5">
                         {o.items.map((it, idx) => (
-                          <li key={idx} className="text-[13px] text-slate-700">
+                          <li key={idx} className="text-[13px] text-[#1d1d1f]">
                             📦 {it.quantity > 1 ? `${it.quantity}× ` : ""}<span className="font-medium">{it.label}</span>
-                            {it.size ? <span className="text-slate-500"> · veličina {it.size}</span> : null}
+                            {it.size ? <span className="text-[#6e6e73]"> · veličina {it.size}</span> : null}
                           </li>
                         ))}
                       </ul>
@@ -595,7 +595,7 @@ export function OrdersManager() {
                         href={waLink(o.phone)!}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-md bg-emerald-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600"
+                        className="a-btn-sm a-btn-ok px-2 py-1 text-[11px]"
                       >
                         💬 WhatsApp
                       </a>
@@ -604,7 +604,7 @@ export function OrdersManager() {
                       href={`/admin/print/${o.id}/pdf/?sender=igor`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-md bg-indigo-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-indigo-600"
+                      className="rounded-[10px] bg-indigo-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-indigo-600"
                     >
                       📄 Igor
                     </a>
@@ -612,7 +612,7 @@ export function OrdersManager() {
                       href={`/admin/print/${o.id}/pdf/?sender=ivica`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-md bg-purple-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-purple-600"
+                      className="rounded-[10px] bg-purple-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-purple-600"
                     >
                       📄 Ivica
                     </a>
@@ -621,7 +621,7 @@ export function OrdersManager() {
                       target="_blank"
                       rel="noopener noreferrer"
                       title="GLS naljepnica: ime kupca + logo + QR na Instagram (adresu radi GLS)"
-                      className="rounded-md bg-orange-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-orange-600"
+                      className="rounded-[10px] bg-orange-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-orange-600"
                     >
                       🚚 GLS
                     </a>
@@ -630,26 +630,26 @@ export function OrdersManager() {
 
                 <div className="mt-2.5 flex flex-wrap gap-1.5">
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "igor" })}
-                    className="rounded-md bg-emerald-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">✓ Igor poslao</button>
+                    className="a-btn-sm a-btn-ok px-2 py-1 text-[11px]">✓ Igor poslao</button>
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "ivica" })}
-                    className="rounded-md bg-sky-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-sky-600 disabled:opacity-50">✓ Ivica poslao</button>
+                    className="a-btn-sm px-2 py-1 text-[11px]">✓ Ivica poslao</button>
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
-                    className="rounded-md border border-red-200 px-2 py-1 text-[11px] font-medium text-red-500 hover:bg-red-50 disabled:opacity-50">↩ Vraćeno</button>
+                    className="a-btn-sm a-btn-danger px-2 py-1 text-[11px]">↩ Vraćeno</button>
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "cancel", { cancelled: true })}
-                    className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50">✕ Otkazano</button>
+                    className="a-btn-sm px-2 py-1 text-[11px]">✕ Otkazano</button>
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
-                    className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-400 hover:bg-slate-50 disabled:opacity-50">↺ Vrati u nove</button>
+                    className="a-btn-sm px-2 py-1 text-[11px]">↺ Vrati u nove</button>
                   {(o.status === "shipped" || o.status === "done") && (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
                       title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}
-                      className={`rounded-md px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-emerald-600 text-white hover:bg-emerald-700" : "border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"}`}>
+                      className={`rounded-[10px] px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-emerald-600 text-white hover:bg-emerald-700" : "border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"}`}>
                       {o.cashCollected ? "💰 Prikupljeno ✓" : "💰 Prikupljeno?"}
                     </button>
                   )}
                   <button type="button" onClick={() => setEditing((e) => (e === o.id ? null : o.id))}
-                    className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50">✏️ Uredi artikle</button>
+                    className="a-btn-sm px-2 py-1 text-[11px]">✏️ Uredi artikle</button>
                   <button type="button" onClick={() => setEditingContact((e) => (e === o.id ? null : o.id))}
-                    className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50">✏️ Uredi adresu</button>
+                    className="a-btn-sm px-2 py-1 text-[11px]">✏️ Uredi adresu</button>
                 </div>
 
                 {editing === o.id && (
@@ -669,8 +669,8 @@ export function OrdersManager() {
 
       {/* infinite-scroll sentinel */}
       <div ref={sentinel} className="h-8" />
-      {loading && orders.length > 0 && <div className="py-3 text-center text-xs text-slate-400">Učitavam još…</div>}
-      {page >= pages && orders.length > 0 && <div className="py-3 text-center text-xs text-slate-300">— kraj popisa —</div>}
+      {loading && orders.length > 0 && <div className="py-3 text-center text-xs text-[#8e8e93]">Učitavam još…</div>}
+      {page >= pages && orders.length > 0 && <div className="py-3 text-center text-xs text-[#c7c7cc]">— kraj popisa —</div>}
     </div>
   );
 }

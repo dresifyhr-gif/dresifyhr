@@ -173,7 +173,7 @@ export function SettingsForm() {
       <Card title="Pošiljatelji (naljepnice)" hint="Ime i adresa koji se ispisuju na naljepnici — Igor ili Ivica.">
         <div className="grid gap-4 sm:grid-cols-2">
           {(["igor", "ivica"] as const).map((who) => (
-            <div key={who} className="space-y-2 rounded-lg border border-slate-100 bg-slate-50/50 p-3">
+            <div key={who} className="space-y-2 rounded-[12px] border border-black/[0.04] bg-black/[0.03] p-3">
               <div className="text-[13px] font-semibold capitalize text-[#1d1d1f]">{who}</div>
               <div><span className={label}>Ime i prezime</span><input value={s.senders[who].name} onChange={setSender(who, "name")} className={inp} /></div>
               <div><span className={label}>Adresa</span><input value={s.senders[who].address} onChange={setSender(who, "address")} className={inp} /></div>

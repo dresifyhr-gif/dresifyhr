@@ -128,15 +128,15 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
 
   return (
     <div className={`a-card ${fill ? "flex h-full flex-col" : ""}`}>
-      <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
+      <div className="flex items-center gap-2 border-b border-black/[0.04] px-5 py-3">
         <Image src="/dresify-robot.png" alt="Dresify AI" width={40} height={40} className="h-10 w-10 object-contain" />
-        <span className="text-sm font-semibold text-slate-800">Dresify AI</span>
+        <span className="text-sm font-semibold text-[#1d1d1f]">Dresify AI</span>
         {messages.length > 0 && (
           <button
             type="button"
             onClick={newChat}
             title="Obriši razgovor i kreni ispočetka"
-            className="ml-auto rounded-md border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+            className="ml-auto rounded-[10px] border border-black/[0.06] px-2 py-1 text-[11px] font-semibold text-[#6e6e73] transition hover:bg-black/[0.03] hover:text-[#1d1d1f]"
           >
             🗑 Novi razgovor
           </button>
@@ -145,7 +145,7 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
 
       <div className={`overflow-y-auto px-5 py-4 ${fill ? "flex-1" : "max-h-80 min-h-[3rem]"}`}>
         {messages.length === 0 ? (
-          <p className="text-sm text-slate-400">Pitaj me bilo što o svom shopu — brojke, prodaji, kupcima, prijedlozima.</p>
+          <p className="text-sm text-[#8e8e93]">Pitaj me bilo što o svom shopu — brojke, prodaji, kupcima, prijedlozima.</p>
         ) : (
           <div className="space-y-3">
             {messages.map((msg, i) =>
@@ -158,7 +158,7 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
               ) : (
                 <div key={i} className="flex items-start gap-2">
                   <Image src="/dresify-robot.png" alt="AI" width={28} height={28} className="mt-0.5 h-7 w-7 shrink-0 object-contain" />
-                  <div className="inline-block max-w-[85%] whitespace-pre-wrap rounded-2xl bg-slate-100 px-3.5 py-2 text-sm text-slate-800">
+                  <div className="inline-block max-w-[85%] whitespace-pre-wrap rounded-2xl bg-black/[0.06] px-3.5 py-2 text-sm text-[#1d1d1f]">
                     {msg.content ? renderRich(msg.content) : (loading ? "…" : "")}
                   </div>
                 </div>
@@ -169,14 +169,14 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
         )}
       </div>
 
-      <div className="border-t border-slate-100 px-5 py-3">
+      <div className="border-t border-black/[0.04] px-5 py-3">
         <div className="mb-2 flex flex-wrap gap-1.5">
           {SUGGESTIONS.map((s) => (
             <button
               key={s}
               onClick={() => ask(s)}
               disabled={loading}
-              className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-500 transition hover:border-slate-300 hover:text-slate-800 disabled:opacity-50"
+              className="rounded-full border border-black/[0.06] bg-black/[0.03] px-2.5 py-1 text-xs text-[#6e6e73] transition hover:border-black/[0.12] hover:text-[#1d1d1f] disabled:opacity-50"
             >
               {s}
             </button>
@@ -193,12 +193,12 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Napiši pitanje…"
-            className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white"
+            className="flex-1 rounded-[12px] border border-black/[0.06] bg-black/[0.03] px-3.5 py-2.5 text-sm text-[#1d1d1f] outline-none transition focus:border-slate-400 focus:bg-white"
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-[12px] bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
           >
             {loading ? "…" : "Pošalji"}
           </button>

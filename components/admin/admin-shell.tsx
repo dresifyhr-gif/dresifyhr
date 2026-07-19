@@ -30,8 +30,8 @@ function Brand() {
         D<span className="text-lime-400">R</span>
       </div>
       <div className="leading-tight">
-        <div className="text-[15px] font-bold tracking-tight text-slate-900">Dresify</div>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Admin</div>
+        <div className="text-[15px] font-bold tracking-tight text-[#1d1d1f]">Dresify</div>
+        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8e8e93]">Admin</div>
       </div>
     </Link>
   );
@@ -98,7 +98,7 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
               >
                 <Search className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Traži…</span>
-                <kbd className="hidden rounded-md bg-black/[0.06] px-1.5 py-0.5 text-[9px] font-semibold text-[#8e8e93] sm:inline">⌘K</kbd>
+                <kbd className="hidden rounded-[10px] bg-black/[0.06] px-1.5 py-0.5 text-[9px] font-semibold text-[#8e8e93] sm:inline">⌘K</kbd>
               </button>
               <Link
                 href="/admin/postavke"

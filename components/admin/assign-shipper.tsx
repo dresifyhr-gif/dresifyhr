@@ -34,23 +34,23 @@ export function AssignShipper({ orders }: { orders: UnassignedOrder[] }) {
 
   const remaining = orders.filter((o) => !done.has(o.id));
   if (remaining.length === 0) {
-    return <div className="text-sm text-slate-400">Sve poslane narudžbe imaju označenog pošiljatelja ✅</div>;
+    return <div className="text-sm text-[#8e8e93]">Sve poslane narudžbe imaju označenog pošiljatelja ✅</div>;
   }
 
   return (
     <ul className="max-h-96 space-y-2 overflow-y-auto">
       {remaining.map((o) => (
-        <li key={o.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 px-2.5 py-2 text-sm">
-          <span className="min-w-0 truncate text-slate-700">
-            <span className="text-slate-400">{o.dateLabel}</span> · {o.customerName}{" "}
-            <span className="text-slate-400">· {eur(o.total)}</span>
+        <li key={o.id} className="flex items-center justify-between gap-2 rounded-[12px] border border-black/[0.04] px-2.5 py-2 text-sm">
+          <span className="min-w-0 truncate text-[#1d1d1f]">
+            <span className="text-[#8e8e93]">{o.dateLabel}</span> · {o.customerName}{" "}
+            <span className="text-[#8e8e93]">· {eur(o.total)}</span>
           </span>
           <span className="flex shrink-0 items-center gap-1.5">
             <button
               type="button"
               onClick={() => assign(o.id, "igor")}
               disabled={busy === o.id}
-              className="rounded-md bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
+              className="rounded-[10px] bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
             >
               {busy === o.id ? "…" : "Igor"}
             </button>
@@ -58,7 +58,7 @@ export function AssignShipper({ orders }: { orders: UnassignedOrder[] }) {
               type="button"
               onClick={() => assign(o.id, "ivica")}
               disabled={busy === o.id}
-              className="rounded-md bg-sky-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-sky-600 disabled:opacity-50"
+              className="rounded-[10px] bg-sky-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-sky-600 disabled:opacity-50"
             >
               {busy === o.id ? "…" : "Ivica"}
             </button>

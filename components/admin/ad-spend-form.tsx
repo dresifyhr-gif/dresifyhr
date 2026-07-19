@@ -41,12 +41,12 @@ export function AdSpendForm() {
           onChange={(e) => setAmount(e.target.value)}
           inputMode="decimal"
           placeholder="Dodaj potrošnju (€)"
-          className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+          className="flex-1 rounded-[12px] border border-black/[0.06] bg-black/[0.03] px-3 py-2 text-sm text-[#1d1d1f] outline-none focus:border-slate-400 focus:bg-white"
         />
         <button
           type="submit"
           disabled={loading || !amount}
-          className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+          className="rounded-[12px] bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
         >
           {loading ? "…" : "Dodaj"}
         </button>

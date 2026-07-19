@@ -13,9 +13,9 @@ import { formatCroatianName, phoneKey } from "@/lib/utils";
 function CustomerLink({ name, phone }: { name?: string | null; phone?: string | null }) {
   const label = name ? formatCroatianName(name) : phone || "—";
   const key = phoneKey(phone);
-  if (!key) return <span className="text-slate-700">{label}</span>;
+  if (!key) return <span className="text-[#1d1d1f]">{label}</span>;
   return (
-    <Link href={`/admin/kupci/${key}`} className="font-medium text-slate-700 underline decoration-slate-300 underline-offset-2 hover:text-slate-900 hover:decoration-slate-500">
+    <Link href={`/admin/kupci/${key}`} className="font-medium text-[#1d1d1f] underline decoration-slate-300 underline-offset-2 hover:text-[#1d1d1f] hover:decoration-slate-500">
       {label}
     </Link>
   );
@@ -37,13 +37,13 @@ export default async function CustomersPage() {
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Najbolji kupci">
           {m.bestCustomers.length === 0 ? (
-            <div className="text-sm text-slate-400">Nema podataka još.</div>
+            <div className="text-sm text-[#8e8e93]">Nema podataka još.</div>
           ) : (
             <ul className="space-y-2.5">
               {m.bestCustomers.map((c) => (
                 <li key={c.id} className="flex items-center justify-between text-sm">
                   <span className="min-w-0 truncate">
-                    <CustomerLink name={c.name} phone={c.phone} /> <span className="text-slate-400">· {c.totalOrders}×</span>
+                    <CustomerLink name={c.name} phone={c.phone} /> <span className="text-[#8e8e93]">· {c.totalOrders}×</span>
                   </span>
                   <span className="font-semibold text-emerald-600">{eur(c.totalSpent)}</span>
                 </li>
@@ -54,7 +54,7 @@ export default async function CustomersPage() {
 
         <Panel title={`Vrati kupce (${m.winbackDays}+ dana bez kupnje) · ${m.inactive.length}`}>
           {m.inactive.length === 0 ? (
-            <div className="text-sm text-slate-400">Nema neaktivnih kupaca.</div>
+            <div className="text-sm text-[#8e8e93]">Nema neaktivnih kupaca.</div>
           ) : (
             <ul className="max-h-96 space-y-2 overflow-y-auto">
               {m.inactive.map((c) => {
@@ -62,7 +62,7 @@ export default async function CustomersPage() {
                 return (
                   <li key={c.id} className="flex items-center justify-between gap-2 text-sm">
                     <span className="min-w-0 truncate">
-                      <CustomerLink name={c.name} phone={c.phone} /> <span className="text-slate-400">· {c.lastOrderAt.toLocaleDateString("hr-HR")}</span>
+                      <CustomerLink name={c.name} phone={c.phone} /> <span className="text-[#8e8e93]">· {c.lastOrderAt.toLocaleDateString("hr-HR")}</span>
                     </span>
                     <span className="flex shrink-0 items-center gap-2">
                       <span className="font-semibold text-emerald-600">{eur(c.totalSpent)}</span>
@@ -83,7 +83,7 @@ export default async function CustomersPage() {
       <div className="mt-5">
         <Panel title={`Rizični kupci (${m.riskMinFailed}+ odbijanja) · ${m.riskyCustomers.length}`}>
           {m.riskyCustomers.length === 0 ? (
-            <div className="text-sm text-slate-400">Nema rizičnih kupaca — svi uredno preuzimaju. 👌</div>
+            <div className="text-sm text-[#8e8e93]">Nema rizičnih kupaca — svi uredno preuzimaju. 👌</div>
           ) : (
             <ul className="max-h-96 space-y-2 overflow-y-auto">
               {m.riskyCustomers.map((c, i) => {
@@ -92,7 +92,7 @@ export default async function CustomersPage() {
                   <li key={`${c.phone}-${i}`} className="flex items-center justify-between gap-2 text-sm">
                     <span className="min-w-0 truncate">
                       <CustomerLink name={c.name} phone={c.phone} />
-                      {c.phone ? <span className="text-slate-400"> · {c.phone}</span> : null}
+                      {c.phone ? <span className="text-[#8e8e93]"> · {c.phone}</span> : null}
                     </span>
                     <span className="flex shrink-0 items-center gap-2">
                       <span className="rounded bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-700">{c.failed}× odbio</span>
@@ -114,14 +114,14 @@ export default async function CustomersPage() {
       <div className="mt-5">
         <Panel title="Odakle kupci (top gradovi)">
           {m.topCities.length === 0 ? (
-            <div className="text-sm text-slate-400">Nema podataka.</div>
+            <div className="text-sm text-[#8e8e93]">Nema podataka.</div>
           ) : (
             <ul className="grid gap-2 sm:grid-cols-2">
               {m.topCities.map((c) => (
                 <li key={c.name} className="flex items-center justify-between text-sm">
-                  <span className="text-slate-700">{c.name}</span>
-                  <span className="text-slate-500">
-                    <span className="font-semibold text-slate-900">{c.count}</span> · {eur(c.total)}
+                  <span className="text-[#1d1d1f]">{c.name}</span>
+                  <span className="text-[#6e6e73]">
+                    <span className="font-semibold text-[#1d1d1f]">{c.count}</span> · {eur(c.total)}
                   </span>
                 </li>
               ))}

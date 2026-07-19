@@ -159,7 +159,7 @@ export function PromoManager() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-md bg-black/[0.06] px-2 py-0.5 font-mono text-[13px] font-bold text-[#1d1d1f]">{c.code}</span>
+                    <span className="rounded-[10px] bg-black/[0.06] px-2 py-0.5 font-mono text-[13px] font-bold text-[#1d1d1f]">{c.code}</span>
                     <span className="text-[13px] text-[#6e6e73]">
                       {c.kind === "freeship" ? "besplatna dostava" : `−${c.value}%`}
                       {c.minSubtotal > 0 ? ` · od ${eur(c.minSubtotal)}` : ""}

@@ -19,7 +19,7 @@ export function PdfLabelLink({ id, defaultSender }: { id: string; defaultSender?
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-600"
+      className="rounded-[10px] bg-indigo-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-600"
     >
       📄 PDF za MarkLife
     </a>

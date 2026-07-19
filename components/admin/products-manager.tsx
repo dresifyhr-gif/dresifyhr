@@ -102,17 +102,17 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 p-3">
+    <div className="rounded-[12px] border border-black/[0.06] p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 font-semibold text-slate-900">
+          <div className="flex items-center gap-2 font-semibold text-[#1d1d1f]">
             {isStreetwear && <span className="shrink-0 rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-600">🔥 Street</span>}
             <span className="truncate">{p.klub} — {p.igrac}</span>
           </div>
-          <div className="text-[11px] text-slate-400">{p.liga}{p.overridden && !p.custom ? " · uređeno" : ""}</div>
+          <div className="text-[11px] text-[#8e8e93]">{p.liga}{p.overridden && !p.custom ? " · uređeno" : ""}</div>
           <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]">
-            <span className="text-slate-500">📦 {p.sold} prodano</span>
-            <span className="text-slate-500">💶 {eur(p.revenue)} prihod</span>
+            <span className="text-[#6e6e73]">📦 {p.sold} prodano</span>
+            <span className="text-[#6e6e73]">💶 {eur(p.revenue)} prihod</span>
             <span className="font-medium text-emerald-600">📈 {eur(p.profit)} profit</span>
             {p.returns > 0 && <span className="font-medium text-red-500">↩ {p.returns} vraćeno</span>}
           </div>
@@ -123,9 +123,9 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               inputMode="decimal"
-              className="w-16 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+              className="w-16 rounded-[10px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 text-sm text-[#1d1d1f] outline-none focus:border-slate-400 focus:bg-white"
             />
-            <span className="text-xs text-slate-400">€</span>
+            <span className="text-xs text-[#8e8e93]">€</span>
           </div>
           <div className="flex items-center gap-1">
             <input
@@ -134,21 +134,21 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
               inputMode="numeric"
               placeholder="auto"
               title="Količina na stanju (prazno = automatski)"
-              className="w-14 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+              className="w-14 rounded-[10px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 text-sm text-[#1d1d1f] outline-none focus:border-slate-400 focus:bg-white"
             />
-            <span className="text-xs text-slate-400">kom</span>
+            <span className="text-xs text-[#8e8e93]">kom</span>
           </div>
           <select
             value={oos}
             onChange={(e) => setOos(e.target.value)}
-            className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-700 outline-none focus:border-slate-400"
+            className="rounded-[10px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 text-sm text-[#1d1d1f] outline-none focus:border-slate-400"
           >
             {STOCK_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
           <select
             value={badge}
             onChange={(e) => setBadge(e.target.value)}
-            className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-700 outline-none focus:border-slate-400"
+            className="rounded-[10px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 text-sm text-[#1d1d1f] outline-none focus:border-slate-400"
           >
             {BADGE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
@@ -156,7 +156,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             type="button"
             onClick={() => setHidden((v) => !v)}
             title={hidden ? "Skriveno sa shopa — klikni da prikažeš" : "Prikazano — klikni da sakriješ"}
-            className={`rounded-md px-2 py-1 text-[11px] font-semibold transition ${hidden ? "bg-amber-500 text-white hover:bg-amber-600" : "border border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+            className={`rounded-[10px] px-2 py-1 text-[11px] font-semibold transition ${hidden ? "bg-amber-500 text-white hover:bg-amber-600" : "border border-black/[0.06] text-[#6e6e73] hover:bg-black/[0.03]"}`}
           >
             {hidden ? "🙈 Skriveno" : "👁 Vidljivo"}
           </button>
@@ -164,7 +164,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             type="button"
             onClick={() => setFeatured((v) => !v)}
             title={featured ? "Prikazan u 'Najprodavaniji dresovi' na naslovnici — klikni da makneš" : "Klikni da ga staviš u 'Najprodavaniji dresovi' na naslovnici"}
-            className={`shrink-0 rounded-md px-2 py-1 text-[11px] font-semibold transition ${featured ? "bg-orange-500 text-white hover:bg-orange-600" : "border border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+            className={`shrink-0 rounded-[10px] px-2 py-1 text-[11px] font-semibold transition ${featured ? "bg-orange-500 text-white hover:bg-orange-600" : "border border-black/[0.06] text-[#6e6e73] hover:bg-black/[0.03]"}`}
           >
             {featured ? "🔥 Najprodavaniji" : "🔥 Dodaj u top"}
           </button>
@@ -172,7 +172,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             type="button"
             onClick={save}
             disabled={saving || !dirty}
-            className="rounded-md bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white transition hover:bg-slate-800 disabled:opacity-40"
+            className="rounded-[10px] bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white transition hover:bg-slate-800 disabled:opacity-40"
           >
             {saving ? "…" : saved ? "✓" : "Spremi"}
           </button>
@@ -180,7 +180,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
       </div>
 
       <div className="mt-2 flex flex-wrap items-center gap-1">
-        <span className="mr-1 text-[11px] text-slate-400">Rasprodane veličine:</span>
+        <span className="mr-1 text-[11px] text-[#8e8e93]">Rasprodane veličine:</span>
         {rowSizes.map((s) => {
           const on = soldSizes.includes(s);
           return (
@@ -188,7 +188,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
               key={s}
               type="button"
               onClick={() => toggleSize(s)}
-              className={`rounded px-1.5 py-0.5 text-[11px] font-medium transition ${on ? "bg-red-500 text-white" : "border border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+              className={`rounded px-1.5 py-0.5 text-[11px] font-medium transition ${on ? "bg-red-500 text-white" : "border border-black/[0.06] text-[#6e6e73] hover:bg-black/[0.03]"}`}
             >
               {s}
             </button>
@@ -205,7 +205,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
         <button
           type="button"
           onClick={() => setShowDesc((v) => !v)}
-          className="rounded px-1.5 py-0.5 text-[11px] font-medium text-slate-500 underline decoration-dotted hover:text-slate-800"
+          className="rounded px-1.5 py-0.5 text-[11px] font-medium text-[#6e6e73] underline decoration-dotted hover:text-[#1d1d1f]"
         >
           {showDesc ? "Sakrij opis" : "✏️ Uredi opis"}
           {p.description ? " (uređen)" : ""}
@@ -214,7 +214,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
           <button
             type="button"
             onClick={() => setShowSizes((v) => !v)}
-            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-slate-500 underline decoration-dotted hover:text-slate-800"
+            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-[#6e6e73] underline decoration-dotted hover:text-[#1d1d1f]"
           >
             {showSizes ? "Sakrij količine" : "📦 Količine po veličini"}
             {hasSizeStock ? ` (${sizeStockTotal} kom)` : ""}
@@ -223,18 +223,18 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
       </div>
 
       {showEdit && (
-        <div className="mt-2 rounded-lg border border-violet-200 bg-violet-50/40 p-2.5">
+        <div className="mt-2 rounded-[12px] border border-violet-200 bg-violet-50/40 p-2.5">
           <div className="flex flex-wrap items-center gap-1.5">
-            <input value={klub} onChange={(e) => setKlub(e.target.value)} placeholder="Klub / brend" className="w-36 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
-            <input value={igrac} onChange={(e) => setIgrac(e.target.value)} placeholder="Igrač / model" className="min-w-[150px] flex-1 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
-            <select value={liga} onChange={(e) => setLiga(e.target.value)} className="w-32 max-w-full shrink-0 rounded border border-slate-200 bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400">
+            <input value={klub} onChange={(e) => setKlub(e.target.value)} placeholder="Klub / brend" className="w-36 rounded border border-black/[0.06] bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
+            <input value={igrac} onChange={(e) => setIgrac(e.target.value)} placeholder="Igrač / model" className="min-w-[150px] flex-1 rounded border border-black/[0.06] bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
+            <select value={liga} onChange={(e) => setLiga(e.target.value)} className="w-32 max-w-full shrink-0 rounded border border-black/[0.06] bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400">
               {(LIGE.includes(liga) ? LIGE : [liga, ...LIGE]).map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
           <div className="mt-2">
             <ImageUploader value={images} onChange={setImages} slug={p.slug} />
           </div>
-          <p className="mt-1.5 text-[11px] text-slate-500">
+          <p className="mt-1.5 text-[11px] text-[#6e6e73]">
             {p.custom
               ? "Slike i naziv ovog proizvoda. Prva slika je glavna."
               : "Ostavi slike prazno = koriste se originalne iz kataloga. Dodaj slike da ih zamijeniš. Prva je glavna."}
@@ -244,23 +244,23 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
       )}
 
       {showSizes && p.sizeList && p.sizeList.length > 0 && (
-        <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
+        <div className="mt-2 rounded-[12px] border border-black/[0.06] bg-black/[0.03] p-2.5">
           <div className="flex flex-wrap gap-2">
             {p.sizeList.map((s) => (
               <label key={s} className="flex flex-col items-center gap-0.5">
-                <span className="text-[11px] font-medium text-slate-500">{s}</span>
+                <span className="text-[11px] font-medium text-[#6e6e73]">{s}</span>
                 <input
                   value={sizeStock[s] ?? ""}
                   onChange={(e) => setSizeStock((cur) => ({ ...cur, [s]: e.target.value.replace(/[^0-9]/g, "") }))}
                   inputMode="numeric"
                   placeholder="–"
-                  className="w-12 rounded border border-slate-200 bg-white px-1.5 py-1 text-center text-[13px] outline-none focus:border-slate-400"
+                  className="w-12 rounded border border-black/[0.06] bg-white px-1.5 py-1 text-center text-[13px] outline-none focus:border-slate-400"
                 />
               </label>
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-slate-400">
-            Upiši koliko imaš po veličini. <b>0 = rasprodano</b> (kupac ne može naručiti tu veličinu). Prazno = ne pratiš tu veličinu. Ukupno: <b className="text-slate-600">{sizeStockTotal} kom</b>. Ne zaboravi „Spremi” gore.
+          <p className="mt-2 text-[11px] text-[#8e8e93]">
+            Upiši koliko imaš po veličini. <b>0 = rasprodano</b> (kupac ne može naručiti tu veličinu). Prazno = ne pratiš tu veličinu. Ukupno: <b className="text-[#6e6e73]">{sizeStockTotal} kom</b>. Ne zaboravi „Spremi” gore.
           </p>
         </div>
       )}
@@ -271,17 +271,17 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
             rows={6}
-            className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[13px] leading-6 text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+            className="w-full rounded-[10px] border border-black/[0.06] bg-black/[0.03] px-3 py-2 text-[13px] leading-6 text-[#1d1d1f] outline-none focus:border-slate-400 focus:bg-white"
           />
           <div className="mt-1 flex items-center gap-2">
             <button
               type="button"
               onClick={() => setDesc(p.descriptionAuto)}
-              className="text-[11px] text-slate-400 underline decoration-dotted hover:text-slate-600"
+              className="text-[11px] text-[#8e8e93] underline decoration-dotted hover:text-[#6e6e73]"
             >
               ↺ Vrati automatski opis
             </button>
-            <span className="text-[11px] text-slate-400">Svaki novi red = novi odlomak. Ne zaboravi „Spremi” gore.</span>
+            <span className="text-[11px] text-[#8e8e93]">Svaki novi red = novi odlomak. Ne zaboravi „Spremi” gore.</span>
           </div>
         </div>
       )}
@@ -327,12 +327,12 @@ export function ProductsManager() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Traži proizvod (klub, igrač, liga, streetwear)…"
-          className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-400 focus:bg-white"
+          className="flex-1 rounded-[12px] border border-black/[0.06] bg-black/[0.03] px-3.5 py-2.5 text-sm text-[#1d1d1f] outline-none focus:border-slate-400 focus:bg-white"
         />
-        <span className="shrink-0 text-xs text-slate-400">{loading ? "…" : `${filtered.length} proizvoda`}</span>
+        <span className="shrink-0 text-xs text-[#8e8e93]">{loading ? "…" : `${filtered.length} proizvoda`}</span>
       </div>
       {loading ? (
-        <div className="py-8 text-center text-sm text-slate-400">Učitavam…</div>
+        <div className="py-8 text-center text-sm text-[#8e8e93]">Učitavam…</div>
       ) : (
         <div className="space-y-2">
           {filtered.map((p) => <ProductRow key={p.slug} p={p} sizes={sizes} />)}

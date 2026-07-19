@@ -67,31 +67,31 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
           type="button"
           onClick={syncSheet}
           disabled={syncing}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:text-slate-900 disabled:opacity-50"
+          className="rounded-[12px] border border-black/[0.06] bg-white px-3 py-1.5 text-xs font-medium text-[#6e6e73] shadow-sm transition hover:text-[#1d1d1f] disabled:opacity-50"
         >
           {syncing ? "Sinkroniziram…" : "↻ Sinkroniziraj sa Sheetom"}
         </button>
       </div>
 
-      {note && <div className="mb-3 rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-600">{note}</div>}
+      {note && <div className="mb-3 rounded-[12px] bg-black/[0.06] px-3 py-2 text-xs text-[#6e6e73]">{note}</div>}
 
       {orders.length === 0 ? (
-        <div className="text-sm text-slate-400">Sve poslano ✅</div>
+        <div className="text-sm text-[#8e8e93]">Sve poslano ✅</div>
       ) : (
         <ul className="max-h-96 space-y-2 overflow-y-auto">
           {orders.map((o) => (
-            <li key={o.id} className="rounded-lg border border-slate-100 px-2.5 py-2 text-sm">
+            <li key={o.id} className="rounded-[12px] border border-black/[0.04] px-2.5 py-2 text-sm">
              <div className="flex items-center justify-between gap-2">
-              <span className="min-w-0 truncate text-slate-700">
-                <span className="text-slate-400">{o.dateLabel}</span> · {o.customerName}{" "}
-                <span className="text-slate-400">· {o.itemCount} kom · {eur(o.total)}</span>
+              <span className="min-w-0 truncate text-[#1d1d1f]">
+                <span className="text-[#8e8e93]">{o.dateLabel}</span> · {o.customerName}{" "}
+                <span className="text-[#8e8e93]">· {o.itemCount} kom · {eur(o.total)}</span>
               </span>
               <span className="flex shrink-0 items-center gap-1.5">
                 <a
                   href={`/admin/print/${o.id}/`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-500 transition hover:text-slate-800"
+                  className="rounded-[10px] border border-black/[0.06] px-2 py-1 text-[11px] font-medium text-[#6e6e73] transition hover:text-[#1d1d1f]"
                   title="Isprintaj otpremnicu"
                 >
                   🖨 Print
@@ -100,7 +100,7 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
                   type="button"
                   onClick={() => markShipped(o.id, "igor")}
                   disabled={busy === o.id}
-                  className="rounded-md bg-emerald-500 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
+                  className="rounded-[10px] bg-emerald-500 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
                   title="Ja (Igor) sam poslao"
                 >
                   {busy === o.id ? "…" : "✓ Ja"}
@@ -109,7 +109,7 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
                   type="button"
                   onClick={() => markShipped(o.id, "ivica")}
                   disabled={busy === o.id}
-                  className="rounded-md bg-sky-500 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-sky-600 disabled:opacity-50"
+                  className="rounded-[10px] bg-sky-500 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-sky-600 disabled:opacity-50"
                   title="Ivica je poslao"
                 >
                   {busy === o.id ? "…" : "✓ Ivica"}
@@ -118,7 +118,7 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
                   type="button"
                   onClick={() => cancelOrder(o.id)}
                   disabled={busy === o.id}
-                  className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-400 transition hover:border-red-300 hover:text-red-500 disabled:opacity-50"
+                  className="rounded-[10px] border border-black/[0.06] px-2 py-1 text-[11px] font-medium text-[#8e8e93] transition hover:border-red-300 hover:text-red-500 disabled:opacity-50"
                   title="Otkaži narudžbu (neće se poslati)"
                 >
                   ✕
@@ -126,11 +126,11 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
               </span>
              </div>
              {o.items.length > 0 && (
-               <ul className="mt-1.5 space-y-0.5 border-t border-slate-100 pt-1.5">
+               <ul className="mt-1.5 space-y-0.5 border-t border-black/[0.04] pt-1.5">
                  {o.items.map((it, idx) => (
-                   <li key={idx} className="text-[13px] text-slate-700">
+                   <li key={idx} className="text-[13px] text-[#1d1d1f]">
                      📦 {it.quantity > 1 ? `${it.quantity}× ` : ""}<span className="font-medium">{it.label}</span>
-                     {it.size ? <span className="text-slate-500"> · veličina {it.size}</span> : null}
+                     {it.size ? <span className="text-[#6e6e73]"> · veličina {it.size}</span> : null}
                    </li>
                  ))}
                </ul>

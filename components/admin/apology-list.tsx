@@ -25,15 +25,15 @@ export function ApologyList({ rows }: { rows: OldUnshippedRow[] }) {
 
   return (
     <>
-      <p className="mb-3 -mt-2 text-xs text-slate-400">
+      <p className="mb-3 -mt-2 text-xs text-[#8e8e93]">
         Prošlo je dosta od narudžbe, a nije poslana. Klikni „WhatsApp isprika” — poruka je već napisana, samo pošalji. Kad si javio, klikni ✕ da makneš s liste.
       </p>
       <ul className="space-y-2">
         {rows.map((o) => (
-          <li key={o.id} className="flex flex-col items-start gap-2 rounded-lg border border-slate-100 px-2.5 py-2 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <span className="min-w-0 text-slate-700">
-              <span className="text-slate-400">{o.dateLabel}</span> · {o.name}{" "}
-              <span className="text-slate-400">· {o.product} · {eur(o.total)}</span>
+          <li key={o.id} className="flex flex-col items-start gap-2 rounded-[12px] border border-black/[0.04] px-2.5 py-2 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <span className="min-w-0 text-[#1d1d1f]">
+              <span className="text-[#8e8e93]">{o.dateLabel}</span> · {o.name}{" "}
+              <span className="text-[#8e8e93]">· {o.product} · {eur(o.total)}</span>
             </span>
             <span className="flex shrink-0 items-center gap-1.5">
               {o.wa ? (
@@ -41,19 +41,19 @@ export function ApologyList({ rows }: { rows: OldUnshippedRow[] }) {
                   href={o.wa}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-md bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600"
+                  className="rounded-[10px] bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600"
                 >
                   WhatsApp isprika
                 </a>
               ) : (
-                <span className="text-[11px] text-slate-300">nema broja</span>
+                <span className="text-[11px] text-[#c7c7cc]">nema broja</span>
               )}
               <button
                 type="button"
                 onClick={() => dismiss(o.id)}
                 disabled={busy === o.id}
                 title="Javio sam se — makni s liste"
-                className="rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-400 transition hover:border-slate-300 hover:text-slate-600 disabled:opacity-50"
+                className="rounded-[10px] border border-black/[0.06] px-2 py-1 text-[11px] font-medium text-[#8e8e93] transition hover:border-black/[0.12] hover:text-[#6e6e73] disabled:opacity-50"
               >
                 {busy === o.id ? "…" : "✕"}
               </button>

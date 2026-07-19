@@ -321,3 +321,46 @@ body::before {
 .admin-root .a-blur {
   background: rgba(245, 245, 247, 0.97);
 }
+
+/* Apple sitni elementi za admin — NAMJERNO JEFTINI.
+   Na Narudžbama je ~250 gumba na ekranu, na Proizvodima 120 redaka, pa ovdje
+   nema sjena, zamućenja ni CSS varijabli u bojama (to je već jednom srušilo
+   glatkoću listanja). Samo pozadina + rub + radijus. */
+.admin-root .a-btn-sm {
+  border-radius: 9px;
+  font-weight: 600;
+  background: rgba(118, 118, 128, 0.10);
+  color: #1d1d1f;
+  transition: background 0.12s ease;
+}
+.admin-root .a-btn-sm:hover { background: rgba(118, 118, 128, 0.18); }
+.admin-root .a-btn-sm:disabled { opacity: 0.4; }
+
+/* Obojane varijante (potvrda / upozorenje / opasnost) */
+.admin-root .a-btn-ok { background: #e7f8ee; color: #0a7d3f; }
+.admin-root .a-btn-ok:hover { background: #d6f2e2; }
+.admin-root .a-btn-warn { background: #fff4e0; color: #a35b00; }
+.admin-root .a-btn-warn:hover { background: #ffe9c7; }
+.admin-root .a-btn-danger { background: #ffeceb; color: #c2352c; }
+.admin-root .a-btn-danger:hover { background: #ffdbd9; }
+
+/* Oznaka statusa (pill) */
+.admin-root .a-chip {
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: rgba(118, 118, 128, 0.12);
+  color: #6e6e73;
+}
+
+/* Redak/podkartica unutar kartice */
+.admin-root .a-row {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  background: #fff;
+}
+.admin-root .a-sub {
+  border-radius: 12px;
+  background: rgba(118, 118, 128, 0.06);
+}

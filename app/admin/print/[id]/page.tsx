@@ -30,7 +30,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
   const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode, hasStreetwear) : 0;
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-8 print:bg-white print:p-0">
+    <div className="min-h-screen bg-black/[0.06] px-4 py-8 print:bg-white print:p-0">
       <style>{`
         @media print {
           @page { size: 100mm 150mm; margin: 4mm; }
@@ -41,7 +41,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
       `}</style>
 
       <div className="no-print mx-auto mb-4 flex max-w-[360px] items-center justify-between">
-        <a href="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-800">← Nazad</a>
+        <a href="/admin" className="text-sm font-medium text-[#6e6e73] hover:text-[#1d1d1f]">← Nazad</a>
         <div className="flex items-center gap-2">
           <PdfLabelLink id={id} defaultSender={order.shippedBy === "ivica" ? "ivica" : order.shippedBy === "igor" ? "igor" : undefined} />
           <a
@@ -49,7 +49,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
             target="_blank"
             rel="noopener noreferrer"
             title="GLS naljepnica: ime kupca + logo + QR na Instagram (adresu radi GLS)"
-            className="rounded-md bg-orange-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-orange-600"
+            className="rounded-[10px] bg-orange-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-orange-600"
           >
             🚚 GLS
           </a>
@@ -57,7 +57,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <div className="label mx-auto w-[360px] rounded-lg bg-white p-4 pl-7 text-black shadow-lg print:shadow-none">
+      <div className="label mx-auto w-[360px] rounded-[12px] bg-white p-4 pl-7 text-black shadow-lg print:shadow-none">
         {/* Šalje — Igor ili Ivica (različite adrese) */}
         <LabelSender defaultSender={order.shippedBy === "ivica" ? "ivica" : order.shippedBy === "igor" ? "igor" : undefined} senders={(await getSettings()).senders} />
 

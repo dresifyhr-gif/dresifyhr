@@ -45,11 +45,11 @@ export function ImageUploader({ value, onChange, slug }: { value: string[]; onCh
         onDragLeave={() => setDrag(false)}
         onDrop={(e) => { e.preventDefault(); setDrag(false); if (e.dataTransfer.files.length) uploadFiles(e.dataTransfer.files); }}
         onClick={() => inputRef.current?.click()}
-        className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed p-5 text-center text-sm transition ${drag ? "border-slate-900 bg-slate-50" : "border-slate-200 hover:border-slate-300"}`}
+        className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-[12px] border-2 border-dashed p-5 text-center text-sm transition ${drag ? "border-slate-900 bg-black/[0.03]" : "border-black/[0.06] hover:border-black/[0.12]"}`}
       >
         <span className="text-2xl">🖼️</span>
-        <span className="font-medium text-slate-600">{busy ? "Uploadam…" : "Povuci slike ovdje ili klikni za odabir"}</span>
-        <span className="text-[11px] text-slate-400">JPG / PNG / WebP · max 8 MB · prva slika je glavna</span>
+        <span className="font-medium text-[#6e6e73]">{busy ? "Uploadam…" : "Povuci slike ovdje ili klikni za odabir"}</span>
+        <span className="text-[11px] text-[#8e8e93]">JPG / PNG / WebP · max 8 MB · prva slika je glavna</span>
         <input
           ref={inputRef}
           type="file"
@@ -65,7 +65,7 @@ export function ImageUploader({ value, onChange, slug }: { value: string[]; onCh
       {value.length > 0 && (
         <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
           {value.map((url, i) => (
-            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+            <div key={url} className="group relative aspect-square overflow-hidden rounded-[12px] border border-black/[0.06] bg-black/[0.03]">
               <Image src={url} alt="" fill sizes="120px" className="object-cover" />
               {i === 0 && <span className="absolute left-1 top-1 rounded bg-slate-900/80 px-1 py-0.5 text-[9px] font-semibold text-white">glavna</span>}
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/50 px-1 py-0.5 opacity-0 transition group-hover:opacity-100">
