@@ -20,6 +20,8 @@ export type KlubProgress = {
   remaining: number; // koliko još fali do sljedeće nagrade
   earned: number; // koliko je nagrada ukupno zaslužio
   issued: number; // koliko je kodova stvarno izdano
+  pending: number; // zasluženo, a još neizdano (npr. retroaktivno)
+  hasReward: boolean; // ima nagradu spremnu ili neiskorišten kod
   codes: { code: string; used: boolean; label: string }[];
 };
 
@@ -45,7 +47,8 @@ export async function getKlubProgress(phone: string | null | undefined): Promise
   const key = phoneKey(phone);
   const base: KlubProgress = {
     active: s.klubActive, collected: 0, target: s.klubTarget,
-    inCycle: 0, remaining: s.klubTarget, earned: 0, issued: 0, codes: []
+    inCycle: 0, remaining: s.klubTarget, earned: 0, issued: 0,
+    pending: 0, hasReward: false, codes: []
   };
   if (!key) return base;
 
@@ -62,15 +65,26 @@ export async function getKlubProgress(phone: string | null | undefined): Promise
   const usedSet = new Set(used.map((u) => (u.promoCode || "").toUpperCase()));
 
   const earned = Math.floor(collected / s.klubTarget);
+  const mapped = codes.map((c) => ({ code: c.code, used: usedSet.has(c.code.toUpperCase()), label: c.label }));
+  const unused = mapped.filter((c) => !c.used).length;
+  const pending = Math.max(0, earned - codes.length);
+  // Kad je nagrada zaslužena a još nije iskorištena, prikazujemo puni krug
+  // (inače bi 3/3 zbog modula ispalo "0/3" i kupac bi mislio da nema ništa).
+  const rawCycle = collected % s.klubTarget;
+  const hasReward = pending > 0 || unused > 0;
+  const inCycle = hasReward && rawCycle === 0 ? s.klubTarget : rawCycle;
+
   return {
     active: s.klubActive,
     collected,
     target: s.klubTarget,
-    inCycle: collected % s.klubTarget,
-    remaining: s.klubTarget - (collected % s.klubTarget),
+    inCycle,
+    remaining: Math.max(0, s.klubTarget - inCycle),
     earned,
     issued: codes.length,
-    codes: codes.map((c) => ({ code: c.code, used: usedSet.has(c.code.toUpperCase()), label: c.label }))
+    pending,
+    hasReward,
+    codes: mapped
   };
 }
 

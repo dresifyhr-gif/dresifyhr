@@ -112,7 +112,7 @@ export function ContactForm() {
   const [autoPromoTried, setAutoPromoTried] = useState(false);
   const [hasGift, setHasGift] = useState(false);
   // Dresify Klub: napredak po broju mobitela (bez prijave).
-  const [klub, setKlub] = useState<{ inCycle: number; target: number; remaining: number; available: { code: string; label: string }[] } | null>(null);
+  const [klub, setKlub] = useState<{ inCycle: number; target: number; remaining: number; hasReward: boolean } | null>(null);
 
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
@@ -325,9 +325,9 @@ export function ContactForm() {
               />
               {klub && (
                 <div className="mt-2 rounded-[8px] border border-accent/30 bg-accent/[0.07] px-3 py-2">
-                  {klub.available.length > 0 ? (
+                  {klub.hasReward ? (
                     <p className="text-[13px] font-semibold text-accent">
-                      🎁 Imaš nagradu! Upiši kod <span className="font-mono">{klub.available[0].code}</span> ispod.
+                      🎁 Imaš nagradu u Dresify Klubu! Javi nam se na WhatsApp i šaljemo ti kod.
                     </p>
                   ) : (
                     <>

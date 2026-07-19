@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/admin-shell";
 import { isAdmin } from "@/lib/admin-auth";
-import { getKlubProgress } from "@/lib/klub";
+import { getKlubProgress, issueKlubRewardIfEarned } from "@/lib/klub";
 import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
 import { formatCroatianName, formatCroatianPhone, phoneKey, repairText } from "@/lib/utils";
@@ -51,6 +51,9 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
   const totalSpent = collected.reduce((s, o) => s + (o.total - (o.shipping ?? 0)), 0);
   const firstAt = orders[orders.length - 1].createdAt;
   const wa = latest.phone ? `https://wa.me/${String(latest.phone).replace(/\D/g, "").replace(/^00/, "")}` : null;
+  // Nagrade zaslužene prije uvođenja Kluba (ili propuštene) izdaju se ovdje —
+  // idempotentno je i vidi ga samo admin.
+  await issueKlubRewardIfEarned(latest.phone).catch(() => null);
   const klub = await getKlubProgress(latest.phone);
 
   const Stat = ({ label, value, cls = "text-slate-900" }: { label: string; value: string; cls?: string }) => (
@@ -99,7 +102,8 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
             <div>
               <div className="text-[15px] font-semibold text-[#1d1d1f]">🎁 Dresify Klub</div>
               <div className="mt-0.5 text-[13px] text-[#6e6e73]">
-                {klub.inCycle}/{klub.target} preuzetih narudžbi — još <b>{klub.remaining}</b> do nagrade
+                {klub.inCycle}/{klub.target} preuzetih narudžbi
+                {klub.remaining > 0 ? <> — još <b>{klub.remaining}</b> do nagrade</> : <> — <b className="text-emerald-600">nagrada spremna</b></>}
                 {klub.earned > 0 && <> · zaslužio <b>{klub.earned}</b>×</>}
               </div>
             </div>
@@ -109,7 +113,7 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
               ) : (
                 klub.codes.map((c) => (
                   <span key={c.code} className={`rounded-md px-2 py-1 font-mono text-[12px] font-bold ${c.used ? "bg-black/[0.06] text-[#8e8e93] line-through" : "bg-accent/60 text-[#1d1d1f]"}`}>
-                    {c.code}
+                    {c.code}{c.used ? "" : " ✓"}
                   </span>
                 ))
               )}

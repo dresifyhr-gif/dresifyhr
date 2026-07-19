@@ -6,7 +6,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // Napredak u Dresify Klubu za upisani broj mobitela (bez prijave).
-// Vraća SAMO napredak i eventualne nezauzete kodove tog broja — ništa osobno.
+//
+// SIGURNOST: namjerno NE vraćamo šifru nagrade. Nemamo načina provjeriti da
+// osoba koja je upisala broj doista jest vlasnik tog broja, pa bi vraćanje koda
+// značilo da netko može redom probavati tuđe brojeve i pokupiti njihove nagrade.
+// Vraćamo samo napredak i signal da nagrada postoji — kod šalje Gazda
+// (vidi ga na profilu kupca u adminu) preko WhatsAppa.
 export async function GET(request: Request) {
   const phone = (new URL(request.url).searchParams.get("phone") || "").trim();
   if (!phone) return NextResponse.json({ ok: false });
@@ -16,11 +21,9 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    collected: p.collected,
     target: p.target,
     inCycle: p.inCycle,
     remaining: p.remaining,
-    // Neiskorišteni kodovi — da kupac odmah vidi svoju nagradu na blagajni.
-    available: p.codes.filter((c) => !c.used).map((c) => ({ code: c.code, label: c.label }))
+    hasReward: p.hasReward
   });
 }
