@@ -7,9 +7,6 @@
   --background: #0a0a0a;
   --foreground: #ffffff;
   --accent: #e8ff3c;
-  /* Ista boja kao RGB trojka — Tailwind `accent` klase idu kroz nju,
-     pa promjena u Postavkama mijenja SVE (uključujući /opacity varijante). */
-  --accent-rgb: 232 255 60;
   --surface: #111111;
   --surface-2: #0a0a0a;
   --line: rgba(255, 255, 255, 0.08);

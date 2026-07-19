@@ -91,14 +91,6 @@ export default async function RootLayout({
     heroSubtitle: s.heroSubtitle
   };
 
-  // Hex → "R G B" (format koji Tailwind traži za /opacity varijante).
-  const accentRgb = (() => {
-    const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(s.accentColor || "");
-    if (!m) return null;
-    const rgb = `${parseInt(m[1], 16)} ${parseInt(m[2], 16)} ${parseInt(m[3], 16)}`;
-    return rgb === "232 255 60" ? null : rgb; // zadana boja → ne treba override
-  })();
-
   const cookieStore = await cookies();
   const rawLocale = cookieStore.get(LOCALE_COOKIE)?.value;
   const locale: Locale = rawLocale === "en" ? "en" : "hr";
@@ -106,10 +98,6 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${bebas.variable} ${barlow.variable}`}>
-        {/* Akcentna boja iz Postavki — Tailwind `accent` klase čitaju --accent-rgb. */}
-        {accentRgb && (
-          <style dangerouslySetInnerHTML={{ __html: `:root{--accent:${s.accentColor};--accent-rgb:${accentRgb};}` }} />
-        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}

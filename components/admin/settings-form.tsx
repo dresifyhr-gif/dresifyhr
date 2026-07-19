@@ -238,16 +238,6 @@ export function SettingsForm() {
         </div>
       </Card>
 
-      <Card title="Boja" hint="Akcentna boja shopa (gumbi, naglasci). Zadana je Dresify limeta.">
-        <div className="flex flex-wrap items-center gap-3">
-          <input type="color" value={s.accentColor} onChange={(e) => setS((cur) => (cur ? { ...cur, accentColor: e.target.value } : cur))} className="h-10 w-16 cursor-pointer rounded-[10px] border border-black/10 bg-white p-1" />
-          <input value={s.accentColor} onChange={setStr("accentColor")} className={`${inp} max-w-[140px] font-mono`} />
-          <button type="button" onClick={() => setS((cur) => (cur ? { ...cur, accentColor: "#e8ff3c" } : cur))} className="a-input px-3 py-2 text-[12px] font-medium text-[#6e6e73] hover:text-[#1d1d1f]">
-            Vrati zadanu
-          </button>
-        </div>
-      </Card>
-
       <Card title="🎁 Dresify Klub" hint="Vjernost po broju mobitela — bez računa i lozinki. Broje se samo PREUZETE narudžbe.">
         <label className="mb-3 flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
           <input type="checkbox" checked={s.klubActive} onChange={(e) => setS((cur) => (cur ? { ...cur, klubActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />
