@@ -8,6 +8,11 @@ type Settings = {
   costDres: number;
   costKomplet: number;
   costStreetwear: number;
+  deliveryCost: number;
+  returnCost: number;
+  igorSharePct: number;
+  winbackDays: number;
+  riskMinFailed: number;
   senders: { igor: { name: string; address: string; city: string }; ivica: { name: string; address: string; city: string } };
   iban: string;
   businessName: string;
@@ -64,6 +69,11 @@ export function SettingsForm() {
         costDres: s.costDres,
         costKomplet: s.costKomplet,
         costStreetwear: s.costStreetwear,
+        deliveryCost: s.deliveryCost,
+        returnCost: s.returnCost,
+        igorSharePct: s.igorSharePct,
+        winbackDays: s.winbackDays,
+        riskMinFailed: s.riskMinFailed,
         igorName: s.senders.igor.name, igorAddress: s.senders.igor.address, igorCity: s.senders.igor.city,
         ivicaName: s.senders.ivica.name, ivicaAddress: s.senders.ivica.address, ivicaCity: s.senders.ivica.city,
         iban: s.iban, businessName: s.businessName, contactPhone: s.contactPhone, contactEmail: s.contactEmail
@@ -89,6 +99,36 @@ export function SettingsForm() {
           <div>
             <span className={label}>Nabava streetweara (€)</span>
             <input value={s.costStreetwear} onChange={setNum("costStreetwear")} inputMode="decimal" className={inp} />
+          </div>
+        </div>
+      </Card>
+
+      <Card title="Poslovna pravila" hint="Utječu samo na obračun i admin — ne diraju cijene na shopu.">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <span className={label}>Trošak besplatne dostave (€)</span>
+            <input value={s.deliveryCost} onChange={setNum("deliveryCost")} inputMode="decimal" className={inp} />
+            <p className="mt-1 text-[11px] text-[#8e8e93]">Koliko NAS košta kad je dostava besplatna — skida se s marže.</p>
+          </div>
+          <div>
+            <span className={label}>Trošak vraćene pošiljke (€)</span>
+            <input value={s.returnCost} onChange={setNum("returnCost")} inputMode="decimal" className={inp} />
+            <p className="mt-1 text-[11px] text-[#8e8e93]">Sad 0 jer ne plaćamo povrat. Stavi iznos ako se to promijeni.</p>
+          </div>
+          <div>
+            <span className={label}>Igorov udio u marži (%)</span>
+            <input value={s.igorSharePct} onChange={setNum("igorSharePct")} inputMode="decimal" className={inp} />
+            <p className="mt-1 text-[11px] text-[#8e8e93]">50 = pola-pola. Ivici ide ostatak. Mijenja poravnanje.</p>
+          </div>
+          <div>
+            <span className={label}>Vrati kupca nakon (dana)</span>
+            <input value={s.winbackDays} onChange={setNum("winbackDays")} inputMode="numeric" className={inp} />
+            <p className="mt-1 text-[11px] text-[#8e8e93]">Koliko dana bez kupnje da kupac uđe u „vrati kupce".</p>
+          </div>
+          <div>
+            <span className={label}>Rizičan od (broj odbijanja)</span>
+            <input value={s.riskMinFailed} onChange={setNum("riskMinFailed")} inputMode="numeric" className={inp} />
+            <p className="mt-1 text-[11px] text-[#8e8e93]">1 = već prvo odbijanje. Stavi 2 ako ti je prestrogo.</p>
           </div>
         </div>
       </Card>

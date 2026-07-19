@@ -22,6 +22,12 @@ export type ShopSettings = {
   costDres: number;
   costKomplet: number;
   costStreetwear: number;
+  // Poslovna pravila (admin/obračun)
+  deliveryCost: number;
+  returnCost: number;
+  igorSharePct: number;
+  winbackDays: number;
+  riskMinFailed: number;
   senders: {
     igor: { name: string; address: string; city: string };
     ivica: { name: string; address: string; city: string };
@@ -39,6 +45,11 @@ const DEFAULTS: ShopSettings = {
   costDres: COST_DRES_EUR,
   costKomplet: COST_KOMPLET_EUR,
   costStreetwear: COST_STREETWEAR_EUR,
+  deliveryCost: 5,   // trošak besplatne dostave koji snosimo mi
+  returnCost: 0,     // povrat trenutno ne plaćamo
+  igorSharePct: 50,  // pola-pola
+  winbackDays: 30,
+  riskMinFailed: 1,
   senders: {
     igor: { name: "Igor Katanić", address: "Dubljevička ulica 91", city: "10040 Zagreb" },
     ivica: { name: "Ivica Karamatić", address: "Katoro 54", city: "52470 Umag" }
@@ -74,6 +85,11 @@ export async function getSettings(): Promise<ShopSettings> {
     costDres: num(r.costDres, DEFAULTS.costDres),
     costKomplet: num(r.costKomplet, DEFAULTS.costKomplet),
     costStreetwear: num(r.costStreetwear, DEFAULTS.costStreetwear),
+    deliveryCost: num(r.deliveryCost, DEFAULTS.deliveryCost),
+    returnCost: num(r.returnCost, DEFAULTS.returnCost),
+    igorSharePct: num(r.igorSharePct, DEFAULTS.igorSharePct),
+    winbackDays: num(r.winbackDays, DEFAULTS.winbackDays),
+    riskMinFailed: num(r.riskMinFailed, DEFAULTS.riskMinFailed),
     senders: {
       igor: {
         name: str(r.igorName, DEFAULTS.senders.igor.name),

@@ -7,11 +7,7 @@ import { phoneKey } from "@/lib/utils";
 
 const DAY = 86_400_000;
 // Nabavne cijene (dres/komplet) dolaze iz Postavki — vidi getSettings().
-// Vraćena pošiljka (kupac je nije preuzeo) — poštarina tamo-natrag koju mi plaćamo.
-// Skida se s ukupnog profita, a u podjeli sa zajedničke marže (dakle po 2 € svakome).
-// Povrat pošiljke više ne košta (ne plaćamo poštarinu za vraćeni paket) → 0 €.
-// Ostaje kao konstanta da se lako vrati ako se to ikad promijeni.
-const RETURN_COST = 0;
+// Trošak vraćene pošiljke i besplatne dostave dolaze iz Postavki (getSettings).
 // Komplet se prepoznaje po slugu/nazivu koji sadrži "komplet".
 const kompletItemWhere = {
   OR: [{ slug: { contains: "komplet" } }, { igrac: { contains: "komplet", mode: "insensitive" as const } }]
@@ -20,7 +16,7 @@ const kompletItemWhere = {
 export async function getDashboardMetrics() {
   const now = new Date();
   // Nabavne cijene iz Postavki (fallback na zadane) — utječu na profit i poravnanje.
-  const { costDres, costKomplet, costStreetwear } = await getSettings();
+  const { costDres, costKomplet, costStreetwear, deliveryCost, returnCost, igorSharePct, winbackDays, riskMinFailed } = await getSettings();
   // Početak današnjeg dana po Europe/Zagreb (Vercel radi u UTC-u) kao UTC instant —
   // inače bi "promet danas" u ranim satima gledao krivi (UTC) dan.
   const zp = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zagreb", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
@@ -80,7 +76,7 @@ export async function getDashboardMetrics() {
     prisma.order.aggregate({ _sum: { total: true, shipping: true }, where: { createdAt: { gte: new Date(now.getTime() - 60 * DAY), lt: startMonth } } }),
     prisma.order.findMany({ where: { status: "new" }, orderBy: { createdAt: "asc" }, take: 500, select: { id: true, createdAt: true, customerName: true, phone: true, itemCount: true, total: true, shipping: true, items: { select: { klub: true, igrac: true, size: true, quantity: true } } } }),
     prisma.order.aggregate({ _count: { _all: true }, _sum: { total: true, shipping: true }, where: { status: "new" } }),
-    prisma.customer.findMany({ where: { lastOrderAt: { lt: new Date(now.getTime() - 30 * DAY) }, totalOrders: { gt: 0 } }, orderBy: { totalSpent: "desc" }, take: 20 }),
+    prisma.customer.findMany({ where: { lastOrderAt: { lt: new Date(now.getTime() - winbackDays * DAY) }, totalOrders: { gt: 0 } }, orderBy: { totalSpent: "desc" }, take: 20 }),
     prisma.order.findMany({ select: { address: true, total: true, shipping: true } }),
     prisma.adSpend.aggregate({ _sum: { amount: true } }),
     prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
@@ -156,14 +152,14 @@ export async function getDashboardMetrics() {
     riskMap.set(key, cur);
   }
   const riskyCustomers = [...riskMap.values()]
-    .filter((c) => c.failed > 0)
+    .filter((c) => c.failed >= riskMinFailed)
     .sort((a, b) => b.failed - a.failed || b.lastAt.getTime() - a.lastAt.getTime())
     .slice(0, 200)
     .map((c) => ({ name: c.name, phone: c.phone, failed: c.failed, collected: c.collected }));
 
   // Trošak vraćenih pošiljki (RETURN_COST po povratu) — trenutno 0 € jer ne
   // plaćamo poštarinu za povrat; ostaje u formuli za slučaj da se to promijeni.
-  const returnLossTotal = returnedCountAll * RETURN_COST;
+  const returnLossTotal = returnedCountAll * returnCost;
 
   const pct = (cur: number, prev: number | null) => (prev && prev > 0 ? ((cur - prev) / prev) * 100 : null);
   const weekChange = pct(net(week), net(prev7));
@@ -274,13 +270,14 @@ export async function getDashboardMetrics() {
     }
   }
 
-  const DELIVERY_COST = 5;
-  const freeShipCost = freeDeliveries * DELIVERY_COST;
+  const freeShipCost = freeDeliveries * deliveryCost;
   // Vraćene pošiljke od zadnjeg poravnanja: 4 € svaka, skida se sa zajedničke marže (po 2 € svakome).
-  const returnLossSettle = returnedSinceCount * RETURN_COST;
+  const returnLossSettle = returnedSinceCount * returnCost;
 
   // Profit poslanih i oglasi od zadnjeg poravnanja — oboje već dohvaćeno u Fazi B.
-  const halfShare = shippedProfitTotal / 2;
+  // Udio iz Postavki (50 = pola-pola). Igorov udio; Ivici ide ostatak.
+  const igorShare = Math.min(100, Math.max(0, igorSharePct)) / 100;
+  const halfShare = shippedProfitTotal * igorShare;
   const adsSpend = adsAgg._sum.amount ?? 0;
 
   // Poravnanje: Ivica je platila SVU robu → prvo joj se vrati nabava prikupljenih artikala,
@@ -293,10 +290,11 @@ export async function getDashboardMetrics() {
   // Besplatne dostave (~5€) i vraćene pošiljke (4€) su naši troškovi → skidaju se s marže
   // prije podjele, pa ih oboje snose pola-pola (npr. povrat = 2€ Igor + 2€ Ivica).
   const collectedMargin = totalCollected - collectedCost - freeShipCost - returnLossSettle;
-  const marginHalf = collectedMargin / 2;
+  const marginHalf = collectedMargin * igorShare;
   // Igor treba zadržati samo svoju polovicu marže; sve preko toga (koje drži) ide Ivici (roba + njena marža).
   // Oglasi: Igor platio → Ivica vraća pola. Pozitivno = Ivica → Igoru; negativno = Igor → Ivici.
-  const ivicaToIgor = adsSpend / 2 - (cashSplit.igor.collected - marginHalf);
+  // Oglase (Igor plaća) Ivica vraća razmjerno svom udjelu (1 − igorShare).
+  const ivicaToIgor = adsSpend * (1 - igorShare) - (cashSplit.igor.collected - marginHalf);
   const settleAmount = Math.abs(ivicaToIgor);
   const settleFrom = ivicaToIgor > 0.005 ? "ivica" : ivicaToIgor < -0.005 ? "igor" : null;
 
@@ -323,7 +321,7 @@ export async function getDashboardMetrics() {
     netAfterAds: totalProfit - returnLossTotal - adSpendTotal,
     // Trošak vraćenih pošiljki (RETURN_COST po povratu, trenutno 0 €).
     returnLossTotal,
-    returnCostEach: RETURN_COST,
+    returnCostEach: returnCost,
     todayRev: net(today),
     todayOrders: today._count,
     todayProfit,
@@ -341,7 +339,7 @@ export async function getDashboardMetrics() {
     shippedRev: net(shippedAgg),
     shippedProfit,
     aov: orderCount ? totalRev / orderCount : 0,
-    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, collectedCost, freeDeliveries, freeShipCost, returnedSinceCount, returnLossSettle, returnCostEach: RETURN_COST, collectedMargin, marginHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
+    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, collectedCost, freeDeliveries, freeShipCost, returnedSinceCount, returnLossSettle, returnCostEach: returnCost, collectedMargin, marginHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
     topItems,
     bestCustomers,
     riskyCustomers,

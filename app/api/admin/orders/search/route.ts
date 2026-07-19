@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/settings";
 import { formatCroatianName, phoneKey, repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -31,6 +32,7 @@ export async function GET(request: Request) {
   const sort = url.searchParams.get("sort") || ""; // "" (new-first) | old | new
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
 
+  const { riskMinFailed } = await getSettings();
   const all = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     select: {
@@ -169,7 +171,7 @@ export async function GET(request: Request) {
       tracking: o.tracking || "",
       promoCode: o.promoCode || null,
       cashCollected: o.cashCollected,
-      risk: riskFor(o),
+      risk: { ...riskFor(o), min: riskMinFailed },
       items: o.items.map((it) => ({
         id: it.id,
         klub: repairText(it.klub || ""),

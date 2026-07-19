@@ -20,6 +20,11 @@ const numOrNull = (v: unknown) => {
   const n = Number(s.replace(",", "."));
   return Number.isFinite(n) && n >= 0 ? n : null;
 };
+// Cijeli broj (dani, broj odbijanja) — prazno = zadano.
+const intOrNull = (v: unknown) => {
+  const n = numOrNull(v);
+  return n == null ? null : Math.max(0, Math.round(n));
+};
 const strOrNull = (v: unknown) => {
   const s = typeof v === "string" ? v.trim() : "";
   return s || null;
@@ -35,6 +40,11 @@ export async function POST(request: Request) {
     costDres: numOrNull(b?.costDres),
     costKomplet: numOrNull(b?.costKomplet),
     costStreetwear: numOrNull(b?.costStreetwear),
+    deliveryCost: numOrNull(b?.deliveryCost),
+    returnCost: numOrNull(b?.returnCost),
+    igorSharePct: numOrNull(b?.igorSharePct),
+    winbackDays: intOrNull(b?.winbackDays),
+    riskMinFailed: intOrNull(b?.riskMinFailed),
     igorName: strOrNull(b?.igorName),
     igorAddress: strOrNull(b?.igorAddress),
     igorCity: strOrNull(b?.igorCity),
