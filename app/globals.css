@@ -316,9 +316,11 @@ body::before {
   color: var(--a-text);
 }
 
-/* Ljepljive trake — zamućeno staklo */
+/* Ljepljive trake.
+   NAPOMENA: ovdje je prije stajao backdrop-filter: blur(20px). Na fiksnim
+   plohama preko cijele širine GPU ga mora preračunati na SVAKI frame listanja,
+   što je rušilo glatkoću (~30 fps, pogotovo na mobitelu). Gotovo neprozirna
+   pozadina izgleda praktički isto, a listanje je opet glatko. */
 .admin-root .a-blur {
-  background: rgba(245, 245, 247, 0.82);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(245, 245, 247, 0.97);
 }

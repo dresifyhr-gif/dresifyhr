@@ -43,7 +43,7 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
   return (
     <div className="admin-root min-h-screen overflow-x-hidden">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-black/[0.06] bg-white/80 backdrop-blur-xl lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-black/[0.06] bg-white lg:flex">
         <div className="px-5 py-6">
           <Brand />
         </div>
