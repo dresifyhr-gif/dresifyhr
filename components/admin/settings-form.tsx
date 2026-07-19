@@ -30,6 +30,11 @@ type Settings = {
   heroSubtitle: string;
   hiddenSections: string[];
   accentColor: string;
+  klubActive: boolean;
+  klubTarget: number;
+  klubRewardKind: string;
+  klubRewardValue: number;
+  klubRewardLabel: string;
 };
 
 const SECTIONS: [string, string][] = [
@@ -76,7 +81,7 @@ export function SettingsForm() {
 
   const setNum = (k: keyof Settings) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, [k]: e.target.value } as unknown as Settings : cur));
-  const setStr = (k: "iban" | "businessName" | "contactPhone" | "contactEmail" | "whatsappNumber" | "instagramHandle" | "announcementText" | "heroSubtitle" | "accentColor") => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const setStr = (k: "iban" | "businessName" | "contactPhone" | "contactEmail" | "whatsappNumber" | "instagramHandle" | "announcementText" | "heroSubtitle" | "accentColor" | "klubRewardLabel") => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, [k]: e.target.value } : cur));
   const setSender = (who: "igor" | "ivica", f: "name" | "address" | "city") => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, senders: { ...cur.senders, [who]: { ...cur.senders[who], [f]: e.target.value } } } : cur));
@@ -106,7 +111,9 @@ export function SettingsForm() {
         notifyEmail: s.notifyEmail, notifyTelegram: s.notifyTelegram, notifyWhatsapp: s.notifyWhatsapp,
         announcementActive: s.announcementActive, announcementText: s.announcementText,
         heroTitle: s.heroTitle, heroSubtitle: s.heroSubtitle,
-        hiddenSections: s.hiddenSections, accentColor: s.accentColor
+        hiddenSections: s.hiddenSections, accentColor: s.accentColor,
+        klubActive: s.klubActive, klubTarget: s.klubTarget, klubRewardKind: s.klubRewardKind,
+        klubRewardValue: s.klubRewardValue, klubRewardLabel: s.klubRewardLabel
       })
     }).catch(() => {});
     setSaving(false);
@@ -238,6 +245,39 @@ export function SettingsForm() {
           <button type="button" onClick={() => setS((cur) => (cur ? { ...cur, accentColor: "#e8ff3c" } : cur))} className="a-input px-3 py-2 text-[12px] font-medium text-[#6e6e73] hover:text-[#1d1d1f]">
             Vrati zadanu
           </button>
+        </div>
+      </Card>
+
+      <Card title="🎁 Dresify Klub" hint="Vjernost po broju mobitela — bez računa i lozinki. Broje se samo PREUZETE narudžbe.">
+        <label className="mb-3 flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
+          <input type="checkbox" checked={s.klubActive} onChange={(e) => setS((cur) => (cur ? { ...cur, klubActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />
+          Klub je uključen
+        </label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <span className={label}>Nagrada nakon (preuzetih narudžbi)</span>
+            <input value={s.klubTarget} onChange={setNum("klubTarget")} inputMode="numeric" className={inp} />
+            <p className="mt-1 text-[11px] text-[#8e8e93]">Broje se samo plaćene (preuzete) narudžbe — da se ne može farmati.</p>
+          </div>
+          <div>
+            <span className={label}>Vrsta nagrade</span>
+            <select value={s.klubRewardKind} onChange={(e) => setS((cur) => (cur ? { ...cur, klubRewardKind: e.target.value } : cur))} className={inp}>
+              <option value="amount">Fiksni popust (€) — npr. gratis dres</option>
+              <option value="percent">Postotak popusta</option>
+              <option value="freeship">Besplatna dostava</option>
+            </select>
+          </div>
+          {s.klubRewardKind !== "freeship" && (
+            <div>
+              <span className={label}>{s.klubRewardKind === "percent" ? "Popust (%)" : "Popust (€)"}</span>
+              <input value={s.klubRewardValue} onChange={setNum("klubRewardValue")} inputMode="decimal" className={inp} />
+              <p className="mt-1 text-[11px] text-[#8e8e93]">20 € = gratis dres (kupac plati samo dostavu).</p>
+            </div>
+          )}
+          <div>
+            <span className={label}>Opis nagrade (vidi kupac)</span>
+            <input value={s.klubRewardLabel} onChange={setStr("klubRewardLabel")} className={inp} />
+          </div>
         </div>
       </Card>
 

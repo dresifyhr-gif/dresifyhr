@@ -50,7 +50,7 @@ export async function lookupPromo(input: string, subtotal: number): Promise<Prom
   if (row) {
     const promo: PromoCode = {
       code: norm(row.code),
-      kind: row.kind === "freeship" ? "freeship" : "percent",
+      kind: row.kind === "freeship" ? "freeship" : row.kind === "amount" ? "amount" : "percent",
       value: row.value,
       minSubtotal: row.minSubtotal,
       label: row.label || ""

@@ -2,7 +2,7 @@
 // `value` is a percentage; `minSubtotal` is the minimum item subtotal (without
 // shipping) required for the code to apply.
 
-export type PromoKind = "percent" | "freeship";
+export type PromoKind = "percent" | "freeship" | "amount"; // amount = fiksni popust u €
 
 export type PromoCode = {
   code: string;
@@ -37,6 +37,9 @@ export function roundMoney(amount: number) {
 export function computePromoDiscount(promo: PromoCode | null, subtotal: number): number {
   if (!promo) return 0;
   if (subtotal < promo.minSubtotal) return 0;
+  if (promo.kind === "freeship") return 0;
+  // Fiksni popust (npr. gratis dres = −20 €) nikad ne smije premašiti iznos robe.
+  if (promo.kind === "amount") return roundMoney(Math.min(promo.value, subtotal));
   return roundMoney((subtotal * promo.value) / 100);
 }
 

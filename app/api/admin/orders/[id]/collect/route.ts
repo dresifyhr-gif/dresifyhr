@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { markCashCollectedInSheet } from "@/lib/sheets";
+import { issueKlubRewardIfEarned } from "@/lib/klub";
 
 export const runtime = "nodejs";
 
@@ -34,5 +35,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     by: order.shippedBy
   });
 
-  return NextResponse.json({ ok: true, collected });
+  // Dresify Klub: preuzeta narudžba može značiti novu nagradu (idempotentno).
+  let klubCode: string | null = null;
+  if (collected) {
+    klubCode = await issueKlubRewardIfEarned(order.phone).catch(() => null);
+  }
+
+  return NextResponse.json({ ok: true, collected, klubCode });
 }

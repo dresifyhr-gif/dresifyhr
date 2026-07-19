@@ -222,6 +222,12 @@ model Settings {
   heroSubtitle        String?
   hiddenSections      String?  // JSON niz ključeva sekcija koje se NE prikazuju
   accentColor         String?  // npr. #e8ff3c
+  // Dresify Klub (vjernost po telefonu)
+  klubActive          Boolean? // uključen program vjernosti
+  klubTarget          Int?     // koliko PREUZETIH narudžbi do nagrade (npr. 3)
+  klubRewardKind      String?  // "percent" | "freeship" (gratis dres = percent 100 na 1 dres → koristimo fiksni popust)
+  klubRewardValue     Float?   // postotak ili iznos popusta
+  klubRewardLabel     String?  // opis nagrade koji vidi kupac
   contactPhone        String?
   contactEmail        String?
   updatedAt           DateTime @updatedAt
@@ -239,6 +245,8 @@ model PromoCode {
   expiresAt   DateTime? // prazno = bez roka
   maxUses     Int? // prazno = neograničeno
   note        String? // interna bilješka (odakle kod, kampanja)
+  source      String? // "manual" | "klub" | "kolo" — tko je izdao kod
+  personalFor String? // phoneKey kupca kojem je kod izdan (osobne nagrade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 

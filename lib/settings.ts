@@ -49,6 +49,12 @@ export type ShopSettings = {
   heroSubtitle: string;
   hiddenSections: string[];
   accentColor: string;
+  // Dresify Klub
+  klubActive: boolean;
+  klubTarget: number;
+  klubRewardKind: string;
+  klubRewardValue: number;
+  klubRewardLabel: string;
   contactPhone: string;
   contactEmail: string;
 };
@@ -86,6 +92,11 @@ const DEFAULTS: ShopSettings = {
   heroSubtitle: "",
   hiddenSections: [],
   accentColor: "#e8ff3c",
+  klubActive: false,          // pali se u Postavkama kad Gazda želi
+  klubTarget: 3,              // 3 preuzete narudžbe
+  klubRewardKind: "amount",   // fiksni popust = gratis dres
+  klubRewardValue: 20,
+  klubRewardLabel: "Gratis dres — Dresify Klub 🎁",
   contactPhone: CONTACT_PHONE_DISPLAY,
   contactEmail: CONTACT_EMAIL
 };
@@ -157,6 +168,11 @@ export async function getSettings(): Promise<ShopSettings> {
     heroSubtitle: r.heroSubtitle?.trim() || "",
     hiddenSections: parseLeagues(r.hiddenSections) ?? [],
     accentColor: /^#[0-9a-fA-F]{6}$/.test(r.accentColor || "") ? r.accentColor! : DEFAULTS.accentColor,
+    klubActive: bool(r.klubActive, DEFAULTS.klubActive),
+    klubTarget: Math.max(1, Math.round(num(r.klubTarget, DEFAULTS.klubTarget))),
+    klubRewardKind: str(r.klubRewardKind, DEFAULTS.klubRewardKind),
+    klubRewardValue: num(r.klubRewardValue, DEFAULTS.klubRewardValue),
+    klubRewardLabel: str(r.klubRewardLabel, DEFAULTS.klubRewardLabel),
     contactPhone: str(r.contactPhone, DEFAULTS.contactPhone),
     contactEmail: str(r.contactEmail, DEFAULTS.contactEmail)
   };

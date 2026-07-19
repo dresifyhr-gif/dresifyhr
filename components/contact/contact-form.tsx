@@ -111,6 +111,8 @@ export function ContactForm() {
   const [promoMessage, setPromoMessage] = useState<string | null>(null);
   const [autoPromoTried, setAutoPromoTried] = useState(false);
   const [hasGift, setHasGift] = useState(false);
+  // Dresify Klub: napredak po broju mobitela (bez prijave).
+  const [klub, setKlub] = useState<{ inCycle: number; target: number; remaining: number; available: { code: string; label: string }[] } | null>(null);
 
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
@@ -192,6 +194,20 @@ export function ContactForm() {
     })();
     return () => { cancelled = true; };
   }, [autoPromoTried, appliedPromo, orderSubtotal]);
+
+  // Napredak u Klubu čim broj ima dovoljno znamenki.
+  useEffect(() => {
+    const digits = form.phone.replace(/\D/g, "");
+    if (digits.length < 8) { setKlub(null); return; }
+    let cancelled = false;
+    const id = setTimeout(async () => {
+      try {
+        const d = await fetch(`/api/klub/progress/?phone=${encodeURIComponent(form.phone)}`).then((r) => r.json());
+        if (!cancelled) setKlub(d?.ok ? d : null);
+      } catch { if (!cancelled) setKlub(null); }
+    }, 450);
+    return () => { cancelled = true; clearTimeout(id); };
+  }, [form.phone]);
 
   function set(field: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -307,6 +323,24 @@ export function ContactForm() {
                 onChange={(e) => set("phone", e.target.value)}
                 className={inputClass}
               />
+              {klub && (
+                <div className="mt-2 rounded-[8px] border border-accent/30 bg-accent/[0.07] px-3 py-2">
+                  {klub.available.length > 0 ? (
+                    <p className="text-[13px] font-semibold text-accent">
+                      🎁 Imaš nagradu! Upiši kod <span className="font-mono">{klub.available[0].code}</span> ispod.
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-[13px] text-white/70">
+                        🎁 Dresify Klub: <b className="text-accent">{klub.inCycle}/{klub.target}</b> — još {klub.remaining} do gratis nagrade
+                      </p>
+                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                        <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${Math.round((klub.inCycle / klub.target) * 100)}%` }} />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="email" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
