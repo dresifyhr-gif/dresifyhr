@@ -123,7 +123,7 @@ export function SettingsForm() {
           <div>
             <span className={label}>Vrati kupca nakon (dana)</span>
             <input value={s.winbackDays} onChange={setNum("winbackDays")} inputMode="numeric" className={inp} />
-            <p className="mt-1 text-[11px] text-[#8e8e93]">Koliko dana bez kupnje da kupac uđe u „vrati kupce".</p>
+            <p className="mt-1 text-[11px] text-[#8e8e93]">Koliko dana bez kupnje da kupac uđe u popis za vraćanje.</p>
           </div>
           <div>
             <span className={label}>Rizičan od (broj odbijanja)</span>
