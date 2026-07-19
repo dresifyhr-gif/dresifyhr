@@ -294,6 +294,10 @@ export function ProductsManager() {
   const [sizes, setSizes] = useState<string[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
+  // Koliko redaka crtamo odjednom. Svaki redak nosi ~16 gumba i polja, pa bi
+  // svih 120 odjednom značilo ~2000 gumba i preračun stilova od ~375 ms
+  // (mjereno) — stranica bi trzala. Ostatak se dodaje na klik.
+  const [limit, setLimit] = useState(24);
 
   // Početni pojam iz URL-a (?q=…) — kad ⌘K paleta skoči na proizvod.
   useEffect(() => {
@@ -320,6 +324,9 @@ export function ProductsManager() {
     return products.filter((p) => `${p.klub} ${p.igrac} ${p.liga} ${p.category}`.toLowerCase().includes(nq));
   }, [q, products]);
 
+  // Pretraga uvijek gleda CIJELI popis; ograničenje je samo koliko ih crtamo.
+  const visible = useMemo(() => filtered.slice(0, limit), [filtered, limit]);
+
   return (
     <div>
       <div className="mb-4 flex items-center gap-3">
@@ -335,7 +342,16 @@ export function ProductsManager() {
         <div className="py-8 text-center text-sm text-[#8e8e93]">Učitavam…</div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((p) => <ProductRow key={p.slug} p={p} sizes={sizes} />)}
+          {visible.map((p) => <ProductRow key={p.slug} p={p} sizes={sizes} />)}
+          {filtered.length > visible.length && (
+            <button
+              type="button"
+              onClick={() => setLimit((n) => n + 40)}
+              className="a-btn-sm w-full py-2.5 text-[13px]"
+            >
+              Prikaži još ({filtered.length - visible.length} preostalo)
+            </button>
+          )}
         </div>
       )}
     </div>
