@@ -11,7 +11,7 @@ const config: Config = {
       colors: {
         background: "#0a0a0a",
         foreground: "#ffffff",
-        accent: "#e8ff3c",
+        accent: "rgb(var(--accent-rgb) / <alpha-value>)",
         surface: "#111111",
         muted: "rgba(255,255,255,0.5)",
         line: "rgba(255, 255, 255, 0.08)"

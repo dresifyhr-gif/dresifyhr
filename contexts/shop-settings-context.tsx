@@ -11,6 +11,11 @@ export type PublicShopSettings = {
   businessName: string;
   contactPhone: string;
   contactEmail: string;
+  // Izgled
+  announcementActive: boolean;
+  announcementText: string;
+  heroTitle: string;
+  heroSubtitle: string;
 };
 
 const FALLBACK: PublicShopSettings = {
@@ -18,7 +23,11 @@ const FALLBACK: PublicShopSettings = {
   instagramHandle: "dresify.hr",
   businessName: "DRESIFY",
   contactPhone: "+385 97 604 7510",
-  contactEmail: "dresify.hr@gmail.com"
+  contactEmail: "dresify.hr@gmail.com",
+  announcementActive: true,
+  announcementText: "",
+  heroTitle: "",
+  heroSubtitle: ""
 };
 
 const Ctx = createContext<PublicShopSettings>(FALLBACK);

@@ -58,6 +58,12 @@ export async function POST(request: Request) {
     notifyEmail: b?.notifyEmail !== false,
     notifyTelegram: b?.notifyTelegram !== false,
     notifyWhatsapp: b?.notifyWhatsapp !== false,
+    announcementActive: b?.announcementActive !== false,
+    announcementText: strOrNull(b?.announcementText),
+    heroTitle: strOrNull(b?.heroTitle),
+    heroSubtitle: strOrNull(b?.heroSubtitle),
+    hiddenSections: Array.isArray(b?.hiddenSections) && b.hiddenSections.length ? JSON.stringify(b.hiddenSections.filter((x: unknown) => typeof x === "string")) : null,
+    accentColor: /^#[0-9a-fA-F]{6}$/.test(String(b?.accentColor ?? "")) ? String(b.accentColor) : null,
     businessName: strOrNull(b?.businessName),
     contactPhone: strOrNull(b?.contactPhone),
     contactEmail: strOrNull(b?.contactEmail)

@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
 import { useLanguage } from "@/contexts/language-context";
+import { useShopSettings } from "@/contexts/shop-settings-context";
 
 const STORAGE_KEY = "dresify_announcement_hidden_until";
 const ANNOUNCEMENT_OFFSET = "40px";
@@ -18,13 +19,16 @@ function getEndOfDayTimestamp() {
 
 export function AnnouncementBar() {
   const { t } = useLanguage();
+  // Traka se pali/gasi i tekst se mijenja u Postavkama (prazan tekst = zadane poruke).
+  const { announcementActive, announcementText } = useShopSettings();
+  const messages = announcementText ? [announcementText] : t.announcement;
   const [isVisible, setIsVisible] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
     const hiddenUntilRaw = window.localStorage.getItem(STORAGE_KEY);
     const hiddenUntil = hiddenUntilRaw ? Number(hiddenUntilRaw) : 0;
-    const nextVisible = !hiddenUntil || Date.now() > hiddenUntil;
+    const nextVisible = announcementActive && (!hiddenUntil || Date.now() > hiddenUntil);
 
     setIsVisible(nextVisible);
     document.documentElement.style.setProperty(
@@ -35,7 +39,7 @@ export function AnnouncementBar() {
     return () => {
       document.documentElement.style.setProperty("--announcement-offset", "0px");
     };
-  }, []);
+  }, [announcementActive]);
 
   useEffect(() => {
     if (!isVisible) {
@@ -43,13 +47,13 @@ export function AnnouncementBar() {
     }
 
     const interval = window.setInterval(() => {
-      setMessageIndex((current) => (current + 1) % t.announcement.length);
+      setMessageIndex((current) => (current + 1) % messages.length);
     }, 4000);
 
     return () => window.clearInterval(interval);
   }, [isVisible]);
 
-  const currentMessage = useMemo(() => t.announcement[messageIndex], [messageIndex, t.announcement]);
+  const currentMessage = useMemo(() => messages[messageIndex % messages.length], [messageIndex, messages]);
 
   const handleDismiss = () => {
     window.localStorage.setItem(STORAGE_KEY, String(getEndOfDayTimestamp()));

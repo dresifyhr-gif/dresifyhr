@@ -12,6 +12,7 @@ import { TrustStrip } from "@/components/home/trust-strip";
 import { jerseys } from "@/lib/data/jerseys";
 import { getFeaturedProducts, getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
 import { getVisibleTestimonials } from "@/lib/testimonials";
+import { getSettings } from "@/lib/settings";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import { buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
@@ -50,6 +51,10 @@ export const revalidate = 120;
 export default async function HomePage() {
   const { t } = await getServerTranslations();
 
+  // Sekcije se pale/gase u Postavkama (Izgled). Hero i katalog su uvijek tu.
+  const { hiddenSections } = await getSettings();
+  const show = (key: string) => !hiddenSections.includes(key);
+
   const dresovi = (await getCatalogProducts(jerseys)).filter((j) => j.liga !== "Komplet");
   const streetwear = await getStreetwearProducts();
   const testimonials = await getVisibleTestimonials();
@@ -57,13 +62,13 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
-      <TrustStrip />
-      {streetwear.length > 0 && (
+      {show("trust") && <TrustStrip />}
+      {show("streetwear") && streetwear.length > 0 && (
         <StreetwearBanner
           images={streetwear.map((p) => p.images?.[0]?.src).filter((s): s is string => !!s).slice(0, 5)}
         />
       )}
-      <FeaturedSection products={await getFeaturedProducts(jerseys)} />
+      {show("featured") && <FeaturedSection products={await getFeaturedProducts(jerseys)} />}
 
       <section className="section-pad bg-[#0a0a0a]">
         <div className="page-shell">
@@ -77,14 +82,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <GamesCta />
+      {show("games") && <GamesCta />}
 
-      <TestimonialsSection items={testimonials} />
-      <ReviewsSection />
-      <InstagramSection />
-      <FaqSection />
-      <BlogPreviewSection />
-      <NewsletterSection />
+      {show("testimonials") && <TestimonialsSection items={testimonials} />}
+      {show("reviews") && <ReviewsSection />}
+      {show("instagram") && <InstagramSection />}
+      {show("faq") && <FaqSection />}
+      {show("blog") && <BlogPreviewSection />}
+      {show("newsletter") && <NewsletterSection />}
     </>
   );
 }

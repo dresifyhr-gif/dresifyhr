@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 
 import { HeroKompletiCarousel } from "@/components/home/hero-kompleti-carousel";
 import { useLanguage } from "@/contexts/language-context";
+import { useShopSettings } from "@/contexts/shop-settings-context";
 
 const TICKER_ITEMS = [
   "Real Madrid", "Barcelona", "PSG", "Bayern München", "Man United",
@@ -14,6 +15,10 @@ const TICKER_ITEMS = [
 ];
 
 export function HeroSection() {
+  // Naslov/podnaslov iz Postavki; prazno = zadani tekst iz prijevoda.
+  const { heroTitle, heroSubtitle } = useShopSettings();
+  const customTitleLines = heroTitle ? heroTitle.split("\n").map((l) => l.trim()).filter(Boolean) : null;
+
   const { t } = useLanguage();
 
   return (
@@ -54,9 +59,17 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
-              <span className="block">{t.hero.line1}</span>
-              <span className="block">{t.hero.line2}</span>
-              <span className="block text-accent">{t.hero.line3}</span>
+              {customTitleLines ? (
+                customTitleLines.map((line, i) => (
+                  <span key={i} className={`block ${i === customTitleLines.length - 1 ? "text-accent" : ""}`}>{line}</span>
+                ))
+              ) : (
+                <>
+                  <span className="block">{t.hero.line1}</span>
+                  <span className="block">{t.hero.line2}</span>
+                  <span className="block text-accent">{t.hero.line3}</span>
+                </>
+              )}
             </motion.h1>
 
             <motion.p
@@ -65,7 +78,7 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.08, ease: "easeOut" }}
             >
-              {t.hero.subtitle}
+              {heroSubtitle || t.hero.subtitle}
             </motion.p>
 
             <motion.div

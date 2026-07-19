@@ -42,6 +42,13 @@ export type ShopSettings = {
   notifyEmail: boolean;
   notifyTelegram: boolean;
   notifyWhatsapp: boolean;
+  // Izgled shopa
+  announcementActive: boolean;
+  announcementText: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  hiddenSections: string[];
+  accentColor: string;
   contactPhone: string;
   contactEmail: string;
 };
@@ -73,6 +80,12 @@ const DEFAULTS: ShopSettings = {
   notifyEmail: true,
   notifyTelegram: true,
   notifyWhatsapp: true,
+  announcementActive: true,
+  announcementText: "",
+  heroTitle: "",
+  heroSubtitle: "",
+  hiddenSections: [],
+  accentColor: "#e8ff3c",
   contactPhone: CONTACT_PHONE_DISPLAY,
   contactEmail: CONTACT_EMAIL
 };
@@ -138,6 +151,12 @@ export async function getSettings(): Promise<ShopSettings> {
     notifyEmail: bool(r.notifyEmail, DEFAULTS.notifyEmail),
     notifyTelegram: bool(r.notifyTelegram, DEFAULTS.notifyTelegram),
     notifyWhatsapp: bool(r.notifyWhatsapp, DEFAULTS.notifyWhatsapp),
+    announcementActive: bool(r.announcementActive, DEFAULTS.announcementActive),
+    announcementText: r.announcementText?.trim() || "",
+    heroTitle: r.heroTitle?.trim() || "",
+    heroSubtitle: r.heroSubtitle?.trim() || "",
+    hiddenSections: parseLeagues(r.hiddenSections) ?? [],
+    accentColor: /^#[0-9a-fA-F]{6}$/.test(r.accentColor || "") ? r.accentColor! : DEFAULTS.accentColor,
     contactPhone: str(r.contactPhone, DEFAULTS.contactPhone),
     contactEmail: str(r.contactEmail, DEFAULTS.contactEmail)
   };

@@ -24,7 +24,26 @@ type Settings = {
   notifyEmail: boolean;
   notifyTelegram: boolean;
   notifyWhatsapp: boolean;
+  announcementActive: boolean;
+  announcementText: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  hiddenSections: string[];
+  accentColor: string;
 };
+
+const SECTIONS: [string, string][] = [
+  ["trust", "Traka povjerenja"],
+  ["streetwear", "Streetwear banner"],
+  ["featured", "Najprodavaniji dresovi"],
+  ["games", "Poziv na igrice"],
+  ["testimonials", "Zadovoljni kupci (slike)"],
+  ["reviews", "Recenzije (tekst)"],
+  ["instagram", "Instagram feed"],
+  ["faq", "Česta pitanja"],
+  ["blog", "Blog"],
+  ["newsletter", "Newsletter"]
+];
 
 const inp = "a-input w-full px-3 py-2 text-sm";
 const label = "a-label mb-1 block";
@@ -57,7 +76,7 @@ export function SettingsForm() {
 
   const setNum = (k: keyof Settings) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, [k]: e.target.value } as unknown as Settings : cur));
-  const setStr = (k: "iban" | "businessName" | "contactPhone" | "contactEmail" | "whatsappNumber" | "instagramHandle") => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const setStr = (k: "iban" | "businessName" | "contactPhone" | "contactEmail" | "whatsappNumber" | "instagramHandle" | "announcementText" | "heroSubtitle" | "accentColor") => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, [k]: e.target.value } : cur));
   const setSender = (who: "igor" | "ivica", f: "name" | "address" | "city") => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, senders: { ...cur.senders, [who]: { ...cur.senders[who], [f]: e.target.value } } } : cur));
@@ -84,7 +103,10 @@ export function SettingsForm() {
         ivicaName: s.senders.ivica.name, ivicaAddress: s.senders.ivica.address, ivicaCity: s.senders.ivica.city,
         iban: s.iban, businessName: s.businessName, contactPhone: s.contactPhone, contactEmail: s.contactEmail,
         whatsappNumber: s.whatsappNumber, instagramHandle: s.instagramHandle, leagues: s.leagues,
-        notifyEmail: s.notifyEmail, notifyTelegram: s.notifyTelegram, notifyWhatsapp: s.notifyWhatsapp
+        notifyEmail: s.notifyEmail, notifyTelegram: s.notifyTelegram, notifyWhatsapp: s.notifyWhatsapp,
+        announcementActive: s.announcementActive, announcementText: s.announcementText,
+        heroTitle: s.heroTitle, heroSubtitle: s.heroSubtitle,
+        hiddenSections: s.hiddenSections, accentColor: s.accentColor
       })
     }).catch(() => {});
     setSaving(false);
@@ -160,6 +182,62 @@ export function SettingsForm() {
           <div><span className={label}>IBAN</span><input value={s.iban} onChange={setStr("iban")} placeholder="HR…" className={inp} /></div>
           <div><span className={label}>Kontakt telefon</span><input value={s.contactPhone} onChange={setStr("contactPhone")} className={inp} /></div>
           <div><span className={label}>Kontakt email</span><input value={s.contactEmail} onChange={setStr("contactEmail")} className={inp} /></div>
+        </div>
+      </Card>
+
+      <Card title="Traka obavijesti" hint="Žuta traka na vrhu shopa. Prazan tekst = zadane poruke koje se izmjenjuju.">
+        <label className="mb-3 flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
+          <input type="checkbox" checked={s.announcementActive} onChange={(e) => setS((cur) => (cur ? { ...cur, announcementActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />
+          Prikaži traku
+        </label>
+        <span className={label}>Tekst</span>
+        <input value={s.announcementText} onChange={setStr("announcementText")} placeholder="Vikend akcija — besplatna dostava!" className={inp} />
+      </Card>
+
+      <Card title="Naslovna — hero" hint="Prazno = zadani tekst. U naslovu svaki novi red je nova linija; zadnja je u boji.">
+        <div className="space-y-3">
+          <div>
+            <span className={label}>Naslov</span>
+            <textarea value={s.heroTitle} onChange={(e) => setS((cur) => (cur ? { ...cur, heroTitle: e.target.value } : cur))} rows={3} placeholder={"SVAKI DRES.\nSVAKI KLUB.\n20€."} className={`${inp} font-mono text-[13px]`} />
+          </div>
+          <div>
+            <span className={label}>Podnaslov</span>
+            <input value={s.heroSubtitle} onChange={setStr("heroSubtitle")} className={inp} />
+          </div>
+        </div>
+      </Card>
+
+      <Card title="Sekcije naslovnice" hint="Odznači da sakriješ sekciju sa shopa. Hero i katalog su uvijek prikazani.">
+        <div className="grid gap-2 sm:grid-cols-2">
+          {SECTIONS.map(([key, lab]) => {
+            const visible = !s.hiddenSections.includes(key);
+            return (
+              <label key={key} className="flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
+                <input
+                  type="checkbox"
+                  checked={visible}
+                  onChange={(e) => setS((cur) => {
+                    if (!cur) return cur;
+                    const set = new Set(cur.hiddenSections);
+                    if (e.target.checked) set.delete(key); else set.add(key);
+                    return { ...cur, hiddenSections: [...set] };
+                  })}
+                  className="h-4 w-4 accent-[#1d1d1f]"
+                />
+                {lab}
+              </label>
+            );
+          })}
+        </div>
+      </Card>
+
+      <Card title="Boja" hint="Akcentna boja shopa (gumbi, naglasci). Zadana je Dresify limeta.">
+        <div className="flex flex-wrap items-center gap-3">
+          <input type="color" value={s.accentColor} onChange={(e) => setS((cur) => (cur ? { ...cur, accentColor: e.target.value } : cur))} className="h-10 w-16 cursor-pointer rounded-[10px] border border-black/10 bg-white p-1" />
+          <input value={s.accentColor} onChange={setStr("accentColor")} className={`${inp} max-w-[140px] font-mono`} />
+          <button type="button" onClick={() => setS((cur) => (cur ? { ...cur, accentColor: "#e8ff3c" } : cur))} className="a-input px-3 py-2 text-[12px] font-medium text-[#6e6e73] hover:text-[#1d1d1f]">
+            Vrati zadanu
+          </button>
         </div>
       </Card>
 

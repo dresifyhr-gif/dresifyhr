@@ -215,6 +215,13 @@ model Settings {
   notifyEmail         Boolean? // šalji obavijest o narudžbi na email
   notifyTelegram      Boolean?
   notifyWhatsapp      Boolean?
+  // Izgled shopa
+  announcementActive  Boolean? // traka obavijesti na vrhu
+  announcementText    String?  // prazno = zadane poruke iz prijevoda
+  heroTitle           String?  // prazno = zadani naslov
+  heroSubtitle        String?
+  hiddenSections      String?  // JSON niz ključeva sekcija koje se NE prikazuju
+  accentColor         String?  // npr. #e8ff3c
   contactPhone        String?
   contactEmail        String?
   updatedAt           DateTime @updatedAt
