@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { useLeagues } from "@/components/admin/use-leagues";
+
 import { ImageUploader } from "@/components/admin/image-uploader";
 
-const LIGE = ["Reprezentacija", "La Liga", "Premier Liga", "Serie A", "Bundesliga", "Ligue 1", "Saudi Pro", "Brazil", "MLS", "Komplet", "Streetwear"];
+
 
 type Product = {
   slug: string;
@@ -48,6 +50,7 @@ const STOCK_OPTIONS = [
 ];
 
 function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
+  const LIGE = useLeagues();
   // Streetwear/custom prikazuje samo svoje veličine (XS–L); dresovi svoje.
   const rowSizes = p.sizeList && p.sizeList.length ? p.sizeList : sizes;
   const isStreetwear = p.category === "streetwear";

@@ -3,6 +3,7 @@ import "server-only";
 import nodemailer from "nodemailer";
 
 import { CONTACT_EMAIL, WHATSAPP_NUMBER } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
 import {
   type OrderPayload,
   buildCustomerOrderHtml,
@@ -245,11 +246,19 @@ export async function sendOrderNotifications(order: OrderPayload): Promise<Notif
     createdAt: order.createdAt
   });
 
+  // Kanali se mogu ugasiti u Postavkama. Ugašen kanal = "nije konfiguriran"
+  // (ne pokušava se slati i ne broji se kao neuspjeh).
+  const off: ChannelResult = { configured: false, sent: false };
+  const st = await getSettings().catch(() => null);
+  const useEmail = st ? st.notifyEmail : true;
+  const useTelegram = st ? st.notifyTelegram : true;
+  const useWhatsapp = st ? st.notifyWhatsapp : true;
+
   const [email, customerEmail, whatsapp, telegram] = await Promise.all([
-    sendAdminEmail(order),
+    useEmail ? sendAdminEmail(order) : Promise.resolve(off),
     sendCustomerEmail(order),
-    sendWhatsApp(order),
-    sendTelegram(order)
+    useWhatsapp ? sendWhatsApp(order) : Promise.resolve(off),
+    useTelegram ? sendTelegram(order) : Promise.resolve(off)
   ]);
 
   const configuredChannels =

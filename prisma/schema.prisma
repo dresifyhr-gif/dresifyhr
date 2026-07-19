@@ -207,6 +207,14 @@ model Settings {
   // Posao (naljepnice / budući računi)
   iban                String?
   businessName        String?
+  // Brend / kontakt (vidljivo na shopu)
+  whatsappNumber      String?  // samo znamenke, npr. 385976047510
+  instagramHandle     String?  // npr. dresify.hr (bez @)
+  // Operativa
+  leagues             String?  // JSON niz liga za forme proizvoda
+  notifyEmail         Boolean? // šalji obavijest o narudžbi na email
+  notifyTelegram      Boolean?
+  notifyWhatsapp      Boolean?
   contactPhone        String?
   contactEmail        String?
   updatedAt           DateTime @updatedAt

@@ -4,6 +4,8 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { cookies } from "next/headers";
 
 import { LanguageProvider } from "@/contexts/language-context";
+import { ShopSettingsProvider } from "@/contexts/shop-settings-context";
+import { getSettings } from "@/lib/settings";
 import { LOCALE_COOKIE, type Locale } from "@/lib/i18n";
 
 import "@/app/globals.css";
@@ -74,6 +76,17 @@ export default async function RootLayout({
   const organizationSchema = buildOrganizationSchema();
   const websiteSchema = buildWebsiteSchema();
 
+  // Javne postavke (WhatsApp, Instagram, kontakt) → klijentskim komponentama
+  // kroz context, bez dodatnog mrežnog zahtjeva.
+  const s = await getSettings();
+  const publicSettings = {
+    whatsappNumber: s.whatsappNumber,
+    instagramHandle: s.instagramHandle,
+    businessName: s.businessName,
+    contactPhone: s.contactPhone,
+    contactEmail: s.contactEmail
+  };
+
   const cookieStore = await cookies();
   const rawLocale = cookieStore.get(LOCALE_COOKIE)?.value;
   const locale: Locale = rawLocale === "en" ? "en" : "hr";
@@ -89,6 +102,7 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
+        <ShopSettingsProvider value={publicSettings}>
         <LanguageProvider initialLocale={locale}>
           <SiteProviders>
             <SiteChrome
@@ -114,6 +128,7 @@ export default async function RootLayout({
             </SiteChrome>
           </SiteProviders>
         </LanguageProvider>
+        </ShopSettingsProvider>
         <MetaPixel />
       </body>
       <GoogleAnalytics gaId="G-NKPLWRWPN9" />

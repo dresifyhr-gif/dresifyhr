@@ -4,7 +4,7 @@ import { Truck, Banknote, RotateCcw, MessageCircle, Clock, MapPin } from "lucide
 
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
-import { WHATSAPP_URL } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
 
 export const metadata: Metadata = buildMetadata({
   title: "Dostava i povrat",
@@ -36,7 +36,8 @@ const deliveryItems = [
   }
 ];
 
-export default function DeliveryReturnsPage() {
+export default async function DeliveryReturnsPage() {
+  const whatsappUrl = `https://wa.me/${(await getSettings()).whatsappNumber}`;
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Početna", path: "/" },
     { name: "Dostava i povrat", path: "/dostava-i-povrat" }
@@ -99,7 +100,7 @@ export default function DeliveryReturnsPage() {
           </ul>
 
           <Link
-            href={WHATSAPP_URL}
+            href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="button-primary mt-6 inline-flex min-h-[52px] items-center justify-center gap-2 px-7"

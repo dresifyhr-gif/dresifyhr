@@ -6,7 +6,7 @@ import { GlsLabelDoc } from "@/components/admin/gls-label-pdf";
 import { isAdmin } from "@/lib/admin-auth";
 import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
-import { INSTAGRAM_URL } from "@/lib/site";
+import { getSettings } from "@/lib/settings";
 import { formatCroatianName } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -28,7 +28,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
 
   // QR se generira lokalno i ugrađuje kao data URL — bez vanjskih poziva iz PDF-a.
-  const qrDataUrl = await QRCode.toDataURL(INSTAGRAM_URL, {
+  const qrDataUrl = await QRCode.toDataURL(`https://instagram.com/${(await getSettings()).instagramHandle}`, {
     margin: 1,
     scale: 8,
     errorCorrectionLevel: "M",

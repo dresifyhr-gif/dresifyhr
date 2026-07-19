@@ -4,11 +4,12 @@ import Script from "next/script";
 
 import { SectionHeading } from "@/components/site/section-heading";
 import { useLanguage } from "@/contexts/language-context";
-import { INSTAGRAM_HANDLE, INSTAGRAM_URL } from "@/lib/site";
+import { useInstagram } from "@/contexts/shop-settings-context";
 
 const BEHOLD_FEED_ID = "Mr4iBO03Jb1m1NL5S20x";
 
 export function InstagramSection() {
+  const ig = useInstagram();
   const { t } = useLanguage();
 
   return (
@@ -16,7 +17,7 @@ export function InstagramSection() {
       <div className="page-shell">
         <SectionHeading
           kicker={t.instagram.kicker}
-          title={t.instagram.title(INSTAGRAM_HANDLE)}
+          title={t.instagram.title(ig.handle)}
           description={t.instagram.desc}
         />
 
@@ -25,12 +26,12 @@ export function InstagramSection() {
         <behold-widget feed-id={BEHOLD_FEED_ID} />
 
         <a
-          href={INSTAGRAM_URL}
+          href={ig.url}
           target="_blank"
           rel="noreferrer"
           className="button-secondary mt-8 px-6"
         >
-          {t.instagram.cta(INSTAGRAM_HANDLE)}
+          {t.instagram.cta(ig.handle)}
         </a>
       </div>
     </section>

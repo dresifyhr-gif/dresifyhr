@@ -18,6 +18,12 @@ type Settings = {
   businessName: string;
   contactPhone: string;
   contactEmail: string;
+  whatsappNumber: string;
+  instagramHandle: string;
+  leagues: string[];
+  notifyEmail: boolean;
+  notifyTelegram: boolean;
+  notifyWhatsapp: boolean;
 };
 
 const inp = "a-input w-full px-3 py-2 text-sm";
@@ -51,7 +57,7 @@ export function SettingsForm() {
 
   const setNum = (k: keyof Settings) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, [k]: e.target.value } as unknown as Settings : cur));
-  const setStr = (k: "iban" | "businessName" | "contactPhone" | "contactEmail") => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const setStr = (k: "iban" | "businessName" | "contactPhone" | "contactEmail" | "whatsappNumber" | "instagramHandle") => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, [k]: e.target.value } : cur));
   const setSender = (who: "igor" | "ivica", f: "name" | "address" | "city") => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, senders: { ...cur.senders, [who]: { ...cur.senders[who], [f]: e.target.value } } } : cur));
@@ -76,7 +82,9 @@ export function SettingsForm() {
         riskMinFailed: s.riskMinFailed,
         igorName: s.senders.igor.name, igorAddress: s.senders.igor.address, igorCity: s.senders.igor.city,
         ivicaName: s.senders.ivica.name, ivicaAddress: s.senders.ivica.address, ivicaCity: s.senders.ivica.city,
-        iban: s.iban, businessName: s.businessName, contactPhone: s.contactPhone, contactEmail: s.contactEmail
+        iban: s.iban, businessName: s.businessName, contactPhone: s.contactPhone, contactEmail: s.contactEmail,
+        whatsappNumber: s.whatsappNumber, instagramHandle: s.instagramHandle, leagues: s.leagues,
+        notifyEmail: s.notifyEmail, notifyTelegram: s.notifyTelegram, notifyWhatsapp: s.notifyWhatsapp
       })
     }).catch(() => {});
     setSaving(false);
@@ -153,6 +161,50 @@ export function SettingsForm() {
           <div><span className={label}>Kontakt telefon</span><input value={s.contactPhone} onChange={setStr("contactPhone")} className={inp} /></div>
           <div><span className={label}>Kontakt email</span><input value={s.contactEmail} onChange={setStr("contactEmail")} className={inp} /></div>
         </div>
+      </Card>
+
+      <Card title="Brend i kontakt" hint="Mijenja linkove na shopu (WhatsApp gumb, Instagram sekcija, kontakt).">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <span className={label}>WhatsApp broj (samo znamenke)</span>
+            <input value={s.whatsappNumber} onChange={setStr("whatsappNumber")} placeholder="385976047510" inputMode="tel" className={inp} />
+          </div>
+          <div>
+            <span className={label}>Instagram (bez @)</span>
+            <input value={s.instagramHandle} onChange={setStr("instagramHandle")} placeholder="dresify.hr" className={inp} />
+          </div>
+        </div>
+      </Card>
+
+      <Card title="Lige" hint="Popis koji se nudi kod dodavanja i uređivanja proizvoda. Jedna liga po retku.">
+        <textarea
+          value={s.leagues.join("\n")}
+          onChange={(e) => setS((cur) => (cur ? { ...cur, leagues: e.target.value.split("\n") } : cur))}
+          rows={7}
+          className={`${inp} font-mono text-[13px]`}
+        />
+        <p className="mt-1 text-[11px] text-[#8e8e93]">Prazni redovi se zanemaruju. Ako ostaviš prazno, koriste se zadane lige.</p>
+      </Card>
+
+      <Card title="Obavijesti o narudžbi" hint="Koje kanale koristimo kad padne nova narudžba.">
+        <div className="space-y-2">
+          {([
+            ["notifyEmail", "Email"],
+            ["notifyTelegram", "Telegram"],
+            ["notifyWhatsapp", "WhatsApp / Zapier"]
+          ] as const).map(([k, lab]) => (
+            <label key={k} className="flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
+              <input
+                type="checkbox"
+                checked={s[k]}
+                onChange={(e) => setS((cur) => (cur ? { ...cur, [k]: e.target.checked } : cur))}
+                className="h-4 w-4 accent-[#1d1d1f]"
+              />
+              {lab}
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-[11px] text-[#8e8e93]">Kanal radi samo ako je i postavljen na serveru. Ovdje ga možeš privremeno ugasiti.</p>
       </Card>
 
       <div className="sticky bottom-4 flex items-center gap-3">

@@ -9,6 +9,8 @@ import {
   CONTACT_EMAIL,
   CONTACT_PHONE_DISPLAY,
   SITE_NAME,
+  WHATSAPP_NUMBER,
+  INSTAGRAM_HANDLE,
   COST_DRES_EUR,
   COST_KOMPLET_EUR,
   COST_STREETWEAR_EUR
@@ -34,9 +36,18 @@ export type ShopSettings = {
   };
   iban: string;
   businessName: string;
+  whatsappNumber: string;
+  instagramHandle: string;
+  leagues: string[];
+  notifyEmail: boolean;
+  notifyTelegram: boolean;
+  notifyWhatsapp: boolean;
   contactPhone: string;
   contactEmail: string;
 };
+
+// Zadane lige (dosad zakucane u formama proizvoda).
+const DEFAULT_LEAGUES = ["Reprezentacija", "La Liga", "Premier Liga", "Serie A", "Bundesliga", "Ligue 1", "Saudi Pro", "Brazil", "MLS", "Komplet", "Streetwear"];
 
 // Zadane vrijednosti = trenutačno zakucane (pošiljatelji su dosad bili u kodu naljepnice).
 const DEFAULTS: ShopSettings = {
@@ -56,10 +67,17 @@ const DEFAULTS: ShopSettings = {
   },
   iban: "",
   businessName: SITE_NAME,
+  whatsappNumber: WHATSAPP_NUMBER,
+  instagramHandle: INSTAGRAM_HANDLE.replace(/^@/, ""),
+  leagues: DEFAULT_LEAGUES,
+  notifyEmail: true,
+  notifyTelegram: true,
+  notifyWhatsapp: true,
   contactPhone: CONTACT_PHONE_DISPLAY,
   contactEmail: CONTACT_EMAIL
 };
 
+const bool = (v: boolean | null | undefined, d: boolean) => (typeof v === "boolean" ? v : d);
 const num = (v: number | null | undefined, d: number) => (v != null && Number.isFinite(v) ? v : d);
 const str = (v: string | null | undefined, d: string) => (v != null && v.trim() ? v : d);
 
@@ -75,6 +93,16 @@ const fetchSettingsRow = unstable_cache(
   ["shop-settings-row"],
   { revalidate: 60, tags: ["settings"] }
 );
+
+// Lige su spremljene kao JSON niz; prazno/neispravno = zadane.
+function parseLeagues(raw: string | null): string[] | undefined {
+  if (!raw) return undefined;
+  try {
+    const arr = JSON.parse(raw);
+    const list = Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string" && !!x.trim()) : [];
+    return list.length ? list : undefined;
+  } catch { return undefined; }
+}
 
 export async function getSettings(): Promise<ShopSettings> {
   const r = await fetchSettingsRow();
@@ -104,6 +132,12 @@ export async function getSettings(): Promise<ShopSettings> {
     },
     iban: str(r.iban, DEFAULTS.iban),
     businessName: str(r.businessName, DEFAULTS.businessName),
+    whatsappNumber: str(r.whatsappNumber, DEFAULTS.whatsappNumber).replace(/\D/g, ""),
+    instagramHandle: str(r.instagramHandle, DEFAULTS.instagramHandle).replace(/^@/, ""),
+    leagues: parseLeagues(r.leagues) ?? DEFAULTS.leagues,
+    notifyEmail: bool(r.notifyEmail, DEFAULTS.notifyEmail),
+    notifyTelegram: bool(r.notifyTelegram, DEFAULTS.notifyTelegram),
+    notifyWhatsapp: bool(r.notifyWhatsapp, DEFAULTS.notifyWhatsapp),
     contactPhone: str(r.contactPhone, DEFAULTS.contactPhone),
     contactEmail: str(r.contactEmail, DEFAULTS.contactEmail)
   };

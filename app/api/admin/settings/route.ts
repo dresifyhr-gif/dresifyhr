@@ -52,6 +52,12 @@ export async function POST(request: Request) {
     ivicaAddress: strOrNull(b?.ivicaAddress),
     ivicaCity: strOrNull(b?.ivicaCity),
     iban: strOrNull(b?.iban),
+    whatsappNumber: strOrNull(String(b?.whatsappNumber ?? "").replace(/\D/g, "")),
+    instagramHandle: strOrNull(String(b?.instagramHandle ?? "").replace(/^@/, "")),
+    leagues: Array.isArray(b?.leagues) && b.leagues.length ? JSON.stringify(b.leagues.filter((x: unknown) => typeof x === "string" && x.trim())) : null,
+    notifyEmail: b?.notifyEmail !== false,
+    notifyTelegram: b?.notifyTelegram !== false,
+    notifyWhatsapp: b?.notifyWhatsapp !== false,
     businessName: strOrNull(b?.businessName),
     contactPhone: strOrNull(b?.contactPhone),
     contactEmail: strOrNull(b?.contactEmail)

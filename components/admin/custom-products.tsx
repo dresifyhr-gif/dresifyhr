@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { useLeagues } from "@/components/admin/use-leagues";
+
 import { BulkAdd } from "@/components/admin/bulk-add";
 import { ImageUploader } from "@/components/admin/image-uploader";
 
@@ -22,13 +24,14 @@ type Custom = {
   hidden: boolean;
 };
 
-const LIGE = ["Reprezentacija", "La Liga", "Premier Liga", "Serie A", "Bundesliga", "Ligue 1", "Saudi Pro", "Brazil", "MLS", "Komplet"];
+
 // Veličine: sastavi "Odrasli" / "Djeca" dio (getJerseySizeOptions gleda ove ključne riječi u vel).
 const buildVel = (adults: boolean, kids: boolean) =>
   [kids ? "Djeca: 104-176" : "", adults ? "Odrasli: S-XXL" : ""].filter(Boolean).join(" · ") || "Odrasli: S-XXL";
 const empty = { id: "", category: "dres", klub: "", igrac: "", liga: "Reprezentacija", price: "20", retro: false, adults: true, kids: true, badge: "", description: "", images: [] as string[] };
 
 export function CustomProducts() {
+  const LIGE = useLeagues();
   const [list, setList] = useState<Custom[]>([]);
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({ ...empty });

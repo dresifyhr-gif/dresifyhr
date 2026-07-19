@@ -3,13 +3,14 @@
 import { MessageCircle } from "lucide-react";
 
 import { useLanguage } from "@/contexts/language-context";
-import { WHATSAPP_URL } from "@/lib/site";
+import { useWhatsAppUrl } from "@/contexts/shop-settings-context";
 
 export function FloatingWhatsAppButton() {
+  const whatsappUrl = useWhatsAppUrl();
   const { t } = useLanguage();
   return (
     <a
-      href={WHATSAPP_URL}
+      href={whatsappUrl}
       target="_blank"
       rel="noreferrer"
       className="fixed bottom-4 right-4 z-40 flex h-16 w-16 items-center justify-center rounded-[4px] border border-white/10 bg-[#25D366] text-white shadow-[0_18px_40px_rgba(37,211,102,0.28)] transition-transform duration-200 ease-out hover:-translate-y-1 sm:bottom-6 sm:right-6 md:h-auto md:w-auto md:gap-3 md:px-4 md:py-3"

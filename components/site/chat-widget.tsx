@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Send, Bot, MessageCircle } from "lucide-react";
 
-import { WHATSAPP_URL } from "@/lib/site";
+import { useWhatsAppUrl } from "@/contexts/shop-settings-context";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -33,6 +33,7 @@ function renderLinks(text: string) {
 }
 
 export function ChatWidget() {
+  const whatsappUrl = useWhatsAppUrl();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Bok! 👋 Mogu li ti pomoći pronaći pravi dres?" }
@@ -176,7 +177,7 @@ export function ChatWidget() {
               </button>
             </form>
             <a
-              href={WHATSAPP_URL}
+              href={whatsappUrl}
               target="_blank"
               rel="noreferrer"
               className="mt-2.5 flex items-center justify-center gap-2 text-[11px] text-white/35 transition hover:text-white/60"

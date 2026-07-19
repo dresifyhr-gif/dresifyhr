@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
 
-const LIGE = ["Reprezentacija", "La Liga", "Premier Liga", "Serie A", "Bundesliga", "Ligue 1", "Saudi Pro", "Brazil", "MLS", "Komplet"];
+import { useLeagues } from "@/components/admin/use-leagues";
+
+
 
 type Row = {
   key: string;
@@ -48,6 +50,7 @@ function similarity(a: string, b: string) {
 }
 
 export function BulkAdd({ onDone }: { onDone: () => void }) {
+  const LIGE = useLeagues();
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(false);
   const [savingAll, setSavingAll] = useState(false);

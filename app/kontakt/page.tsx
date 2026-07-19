@@ -4,17 +4,12 @@ import { motion } from "framer-motion";
 import { Mail, Phone, MessageCircle, Instagram, Facebook, Music2 } from "lucide-react";
 import Link from "next/link";
 
-import {
-  WHATSAPP_URL,
-  INSTAGRAM_URL,
-  CONTACT_PHONE_DISPLAY,
-  CONTACT_EMAIL,
-} from "@/lib/site";
+import { useShopSettings, useWhatsAppUrl, useInstagram } from "@/contexts/shop-settings-context";
 
 const FACEBOOK_URL = "https://facebook.com/dresifyshop";
 const TIKTOK_URL = "https://tiktok.com/@dresify.shop";
 
-const channels = [
+const buildChannels = (WHATSAPP_URL: string, INSTAGRAM_URL: string, CONTACT_EMAIL: string, CONTACT_PHONE_DISPLAY: string) => [
   {
     icon: MessageCircle,
     label: "WhatsApp Business",
@@ -90,6 +85,10 @@ const channels = [
 ];
 
 export default function KontaktPage() {
+  const { contactEmail, contactPhone } = useShopSettings();
+  const whatsappUrl = useWhatsAppUrl();
+  const ig = useInstagram();
+  const channels = buildChannels(whatsappUrl, ig.url, contactEmail, contactPhone);
   return (
     <main className="bg-[#0a0a0a] min-h-screen">
 

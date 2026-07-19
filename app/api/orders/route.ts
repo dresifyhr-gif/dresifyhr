@@ -36,12 +36,14 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!notificationResult.email.sent) {
+    // Narudžba pada samo ako NIJEDAN uključeni kanal nije prošao (prije je
+    // tražila baš admin email, pa bi gašenje emaila u Postavkama rušilo narudžbe).
+    if (notificationResult.successfulChannels === 0) {
       return NextResponse.json(
         {
           ok: false,
-          code: "ADMIN_EMAIL_FAILED",
-          message: "Narudžbu trenutno nismo uspjeli poslati na admin email. Pokušaj ponovno za minutu."
+          code: "NOTIFICATIONS_FAILED",
+          message: "Narudžbu trenutno nismo uspjeli zaprimiti. Pokušaj ponovno za minutu."
         },
         { status: 502 }
       );
