@@ -32,10 +32,16 @@ OBAVEZNO:
 - Treći odlomak: veličine i dostava, ali napisano drukčije nego kod drugih
   proizvoda (variraj formulaciju).
 
-ZABRANJENO:
-- Ne izmišljaj cijenu, popuste, materijale ni službena licenciranja.
-- Ne piši "vjeran originalnom izgledu" ni druge fraze koje zvuče kao šablona.
-- Bez markdowna, bez naslova, bez emojija. Samo tekst s \\n između odlomaka.`;
+STROGO ZABRANJENO (krivi podaci su gori od šablone):
+- NE izmišljaj ništa o igraču: ni puno ime, ni klub, ni transfere, ni statistiku,
+  ni predviđanja ("bit će ključan", "nosit će na turniru"). Ako o igraču ne znaš
+  pouzdano, piši o DRESU (boje, varijanta, kome odgovara), ne o karijeri.
+- NE izmišljaj cijenu, popuste, materijale ni službena licenciranja.
+- NE piši "vjeran originalnom izgledu" ni druge šablonske fraze.
+- Bez markdowna, naslova i emojija.
+
+JEZIK: besprijekoran hrvatski. Svaka rečenica mora biti gramatički ispravna i
+prirodna. Bolje kraće i točno nego dulje i nespretno.`;
 
 export async function POST(request: Request) {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
@@ -67,7 +73,7 @@ export async function POST(request: Request) {
     const igrac = repairText(p.igrac);
     try {
       const { text } = await generateText({
-        model: anthropic("claude-haiku-4-5-20251001"),
+        model: anthropic("claude-sonnet-5"),
         system: SYSTEM,
         prompt: `Klub/reprezentacija: ${klub}
 Igrač i varijanta: ${igrac}
