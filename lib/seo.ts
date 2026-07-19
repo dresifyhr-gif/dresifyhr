@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import type { BlogPost } from "@/lib/data/blog-posts";
 import type { Jersey } from "@/lib/data/jerseys";
+import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { absoluteUrl } from "@/lib/utils";
 import {
   CONTACT_PHONE_DISPLAY,
@@ -72,13 +73,29 @@ export function buildMetadata({
   };
 }
 
+// Slike za schema.org: prvo uređene/custom (product.images), pa statička
+// galerija po slugu, pa tek onda zadana OG slika kao krajnja rezerva.
+function productImages(product: Jersey): string[] {
+  const fromProduct = (product.images ?? []).map((i: { src: string }) => i.src).filter(Boolean);
+  const urls: string[] = fromProduct.length ? fromProduct : getJerseyGallery(product.slug).map((i) => i.src);
+  const abs = urls
+    .filter(Boolean)
+    .map((src: string) => (src.startsWith("http") ? src : absoluteUrl(src)))
+    .slice(0, 5);
+  return abs.length ? abs : [absoluteUrl(DEFAULT_OG_IMAGE)];
+}
+
 export function buildProductSchema(product: Jersey, stock: number) {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: `${product.klub} - ${product.igrac}`,
     description: `${product.klub} ${product.igrac} nogometni dres za ${CURRENCY_LABEL}. Dostava po cijeloj Hrvatskoj.`,
-    image: [absoluteUrl(`/dresovi/${product.slug}.jpg`), absoluteUrl(DEFAULT_OG_IMAGE)],
+    // Prava slika proizvoda. Prije je ovdje bilo `/dresovi/{slug}.jpg` — putanja
+    // koja NE POSTOJI (slike su u /dresovi/{slug}/front.jpg, a custom proizvodi
+    // imaju URL-ove u product.images). Google je zbog 404 slike odbijao većinu
+    // proizvoda za Shopping/rich rezultate.
+    image: productImages(product),
     brand: {
       "@type": "Brand",
       name: SITE_NAME

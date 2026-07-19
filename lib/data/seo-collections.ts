@@ -62,7 +62,7 @@ const categoryDefinitions: CollectionDefinition[] = [
     slug: "djecji-dresovi",
     label: "Dječji dresovi",
     heading: "Dječji dresovi i kompleti",
-    title: "Dječji nogometni dresovi i kompleti",
+    title: "Dječji nogometni dresovi i kompleti — 20€",
     description:
       "Pregledaj dječje nogometne dresove i komplete za najtraženije klubove i reprezentacije uz fiksnu cijenu i brzu dostavu po Hrvatskoj.",
     intro:
@@ -73,7 +73,7 @@ const categoryDefinitions: CollectionDefinition[] = [
     slug: "dresovi-za-odrasle",
     label: "Dresovi za odrasle",
     heading: "Nogometni dresovi za odrasle",
-    title: "Nogometni dresovi za odrasle",
+    title: "Nogometni dresovi za odrasle — 20€",
     description:
       "Pregledaj dresove za odrasle u veličinama S do XL, od novih modela do retro klasika koji se brzo traže u Hrvatskoj.",
     intro:
@@ -84,7 +84,7 @@ const categoryDefinitions: CollectionDefinition[] = [
     slug: "retro-dresovi",
     label: "Retro dresovi",
     heading: "Retro nogometni dresovi",
-    title: "Retro nogometni dresovi",
+    title: "Retro nogometni dresovi — 20€",
     description:
       "Izdvojeni retro nogometni dresovi za kupce koji traže klasike, ikonične utakmice i legendarne igrače u jednom katalogu.",
     intro:
@@ -95,7 +95,7 @@ const categoryDefinitions: CollectionDefinition[] = [
     slug: "reprezentativni-dresovi",
     label: "Reprezentativni dresovi",
     heading: "Reprezentativni nogometni dresovi",
-    title: "Reprezentativni nogometni dresovi",
+    title: "Reprezentativni nogometni dresovi — 20€",
     description:
       "Hrvatska, Argentina, Brazil, Francuska i ostale reprezentacije na jednom mjestu uz brzu dostavu i stalno rotiranje modela.",
     intro:
@@ -106,7 +106,7 @@ const categoryDefinitions: CollectionDefinition[] = [
     slug: "klupski-dresovi",
     label: "Klupski dresovi",
     heading: "Klupski nogometni dresovi",
-    title: "Klupski nogometni dresovi",
+    title: "Klupski nogometni dresovi — 20€",
     description:
       "FC Barcelona, Real Madrid, PSG, Bayern i ostali klupski dresovi na jednom mjestu za sve koji traže aktualne ili statement modele.",
     intro:
@@ -120,7 +120,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "fc-barcelona",
     label: "FC Barcelona",
     heading: "FC Barcelona dresovi",
-    title: "FC Barcelona dresovi",
+    title: "FC Barcelona dresovi — 20€",
     description:
       "FC Barcelona dresovi s Yamalom, Messijem, Ronaldinhom i ostalim traženim imenima u jednom DRESIFY katalogu.",
     intro:
@@ -131,7 +131,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "real-madrid",
     label: "Real Madrid",
     heading: "Real Madrid dresovi",
-    title: "Real Madrid dresovi",
+    title: "Real Madrid dresovi — 20€",
     description:
       "Real Madrid dresovi s Ronaldom, Mbappéom, Bellinghamom, Ramosom i Gülerom za djecu i odrasle.",
     intro:
@@ -142,7 +142,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "brazil",
     label: "Brazil",
     heading: "Brazil dresovi",
-    title: "Brazil dresovi",
+    title: "Brazil dresovi — 20€",
     description:
       "Brazil dresovi s Neymarom, Ronaldinhom, Peléom, Kakáom i Robertom Carlosom u posebnoj i retro ponudi.",
     intro:
@@ -153,7 +153,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "hrvatska",
     label: "Hrvatska",
     heading: "Hrvatska dresovi",
-    title: "Hrvatska dresovi",
+    title: "Hrvatska dresovi — 20€",
     description:
       "Hrvatska dresovi s Modrićem i drugim traženim varijantama za kupce koji traže domaću reprezentaciju i brzu dostavu po Hrvatskoj.",
     intro:
@@ -164,7 +164,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "argentina",
     label: "Argentina",
     heading: "Argentina dresovi",
-    title: "Argentina dresovi",
+    title: "Argentina dresovi — 20€",
     description:
       "Argentina dresovi s Messijem, uključujući crna posebna izdanja i Svjetsko prvenstvo 2022, za djecu i odrasle.",
     intro:
@@ -175,7 +175,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "psg",
     label: "PSG",
     heading: "PSG dresovi",
-    title: "PSG dresovi",
+    title: "PSG dresovi — 20€",
     description:
       "PSG dresovi s Hakimijem, Ronaldinhom, Douéom i Kvaratskheliom za kupce koji traže francuske klupske modele s jačim vizualom.",
     intro:
@@ -186,7 +186,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "bayern-munchen",
     label: "Bayern München",
     heading: "Bayern München dresovi",
-    title: "Bayern München dresovi",
+    title: "Bayern München dresovi — 20€",
     description:
       "Bayern München dresovi s Musialom i posebnim izdanjima za kupce koji traže Bundesliga favorite u dječjim i odraslim veličinama.",
     intro:
@@ -197,7 +197,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "manchester-united",
     label: "Manchester United",
     heading: "Manchester United dresovi",
-    title: "Manchester United dresovi",
+    title: "Manchester United dresovi — 20€",
     description:
       "Manchester United dresovi s Ronaldom u UCL i retro izdanjima za kupce koji traže prepoznatljive crvene i crne modele.",
     intro:
@@ -208,7 +208,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "inter-miami",
     label: "Inter Miami",
     heading: "Inter Miami dresovi",
-    title: "Inter Miami dresovi",
+    title: "Inter Miami dresovi — 20€",
     description:
       "Inter Miami dresovi s Messijem za sve koji traže rozi MLS hit model u dječjim i odraslim veličinama.",
     intro:
@@ -219,7 +219,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "bih",
     label: "BiH",
     heading: "BiH dresovi",
-    title: "BiH dresovi — reprezentacija Bosne i Hercegovine",
+    title: "BiH dresovi — reprezentacija Bosne i Hercegovine — 20€",
     description:
       "BiH dresovi s Džekom, Bajraktarevićem i Alajbegovićem — reprezentacija Bosne i Hercegovine uz dostavu po cijeloj Hrvatskoj.",
     intro:
@@ -230,7 +230,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "spanjolska",
     label: "Španjolska",
     heading: "Španjolska dresovi",
-    title: "Španjolska dresovi — reprezentacija",
+    title: "Španjolska dresovi — reprezentacija — 20€",
     description:
       "Španjolska dresovi s Yamalom u bijeloj i crvenoj varijanti, za djecu i odrasle, uz plaćanje pouzećem.",
     intro:
@@ -241,7 +241,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "francuska",
     label: "Francuska",
     heading: "Francuska dresovi",
-    title: "Francuska dresovi — reprezentacija",
+    title: "Francuska dresovi — reprezentacija — 20€",
     description:
       "Francuska dresovi s Mbappéom, Oliseom i Zidaneom — od aktualnih izdanja do retro klasika.",
     intro:
@@ -252,7 +252,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "austrija",
     label: "Austrija",
     heading: "Austrija dresovi",
-    title: "Austrija dresovi — reprezentacija",
+    title: "Austrija dresovi — reprezentacija — 20€",
     description:
       "Austrija dresovi sa Sabitzerom — reprezentativni model uz dostavu po cijeloj Hrvatskoj i plaćanje pouzećem.",
     intro:
@@ -263,7 +263,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "liverpool",
     label: "Liverpool",
     heading: "Liverpool dresovi",
-    title: "Liverpool dresovi",
+    title: "Liverpool dresovi — 20€",
     description:
       "Liverpool dresovi u dječjim i odraslim veličinama, uz fiksnu cijenu i dostavu po cijeloj Hrvatskoj.",
     intro:
@@ -274,7 +274,7 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "ac-milan",
     label: "AC Milan",
     heading: "AC Milan dresovi",
-    title: "AC Milan dresovi",
+    title: "AC Milan dresovi — 20€",
     description:
       "AC Milan dresovi s Modrićem, Maldinijem i Ibrahimovićem — aktualna i retro izdanja.",
     intro:
@@ -288,7 +288,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "mbappe",
     label: "Mbappé dresovi",
     heading: "Mbappé dresovi",
-    title: "Mbappé dresovi",
+    title: "Mbappé dresovi — 20€",
     description: "Mbappé dresovi za Real Madrid i Francusku — dječje i odrasle veličine, fiksna cijena 20 €.",
     intro:
       "Otkako je prešao u Real Madrid, Mbappé je jedan od najtraženijih igrača kod nas. Ova stranica skuplja i njegove madridske i reprezentativne varijante na jedno mjesto, pa ne moraš prelistavati cijeli katalog da usporediš boje i sezone.",
@@ -298,7 +298,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "vinicius",
     label: "Vinícius Jr dresovi",
     heading: "Vinícius Jr dresovi",
-    title: "Vinícius Jr dresovi",
+    title: "Vinícius Jr dresovi — 20€",
     description: "Vinícius Jr dresovi za Brazil i Real Madrid, za djecu i odrasle, 20 €.",
     intro:
       "Vinícius Jr je uz Mbappéa najprepoznatljivije ime današnjeg Reala, a brazilski dres s njegovim imenom traži se posebno ljeti. Ovdje su okupljene domaće i gostujuće varijante koje držimo na stanju.",
@@ -308,7 +308,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "bellingham",
     label: "Bellingham dresovi",
     heading: "Bellingham dresovi",
-    title: "Bellingham dresovi",
+    title: "Bellingham dresovi — 20€",
     description: "Bellingham dresovi (Real Madrid, Engleska) — dječje i odrasle veličine, 20 €.",
     intro:
       "Bellinghamov broj 5 postao je jedan od najprodavanijih u Madridu. Ako tražiš dres za dijete ili sebe, ovdje su sve njegove varijante koje trenutačno nudimo, s jasnim veličinama i stanjem.",
@@ -318,7 +318,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "haaland-kane",
     label: "Kane dresovi",
     heading: "Kane dresovi",
-    title: "Kane dresovi",
+    title: "Kane dresovi — 20€",
     description: "Harry Kane dresovi za Bayern München i Englesku — 20 €, dostava 2–5 dana.",
     intro:
       "Kane je nosilac napada Bayerna, a njegov dres je čest izbor za darove navijačima Bundeslige. Ovdje su njegove trenutačne varijante, uključujući crvene domaće komplete.",
@@ -328,7 +328,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "raphinha",
     label: "Raphinha dresovi",
     heading: "Raphinha dresovi",
-    title: "Raphinha dresovi",
+    title: "Raphinha dresovi — 20€",
     description: "Raphinha dresovi za Barcelonu i Brazil — dječje i odrasle veličine, 20 €.",
     intro:
       "Raphinha je u zadnjim sezonama izbio u prvi plan Barcelone i njegov broj 11 sve se češće traži. Skupili smo crne, zelene i domaće varijante da lakše usporediš prije narudžbe.",
@@ -338,7 +338,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "sesko",
     label: "Šeško dresovi",
     heading: "Šeško dresovi",
-    title: "Šeško dresovi",
+    title: "Šeško dresovi — 20€",
     description: "Benjamin Šeško dresovi — Manchester United i Slovenija, 20 €.",
     intro:
       "Šeško je jedno od najzanimljivijih imena regije i njegov prelazak u Premier ligu podigao je potražnju za dresom. Ovdje su varijante koje držimo, u dječjim i odraslim veličinama.",
@@ -348,7 +348,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "dzeko",
     label: "Džeko dresovi",
     heading: "Džeko dresovi",
-    title: "Džeko dresovi",
+    title: "Džeko dresovi — 20€",
     description: "Edin Džeko dresovi — reprezentacija BiH, dječje i odrasle veličine, 20 €.",
     intro:
       "Džeko je i dalje najpoznatije ime bosanskohercegovačkog nogometa, a njegov dres je stalno tražen i u Hrvatskoj. Ovdje su reprezentativne varijante s njegovim imenom i brojem.",
@@ -358,7 +358,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "wirtz",
     label: "Wirtz dresovi",
     heading: "Wirtz dresovi",
-    title: "Wirtz dresovi",
+    title: "Wirtz dresovi — 20€",
     description: "Florian Wirtz dresovi za Njemačku i klub — 20 €, dostava po cijeloj Hrvatskoj.",
     intro:
       "Wirtz je nositelj nove generacije njemačke reprezentacije i njegov dres je čest izbor mlađih navijača. Na ovoj stranici su njegove varijante s dostupnim veličinama.",
@@ -368,7 +368,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "doue",
     label: "Doué dresovi",
     heading: "Doué dresovi",
-    title: "Doué dresovi",
+    title: "Doué dresovi — 20€",
     description: "Désiré Doué dresovi (PSG, Francuska) — dječje i odrasle veličine, 20 €.",
     intro:
       "Doué je nakon sjajne sezone u PSG-u postao jedno od traženijih imena kod mlađih kupaca. Ovdje su njegove varijante koje trenutačno nudimo.",
@@ -378,7 +378,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "suarez",
     label: "Suárez dresovi",
     heading: "Suárez dresovi",
-    title: "Suárez dresovi",
+    title: "Suárez dresovi — 20€",
     description: "Luis Suárez dresovi — Inter Miami i klasici, 20 €.",
     intro:
       "Suárez je uz Messija dio Inter Miami priče koja i dalje vuče kupce. Ovdje su njegove varijante, uključujući rozi dres koji se najčešće traži.",
@@ -388,7 +388,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "pele",
     label: "Pelé dresovi",
     heading: "Pelé dresovi",
-    title: "Pelé dresovi",
+    title: "Pelé dresovi — 20€",
     description: "Pelé retro dresovi — brazilski klasici za kolekcionare, 20 €.",
     intro:
       "Pelé je vječno ime brazilskog nogometa i njegov retro dres je čest poklon starijim navijačima i kolekcionarima. Ovdje su klasične varijante koje držimo.",
@@ -398,8 +398,8 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "bajraktarevic",
     label: "Bajraktarević dresovi",
     heading: "Bajraktarević dresovi",
-    title: "Bajraktarević dresovi",
-    description: "Bajraktarević dresovi za reprezentaciju BiH — 20 €, dostava 2–5 dana.",
+    title: "Bajraktarević dres BiH — 20€",
+    description: "Bajraktarević dres BiH — reprezentativni dres za djecu i odrasle, 20 €. Dostava 2–5 dana, plaćanje pouzećem.",
     intro:
       "Mlada snaga bosanskohercegovačke reprezentacije sve se češće traži uz Džeku. Ovdje su njegove reprezentativne varijante s dostupnim veličinama.",
     filter: playerNameIncludes("bajraktarevic", "bajraktarević")
@@ -408,7 +408,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "messi",
     label: "Messi dresovi",
     heading: "Messi dresovi",
-    title: "Messi dresovi",
+    title: "Messi dresovi — 20€",
     description:
       "Messi dresovi iz Argentine, Barcelone i Inter Miamija za kupce koji traže najprepoznatljiviji igrački katalog na jednom mjestu.",
     intro:
@@ -419,7 +419,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "ronaldo",
     label: "Ronaldo dresovi",
     heading: "Ronaldo dresovi",
-    title: "Ronaldo dresovi",
+    title: "Ronaldo dresovi — 20€",
     description:
       "Ronaldo dresovi iz Reala, Manchester Uniteda, Portugala i Al-Nassra za djecu i odrasle.",
     intro:
@@ -430,7 +430,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "neymar",
     label: "Neymar dresovi",
     heading: "Neymar dresovi",
-    title: "Neymar dresovi",
+    title: "Neymar dresovi — 20€",
     description:
       "Neymar dresovi iz Brazila, Santosa i Barcelone na jednom mjestu za kupce koji traže posebne boje i statement modele.",
     intro:
@@ -441,7 +441,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "yamal",
     label: "Yamal dresovi",
     heading: "Yamal dresovi",
-    title: "Yamal dresovi",
+    title: "Yamal dresovi — 20€",
     description:
       "Yamal dresovi FC Barcelone u domaćim, šarenim i posebnim varijantama za kupce koji traže najaktualnije modele sezone.",
     intro:
@@ -452,7 +452,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "modric",
     label: "Modrić dresovi",
     heading: "Modrić dresovi",
-    title: "Modrić dresovi",
+    title: "Modrić dresovi — 20€",
     description:
       "Modrić dresovi Hrvatske u bijeloj i plavoj varijanti za domaće kupce koji traže siguran i prepoznatljiv izbor.",
     intro:
@@ -463,7 +463,7 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "ronaldinho",
     label: "Ronaldinho dresovi",
     heading: "Ronaldinho dresovi",
-    title: "Ronaldinho dresovi",
+    title: "Ronaldinho dresovi — 20€",
     description:
       "Ronaldinho dresovi iz Barcelone, Brazila i PSG-a za kupce koji traže retro energiju i iconic streetwear vibe.",
     intro:
