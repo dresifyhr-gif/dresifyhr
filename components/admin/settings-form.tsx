@@ -15,15 +15,15 @@ type Settings = {
   contactEmail: string;
 };
 
-const inp = "w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400";
-const label = "block text-[11px] font-semibold uppercase tracking-wide text-slate-400";
+const inp = "a-input w-full px-3 py-2 text-sm";
+const label = "a-label mb-1 block";
 
 function Card({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <div className="a-card p-4 sm:p-5">
       <div className="mb-3">
-        <div className="text-sm font-bold text-slate-900">{title}</div>
-        {hint && <div className="text-xs text-slate-400">{hint}</div>}
+        <div className="text-[15px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">{title}</div>
+        {hint && <div className="mt-0.5 text-[12px] text-[#8e8e93]">{hint}</div>}
       </div>
       {children}
     </div>
@@ -42,7 +42,7 @@ export function SettingsForm() {
       .catch(() => {});
   }, []);
 
-  if (!s) return <div className="text-sm text-slate-400">Učitavam postavke…</div>;
+  if (!s) return <div className="text-sm text-[#8e8e93]">Učitavam postavke…</div>;
 
   const setNum = (k: keyof Settings) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, [k]: e.target.value } as unknown as Settings : cur));
@@ -97,7 +97,7 @@ export function SettingsForm() {
         <div className="grid gap-4 sm:grid-cols-2">
           {(["igor", "ivica"] as const).map((who) => (
             <div key={who} className="space-y-2 rounded-lg border border-slate-100 bg-slate-50/50 p-3">
-              <div className="text-xs font-bold capitalize text-slate-600">{who}</div>
+              <div className="text-[13px] font-semibold capitalize text-[#1d1d1f]">{who}</div>
               <div><span className={label}>Ime i prezime</span><input value={s.senders[who].name} onChange={setSender(who, "name")} className={inp} /></div>
               <div><span className={label}>Adresa</span><input value={s.senders[who].address} onChange={setSender(who, "address")} className={inp} /></div>
               <div><span className={label}>Poštanski broj i mjesto</span><input value={s.senders[who].city} onChange={setSender(who, "city")} className={inp} /></div>
@@ -116,7 +116,7 @@ export function SettingsForm() {
       </Card>
 
       <div className="sticky bottom-4 flex items-center gap-3">
-        <button type="button" onClick={save} disabled={saving} className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-800 disabled:opacity-50">
+        <button type="button" onClick={save} disabled={saving} className="a-btn a-btn-primary px-5 py-2.5 text-sm disabled:opacity-50">
           {saving ? "Spremam…" : "Spremi postavke"}
         </button>
         {saved && <span className="text-sm font-semibold text-emerald-600">✓ Spremljeno</span>}

@@ -29,7 +29,7 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 
 function Highlight({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="a-card p-4">
       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
       <div className="mt-1 truncate text-lg font-bold text-slate-900">{value}</div>
       {sub && <div className="text-xs text-slate-400">{sub}</div>}
@@ -230,7 +230,7 @@ export default async function AdminOverview() {
               { name: "Igor", color: "emerald", c: m.split.cashSplit.igor },
               { name: "Ivica", color: "sky", c: m.split.cashSplit.ivica }
             ].map((p) => (
-              <div key={p.name} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div key={p.name} className="a-card p-4">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-900">{p.name}</span>
                   <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${p.color === "emerald" ? "bg-emerald-50 text-emerald-600" : "bg-sky-50 text-sky-600"}`}>{p.c.sentCount} poslao</span>

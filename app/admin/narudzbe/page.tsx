@@ -13,7 +13,7 @@ export default async function OrdersPage() {
 
   return (
     <AdminShell title="Narudžbe" subtitle="Pronađi bilo koju narudžbu i promijeni status">
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <div className="a-card p-4 sm:p-5">
         <OrdersManager />
       </div>
     </AdminShell>

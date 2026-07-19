@@ -38,10 +38,10 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900">
+    <div className="admin-root min-h-screen overflow-x-hidden">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
-        <div className="px-5 py-5">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-black/[0.06] bg-white/80 backdrop-blur-xl lg:flex">
+        <div className="px-5 py-6">
           <Brand />
         </div>
         <nav className="flex-1 space-y-1 px-3">
@@ -52,14 +52,14 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 transition ${
-                  active ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
+                className={`group flex items-center gap-3 rounded-[12px] px-3 py-2.5 transition-all duration-150 ${
+                  active ? "bg-accent/60 text-[#1d1d1f]" : "text-[#6e6e73] hover:bg-black/[0.04]"
                 }`}
               >
-                <Icon className={`h-[19px] w-[19px] ${active ? "text-lime-400" : "text-slate-400 group-hover:text-slate-600"}`} />
+                <Icon className={`h-[19px] w-[19px] ${active ? "text-[#1d1d1f]" : "text-[#8e8e93] group-hover:text-[#1d1d1f]"}`} />
                 <span className="flex flex-col">
-                  <span className="text-sm font-semibold leading-tight">{item.label}</span>
-                  <span className={`text-[11px] leading-tight ${active ? "text-white/60" : "text-slate-400"}`}>{item.hint}</span>
+                  <span className="text-[14px] font-semibold leading-tight">{item.label}</span>
+                  <span className={`text-[11px] leading-tight ${active ? "text-[#1d1d1f]/55" : "text-[#8e8e93]"}`}>{item.hint}</span>
                 </span>
               </Link>
             );
@@ -67,7 +67,7 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
         </nav>
         <a
           href="/api/admin/logout"
-          className="m-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          className="m-3 flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[#8e8e93] transition hover:bg-black/[0.04] hover:text-[#1d1d1f]"
         >
           <LogOut className="h-[18px] w-[18px]" />
           Odjava
@@ -77,36 +77,36 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
       {/* Main column */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur sm:px-6">
+        <header className="a-blur sticky top-0 z-20 border-b border-black/[0.06] px-4 py-3 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="lg:hidden">
               <Brand />
             </div>
             <div className="hidden lg:block">
-              <h1 className="text-lg font-bold tracking-tight text-slate-900">{title}</h1>
-              {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+              <h1 className="text-[19px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{title}</h1>
+              {subtitle && <p className="text-[12px] text-[#8e8e93]">{subtitle}</p>}
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
-                className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-400 shadow-sm transition hover:text-slate-700"
+                className="a-input flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-[#8e8e93] transition hover:text-[#1d1d1f]"
                 title="Globalno pretraživanje (⌘K)"
               >
                 <Search className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Traži…</span>
-                <kbd className="hidden rounded border border-slate-200 px-1 py-0.5 text-[9px] font-semibold text-slate-400 sm:inline">⌘K</kbd>
+                <kbd className="hidden rounded-md bg-black/[0.06] px-1.5 py-0.5 text-[9px] font-semibold text-[#8e8e93] sm:inline">⌘K</kbd>
               </button>
               <Link
                 href="/admin/postavke"
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:text-slate-700"
+                className="a-input flex h-8 w-8 items-center justify-center text-[#8e8e93] transition hover:text-[#1d1d1f]"
                 title="Postavke"
               >
                 <Settings className="h-4 w-4" />
               </Link>
               <a
                 href="/api/admin/logout"
-                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-sm transition hover:text-slate-800 lg:hidden"
+                className="a-input px-3 py-1.5 text-xs font-medium text-[#6e6e73] transition hover:text-[#1d1d1f] lg:hidden"
               >
                 Odjava
               </a>
@@ -114,12 +114,12 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
           </div>
           {/* Mobile page title */}
           <div className="mt-3 lg:hidden">
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">{title}</h1>
-            {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+            <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{title}</h1>
+            {subtitle && <p className="text-[12px] text-[#8e8e93]">{subtitle}</p>}
           </div>
         </header>
 
-        <main className="mx-auto max-w-[1600px] px-4 py-5 pb-24 sm:px-6 lg:px-8 lg:pb-10">{children}</main>
+        <main className="mx-auto max-w-[1600px] px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-10">{children}</main>
       </div>
 
       {/* Global AI assistant — available on every page */}
@@ -129,7 +129,7 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
       <CommandPalette />
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      <nav className="a-blur fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-black/[0.06] pb-[env(safe-area-inset-bottom)] lg:hidden">
         {NAV.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;
@@ -138,11 +138,11 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center gap-1 py-2 text-[10px] font-semibold transition ${
-                active ? "text-slate-900" : "text-slate-400"
+                active ? "text-[#1d1d1f]" : "text-[#8e8e93]"
               }`}
             >
-              <span className={`flex h-8 w-12 items-center justify-center rounded-full transition ${active ? "bg-slate-900" : ""}`}>
-                <Icon className={`h-[18px] w-[18px] ${active ? "text-lime-400" : "text-slate-400"}`} />
+              <span className={`flex h-8 w-12 items-center justify-center rounded-full transition-all duration-150 ${active ? "bg-accent/60" : ""}`}>
+                <Icon className={`h-[18px] w-[18px] ${active ? "text-[#1d1d1f]" : "text-[#8e8e93]"}`} />
               </span>
               {item.label}
             </Link>

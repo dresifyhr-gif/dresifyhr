@@ -157,7 +157,7 @@ export function CustomProducts() {
   }
 
   return (
-    <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <div className="mb-5 a-card p-4 sm:p-5">
       {/* Na mobitelu naslov i gumbi idu jedno ispod drugog — u istom redu bi
           gumbi stisnuli naslov na jednu riječ po retku. */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

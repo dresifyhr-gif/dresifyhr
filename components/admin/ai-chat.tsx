@@ -127,7 +127,7 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
   }
 
   return (
-    <div className={`rounded-xl border border-slate-200 bg-white shadow-sm ${fill ? "flex h-full flex-col" : ""}`}>
+    <div className={`a-card ${fill ? "flex h-full flex-col" : ""}`}>
       <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
         <Image src="/dresify-robot.png" alt="Dresify AI" width={40} height={40} className="h-10 w-10 object-contain" />
         <span className="text-sm font-semibold text-slate-800">Dresify AI</span>

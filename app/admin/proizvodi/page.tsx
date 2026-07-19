@@ -15,7 +15,7 @@ export default async function ProductsPage() {
   return (
     <AdminShell title="Proizvodi" subtitle="Dodaj dresove, uredi cijenu i zalihu — bez koda">
       <CustomProducts />
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <div className="a-card p-4 sm:p-5">
         <ProductsManager />
       </div>
     </AdminShell>

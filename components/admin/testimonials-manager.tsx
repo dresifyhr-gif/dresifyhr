@@ -71,7 +71,7 @@ export function TestimonialsManager() {
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <div className="a-card p-4 sm:p-5">
       <div className="mb-1 text-sm font-bold text-slate-900">Zadovoljni kupci (recenzije)</div>
       <p className="mb-3 text-xs text-slate-400">Uploadaj slike koje su ti kupci slali (Instagram/WhatsApp). Prikazuju se na naslovnici kao društveni dokaz. Ime/tekst su opcionalni.</p>
 

@@ -40,26 +40,26 @@ export function Stat({
   change?: number | null;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="a-card p-4">
       <div className="flex items-center justify-between">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
+        <div className="a-label">{label}</div>
         {change != null && (
           <span className={`text-[11px] font-semibold ${change >= 0 ? "text-emerald-600" : "text-red-500"}`}>
             {change >= 0 ? "▲" : "▼"} {Math.abs(change).toFixed(0)}%
           </span>
         )}
       </div>
-      <div className="mt-1 text-2xl font-bold text-slate-900">{value}</div>
+      <div className="mt-1.5 text-[26px] font-semibold tracking-[-0.03em] text-[#1d1d1f]">{value}</div>
       {profit && <div className="mt-0.5 text-xs font-semibold text-emerald-600">{profit} profit</div>}
-      {sub && <div className="mt-0.5 text-xs text-slate-400">{sub}</div>}
+      {sub && <div className="mt-0.5 text-xs text-[#8e8e93]">{sub}</div>}
     </div>
   );
 }
 
 export function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{title}</div>
+    <div className="a-card p-5">
+      <div className="a-label mb-4">{title}</div>
       {children}
     </div>
   );
