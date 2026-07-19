@@ -285,6 +285,126 @@ const clubDefinitions: CollectionDefinition[] = [
 
 const playerDefinitions: CollectionDefinition[] = [
   {
+    slug: "mbappe",
+    label: "Mbappé dresovi",
+    heading: "Mbappé dresovi",
+    title: "Mbappé dresovi",
+    description: "Mbappé dresovi za Real Madrid i Francusku — dječje i odrasle veličine, fiksna cijena 20 €.",
+    intro:
+      "Otkako je prešao u Real Madrid, Mbappé je jedan od najtraženijih igrača kod nas. Ova stranica skuplja i njegove madridske i reprezentativne varijante na jedno mjesto, pa ne moraš prelistavati cijeli katalog da usporediš boje i sezone.",
+    filter: playerNameIncludes("mbappe", "mbappé")
+  },
+  {
+    slug: "vinicius",
+    label: "Vinícius Jr dresovi",
+    heading: "Vinícius Jr dresovi",
+    title: "Vinícius Jr dresovi",
+    description: "Vinícius Jr dresovi za Brazil i Real Madrid, za djecu i odrasle, 20 €.",
+    intro:
+      "Vinícius Jr je uz Mbappéa najprepoznatljivije ime današnjeg Reala, a brazilski dres s njegovim imenom traži se posebno ljeti. Ovdje su okupljene domaće i gostujuće varijante koje držimo na stanju.",
+    filter: playerNameIncludes("vinicius", "vinícius")
+  },
+  {
+    slug: "bellingham",
+    label: "Bellingham dresovi",
+    heading: "Bellingham dresovi",
+    title: "Bellingham dresovi",
+    description: "Bellingham dresovi (Real Madrid, Engleska) — dječje i odrasle veličine, 20 €.",
+    intro:
+      "Bellinghamov broj 5 postao je jedan od najprodavanijih u Madridu. Ako tražiš dres za dijete ili sebe, ovdje su sve njegove varijante koje trenutačno nudimo, s jasnim veličinama i stanjem.",
+    filter: playerNameIncludes("bellingham")
+  },
+  {
+    slug: "haaland-kane",
+    label: "Kane dresovi",
+    heading: "Kane dresovi",
+    title: "Kane dresovi",
+    description: "Harry Kane dresovi za Bayern München i Englesku — 20 €, dostava 2–5 dana.",
+    intro:
+      "Kane je nosilac napada Bayerna, a njegov dres je čest izbor za darove navijačima Bundeslige. Ovdje su njegove trenutačne varijante, uključujući crvene domaće komplete.",
+    filter: playerNameIncludes("kane")
+  },
+  {
+    slug: "raphinha",
+    label: "Raphinha dresovi",
+    heading: "Raphinha dresovi",
+    title: "Raphinha dresovi",
+    description: "Raphinha dresovi za Barcelonu i Brazil — dječje i odrasle veličine, 20 €.",
+    intro:
+      "Raphinha je u zadnjim sezonama izbio u prvi plan Barcelone i njegov broj 11 sve se češće traži. Skupili smo crne, zelene i domaće varijante da lakše usporediš prije narudžbe.",
+    filter: playerNameIncludes("raphinha")
+  },
+  {
+    slug: "sesko",
+    label: "Šeško dresovi",
+    heading: "Šeško dresovi",
+    title: "Šeško dresovi",
+    description: "Benjamin Šeško dresovi — Manchester United i Slovenija, 20 €.",
+    intro:
+      "Šeško je jedno od najzanimljivijih imena regije i njegov prelazak u Premier ligu podigao je potražnju za dresom. Ovdje su varijante koje držimo, u dječjim i odraslim veličinama.",
+    filter: playerNameIncludes("sesko", "šeško")
+  },
+  {
+    slug: "dzeko",
+    label: "Džeko dresovi",
+    heading: "Džeko dresovi",
+    title: "Džeko dresovi",
+    description: "Edin Džeko dresovi — reprezentacija BiH, dječje i odrasle veličine, 20 €.",
+    intro:
+      "Džeko je i dalje najpoznatije ime bosanskohercegovačkog nogometa, a njegov dres je stalno tražen i u Hrvatskoj. Ovdje su reprezentativne varijante s njegovim imenom i brojem.",
+    filter: playerNameIncludes("dzeko", "džeko")
+  },
+  {
+    slug: "wirtz",
+    label: "Wirtz dresovi",
+    heading: "Wirtz dresovi",
+    title: "Wirtz dresovi",
+    description: "Florian Wirtz dresovi za Njemačku i klub — 20 €, dostava po cijeloj Hrvatskoj.",
+    intro:
+      "Wirtz je nositelj nove generacije njemačke reprezentacije i njegov dres je čest izbor mlađih navijača. Na ovoj stranici su njegove varijante s dostupnim veličinama.",
+    filter: playerNameIncludes("wirtz")
+  },
+  {
+    slug: "doue",
+    label: "Doué dresovi",
+    heading: "Doué dresovi",
+    title: "Doué dresovi",
+    description: "Désiré Doué dresovi (PSG, Francuska) — dječje i odrasle veličine, 20 €.",
+    intro:
+      "Doué je nakon sjajne sezone u PSG-u postao jedno od traženijih imena kod mlađih kupaca. Ovdje su njegove varijante koje trenutačno nudimo.",
+    filter: playerNameIncludes("doue", "doué")
+  },
+  {
+    slug: "suarez",
+    label: "Suárez dresovi",
+    heading: "Suárez dresovi",
+    title: "Suárez dresovi",
+    description: "Luis Suárez dresovi — Inter Miami i klasici, 20 €.",
+    intro:
+      "Suárez je uz Messija dio Inter Miami priče koja i dalje vuče kupce. Ovdje su njegove varijante, uključujući rozi dres koji se najčešće traži.",
+    filter: playerNameIncludes("suarez", "suárez")
+  },
+  {
+    slug: "pele",
+    label: "Pelé dresovi",
+    heading: "Pelé dresovi",
+    title: "Pelé dresovi",
+    description: "Pelé retro dresovi — brazilski klasici za kolekcionare, 20 €.",
+    intro:
+      "Pelé je vječno ime brazilskog nogometa i njegov retro dres je čest poklon starijim navijačima i kolekcionarima. Ovdje su klasične varijante koje držimo.",
+    filter: playerNameIncludes("pele", "pelé")
+  },
+  {
+    slug: "bajraktarevic",
+    label: "Bajraktarević dresovi",
+    heading: "Bajraktarević dresovi",
+    title: "Bajraktarević dresovi",
+    description: "Bajraktarević dresovi za reprezentaciju BiH — 20 €, dostava 2–5 dana.",
+    intro:
+      "Mlada snaga bosanskohercegovačke reprezentacije sve se češće traži uz Džeku. Ovdje su njegove reprezentativne varijante s dostupnim veličinama.",
+    filter: playerNameIncludes("bajraktarevic", "bajraktarević")
+  },
+  {
     slug: "messi",
     label: "Messi dresovi",
     heading: "Messi dresovi",

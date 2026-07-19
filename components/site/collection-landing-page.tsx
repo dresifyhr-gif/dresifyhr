@@ -43,6 +43,7 @@ export function CollectionLandingPage({
         <Breadcrumbs items={breadcrumbItems.map((item) => ({ ...item, label: repairText(item.label) }))} />
 
         <SectionHeading
+          as="h1"
           kicker="Kolekcija"
           title={repairText(collection.heading)}
           description={repairText(collection.description)}

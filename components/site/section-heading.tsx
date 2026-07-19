@@ -3,13 +3,16 @@ type SectionHeadingProps = {
   title: string;
   description?: string;
   align?: "left" | "center";
+  /** Razina naslova. Na SEO landing stranicama glavni naslov mora biti h1. */
+  as?: "h1" | "h2";
 };
 
 export function SectionHeading({
   kicker,
   title,
   description,
-  align = "left"
+  align = "left",
+  as: Tag = "h2"
 }: SectionHeadingProps) {
   const alignment =
     align === "center" ? "items-center text-center mx-auto" : "items-start text-left";
@@ -22,7 +25,7 @@ export function SectionHeading({
           {kicker}
         </span>
       ) : null}
-      <h2 className="section-title text-white">{title}</h2>
+      <Tag className="section-title text-white">{title}</Tag>
       {description ? <p className="section-copy mt-3 sm:mt-4">{description}</p> : null}
     </div>
   );
