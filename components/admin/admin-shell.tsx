@@ -17,7 +17,9 @@ const NAV = [
 ];
 
 function isActive(pathname: string, href: string) {
-  return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+  // trailingSlash: true → putanja je "/admin/", pa uspoređujemo bez završne crte.
+  const p = pathname.replace(/\/+$/, "") || "/admin";
+  return href === "/admin" ? p === "/admin" : p.startsWith(href);
 }
 
 function Brand() {
