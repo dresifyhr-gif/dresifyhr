@@ -71,6 +71,48 @@ export default async function StreetwearPage() {
             </Link>
           </div>
         )}
+
+        {/* SEO sadržaj — stranica je prije imala samo 332 riječi, što je pretanko
+            da bi rangirala. Tekst odgovara na stvarna pitanja kupaca. */}
+        <div className="mx-auto mt-14 max-w-3xl border-t border-orange-100 pt-10">
+          <h2 className="font-heading text-2xl uppercase tracking-[0.04em] text-slate-900 sm:text-3xl">
+            Streetwear kompleti — majice i hlačice u istom stilu
+          </h2>
+          <div className="mt-5 space-y-4 text-sm leading-7 text-slate-600 sm:text-[15px]">
+            <p>
+              Streetwear komplet je najlakši način da izgledaš sređeno bez razmišljanja — gornji i donji dio
+              su usklađeni pa ne moraš pogađati paše li boja. Kod nas su svi kompleti u uličnom kroju,
+              malo opuštenijem, kakav se danas nosi. Cijena kompleta je 50 €, a dostava po cijeloj
+              Hrvatskoj je za njih besplatna.
+            </p>
+            <h3 className="pt-2 font-heading text-lg uppercase tracking-[0.04em] text-slate-900">
+              Kako odabrati veličinu
+            </h3>
+            <p>
+              Kroj je opušteniji nego kod klasičnih majica, pa ako si između dvije veličine preporučujemo
+              manju. Ako nisi siguran, javi nam visinu i uobičajenu veličinu na WhatsApp i reći ćemo ti
+              što najčešće odgovara. Zamjena za drugu veličinu je moguća unutar 14 dana.
+            </p>
+            <h3 className="pt-2 font-heading text-lg uppercase tracking-[0.04em] text-slate-900">
+              Dostava i plaćanje
+            </h3>
+            <p>
+              Šaljemo GLS kurirskom službom na svaku adresu u Hrvatskoj, rok je 2–5 radnih dana.
+              Plaćaš <strong>pouzećem</strong> — dakle tek kad ti paket stigne na vrata, ne unaprijed.
+              Za streetwear komplete dostavu snosimo mi.
+            </p>
+            <h3 className="pt-2 font-heading text-lg uppercase tracking-[0.04em] text-slate-900">
+              Zašto Dresify
+            </h3>
+            <p>
+              Radimo isključivo s komadima koje bismo i sami nosili, a svaku narudžbu pratimo do
+              preuzimanja. Ako nešto ne odgovara ili ti se ne svidi uživo — javi se i riješit ćemo,
+              bez kompliciranja. Osim streetweara nudimo i preko sto{" "}
+              <Link href="/dresovi" className="font-semibold text-orange-600 hover:underline">nogometnih dresova po 20 €</Link>{" "}
+              te <Link href="/kompleti" className="font-semibold text-orange-600 hover:underline">komplete s loptom i kapom</Link>.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );
