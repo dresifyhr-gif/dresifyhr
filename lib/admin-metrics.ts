@@ -90,7 +90,13 @@ export async function getDashboardMetrics() {
     prisma.order.count({ where: { status: "returned" } }),
     // Rizik po kupcu: minimalna polja SVIH narudžbi (mali skup) — grupira se po
     // telefonu u JS-u da izračunamo tko je odbijao pouzeće.
-    prisma.order.findMany({ select: { customerName: true, phone: true, status: true, cashCollected: true, createdAt: true } })
+    prisma.order.findMany({ select: { customerName: true, phone: true, status: true, cashCollected: true, createdAt: true } }),
+    // Pouzeće UKUPNO (sve poslano, neovisno o poravnanju) — za pregled na naslovnoj
+    // da se brojke poklapaju s onima na stranici Narudžbe.
+    prisma.order.findMany({
+      where: { status: { in: ["shipped", "done"] } },
+      select: { total: true, shipping: true, cashCollected: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
+    })
   ]);
   const settlementsP = prisma.settlement.findMany({ orderBy: { settledAt: "desc" }, take: 6 });
   // Treba i profitu (streetwear ima svoju nabavu) i besplatnim dostavama —
@@ -134,7 +140,7 @@ export async function getDashboardMetrics() {
   const totalRev = net(total);
 
   // ── Extras (trends, shipping queue, win-back, cities, ad ROI): već pokrenuto gore, samo await ──
-  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll, riskRows] = await extrasP;
+  const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll, riskRows, allSentOrders] = await extrasP;
 
   // ── Rizični kupci ─────────────────────────────────────────────────────────
   // Grupiraj sve narudžbe po telefonu (phoneKey iz lib/utils) i izbroji propale
@@ -246,6 +252,28 @@ export async function getDashboardMetrics() {
     const isFreeShip = amt >= 60 || Boolean(o.promoCode && o.promoCode.trim()) || o.items.some((it) => it.slug && streetwearSlugs.has(it.slug));
     if (isFreeShip) freeDeliveries++;
   }
+  // ── Pouzeće UKUPNO (sve poslano, neovisno o poravnanju) ────────────────────
+  // Iste brojke kao na stranici Narudžbe: koliko je prikupljeno, koliko još fali,
+  // te koliko je komada poslano vs. koliko ih se još čeka preuzeti.
+  const cashOverview = {
+    collectedTotal: 0, collectedDresovi: 0, collectedKompleti: 0, collectedStreet: 0, collectedCount: 0,
+    pendingTotal: 0, pendingDresovi: 0, pendingKompleti: 0, pendingStreet: 0, pendingCount: 0,
+    sentDresovi: 0, sentKompleti: 0, sentStreet: 0, sentCount: 0
+  };
+  for (const o of allSentOrders) {
+    const amt = o.total - (o.shipping ?? 0);
+    let d = 0, k = 0, s = 0;
+    for (const it of o.items) { const q = it.quantity || 1; if (it.slug && streetwearSlugs.has(it.slug)) s += q; else if (isKomplet(it)) k += q; else d += q; }
+    cashOverview.sentCount++; cashOverview.sentDresovi += d; cashOverview.sentKompleti += k; cashOverview.sentStreet += s;
+    if (o.cashCollected) {
+      cashOverview.collectedCount++; cashOverview.collectedTotal += amt;
+      cashOverview.collectedDresovi += d; cashOverview.collectedKompleti += k; cashOverview.collectedStreet += s;
+    } else {
+      cashOverview.pendingCount++; cashOverview.pendingTotal += amt;
+      cashOverview.pendingDresovi += d; cashOverview.pendingKompleti += k; cashOverview.pendingStreet += s;
+    }
+  }
+
   const DELIVERY_COST = 5;
   const freeShipCost = freeDeliveries * DELIVERY_COST;
   // Vraćene pošiljke od zadnjeg poravnanja: 4 € svaka, skida se sa zajedničke marže (po 2 € svakome).
@@ -317,6 +345,7 @@ export async function getDashboardMetrics() {
     topItems,
     bestCustomers,
     riskyCustomers,
+    cashOverview,
     recentOrders,
     byDay,
     deadProducts

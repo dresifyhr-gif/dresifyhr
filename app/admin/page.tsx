@@ -69,6 +69,32 @@ export default async function AdminOverview() {
         <Stat label="Procjena dana" value={eur(ceo.projection)} sub="predviđeni promet" />
       </div>
 
+      <SectionHeading>💰 Pouzeće — novac i roba</SectionHeading>
+
+      {/* Ukupno (sve poslano, neovisno o poravnanju) — iste brojke kao na Narudžbama */}
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <Stat
+          label="Prikupljeno"
+          value={eur(m.cashOverview.collectedTotal)}
+          sub={`${m.cashOverview.collectedCount} narudžbi · ${komLabel(m.cashOverview.collectedDresovi, m.cashOverview.collectedKompleti)}${m.cashOverview.collectedStreet ? ` + ${m.cashOverview.collectedStreet} street` : ""}`}
+        />
+        <Stat
+          label="Za prikupiti"
+          value={eur(m.cashOverview.pendingTotal)}
+          sub={`${m.cashOverview.pendingCount} narudžbi · ${komLabel(m.cashOverview.pendingDresovi, m.cashOverview.pendingKompleti)}${m.cashOverview.pendingStreet ? ` + ${m.cashOverview.pendingStreet} street` : ""}`}
+        />
+        <Stat
+          label="Poslano komada"
+          value={String(m.cashOverview.sentDresovi + m.cashOverview.sentKompleti + m.cashOverview.sentStreet)}
+          sub={`${komLabel(m.cashOverview.sentDresovi, m.cashOverview.sentKompleti)}${m.cashOverview.sentStreet ? ` + ${m.cashOverview.sentStreet} street` : ""}`}
+        />
+        <Stat
+          label="Čeka preuzimanje"
+          value={String(m.cashOverview.pendingDresovi + m.cashOverview.pendingKompleti + m.cashOverview.pendingStreet)}
+          sub={`${komLabel(m.cashOverview.pendingDresovi, m.cashOverview.pendingKompleti)}${m.cashOverview.pendingStreet ? ` + ${m.cashOverview.pendingStreet} street` : ""}`}
+        />
+      </div>
+
       <SectionHeading>⚡ Za danas</SectionHeading>
 
       {/* To-do + watch */}
