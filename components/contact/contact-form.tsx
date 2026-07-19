@@ -15,7 +15,7 @@ import {
 } from "@/lib/site";
 import { createCartOrderSummary, formatEuroAmount, repairText } from "@/lib/utils";
 import { fbTrack } from "@/lib/fbpixel";
-import { computePromoDiscount, GIFT_STORAGE_KEY, validatePromo, type PromoCode } from "@/lib/promo";
+import { computePromoDiscount, GIFT_STORAGE_KEY, type PromoCode } from "@/lib/promo";
 import type { FulfillmentType } from "@/lib/orders";
 
 type FulfillmentOption = {
@@ -52,6 +52,22 @@ function StepLabel({ number, title }: { number: string; title: string }) {
       <span className="text-xs font-semibold uppercase tracking-[0.28em] text-white/50">{title}</span>
     </div>
   );
+}
+
+
+// Provjera popust-koda ide na server jer kodovi žive u bazi (admin ih uređuje).
+type PromoCheck =
+  | { ok: true; promo: PromoCode; discount: number }
+  | { ok: false; reason: "not_found" | "min_not_met" | "expired" | "used_up"; promo?: PromoCode };
+
+async function checkPromo(code: string, subtotal: number): Promise<PromoCheck> {
+  try {
+    const d = await fetch(`/api/promo/validate/?code=${encodeURIComponent(code)}&subtotal=${subtotal}`).then((r) => r.json());
+    if (d?.ok) return { ok: true, promo: d.promo as PromoCode, discount: Number(d.discount) || 0 };
+    return { ok: false, reason: d?.reason || "not_found", promo: d?.promo || undefined };
+  } catch {
+    return { ok: false, reason: "not_found" };
+  }
 }
 
 export function ContactForm() {
@@ -113,8 +129,9 @@ export function ContactForm() {
   // A reward is "active" if it gives a discount OR free shipping.
   const rewardActive = !!appliedPromo && (discount > 0 || promoFreeShipping);
 
-  function applyPromo() {
-    const result = validatePromo(promoInput, orderSubtotal);
+  // Kodovi žive u bazi (uređuju se u adminu) → provjera ide na server.
+  async function applyPromo() {
+    const result = await checkPromo(promoInput, orderSubtotal);
     if (result.ok) {
       setAppliedPromo(result.promo);
       setPromoMessage(
@@ -125,6 +142,12 @@ export function ContactForm() {
     } else if (result.reason === "min_not_met" && result.promo) {
       setAppliedPromo(null);
       setPromoMessage(`Ovaj kod vrijedi za narudžbe od ${formatEuroAmount(result.promo.minSubtotal)}.`);
+    } else if (result.reason === "expired") {
+      setAppliedPromo(null);
+      setPromoMessage("Ovaj kod je istekao.");
+    } else if (result.reason === "used_up") {
+      setAppliedPromo(null);
+      setPromoMessage("Ovaj kod je iskorišten do kraja.");
     } else {
       setAppliedPromo(null);
       setPromoMessage("Promo kod nije ispravan.");
@@ -149,7 +172,10 @@ export function ContactForm() {
     if (typeof window === "undefined") return;
     const stored = window.localStorage.getItem(PROMO_STORAGE_KEY);
     if (!stored) return;
-    const result = validatePromo(stored, orderSubtotal);
+    let cancelled = false;
+    (async () => {
+    const result = await checkPromo(stored, orderSubtotal);
+    if (cancelled) return;
     if (result.ok) {
       setPromoInput(result.promo.code);
       setAppliedPromo(result.promo);
@@ -163,6 +189,8 @@ export function ContactForm() {
       // Cart loaded but below minimum — pre-fill the field so the customer sees it
       setPromoInput(stored);
     }
+    })();
+    return () => { cancelled = true; };
   }, [autoPromoTried, appliedPromo, orderSubtotal]);
 
   function set(field: keyof FormState, value: string) {

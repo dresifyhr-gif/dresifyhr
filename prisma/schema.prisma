@@ -211,3 +211,21 @@ model Settings {
   contactEmail        String?
   updatedAt           DateTime @updatedAt
 }
+
+// Popust-kodovi — uređuju se u adminu (prije su bili zakucani u lib/promo.ts).
+// Broj iskorištenja se NE sprema ovdje nego se izvodi iz Order.promoCode (uvijek točan).
+model PromoCode {
+  code        String    @id // npr. "DRESIFY10" (uvijek velikim slovima)
+  kind        String    @default("percent") // "percent" | "freeship"
+  value       Float     @default(0) // postotak popusta (0 za besplatnu dostavu)
+  minSubtotal Float     @default(0) // minimalna vrijednost robe (bez dostave)
+  label       String    @default("") // kratki opis koji vidi kupac
+  active      Boolean   @default(true)
+  expiresAt   DateTime? // prazno = bez roka
+  maxUses     Int? // prazno = neograničeno
+  note        String? // interna bilješka (odakle kod, kampanja)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([active])
+}
