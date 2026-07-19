@@ -344,6 +344,9 @@ export async function getDashboardMetrics() {
     bestCustomers,
     riskyCustomers,
     cashOverview,
+    // Pragovi iz Postavki — da naslovi u UI-u ne lažu kad se promijene.
+    winbackDays,
+    riskMinFailed,
     recentOrders,
     byDay,
     deadProducts

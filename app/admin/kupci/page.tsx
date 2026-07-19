@@ -52,7 +52,7 @@ export default async function CustomersPage() {
           )}
         </Panel>
 
-        <Panel title={`Vrati kupce (30+ dana bez kupnje) · ${m.inactive.length}`}>
+        <Panel title={`Vrati kupce (${m.winbackDays}+ dana bez kupnje) · ${m.inactive.length}`}>
           {m.inactive.length === 0 ? (
             <div className="text-sm text-slate-400">Nema neaktivnih kupaca.</div>
           ) : (
@@ -81,7 +81,7 @@ export default async function CustomersPage() {
       </div>
 
       <div className="mt-5">
-        <Panel title={`Rizični kupci (odbili pouzeće) · ${m.riskyCustomers.length}`}>
+        <Panel title={`Rizični kupci (${m.riskMinFailed}+ odbijanja) · ${m.riskyCustomers.length}`}>
           {m.riskyCustomers.length === 0 ? (
             <div className="text-sm text-slate-400">Nema rizičnih kupaca — svi uredno preuzimaju. 👌</div>
           ) : (
