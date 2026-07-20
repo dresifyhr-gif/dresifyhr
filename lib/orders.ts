@@ -142,6 +142,17 @@ export function parseOrderPayload(body: unknown): { payload?: OrderPayload; erro
     errors.push("Ukupan iznos narudžbe nije ispravan.");
   }
 
+  // Sigurnosna mreža: artikl iz kataloga MORA imati veličinu. Jednom je stigla
+  // narudžba bez nje jer gumb "Dodaj u košaricu" nije provjeravao odabir na
+  // proizvodu kojem su sve veličine rasprodane. Svi proizvodi u katalogu imaju
+  // veličine, pa je ovo sigurno; artikli bez sluga su ručne/uvezene narudžbe.
+  const missingSize = (payload.items ?? []).filter((it) => it.slug && !it.size);
+  if (missingSize.length) {
+    errors.push(
+      `Odaberi veličinu za: ${missingSize.map((it) => `${it.klub} ${it.igrac}`.trim()).join(", ")}.`
+    );
+  }
+
   return { payload: errors.length ? undefined : payload, errors };
 }
 

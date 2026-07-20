@@ -42,13 +42,16 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
     defaultSegment === "adult" ? defaultAdultSize : defaultKidSize
   );
 
+  // Kod promjene proizvoda biraj segment u kojem STVARNO ima veličina. Prije je
+  // ovdje bilo `hasAdults ? "adult" : "kid"` bez obzira na zalihu, pa je kod
+  // proizvoda s rasprodanim odraslim veličinama ostajao prazan odabir — a gumb
+  // ga je svejedno puštao u košaricu (33 od 403 artikla je stiglo bez veličine).
   useEffect(() => {
-    const nextSegment = sizeOptions.hasAdults ? "adult" : "kid";
+    const nextSegment: "adult" | "kid" =
+      sizeOptions.hasAdults && defaultAdultSize ? "adult" : defaultKidSize ? "kid" : sizeOptions.hasAdults ? "adult" : "kid";
     const nextSize = nextSegment === "adult" ? defaultAdultSize : defaultKidSize;
     setSegment(nextSegment);
-    if (nextSize) {
-      setSelectedSize(nextSize);
-    }
+    setSelectedSize(nextSize); // i kad je prazno — da se ne vuče veličina prethodnog proizvoda
   }, [product.slug, sizeOptions.hasAdults, defaultAdultSize, defaultKidSize]);
 
   useEffect(() => {
@@ -67,6 +70,12 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   const whatsappMessage = `Pozdrav, želim naručiti: ${repairText(product.klub)} ${repairText(
     product.igrac
   )}${selectedSize ? `, veličina: ${selectedSize}` : ""}. Cijena: ${productPrice}€.`;
+  const whatsappUrl = createWhatsAppUrl(whatsappMessage);
+
+  // "Jedna veličina" (npr. dio streetweara) nema izbornik pa ni ne treba odabir.
+  const hasSizePicker = sizeOptions.adults.length > 0 || sizeOptions.kids.length > 0;
+  const allSoldOut = hasSizePicker && !defaultAdultSize && !defaultKidSize;
+  const needsSize = hasSizePicker && !selectedSize;
 
   const handleSegmentChange = (nextSegment: "adult" | "kid") => {
     setSegment(nextSegment);
@@ -172,7 +181,9 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
       <button
         ref={mainButtonRef}
         type="button"
-        onClick={() =>
+        disabled={needsSize}
+        onClick={() => {
+          if (needsSize) return; // pojas i tregeri — bez veličine ne ide u košaricu
           addItem({
             slug: product.slug,
             klub: repairText(product.klub),
@@ -183,12 +194,30 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
             imageSrc: frontImage,
             price: product.price,
             category: product.category
-          })
-        }
-        className="button-primary mt-8 w-full"
+          });
+        }}
+        className="button-primary mt-8 w-full disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {t.product.addToCart}
+        {allSoldOut ? "Trenutno rasprodano" : t.product.addToCart}
       </button>
+
+      {/* Bez ovoga je kupac klikao rasprodane veličine, ništa se nije događalo i
+          mislio je da stranica ne radi — pa je odustao ili naručio bez veličine. */}
+      {needsSize && (
+        <p className="mt-3 text-sm text-white/60">
+          {allSoldOut ? (
+            <>
+              Sve veličine su trenutno rasprodane.{" "}
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-4">
+                Javi se na WhatsApp
+              </a>{" "}
+              i javimo ti čim stigne.
+            </>
+          ) : (
+            "Odaberi veličinu da nastaviš."
+          )}
+        </p>
+      )}
 
       <p className="mt-3 text-sm text-white/50">
         {t.product.paymentSummary(PAYMENT_METHOD_LABEL.toLowerCase(), SHIPPING_PRICE_LABEL)}
