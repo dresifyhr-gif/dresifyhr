@@ -6,6 +6,7 @@ import { PdfLabelLink } from "@/components/admin/pdf-label-link";
 import { isAdmin } from "@/lib/admin-auth";
 import { codAmount, getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
+import { promoGrantsFreeShipping } from "@/lib/promo-db";
 import { getSettings } from "@/lib/settings";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
 
@@ -27,7 +28,11 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
 
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
   const isCod = order.payment?.toLowerCase().includes("pouze") || !order.payment;
-  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode, hasStreetwear) : 0;
+  // Kod tipa "besplatna dostava" (npr. DOSTAVA) gasi dostavu i na naljepnici;
+  // obični postotni kod NE — njega je blagajna kupcu naplatila.
+  const goods = Math.max(0, (order.total ?? 0) - (order.shipping ?? 0));
+  const freeShip = hasStreetwear || (await promoGrantsFreeShipping(order.promoCode, goods));
+  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode, freeShip) : 0;
 
   return (
     <div className="min-h-screen bg-black/[0.06] px-4 py-8 print:bg-white print:p-0">

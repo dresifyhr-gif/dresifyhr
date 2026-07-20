@@ -90,7 +90,7 @@ export function MemoryGame() {
   };
 
   const claim = () => {
-    try { localStorage.setItem(PROMO_STORAGE_KEY, "DOSTAVA"); } catch {}
+    try { localStorage.setItem(PROMO_STORAGE_KEY, "GOL10"); } catch {}
     setPhase("claimed");
     setTimeout(() => { window.location.href = "/dresovi"; }, 1400);
   };
@@ -105,7 +105,7 @@ export function MemoryGame() {
         <div className="flex flex-col items-center gap-4 py-6 text-center">
           <div className="text-[13px] font-bold tracking-[3px] text-accent">DRESIFY SPOJNICA</div>
           <div className="text-[22px] font-extrabold leading-tight text-white">Spoji svih 6 parova</div>
-          <p className="max-w-[260px] text-[13px] text-white/70">u najviše {ATTEMPT_LIMIT} pokušaja i osvoji <b className="text-accent">besplatnu dostavu</b> (od 40€).</p>
+          <p className="max-w-[260px] text-[13px] text-white/70">u najviše {ATTEMPT_LIMIT} pokušaja i osvoji <b className="text-accent">10% popusta</b> (od 20€).</p>
           <button type="button" onClick={start} className="mt-1 rounded-[12px] bg-accent px-9 py-3.5 text-[15px] font-extrabold text-black shadow-[0_8px_24px_rgba(232,255,60,0.25)] transition active:scale-[0.97]">
             KRENI 🧠
           </button>

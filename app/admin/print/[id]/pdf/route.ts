@@ -5,6 +5,7 @@ import { ShippingLabelDoc } from "@/components/admin/shipping-label-pdf";
 import { isAdmin } from "@/lib/admin-auth";
 import { codAmount, getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
+import { promoGrantsFreeShipping } from "@/lib/promo-db";
 import { getSettings } from "@/lib/settings";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
 
@@ -29,7 +30,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
   const isCod = order.payment?.toLowerCase().includes("pouze") || !order.payment;
-  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode, hasStreetwear) : 0;
+  // Isto pravilo kao na HTML naljepnici i blagajni.
+  const goods = Math.max(0, (order.total ?? 0) - (order.shipping ?? 0));
+  const freeShip = hasStreetwear || (await promoGrantsFreeShipping(order.promoCode, goods));
+  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode, freeShip) : 0;
 
   const recipientName = formatCroatianName(order.customerName);
 

@@ -72,3 +72,13 @@ export async function lookupPromo(input: string, subtotal: number): Promise<Prom
 
   return { ok: false, reason: "not_found" };
 }
+
+// Daje li ovaj kod besplatnu dostavu na ovoj robi? Naljepnica (codAmount) mora
+// suditi po istim pravilima kao blagajna: samo kodovi tipa "freeship" i to tek
+// kad je njihov minimum zadovoljen. lookupPromo već provjerava minimum, rok i
+// iskorištenost, pa ovdje ostaje samo provjera vrste.
+export async function promoGrantsFreeShipping(code: string | null | undefined, goods: number): Promise<boolean> {
+  if (!code?.trim()) return false;
+  const r = await lookupPromo(code, goods);
+  return r.ok && r.promo.kind === "freeship";
+}

@@ -55,13 +55,19 @@ export function getOrderReference(createdAt: string) {
   return `DRS-${year}${month}${day}-${hours}${minutes}`;
 }
 
-// Otkupnina (koliko kupac plaća pouzećem) = roba + dostava, po istoj logici kao blagajna.
-// Robustno i za uvezene narudžbe gdje dostava nije zapisana (shipping=0): preračuna se.
-// Dostava je besplatna kad: roba ≥ 60 € ILI je osvojena na igrici (promoCode) ILI je
-// streetwear (uvijek besplatna dostava) — zato pozivatelj šalje freeShipping.
-export function codAmount(total: number, shipping: number, promoCode?: string | null, freeShipping?: boolean): number {
+// Otkupnina (koliko kupac plaća pouzećem) = roba + dostava, po ISTIM pravilima
+// kao blagajna (contact-form.tsx): besplatna je kad je roba ≥ 60 €, kad je kod
+// tipa "besplatna dostava" i njegov minimum je zadovoljen, ili kad je streetwear.
+// Oboje zadnje pozivatelj računa i šalje kroz freeShipping.
+//
+// Prije je OVDJE stajalo `|| Boolean(promoCode)` — svaki kod, i običan postotni,
+// gasio je dostavu na naljepnici iako ju je blagajna kupcu naplatila. Kurir bi
+// tako pokupio 7 € manje nego što je kupac pristao platiti.
+//
+// Robustno i za uvezene narudžbe gdje dostava nije zapisana (shipping=0).
+export function codAmount(total: number, shipping: number, _promoCode?: string | null, freeShipping?: boolean): number {
   const goods = Math.max(0, (total ?? 0) - (shipping ?? 0));
-  const freeDelivery = Boolean(freeShipping) || goods >= FREE_SHIPPING_THRESHOLD_EUR || Boolean(promoCode && promoCode.trim());
+  const freeDelivery = Boolean(freeShipping) || goods >= FREE_SHIPPING_THRESHOLD_EUR;
   return goods + (freeDelivery ? 0 : SHIPPING_PRICE_EUR);
 }
 

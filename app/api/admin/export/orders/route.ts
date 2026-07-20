@@ -1,6 +1,7 @@
 import { isAdmin } from "@/lib/admin-auth";
 import { codAmount, getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
+import { promoGrantsFreeShipping } from "@/lib/promo-db";
 import { formatCroatianName, repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -71,7 +72,9 @@ export async function GET(request: Request) {
   for (const o of rows) {
     const goods = o.total - (o.shipping ?? 0);
     const isCod = o.payment?.toLowerCase().includes("pouze") || !o.payment;
-    const cod = isCod ? codAmount(o.total, o.shipping, o.promoCode) : 0;
+    // Kao na naljepnici: samo "freeship" kod gasi dostavu, ne bilo koji kod.
+    const freeShip = await promoGrantsFreeShipping(o.promoCode, goods);
+    const cod = isCod ? codAmount(o.total, o.shipping, o.promoCode, freeShip) : 0;
     const artikli = o.items
       .map((it) => `${repairText([it.klub, it.igrac].filter(Boolean).join(" "))}${it.size ? ` (${it.size})` : ""}${it.quantity > 1 ? ` x${it.quantity}` : ""}`)
       .join(" | ");

@@ -32,7 +32,7 @@ const STAGE_HTML = `
       <div id="ct_intro" style="position:absolute;inset:0;background:linear-gradient(rgba(5,7,12,0.5),rgba(5,7,12,0.82));display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:8;padding:20px;">
         <div style="font-size:13px;letter-spacing:3px;color:#e8ff3c;font-weight:700;margin-bottom:6px;">DRESIFY UHVATI DRES</div>
         <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px;">Skupi dresove u kutiju</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Pomiči kutiju i hvataj dresove. Svaka razina = 20 dresova, sve brže! <b style="color:#e8ff3c;">40&rarr;besplatna dostava</b>, 70&rarr;-15%, 100&rarr;-20%. Smiješ promašiti najviše 3!</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:18px;max-width:260px;">Pomiči kutiju i hvataj dresove. Svaka razina = 20 dresova, sve brže! <b style="color:#e8ff3c;">40&rarr;10% popusta</b>, 70&rarr;-15%, 100&rarr;-20%. Smiješ promašiti najviše 3!</div>
         <button id="ct_start" class="ct-btn" style="padding:14px 34px;border:none;border-radius:12px;background:#e8ff3c;color:#0b0b0b;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(232,255,60,0.25);">START &#128230;</button>
       </div>
 
@@ -98,10 +98,10 @@ export function CatchGame() {
     function rewardFor(s: number) {
       return s >= 100 ? { code: "GOL20", label: "-20% + besplatna dostava (od 100€)" }
         : s >= 70 ? { code: "GOL15", label: "-15% + besplatna dostava (od 80€)" }
-        : s >= 40 ? { code: "DOSTAVA", label: "besplatnu dostavu (od 40€)" } : null;
+        : s >= 40 ? { code: "GOL10", label: "10% popusta (od 20€)" } : null;
     }
     const nextAt = (s: number) => s < 40 ? 40 : s < 70 ? 70 : s < 100 ? 100 : null;
-    const nextLabel = (s: number) => s < 40 ? "besplatnu dostavu (od 40€)" : s < 70 ? "-15% + dostava (od 80€)" : "-20% + dostava (od 100€)";
+    const nextLabel = (s: number) => s < 40 ? "10% popusta (od 20€)" : s < 70 ? "-15% + dostava (od 80€)" : "-20% + dostava (od 100€)";
     const level = (s: number) => Math.floor(s / 20) + 1;
     function fallSpeed() { const l = level(score); const within = score - (l - 1) * 20; const base = 1.8 + (l - 1) * 1.0; return Math.min(9, base + within * 0.03); }
     function spawnEvery() { const l = level(score); return Math.max(28, 98 - (l - 1) * 22); }
