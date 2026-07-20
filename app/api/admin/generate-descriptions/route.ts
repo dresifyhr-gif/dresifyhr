@@ -42,8 +42,10 @@ STROGO ZABRANJENO (krivi podaci su gori od šablone):
 - NE piši "vjeran originalnom izgledu" ni druge šablonske fraze.
 - Bez markdowna, naslova i emojija.
 
-JEZIK: besprijekoran hrvatski. Svaka rečenica mora biti gramatički ispravna i
-prirodna. Bolje kraće i točno nego dulje i nespretno.`;
+JEZIK: besprijekoran hrvatski, NE srpski/bosanski. Piši "aktualan" (ne
+"aktuelan"), "uvjet" (ne "uslov"), "natjecanje" (ne "takmičenje"), "tjedan" (ne
+"nedjelja" za sedmicu). Svaka rečenica mora biti gramatički ispravna i prirodna.
+Bolje kraće i točno nego dulje i nespretno. Zadnja rečenica MORA biti dovršena.`;
 
 // Streetwear nema klub, igrača ni sezonu — s prompta za dresove model nema o čemu
 // pisati. Zato zaseban prompt: dizajn, boja, kroj, prilike za nošenje.
@@ -117,11 +119,18 @@ Igrač i varijanta: ${igrac}
 Liga: ${repairText(p.liga)}
 Retro: ${p.retro ? "da" : "ne"}
 Veličine: ${p.vel}`,
-        maxOutputTokens: 500
+        // 500 je bilo premalo: hrvatski troši puno tokena po riječi, pa je 44%
+        // opisa ostalo odrezano nasred rečenice. Plaćamo stvarni izlaz, ne strop.
+        maxOutputTokens: 1200
       });
       const desc = text.trim();
       if (!desc) {
         errors.push({ slug: p.slug, error: "model je vratio prazan tekst" });
+        continue;
+      }
+      // Sigurnosna mreža: odrezan tekst ne smije završiti na stranici.
+      if (!/[.!?]\s*$/.test(desc)) {
+        errors.push({ slug: p.slug, error: "opis je odrezan — preskočeno" });
         continue;
       }
 
