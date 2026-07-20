@@ -11,7 +11,9 @@ import { repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+// Sonnet piše ~14 s po opisu (izmjereno). Serija mora stati u vrijeme izvođenja,
+// inače funkcija istekne (504) i cijela runda propadne.
+export const maxDuration = 300;
 
 // Automatski opis je bio ~80% identičan na svim proizvodima (dva od četiri
 // odlomka doslovno ista), pa je Google 71 stranicu označio "Discovered –
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
-  const batch = Math.min(8, Math.max(1, Number(body?.batch) || 5));
+  const batch = Math.min(3, Math.max(1, Number(body?.batch) || 3)); // 3 × ~14 s = ~42 s, sigurno i uz 60 s limit
   const force = body?.force === true; // prepiši i one koji već imaju opis
 
   const all = await getCatalogProducts(jerseys);

@@ -33,10 +33,26 @@ export function DescriptionGenerator() {
       const d = await fetch("/api/admin/generate-descriptions/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ batch: 5, force })
+        body: JSON.stringify({ batch: 3, force })
       }).then((r) => r.json()).catch(() => null);
 
-      if (!d?.ok) { setMsg("Greška — pokušaj ponovno."); break; }
+      if (!d?.ok) {
+        // Jedna spora serija ne smije srušiti cijelu rundu — probaj s jednim.
+        const solo = await fetch("/api/admin/generate-descriptions/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ batch: 1, force })
+        }).then((r) => r.json()).catch(() => null);
+        if (!solo?.ok || solo.done === 0) {
+          setMsg(total > 0 ? `Stalo nakon ${total} opisa — klikni ponovno da nastavi.` : "Greška — pokušaj ponovno.");
+          break;
+        }
+        total += solo.done;
+        setDone(total);
+        setRemaining(solo.remaining);
+        if (solo.remaining === 0) { setMsg(`Gotovo — napisano ${total} opisa.`); break; }
+        continue;
+      }
 
       total += d.done;
       setDone(total);
