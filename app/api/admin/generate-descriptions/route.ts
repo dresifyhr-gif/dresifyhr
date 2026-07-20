@@ -6,7 +6,7 @@ import { revalidateTag } from "next/cache";
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { jerseys } from "@/lib/data/jerseys";
-import { getCatalogProducts } from "@/lib/data/product-overrides";
+import { getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
 import { repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -45,6 +45,27 @@ STROGO ZABRANJENO (krivi podaci su gori od šablone):
 JEZIK: besprijekoran hrvatski. Svaka rečenica mora biti gramatički ispravna i
 prirodna. Bolje kraće i točno nego dulje i nespretno.`;
 
+// Streetwear nema klub, igrača ni sezonu — s prompta za dresove model nema o čemu
+// pisati. Zato zaseban prompt: dizajn, boja, kroj, prilike za nošenje.
+const SYSTEM_STREETWEAR = `Ti si copywriter za Dresify, hrvatski webshop.
+Napiši JEDINSTVEN opis streetwear kompleta na besprijekornom hrvatskom.
+
+OBAVEZNO:
+- 3 odlomka, odvojena s \\n. Ukupno 90–140 riječi.
+- Prvi odlomak: dizajn i boja iz naziva (npr. grafiti print, cvjetni vijenac,
+  oblaci), kakav dojam ostavlja, uz kakav stil ide.
+- Drugi odlomak: kome odgovara i kada se nosi (ljeto, izlazak, trening, poklon) —
+  vezano uz OVAJ konkretan model, ne općenito.
+- Treći odlomak: veličine i dostava, napisano drukčije nego kod drugih proizvoda.
+
+STROGO ZABRANJENO:
+- NE izmišljaj marku, dizajnera, kolekciju, materijal ni gramaturu.
+- NE izmišljaj cijenu ni popuste.
+- NE spominji nogomet, klubove ni igrače — ovo NIJE dres.
+- Bez markdowna, naslova i emojija.
+
+JEZIK: besprijekoran hrvatski. Bolje kraće i točno nego dulje i nespretno.`;
+
 export async function POST(request: Request) {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
@@ -52,7 +73,14 @@ export async function POST(request: Request) {
   const batch = Math.min(3, Math.max(1, Number(body?.batch) || 3)); // 3 × ~14 s = ~42 s, sigurno i uz 60 s limit
   const force = body?.force === true; // prepiši i one koji već imaju opis
 
-  const all = await getCatalogProducts(jerseys);
+  // Streetwear ima svoju stranicu i getCatalogProducts ga izbacuje, ali su to
+  // isto tako proizvodne stranice koje Google mora indeksirati — pa idu i oni.
+  const [catalog, streetwear] = await Promise.all([
+    getCatalogProducts(jerseys),
+    getStreetwearProducts()
+  ]);
+  const streetwearSlugs = new Set(streetwear.map((p) => p.slug));
+  const all = [...catalog, ...streetwear];
 
   // Koji već imaju vlastiti opis (da ne trošimo AI i ne gazimo ručni tekst).
   const [overrides, customs] = await Promise.all([
@@ -69,15 +97,22 @@ export async function POST(request: Request) {
 
   let done = 0;
   const written: string[] = [];
+  // Prije se greška samo progutala, pa je "0 napisano" izgledalo kao "gotovo".
+  // Sad se vraća klijentu da se vidi ŠTO je puklo.
+  const errors: { slug: string; error: string }[] = [];
 
   for (const p of slice) {
     const klub = repairText(p.klub);
     const igrac = repairText(p.igrac);
+    const isStreetwear = streetwearSlugs.has(p.slug);
     try {
       const { text } = await generateText({
         model: anthropic("claude-sonnet-5"),
-        system: SYSTEM,
-        prompt: `Klub/reprezentacija: ${klub}
+        system: isStreetwear ? SYSTEM_STREETWEAR : SYSTEM,
+        prompt: isStreetwear
+          ? `Proizvod: ${klub} — ${igrac}
+Veličine: ${p.vel}`
+          : `Klub/reprezentacija: ${klub}
 Igrač i varijanta: ${igrac}
 Liga: ${repairText(p.liga)}
 Retro: ${p.retro ? "da" : "ne"}
@@ -85,7 +120,10 @@ Veličine: ${p.vel}`,
         maxOutputTokens: 500
       });
       const desc = text.trim();
-      if (!desc) continue;
+      if (!desc) {
+        errors.push({ slug: p.slug, error: "model je vratio prazan tekst" });
+        continue;
+      }
 
       if (customSlugs.has(p.slug)) {
         await prisma.customProduct.update({ where: { slug: p.slug }, data: { description: desc } });
@@ -98,8 +136,9 @@ Veličine: ${p.vel}`,
       }
       done++;
       written.push(p.slug);
-    } catch {
-      // preskoči pojedini proizvod, nastavi dalje
+    } catch (e) {
+      // preskoči pojedini proizvod, nastavi dalje — ali zapamti razlog
+      errors.push({ slug: p.slug, error: e instanceof Error ? e.message : String(e) });
     }
   }
 
@@ -110,6 +149,7 @@ Veličine: ${p.vel}`,
     done,
     written,
     remaining: Math.max(0, todo.length - done),
-    total: all.length
+    total: all.length,
+    errors
   });
 }

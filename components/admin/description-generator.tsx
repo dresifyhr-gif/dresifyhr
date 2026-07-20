@@ -58,7 +58,14 @@ export function DescriptionGenerator() {
       setDone(total);
       setRemaining(d.remaining);
 
-      if (d.done === 0 || d.remaining === 0) { setMsg(`Gotovo — napisano ${total} opisa.`); break; }
+      if (d.remaining === 0) { setMsg(`Gotovo — napisano ${total} opisa.`); break; }
+      // done 0 uz remaining > 0 NIJE gotovo — nešto puca. Prije je i ovo pisalo
+      // "Gotovo", pa je izgledalo kao da su svi opisi napisani.
+      if (d.done === 0) {
+        const why = d.errors?.[0]?.error ? ` (${d.errors[0].slug}: ${d.errors[0].error})` : "";
+        setMsg(`Zapelo na ${d.remaining} proizvoda${why}`);
+        break;
+      }
       if (stopRef.current) { setMsg(`Zaustavljeno — napisano ${total} opisa.`); break; }
     }
     setRunning(false);
