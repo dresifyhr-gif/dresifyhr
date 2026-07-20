@@ -30,6 +30,7 @@ type Settings = {
   heroSubtitle: string;
   hiddenSections: string[];
   accentColor: string;
+  koloActive: boolean;
   klubActive: boolean;
   klubTarget: number;
   klubRewardKind: string;
@@ -112,6 +113,7 @@ export function SettingsForm() {
         announcementActive: s.announcementActive, announcementText: s.announcementText,
         heroTitle: s.heroTitle, heroSubtitle: s.heroSubtitle,
         hiddenSections: s.hiddenSections, accentColor: s.accentColor,
+        koloActive: s.koloActive,
         klubActive: s.klubActive, klubTarget: s.klubTarget, klubRewardKind: s.klubRewardKind,
         klubRewardValue: s.klubRewardValue, klubRewardLabel: s.klubRewardLabel
       })
@@ -236,6 +238,17 @@ export function SettingsForm() {
             );
           })}
         </div>
+      </Card>
+
+      <Card title="🎡 Kolo sreće" hint="Stranica /kolo. Jedna vrtnja po broju mobitela, plus nova za svaku narudžbu od 60 €. Dok je isključeno, stranica ne postoji.">
+        <label className="flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
+          <input type="checkbox" checked={s.koloActive} onChange={(e) => setS((cur) => (cur ? { ...cur, koloActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />
+          Kolo je uključeno
+        </label>
+        <p className="mt-2 text-[11px] text-[#8e8e93]">
+          Dobitna šansa ~27 %: 5 % / 10 % / 20 % popusta, besplatna dostava i gratis dres (1 %).
+          Šifre vrijede 48 h i vezane su uz broj mobitela.
+        </p>
       </Card>
 
       <Card title="🎁 Dresify Klub" hint="Vjernost po broju mobitela — bez računa i lozinki. Broje se samo PREUZETE narudžbe.">

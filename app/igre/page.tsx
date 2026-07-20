@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Crosshair, Footprints, Goal, HelpCircle, Layers, PackageOpen, Volleyball, Worm } from "lucide-react";
+import { ArrowRight, Crosshair, Disc3, Footprints, Goal, HelpCircle, Layers, PackageOpen, Volleyball, Worm } from "lucide-react";
 
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
   title: "DRESIFY mini igre — igraj i osvoji nagradu",
   description:
-    "Igraj DRESIFY mini igre: Penalty Cup, Flappy Ball i Football Kviz. Pobijedi i osvoji besplatnu dostavu, popust ili poklon uz narudžbu.",
+    "Igraj DRESIFY mini igre: Penalty Cup, Flappy Ball i Football Kviz. Pobijedi i osvoji popust ili poklon iznenađenja uz narudžbu.",
   path: "/igre"
 });
 
@@ -15,13 +15,13 @@ const games = [
   {
     href: "/igra",
     title: "Penalty Cup",
-    desc: "Zabij 4 od 5 penala protiv DRESIFY golmana. Osvoji besplatnu dostavu.",
+    desc: "Zabij 4 od 5 penala protiv DRESIFY golmana. Osvoji 10% popusta.",
     Icon: Goal
   },
   {
     href: "/flappy",
     title: "Flappy Ball",
-    desc: "Provedi loptu kroz golove — 20 = besplatna dostava, 35 = −15%, 50 = −20% (uz dostavu).",
+    desc: "Provedi loptu kroz golove — 20 = 10% popusta, 35 = −15%, 50 = −20% (uz dostavu).",
     Icon: Volleyball
   },
   {
@@ -33,31 +33,37 @@ const games = [
   {
     href: "/spojnica",
     title: "Spojnica",
-    desc: "Spoji svih 6 parova u ograničenom broju pokušaja. Osvoji besplatnu dostavu.",
+    desc: "Spoji svih 6 parova u ograničenom broju pokušaja. Osvoji 10% popusta.",
     Icon: Layers
   },
   {
     href: "/zmija",
     title: "Zmija",
-    desc: "Jedi lopte i rasti. 12 = besplatna dostava, 25 = −15%, 40 = −20%.",
+    desc: "Jedi lopte i rasti. 12 = 10% popusta, 25 = −15%, 40 = −20%.",
     Icon: Worm
   },
   {
     href: "/uhvati",
     title: "Uhvati dres",
-    desc: "Hvataj dresove u kutiju. 40 = besplatna dostava, 70 = −15%, 100 = −20%.",
+    desc: "Hvataj dresove u kutiju. 40 = 10% popusta, 70 = −15%, 100 = −20%.",
     Icon: PackageOpen
   },
   {
     href: "/trkac",
     title: "Super Dresify",
-    desc: "Trči i skači, skupljaj dresove i preskači čunjeve. 15 = besplatna dostava, 30 = −15%, 50 = −20%.",
+    desc: "Trči i skači, skupljaj dresove i preskači čunjeve. 15 = 10% popusta, 30 = −15%, 50 = −20%.",
     Icon: Footprints
+  },
+  {
+    href: "/kolo",
+    title: "Kolo sreće",
+    desc: "Jedna vrtnja po broju mobitela — a svaka narudžba od 60 € donosi novu. Glavna nagrada: gratis dres.",
+    Icon: Disc3
   },
   {
     href: "/gadaj",
     title: "Snajper",
-    desc: "Gađaj dresove na trakama u 40 sekundi. 25 = besplatna dostava, 40 = −15%, 60 = −20%.",
+    desc: "Gađaj dresove na trakama u 40 sekundi. 25 = 10% popusta, 40 = −15%, 60 = −20%.",
     Icon: Crosshair
   }
 ];
@@ -72,7 +78,7 @@ export default function IgrePage() {
             Igraj i osvoji nagradu
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">
-            Pobijedi i osvoji besplatnu dostavu, popust ili poklon iznenađenja uz narudžbu. Tri igre — odaberi svoju.
+            Pobijedi i osvoji popust ili poklon iznenađenja uz narudžbu. Odaberi svoju igru — ili zavrti kolo sreće.
           </p>
         </div>
 

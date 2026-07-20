@@ -49,6 +49,8 @@ export type ShopSettings = {
   heroSubtitle: string;
   hiddenSections: string[];
   accentColor: string;
+  // Kolo sreće
+  koloActive: boolean;
   // Dresify Klub
   klubActive: boolean;
   klubTarget: number;
@@ -92,6 +94,7 @@ const DEFAULTS: ShopSettings = {
   heroSubtitle: "",
   hiddenSections: [],
   accentColor: "#e8ff3c",
+  koloActive: false,          // kolo sreće — pali se u Postavkama
   klubActive: false,          // pali se u Postavkama kad Gazda želi
   klubTarget: 3,              // 3 preuzete narudžbe
   klubRewardKind: "amount",   // fiksni popust = gratis dres
@@ -168,6 +171,7 @@ export async function getSettings(): Promise<ShopSettings> {
     heroSubtitle: r.heroSubtitle?.trim() || "",
     hiddenSections: parseLeagues(r.hiddenSections) ?? [],
     accentColor: /^#[0-9a-fA-F]{6}$/.test(r.accentColor || "") ? r.accentColor! : DEFAULTS.accentColor,
+    koloActive: bool(r.koloActive, DEFAULTS.koloActive),
     klubActive: bool(r.klubActive, DEFAULTS.klubActive),
     klubTarget: Math.max(1, Math.round(num(r.klubTarget, DEFAULTS.klubTarget))),
     klubRewardKind: str(r.klubRewardKind, DEFAULTS.klubRewardKind),

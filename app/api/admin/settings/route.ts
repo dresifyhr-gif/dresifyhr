@@ -64,6 +64,7 @@ export async function POST(request: Request) {
     heroSubtitle: strOrNull(b?.heroSubtitle),
     hiddenSections: Array.isArray(b?.hiddenSections) && b.hiddenSections.length ? JSON.stringify(b.hiddenSections.filter((x: unknown) => typeof x === "string")) : null,
     accentColor: /^#[0-9a-fA-F]{6}$/.test(String(b?.accentColor ?? "")) ? String(b.accentColor) : null,
+    koloActive: b?.koloActive === true,
     klubActive: b?.klubActive === true,
     klubTarget: intOrNull(b?.klubTarget),
     klubRewardKind: strOrNull(b?.klubRewardKind),
