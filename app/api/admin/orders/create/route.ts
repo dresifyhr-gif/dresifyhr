@@ -70,6 +70,7 @@ export async function POST(request: Request) {
         status,
         shippedBy: status === "shipped" ? shippedBy : null,
         shippedAt: status === "shipped" ? createdAt : null,
+        courier: status === "shipped" ? "gls" : null, // ručne narudžbe idu GLS-om kao i ostale
         customerId,
         items: { create: items.map((it) => ({ klub: it.klub || null, igrac: it.igrac || null, size: it.size || null, quantity: 1, unitPrice: it.unitPrice })) }
       }

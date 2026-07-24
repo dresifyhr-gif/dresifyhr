@@ -65,7 +65,7 @@ export async function GET(request: Request) {
   const header = [
     "Datum", "Broj narudžbe", "Kupac", "Telefon", "Email", "Adresa",
     "Artikli", "Kom", "Roba (€)", "Dostava (€)", "Ukupno (€)", "Pouzeće (€)",
-    "Status", "Poslao", "Pouzeće naplaćeno", "Tracking", "Promo"
+    "Status", "Poslao", "Kurir", "Pouzeće naplaćeno", "Tracking", "Promo"
   ];
 
   const lines = [header.map(cell).join(SEP)];
@@ -94,6 +94,7 @@ export async function GET(request: Request) {
       money(cod),
       STATUS_HR[o.status] || o.status,
       o.shippedBy || "",
+      isSent(o.status) ? (o.courier === "hp" ? "HP" : "GLS") : "",
       isSent(o.status) ? (o.cashCollected ? "DA" : "NE") : "",
       o.tracking || "",
       o.promoCode || ""

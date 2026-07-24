@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     if (action === "ship") {
       await prisma.order.update({
         where: { id: o.id },
-        data: { status: "shipped", shippedBy: by, shippedAt: new Date() }
+        data: { status: "shipped", shippedBy: by, shippedAt: new Date(), courier: "gls" }
       });
       await markOrderShippedInSheet({ phone: o.phone, name: o.customerName, createdAt: o.createdAt, shipped: true, by }).catch(() => {});
       done++;

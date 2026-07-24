@@ -27,6 +27,7 @@ type Order = {
   total: number;
   status: string;
   shippedBy: string | null;
+  courier: string | null; // "gls" | "hp" — preko kojeg kurira je poslano
   tracking: string;
   promoCode: string | null;
   cashCollected: boolean;
@@ -215,7 +216,13 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
   );
 }
 
-function TrackingRow({ id, initial }: { id: string; initial: string }) {
+// GLS pošiljke pratimo na GLS-u, HP na Hrvatskoj pošti — link ide na pravog kurira.
+const TRACK_URL = { gls: "https://online.gls-croatia.com/index.php", hp: "https://posiljka.posta.hr/en" };
+
+function TrackingRow({ id, initial, courier }: { id: string; initial: string; courier: string | null }) {
+  const isHp = courier === "hp";
+  const trackUrl = isHp ? TRACK_URL.hp : TRACK_URL.gls;
+  const trackLabel = isHp ? "Prati na Pošti" : "Prati na GLS-u";
   const [val, setVal] = useState(initial);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -252,13 +259,13 @@ function TrackingRow({ id, initial }: { id: string; initial: string }) {
       </button>
       {val.trim() && (
         <a
-          href="https://posiljka.posta.hr/en"
+          href={trackUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0 rounded-[10px] bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-slate-800"
-          title="Otvori praćenje na Hrvatskoj pošti (za HP pošiljke; GLS tracking dolazi na email)"
+          title={isHp ? "Otvori praćenje na Hrvatskoj pošti" : "Otvori praćenje na GLS-u"}
         >
-          🔗 Prati na Pošti
+          🔗 {trackLabel}
         </a>
       )}
     </div>
@@ -548,6 +555,19 @@ export function OrdersManager() {
                         </span>
                       )}
                       {o.shippedBy && <span className="text-[10px] text-[#8e8e93]">({o.shippedBy})</span>}
+                      {(o.status === "shipped" || o.status === "done") && (
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => act(o.id, "courier", { courier: o.courier === "hp" ? "gls" : "hp" })}
+                          title="Klikni za prebacivanje kurira (GLS ↔ HP)"
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide transition disabled:opacity-40 ${
+                            o.courier === "hp" ? "bg-blue-100 text-blue-700 hover:bg-blue-200" : "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                          }`}
+                        >
+                          🚚 {o.courier === "hp" ? "HP" : "GLS"}
+                        </button>
+                      )}
                       {o.risk && o.risk.failed >= (o.risk.min ?? 1) && o.risk.failed > 0 && (
                         <span
                           title={`Ovaj broj je ranije ${o.risk.failed}× odbio pouzeće (otkazano/vraćeno)${o.risk.collected > 0 ? `, a ${o.risk.collected}× uredno preuzeo` : ""}. Provjeri prije slanja.`}
@@ -662,7 +682,7 @@ export function OrdersManager() {
                   <ContactEditor orderId={o.id} initial={{ customerName: o.customerName, phone: o.phone, address: o.address }} onSaved={() => { setEditingContact(null); fetchPage(q, 1, false); }} />
                 )}
 
-                <TrackingRow id={o.id} initial={o.tracking} />
+                <TrackingRow id={o.id} initial={o.tracking} courier={o.courier} />
               </div>
             );
           })}
