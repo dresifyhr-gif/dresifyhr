@@ -219,6 +219,100 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
 // GLS pošiljke pratimo na GLS-u, HP na Hrvatskoj pošti — link ide na pravog kurira.
 const TRACK_URL = { gls: "https://online.gls-croatia.com/index.php", hp: "https://posiljka.posta.hr/en" };
 
+// Ime/prezime za GLS formu: zadnja riječ = prezime, ostalo = ime.
+function splitName(full: string): { ime: string; prezime: string } {
+  const parts = (full || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return { ime: full.trim(), prezime: "" };
+  return { ime: parts.slice(0, -1).join(" "), prezime: parts[parts.length - 1] };
+}
+
+// Adresa je jedno polje ("Ulica 12, 21000, Split"), a GLS forma traži ulicu,
+// kućni broj, poštanski i grad odvojeno. Raščlanjujemo po zarezu: 5-znamenkasti
+// broj (uz moguću točku) je poštanski, iza njega je grad, prije njega ulica —
+// iz koje pokušamo izdvojiti kućni broj na kraju. Kad ne prepozna, sve ide u ulicu.
+function parseAddressForGls(address: string): { ulica: string; broj: string; grad: string; postanski: string } {
+  const empty = { ulica: (address || "").trim(), broj: "", grad: "", postanski: "" };
+  const raw = (address || "").trim();
+  if (!raw) return empty;
+
+  const parts = raw.split(",").map((p) => p.trim()).filter(Boolean);
+  const postIdx = parts.findIndex((p) => /^\d{4,5}\.?$/.test(p));
+  if (postIdx === -1) return empty;
+
+  const postanski = parts[postIdx].replace(/\D/g, "");
+  const grad = parts[postIdx + 1] ? parts.slice(postIdx + 1).join(", ") : "";
+  const street = parts.slice(0, postIdx).join(", ").trim();
+
+  // Kućni broj = broj (uz moguće slovo) na kraju ulice: "Ilica 9a" → "Ilica" + "9a".
+  const m = street.match(/^(.*?)[\s]+(\d+[a-zA-Z]?)$/);
+  if (m) return { ulica: m[1].trim(), broj: m[2], grad, postanski };
+  return { ulica: street, broj: "", grad, postanski };
+}
+
+// Panel s podacima primatelja složenim točno po GLS (paket.hr) formi. Svako
+// polje ima gumb za kopiranje da se ne prepisuje ručno svaki put.
+function GlsCopyPanel({ order }: { order: Order }) {
+  const { ime, prezime } = splitName(order.customerName);
+  const { ulica, broj, grad, postanski } = parseAddressForGls(order.address);
+  const fields: { label: string; value: string }[] = [
+    { label: "Ime", value: ime },
+    { label: "Prezime", value: prezime },
+    { label: "Email", value: order.email },
+    { label: "Broj telefona", value: order.phone },
+    { label: "Ulica", value: ulica },
+    { label: "Kućni broj", value: broj },
+    { label: "Grad", value: grad },
+    { label: "Poštanski broj", value: postanski }
+  ];
+  const [copied, setCopied] = useState<string | null>(null);
+
+  async function copy(key: string, val: string) {
+    try {
+      await navigator.clipboard.writeText(val);
+      setCopied(key);
+      setTimeout(() => setCopied((c) => (c === key ? null : c)), 1200);
+    } catch { /* bez međuspremnika — vidljivo je za ručno prepisivanje */ }
+  }
+
+  return (
+    <div className="mt-2 rounded-[12px] border border-black/[0.08] bg-black/[0.02] p-3">
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Za GLS formu (klikni za kopiranje)</span>
+        <button
+          type="button"
+          onClick={() => copy("all", fields.filter((f) => f.value).map((f) => `${f.label}: ${f.value}`).join("\n"))}
+          className="rounded-[8px] bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-slate-800"
+        >
+          {copied === "all" ? "✓ kopirano" : "Kopiraj sve"}
+        </button>
+      </div>
+      <div className="grid grid-cols-2 gap-1.5">
+        {fields.map((f) => (
+          <button
+            key={f.label}
+            type="button"
+            onClick={() => copy(f.label, f.value)}
+            disabled={!f.value}
+            title={f.value ? "Klikni za kopiranje" : "Nema podatka — raščlani ručno"}
+            className="flex items-center justify-between gap-2 rounded-[8px] border border-black/[0.06] bg-white px-2 py-1 text-left text-[12px] transition hover:border-slate-400 disabled:cursor-default disabled:opacity-50"
+          >
+            <span className="min-w-0">
+              <span className="block text-[9px] uppercase tracking-wide text-[#a0a0a5]">{f.label}</span>
+              <span className="block truncate text-[#1d1d1f]">{f.value || "—"}</span>
+            </span>
+            {f.value && (
+              <span className={`shrink-0 rounded-[6px] px-1.5 py-0.5 text-[10px] font-semibold ${copied === f.label ? "bg-emerald-100 text-emerald-700" : "bg-slate-900 text-white"}`}>
+                {copied === f.label ? "✓ ok" : "Kopiraj"}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+      <p className="mt-1.5 text-[10px] text-[#a0a0a5]">Država je uvijek Hrvatska. Provjeri ulicu/broj ako adresa nije standardna.</p>
+    </div>
+  );
+}
+
 function TrackingRow({ id, initial, courier }: { id: string; initial: string; courier: string | null }) {
   const isHp = courier === "hp";
   const trackUrl = isHp ? TRACK_URL.hp : TRACK_URL.gls;
@@ -296,6 +390,7 @@ export function OrdersManager() {
   const [sort, setSort] = useState(""); // "" new-first | new | old
   const [editing, setEditing] = useState<string | null>(null);
   const [editingContact, setEditingContact] = useState<string | null>(null);
+  const [glsOpen, setGlsOpen] = useState<string | null>(null);
   const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingDresovi: number; pendingKompleti: number; collectedTotal: number; collectedDresovi: number; collectedKompleti: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorDresovi: number; igorKompleti: number; ivicaDresovi: number; ivicaKompleti: number } | null>(null);
@@ -672,7 +767,14 @@ export function OrdersManager() {
                     className="a-btn-sm px-2 py-1 text-[11px]">✏️ Uredi artikle</button>
                   <button type="button" onClick={() => setEditingContact((e) => (e === o.id ? null : o.id))}
                     className="a-btn-sm px-2 py-1 text-[11px]">✏️ Uredi adresu</button>
+                  {o.address && (
+                    <button type="button" onClick={() => setGlsOpen((e) => (e === o.id ? null : o.id))}
+                      title="Podaci primatelja složeni za GLS formu — kopiraj bez prepisivanja"
+                      className="a-btn-sm px-2 py-1 text-[11px]">📋 {glsOpen === o.id ? "Sakrij formu" : "Forma"}</button>
+                  )}
                 </div>
+
+                {glsOpen === o.id && <GlsCopyPanel order={o} />}
 
                 {editing === o.id && (
                   <ItemsEditor orderId={o.id} items={o.items} onSaved={() => { setEditing(null); fetchPage(q, 1, false); }} />
