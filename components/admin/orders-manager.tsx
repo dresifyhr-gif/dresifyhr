@@ -219,6 +219,21 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
 // GLS pošiljke pratimo na GLS-u, HP na Hrvatskoj pošti — link ide na pravog kurira.
 const TRACK_URL = { gls: "https://online.gls-croatia.com/index.php", hp: "https://posiljka.posta.hr/en" };
 
+// Telefon za GLS formu: domaći spojeni oblik (0918765432), bez +385/385 i bez
+// razmaka. Puno brojeva je spremljeno bez vodeće nule ("918765432") ili s
+// pozivnim brojem — sve svodimo na 09x…. Strani broj (npr. +380) ostaje kakav je.
+function localPhone(phone: string | null | undefined): string {
+  const raw = (phone || "").trim();
+  const d = raw.replace(/\D/g, "");
+  if (!d) return raw;
+  // Strani broj koji NIJE hrvatski (+385) — ne diramo, samo maknemo razmake.
+  if (raw.startsWith("+") && !d.startsWith("385")) return raw.replace(/\s+/g, "");
+  if (d.startsWith("00385")) return "0" + d.slice(5);
+  if (d.startsWith("385")) return "0" + d.slice(3);
+  if (!d.startsWith("0")) return "0" + d; // fali vodeća nula (918765432 → 0918765432)
+  return d;
+}
+
 // Ime/prezime za GLS formu: zadnja riječ = prezime, ostalo = ime.
 function splitName(full: string): { ime: string; prezime: string } {
   const parts = (full || "").trim().split(/\s+/).filter(Boolean);
@@ -258,7 +273,7 @@ function GlsCopyPanel({ order }: { order: Order }) {
     { label: "Ime", value: ime },
     { label: "Prezime", value: prezime },
     { label: "Email", value: order.email },
-    { label: "Broj telefona", value: order.phone },
+    { label: "Broj telefona", value: localPhone(order.phone) },
     { label: "Ulica", value: ulica },
     { label: "Kućni broj", value: broj },
     { label: "Grad", value: grad },
