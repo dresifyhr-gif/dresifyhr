@@ -128,6 +128,14 @@ export async function GET(request: Request) {
   const isKomplet = (it: { slug?: string | null; klub?: string | null; igrac?: string | null }) =>
     /komplet/i.test(it.slug || "") || /komplet/i.test(it.klub || "") || /komplet/i.test(it.igrac || "");
 
+  // Koliko je dresova/kompleta u SVIM filtriranim narudžbama (ne samo na ovoj
+  // stranici) — popis se učitava stranicu po stranicu, pa se ne može zbrojiti
+  // na klijentu. Komplet se broji odvojeno (drukčija marža), isto kao u sažetku.
+  let filteredDresovi = 0, filteredKompleti = 0;
+  for (const o of filtered) {
+    for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) filteredKompleti += q; else filteredDresovi += q; }
+  }
+
   const sent = all.filter((o) => o.status === "shipped" || o.status === "done");
   const cash = {
     pendingCount: 0, pendingTotal: 0, pendingDresovi: 0, pendingKompleti: 0,
@@ -155,6 +163,8 @@ export async function GET(request: Request) {
     page,
     pages,
     total,
+    filteredDresovi,
+    filteredKompleti,
     cash,
     orders: slice.map((o) => ({
       id: o.id,

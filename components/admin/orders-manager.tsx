@@ -293,6 +293,7 @@ export function OrdersManager() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingDresovi: number; pendingKompleti: number; collectedTotal: number; collectedDresovi: number; collectedKompleti: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorDresovi: number; igorKompleti: number; ivicaDresovi: number; ivicaKompleti: number } | null>(null);
   const [total, setTotal] = useState(0);
+  const [filteredItems, setFilteredItems] = useState({ dresovi: 0, kompleti: 0 });
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -323,6 +324,7 @@ export function OrdersManager() {
       if (d?.ok) {
         setOrders((prev) => (append ? [...prev, ...d.orders] : d.orders));
         setTotal(d.total);
+        setFilteredItems({ dresovi: d.filteredDresovi ?? 0, kompleti: d.filteredKompleti ?? 0 });
         setPages(d.pages);
         setPage(p);
         if (d.cash) setCash(d.cash);
@@ -494,7 +496,7 @@ export function OrdersManager() {
           <option value="new">Najnovije prvo</option>
           <option value="old">Najstarije prvo</option>
         </select>
-        <span className="shrink-0 text-xs text-[#8e8e93]">{total} narudžbi</span>
+        <span className="shrink-0 text-xs text-[#8e8e93]">{total} narudžbi · {komLabel(filteredItems.dresovi, filteredItems.kompleti)}</span>
       </div>
 
       {/* Skupne akcije — pojave se kad je nešto označeno */}
