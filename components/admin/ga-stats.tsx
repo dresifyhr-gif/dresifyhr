@@ -16,8 +16,10 @@ function Trend({ now, prev }: { now: number; prev: number }) {
 }
 
 function Col({ title, rows, unit }: { title: string; rows: { label: string; value: number }[]; unit: string }) {
+  // min-w-0: bez toga grid stavka ne smije biti uža od najduljeg naslova, pa
+  // kolona bježi izvan kartice na mobitelu i brojke se odrežu. S min-w-0 truncate radi.
   return (
-    <div>
+    <div className="min-w-0">
       <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">{title}</div>
       {rows.length === 0 ? (
         <div className="text-[13px] text-[#c7c7cc]">—</div>

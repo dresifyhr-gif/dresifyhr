@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Barlow, Bebas_Neue } from "next/font/google";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import { cookies } from "next/headers";
 
 import { LanguageProvider } from "@/contexts/language-context";
@@ -11,6 +10,7 @@ import { LOCALE_COOKIE, type Locale } from "@/lib/i18n";
 import "@/app/globals.css";
 
 import { MetaPixel } from "@/components/analytics/meta-pixel";
+import { SiteGoogleAnalytics } from "@/components/analytics/google-analytics";
 import { SiteProviders } from "@/components/providers/site-providers";
 import { AddToCartModal } from "@/components/site/add-to-cart-modal";
 import { AnnouncementBar } from "@/components/site/announcement-bar";
@@ -135,7 +135,7 @@ export default async function RootLayout({
         </ShopSettingsProvider>
         <MetaPixel />
       </body>
-      <GoogleAnalytics gaId="G-NKPLWRWPN9" />
+      <SiteGoogleAnalytics gaId="G-NKPLWRWPN9" />
     </html>
   );
 }
