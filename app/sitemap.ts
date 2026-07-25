@@ -22,12 +22,32 @@ async function getCustomSlugs(): Promise<string[]> {
   }
 }
 
+// Datum zadnje promjene po slugu (iz productOverride/customProduct updatedAt).
+// Kad se promijeni opis/cijena, Google to vidi u sitemapu i brže ponovno posjeti
+// stranicu — pomaže onima "Discovered – currently not indexed". Iskreno: koristi
+// STVARNI datum iz baze, ne "danas", pa Google signalu vjeruje.
+async function getLastModMap(): Promise<Map<string, Date>> {
+  const map = new Map<string, Date>();
+  try {
+    if (!process.env.DATABASE_URL) return map;
+    const [ov, cu] = await Promise.all([
+      prisma.productOverride.findMany({ select: { slug: true, updatedAt: true } }),
+      prisma.customProduct.findMany({ select: { slug: true, updatedAt: true } })
+    ]);
+    for (const r of [...ov, ...cu]) if (r.updatedAt) map.set(r.slug, r.updatedAt);
+  } catch {
+    /* best-effort */
+  }
+  return map;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = ["", "/dresovi", "/streetwear", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/igre", "/igra", "/flappy", "/gadaj"];
   const categoryRoutes = (await getJerseyCategoryCollections()).map((collection) => collection.path);
   const clubRoutes = (await getJerseyClubCollections()).map((collection) => collection.path);
   const playerRoutes = (await getJerseyPlayerCollections()).map((collection) => collection.path);
   const customSlugs = await getCustomSlugs();
+  const lastMod = await getLastModMap();
 
   return [
     ...staticRoutes.map((route) => ({
@@ -52,11 +72,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     ...jerseys.map((product) => ({
       url: absoluteUrl(`/dres/${product.slug}`),
+      lastModified: lastMod.get(product.slug),
       changeFrequency: "weekly" as const,
       priority: 0.7
     })),
     ...customSlugs.map((slug) => ({
       url: absoluteUrl(`/dres/${slug}`),
+      lastModified: lastMod.get(slug),
       changeFrequency: "weekly" as const,
       priority: 0.7
     })),
