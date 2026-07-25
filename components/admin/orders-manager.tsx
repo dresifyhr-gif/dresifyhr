@@ -26,6 +26,7 @@ type Order = {
   itemCount: number;
   total: number;
   status: string;
+  cancelReason: string | null; // zašto je otkazano
   shippedBy: string | null;
   courier: string | null; // "gls" | "hp" — preko kojeg kurira je poslano
   tracking: string;
@@ -397,6 +398,47 @@ const TABS = [
   { value: "cancelled", label: "Otkazano" }
 ];
 
+// Gotovi razlozi otkazivanja — jedan klik. "Ostalo" otvara upis.
+const CANCEL_REASONS = [
+  "Nemam tu veličinu",
+  "Nemam taj dres",
+  "Predugo čekanje — kupac odustao",
+  "Kupac se predomislio",
+  "Krivi ili lažni podaci"
+];
+
+// Picker koji iskoči kad se klikne "Otkazano" — biraš razlog pa se tek onda otkaže.
+function CancelPicker({ onPick, onClose }: { onPick: (reason: string) => void; onClose: () => void }) {
+  const [other, setOther] = useState("");
+  return (
+    <div className="mt-2 rounded-[12px] border border-red-200 bg-red-50/60 p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-red-700">Zašto otkazuješ?</span>
+        <button type="button" onClick={onClose} className="text-[11px] text-[#8e8e93] hover:text-[#1d1d1f]">✕ odustani</button>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {CANCEL_REASONS.map((r) => (
+          <button key={r} type="button" onClick={() => onPick(r)}
+            className="rounded-[10px] border border-red-200 bg-white px-2.5 py-1 text-[12px] text-[#1d1d1f] transition hover:border-red-400 hover:bg-red-100">
+            {r}
+          </button>
+        ))}
+        <button type="button" onClick={() => onPick("")}
+          className="rounded-[10px] border border-black/[0.08] bg-white px-2.5 py-1 text-[12px] text-[#6e6e73] transition hover:bg-black/[0.03]">
+          Bez razloga
+        </button>
+      </div>
+      <div className="mt-2 flex gap-1.5">
+        <input value={other} onChange={(e) => setOther(e.target.value)} placeholder="Ostalo — upiši svoj razlog…"
+          onKeyDown={(e) => { if (e.key === "Enter" && other.trim()) onPick(other.trim()); }}
+          className="a-input min-w-0 flex-1 px-2.5 py-1 text-[12px]" />
+        <button type="button" disabled={!other.trim()} onClick={() => onPick(other.trim())}
+          className="a-btn-sm a-btn-danger shrink-0 px-2.5 py-1 text-[11px] disabled:opacity-40">Otkaži</button>
+      </div>
+    </div>
+  );
+}
+
 export function OrdersManager() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
@@ -406,11 +448,13 @@ export function OrdersManager() {
   const [editing, setEditing] = useState<string | null>(null);
   const [editingContact, setEditingContact] = useState<string | null>(null);
   const [glsOpen, setGlsOpen] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState<string | null>(null);
   const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingDresovi: number; pendingKompleti: number; collectedTotal: number; collectedDresovi: number; collectedKompleti: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorDresovi: number; igorKompleti: number; ivicaDresovi: number; ivicaKompleti: number } | null>(null);
   const [total, setTotal] = useState(0);
   const [filteredItems, setFilteredItems] = useState({ dresovi: 0, kompleti: 0 });
+  const [cancelReasons, setCancelReasons] = useState<{ reason: string; count: number }[]>([]);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -445,6 +489,7 @@ export function OrdersManager() {
         setPages(d.pages);
         setPage(p);
         if (d.cash) setCash(d.cash);
+        setCancelReasons(Array.isArray(d.cancelReasons) ? d.cancelReasons : []);
       }
     } catch {
       /* ignore */
@@ -558,6 +603,18 @@ export function OrdersManager() {
         ))}
       </div>
 
+      {/* Sažetak razloga otkazivanja — vidi se samo na filteru "Otkazano". */}
+      {status === "cancelled" && cancelReasons.length > 0 && (
+        <div className="a-sub mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-3 py-2">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Razlozi</span>
+          {cancelReasons.map((r) => (
+            <span key={r.reason} className="text-[12px] text-[#1d1d1f]">
+              {r.reason} <b className="text-red-600">{r.count}×</b>
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Odvojeno po pošiljatelju i po naplati — za organizirano praćenje */}
       <div className="a-sub mb-3 flex flex-wrap items-center gap-x-5 gap-y-2 px-3 py-2">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -656,6 +713,9 @@ export function OrdersManager() {
                         <span className="font-semibold text-[#1d1d1f]">{o.customerName}</span>
                       )}
                       <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
+                      {o.status === "cancelled" && o.cancelReason && (
+                        <span className="rounded bg-red-50 px-1.5 py-0.5 text-[10px] text-red-600" title="Razlog otkazivanja">↳ {o.cancelReason}</span>
+                      )}
                       {o.promoCode && (
                         <span
                           title="Osvojena nagrada na igrici — besplatna dostava (bez +7 €)"
@@ -767,7 +827,7 @@ export function OrdersManager() {
                     className="a-btn-sm px-2 py-1 text-[11px]">✓ Ivica poslao</button>
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
                     className="a-btn-sm a-btn-danger px-2 py-1 text-[11px]">↩ Vraćeno</button>
-                  <button type="button" disabled={isBusy} onClick={() => act(o.id, "cancel", { cancelled: true })}
+                  <button type="button" disabled={isBusy} onClick={() => setCancelling((c) => (c === o.id ? null : o.id))}
                     className="a-btn-sm px-2 py-1 text-[11px]">✕ Otkazano</button>
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                     className="a-btn-sm px-2 py-1 text-[11px]">↺ Vrati u nove</button>
@@ -790,6 +850,13 @@ export function OrdersManager() {
                 </div>
 
                 {glsOpen === o.id && <GlsCopyPanel order={o} />}
+
+                {cancelling === o.id && (
+                  <CancelPicker
+                    onClose={() => setCancelling(null)}
+                    onPick={(reason) => { setCancelling(null); act(o.id, "cancel", { cancelled: true, reason }); }}
+                  />
+                )}
 
                 {editing === o.id && (
                   <ItemsEditor orderId={o.id} items={o.items} onSaved={() => { setEditing(null); fetchPage(q, 1, false); }} />

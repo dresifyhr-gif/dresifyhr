@@ -14,6 +14,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
   const body = await request.json().catch(() => ({}));
   const cancelled = body?.cancelled !== false; // default: mark cancelled
+  const reason = typeof body?.reason === "string" ? body.reason.trim().slice(0, 200) : "";
 
   const order = await prisma.order.findUnique({
     where: { id },
@@ -23,7 +24,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   await prisma.order.update({
     where: { id },
-    data: cancelled ? { status: "cancelled" } : { status: "new", shippedBy: null, shippedAt: null }
+    data: cancelled
+      ? { status: "cancelled", cancelReason: reason || null }
+      : { status: "new", shippedBy: null, shippedAt: null, cancelReason: null }
   });
 
   if (cancelled) {

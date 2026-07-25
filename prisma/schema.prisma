@@ -34,6 +34,7 @@ model Order {
   itemCount    Int         @default(0)
 
   status       String      @default("new") // new | shipped | done | returned | cancelled
+  cancelReason String?     // zašto je otkazano (npr. "nemam veličinu", "predugo čekanje")
   shippedBy    String?     // "igor" | "ivica" — tko je fizički poslao (za obračun)
   shippedAt    DateTime?
   courier      String?     // "gls" | "hp" — preko kojeg kurira je poslano (prazno = GLS, čest slučaj)

@@ -46,6 +46,7 @@ export async function GET(request: Request) {
       total: true,
       shipping: true,
       status: true,
+      cancelReason: true,
       shippedBy: true,
       courier: true,
       reference: true,
@@ -139,6 +140,18 @@ export async function GET(request: Request) {
     for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) filteredKompleti += q; else filteredDresovi += q; }
   }
 
+  // Sažetak razloga otkazivanja (nad SVIM otkazanim narudžbama) — da Gazda vidi
+  // obrazac: "15× nemam veličinu, 8× predugo čekanje…".
+  const cancelReasons: { reason: string; count: number }[] = (() => {
+    const m = new Map<string, number>();
+    for (const o of all) {
+      if (o.status !== "cancelled") continue;
+      const r = (o.cancelReason || "").trim() || "Bez razloga";
+      m.set(r, (m.get(r) || 0) + 1);
+    }
+    return [...m.entries()].map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count);
+  })();
+
   const sent = all.filter((o) => o.status === "shipped" || o.status === "done");
   const cash = {
     pendingCount: 0, pendingTotal: 0, pendingDresovi: 0, pendingKompleti: 0,
@@ -169,6 +182,7 @@ export async function GET(request: Request) {
     filteredDresovi,
     filteredKompleti,
     cash,
+    cancelReasons,
     orders: slice.map((o) => ({
       id: o.id,
       date: o.createdAt.toLocaleDateString("hr-HR"),
@@ -180,6 +194,7 @@ export async function GET(request: Request) {
       itemCount: o.itemCount,
       total: o.total - (o.shipping ?? 0),
       status: o.status,
+      cancelReason: o.cancelReason || null,
       shippedBy: o.shippedBy || null,
       courier: o.courier || null,
       tracking: o.tracking || "",

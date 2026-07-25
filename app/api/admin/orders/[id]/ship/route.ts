@@ -28,7 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     where: { id },
     data: shipped
       ? { status: "shipped", shippedBy: by, shippedAt: new Date(), courier }
-      : { status: "new", shippedBy: null, shippedAt: null, courier: null }
+      : { status: "new", shippedBy: null, shippedAt: null, courier: null, cancelReason: null }
   });
 
   // Best-effort: never block the admin action on the Sheet call.
