@@ -31,9 +31,10 @@ function getGaStats_() {
       { startDate: '7daysAgo',  endDate: 'today'    },
       { startDate: '14daysAgo', endDate: '8daysAgo' }
     ],
-    dimensions: [{ name: 'dateRange' }],
     metrics: [{ name: 'activeUsers' }]
   }, P);
+  // Uz dva dateRanges GA4 SAM doda 'dateRange' dimenziju (date_range_0/1) — ne
+  // smije se pisati u dimensions (baca "Field dateRange is not a dimension").
   var visitors = 0, visitorsPrev = 0;
   (vis.rows || []).forEach(function (r) {
     var v = Number(r.metricValues[0].value) || 0;
