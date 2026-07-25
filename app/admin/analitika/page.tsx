@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
+import { getGaStats } from "@/lib/ga";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdSpendForm } from "@/components/admin/ad-spend-form";
+import { GaStatsPanel } from "@/components/admin/ga-stats";
 import { Panel, eur } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Analitika — Dresify Admin", robots: { index: false, follow: false } };
@@ -13,10 +15,14 @@ export const dynamic = "force-dynamic";
 export default async function AnalyticsPage() {
   if (!(await isAdmin())) redirect("/admin/login/");
 
-  const m = await getDashboardMetrics();
+  const [m, ga] = await Promise.all([getDashboardMetrics(), getGaStats()]);
 
   return (
     <AdminShell title="Analitika" subtitle="Što se prodaje, reklame i trendovi">
+      <div className="mb-5">
+        <GaStatsPanel ga={ga} />
+      </div>
+
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Najprodavaniji">
           {m.topItems.length === 0 ? (
