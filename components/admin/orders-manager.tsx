@@ -680,7 +680,7 @@ export function OrdersManager() {
                       )}
                       {o.risk && o.risk.failed >= (o.risk.min ?? 1) && o.risk.failed > 0 && (
                         <span
-                          title={`Ovaj broj je ranije ${o.risk.failed}× odbio pouzeće (otkazano/vraćeno)${o.risk.collected > 0 ? `, a ${o.risk.collected}× uredno preuzeo` : ""}. Provjeri prije slanja.`}
+                          title={`Ovaj broj je ranije ${o.risk.failed}× vratio pošiljku (odbio pouzeće)${o.risk.collected > 0 ? `, a ${o.risk.collected}× uredno preuzeo` : ""}. Provjeri prije slanja.`}
                           className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-700"
                         >
                           ⚠️ Rizičan · {o.risk.failed}× odbio{o.risk.collected > 0 ? ` · ${o.risk.collected}× ok` : ""}

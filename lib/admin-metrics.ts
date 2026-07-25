@@ -146,7 +146,10 @@ export async function getDashboardMetrics() {
     const key = phoneKey(o.phone);
     if (!key) continue;
     const cur = riskMap.get(key) || { name: o.customerName || o.phone || "—", phone: o.phone || "", failed: 0, collected: 0, lastAt: o.createdAt };
-    if (o.status === "cancelled" || o.status === "returned") cur.failed++;
+    // Rizik = SAMO vraćene pošiljke (kupac odbio pouzeće → gubimo dostavu). Otkazane
+    // NE broje se: njih otkaže Gazda ili su zbog njegove greške (kasno poslano), pa
+    // na njih nije izgubljeno ništa (nisu ni poslane).
+    if (o.status === "returned") cur.failed++;
     else if ((o.status === "shipped" || o.status === "done") && o.cashCollected) cur.collected++;
     if (o.createdAt >= cur.lastAt) { cur.lastAt = o.createdAt; cur.name = o.customerName || cur.name; cur.phone = o.phone || cur.phone; }
     riskMap.set(key, cur);

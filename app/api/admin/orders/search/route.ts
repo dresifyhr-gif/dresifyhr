@@ -67,7 +67,9 @@ export async function GET(request: Request) {
     if (!key) continue;
     const h = historyByPhone.get(key) || { failed: 0, collected: 0, total: 0 };
     h.total++;
-    if (o.status === "cancelled" || o.status === "returned") h.failed++;
+    // Rizik = SAMO vraćene pošiljke (kupac odbio pouzeće). Otkazane ne broje —
+    // njih otkaže Gazda ili su zbog njegove greške; ništa nije poslano ni izgubljeno.
+    if (o.status === "returned") h.failed++;
     else if (isSent(o.status) && o.cashCollected) h.collected++;
     historyByPhone.set(key, h);
   }
@@ -77,7 +79,7 @@ export async function GET(request: Request) {
     const key = phoneKey(o.phone);
     const h = key ? historyByPhone.get(key) : null;
     if (!h) return { failed: 0, collected: 0, priorOrders: 0 };
-    const isThisFailed = o.status === "cancelled" || o.status === "returned";
+    const isThisFailed = o.status === "returned";
     return {
       failed: h.failed - (isThisFailed ? 1 : 0), // ranija odbijanja
       collected: h.collected,

@@ -97,8 +97,8 @@ export default async function AdminOverview() {
 
       <SectionHeading>⚡ Za danas</SectionHeading>
 
-      {/* To-do + watch */}
-      <div className="grid gap-5 lg:grid-cols-2">
+      {/* Samo to-do; "Na što trebam paziti" maknut — Gazda to ionako sam prati. */}
+      <div className="grid gap-5">
         <Panel title="Što danas trebam napraviti">
           <ul className="space-y-2.5 text-sm">
             {m.pendingCount > 0 && (
@@ -136,39 +136,6 @@ export default async function AdminOverview() {
             {m.pendingCount === 0 && !ceo.reorder && !topInactive && m.unassignedShipped.length === 0 && (
               <li className="text-[#8e8e93]">Sve pod kontrolom — nema hitnih zadataka ✅</li>
             )}
-          </ul>
-        </Panel>
-
-        <Panel title="Na što trebam paziti">
-          <ul className="space-y-2.5 text-sm">
-            {m.returnedCount > 0 && (
-              <li className="flex items-start gap-2">
-                <span>↩️</span>
-                <span className="text-[#1d1d1f]">Vraćene pošiljke: <b>{m.returnedCount}</b> · {m.returnedQty} kom ({eur(m.returnedTotal)}) — <span className="text-[#8e8e93]">nije u prometu</span></span>
-              </li>
-            )}
-            {m.cancelledCount > 0 && (
-              <li className="flex items-start gap-2">
-                <span>✖️</span>
-                <span className="text-[#1d1d1f]">Otkazane narudžbe: <b>{m.cancelledCount}</b> · {m.cancelledQty} kom ({eur(m.cancelledTotal)}) — <span className="text-[#8e8e93]">nije u prometu</span></span>
-              </li>
-            )}
-            {ceo.declining && (
-              <li className="flex items-start gap-2">
-                <span>📉</span>
-                <span className="text-[#1d1d1f]"><b>{ceo.declining.name}</b> pada ({ceo.declining.prior}→{ceo.declining.recent} kom u 14 dana)</span>
-              </li>
-            )}
-            {ceo.rising && (
-              <li className="flex items-start gap-2">
-                <span>📈</span>
-                <span className="text-[#1d1d1f]"><b>{ceo.rising.name}</b> raste ({ceo.rising.prior}→{ceo.rising.recent} kom) — pojačaj zalihu</span>
-              </li>
-            )}
-            <li className="flex items-start gap-2">
-              <span>💀</span>
-              <span className="text-[#1d1d1f]">Mrtvih modela: <b>{m.deadProducts.length}</b> bez ijedne prodaje — razmisli o gašenju (<a href="/admin/analitika" className="font-semibold text-[#6e6e73] hover:underline">Analitika</a>)</span>
-            </li>
           </ul>
         </Panel>
       </div>

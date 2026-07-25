@@ -46,7 +46,8 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
 
   // Statistika
   const collected = orders.filter((o) => isSent(o.status) && o.cashCollected);
-  const failed = orders.filter((o) => o.status === "cancelled" || o.status === "returned");
+  // Rizik = samo vraćene pošiljke (kupac odbio pouzeće). Otkazane ne — njih otkaže Gazda.
+  const failed = orders.filter((o) => o.status === "returned");
   const pending = orders.filter((o) => isSent(o.status) && !o.cashCollected);
   const totalSpent = collected.reduce((s, o) => s + (o.total - (o.shipping ?? 0)), 0);
   const firstAt = orders[orders.length - 1].createdAt;
@@ -131,7 +132,7 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
         <Stat label="Ukupno narudžbi" value={String(orders.length)} />
         <Stat label="Potrošeno (preuzeto)" value={eur(totalSpent)} cls="text-emerald-600" />
         <Stat label="Preuzeto / čeka" value={`${collected.length} / ${pending.length}`} />
-        <Stat label="Odbio (otkaz/povrat)" value={String(failed.length)} cls={failed.length ? "text-red-600" : "text-[#1d1d1f]"} />
+        <Stat label="Vraćene pošiljke" value={String(failed.length)} cls={failed.length ? "text-red-600" : "text-[#1d1d1f]"} />
       </div>
       <div className="mb-5 text-xs text-[#8e8e93]">
         Prvi put: {firstAt.toLocaleDateString("hr-HR")} · Zadnji put: {latest.createdAt.toLocaleDateString("hr-HR")}
