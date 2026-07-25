@@ -68,8 +68,14 @@ export async function GET() {
 
   const jerseyProducts = jerseys.map((j) => {
     const ov = overrides.get(j.slug);
-    const outOfStock = ov ? (ov.outOfStock ?? "") : j.outOfStock ?? "";
-    const soldOutSizes = ov ? (ov.soldOutSizes ? ov.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : []) : j.soldOutSizes ?? [];
+    // null u override = nikad dirano → prikaži statičku vrijednost iz kataloga
+    // (ista logika kao na dućanu). "" = izričito na stanju.
+    const outOfStock = ov ? (ov.outOfStock ?? j.outOfStock ?? "") : (j.outOfStock ?? "");
+    const soldOutSizes = ov
+      ? (ov.soldOutSizes != null
+          ? (ov.soldOutSizes ? ov.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : [])
+          : (j.soldOutSizes ?? []))
+      : (j.soldOutSizes ?? []);
 
     // Per-product analytics
     const s = soldMap.get(j.slug);
@@ -160,7 +166,10 @@ export async function POST(request: Request) {
   const stockNum = stockRaw === null || stockRaw === "" || stockRaw === undefined ? null : Math.round(Number(stockRaw));
   const stockVal = stockNum != null && Number.isFinite(stockNum) && stockNum >= 0 ? stockNum : null;
   const oos = body?.outOfStock;
-  const outOfStock = oos === "all" || oos === "adults" || oos === "kids" ? oos : null;
+  // "" (ne null) = admin izričito kaže "na stanju" — da se razlikuje od reda koji
+  // nikad nije dirao stanje (null → zadrži statičko). Inače bi svako spremanje
+  // gazilo katalog i rasprodano bi opet ispalo dostupno.
+  const outOfStock = oos === "all" || oos === "adults" || oos === "kids" ? oos : "";
   const sizes: string[] = Array.isArray(body?.soldOutSizes) ? body.soldOutSizes.filter((s: unknown) => typeof s === "string") : [];
   const hidden = body?.hidden === true;
   const badge = body?.badge === "bestseller" || body?.badge === "novo" ? body.badge : null;
@@ -194,7 +203,7 @@ export async function POST(request: Request) {
         stock: stockVal,
         sizeStock: sizeStockVal,
         outOfStock,
-        soldOutSizes: sizes.join(",") || null,
+        soldOutSizes: sizes.join(","),
         hidden,
         badge,
         featured,
@@ -226,7 +235,7 @@ export async function POST(request: Request) {
     stock: stockVal,
     sizeStock: sizeStockVal,
     outOfStock,
-    soldOutSizes: sizes.join(",") || null,
+    soldOutSizes: sizes.join(","),
     hidden,
     badge,
     featured,

@@ -73,7 +73,16 @@ async function getOverrideMap(): Promise<Map<string, Override>> {
 
 function merge(j: Jersey, ov?: Override): Jersey {
   if (!ov) return j;
-  const outOfStock = ov.outOfStock === "all" || ov.outOfStock === "adults" || ov.outOfStock === "kids" ? ov.outOfStock : undefined;
+  // null = override red NIKAD nije dirao stanje (npr. red je nastao samo zbog opisa
+  // iz AI generatora) → zadrži statičku vrijednost iz kataloga. "" = admin izričito
+  // rekao "na stanju". Prije je svaki null gazio statičko "adults"/"kids" u dostupno,
+  // pa su rasprodani proizvodi prikazivali sve veličine.
+  const outOfStock =
+    ov.outOfStock == null
+      ? j.outOfStock
+      : ov.outOfStock === "all" || ov.outOfStock === "adults" || ov.outOfStock === "kids"
+        ? ov.outOfStock
+        : undefined;
   const badge = ov.badge === "bestseller" || ov.badge === "novo" ? ov.badge : undefined;
   const klub = ov.klub?.trim() || j.klub;
   const igrac = ov.igrac?.trim() || j.igrac;
