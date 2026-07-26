@@ -36,6 +36,7 @@ export async function GET(request: Request) {
   const status = url.searchParams.get("status") || "";
   const shipper = url.searchParams.get("shipper") || "";
   const cashF = url.searchParams.get("cash") || "";
+  const courierF = url.searchParams.get("courier") || "";
 
   const all = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
@@ -50,6 +51,9 @@ export async function GET(request: Request) {
   if (shipper === "igor" || shipper === "ivica") rows = rows.filter((o) => o.shippedBy === shipper);
   if (cashF === "collected" || cashF === "pending") {
     rows = rows.filter((o) => isSent(o.status) && (cashF === "collected" ? o.cashCollected : !o.cashCollected));
+  }
+  if (courierF === "gls" || courierF === "hp") {
+    rows = rows.filter((o) => isSent(o.status) && (courierF === "hp" ? o.courier === "hp" : o.courier !== "hp"));
   }
   if (q) {
     const nq = deaccent(q);

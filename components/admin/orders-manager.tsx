@@ -444,6 +444,7 @@ export function OrdersManager() {
   const [status, setStatus] = useState("");
   const [shipper, setShipper] = useState(""); // "" | igor | ivica
   const [cashF, setCashF] = useState(""); // "" | collected | pending
+  const [courierF, setCourierF] = useState(""); // "" | gls | hp
   const [sort, setSort] = useState(""); // "" new-first | new | old
   const [editing, setEditing] = useState<string | null>(null);
   const [editingContact, setEditingContact] = useState<string | null>(null);
@@ -472,13 +473,15 @@ export function OrdersManager() {
   shipperRef.current = shipper;
   const cashRef = useRef("");
   cashRef.current = cashF;
+  const courierRef = useRef("");
+  courierRef.current = courierF;
 
   const fetchPage = useCallback(async (query: string, p: number, append: boolean) => {
     const my = ++reqId.current;
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/admin/orders/search/?q=${encodeURIComponent(query)}&status=${statusRef.current}&shipper=${shipperRef.current}&cash=${cashRef.current}&sort=${sortRef.current}&page=${p}`
+        `/api/admin/orders/search/?q=${encodeURIComponent(query)}&status=${statusRef.current}&shipper=${shipperRef.current}&cash=${cashRef.current}&courier=${courierRef.current}&sort=${sortRef.current}&page=${p}`
       );
       const d = await res.json();
       if (my !== reqId.current) return; // stale response, ignore
@@ -508,7 +511,7 @@ export function OrdersManager() {
     clearTimeout(debounce.current);
     debounce.current = setTimeout(() => fetchPage(q, 1, false), 300);
     return () => clearTimeout(debounce.current);
-  }, [q, status, shipper, cashF, sort, fetchPage]);
+  }, [q, status, shipper, cashF, courierF, sort, fetchPage]);
 
   // infinite scroll
   useEffect(() => {
@@ -570,7 +573,7 @@ export function OrdersManager() {
           {showNew ? "✕ Zatvori" : "➕ Nova narudžba (ručno)"}
         </button>
         <a
-          href={`/api/admin/export/orders/?q=${encodeURIComponent(q)}&status=${status}&shipper=${shipper}&cash=${cashF}`}
+          href={`/api/admin/export/orders/?q=${encodeURIComponent(q)}&status=${status}&shipper=${shipper}&cash=${cashF}&courier=${courierF}`}
           className="rounded-[10px] border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-[12px] font-semibold text-emerald-700 transition hover:bg-emerald-100"
           title="Preuzmi trenutačno filtrirane narudžbe kao CSV (Excel) — za knjigovođu/obrt"
         >
@@ -643,10 +646,23 @@ export function OrdersManager() {
             </button>
           ))}
         </div>
-        {(shipper || cashF) && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Kurir</span>
+          {[{ v: "", l: "Svi" }, { v: "gls", l: "🚚 GLS" }, { v: "hp", l: "🚚 HP" }].map((o) => (
+            <button
+              key={o.v}
+              type="button"
+              onClick={() => setCourierF(o.v)}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${courierF === o.v ? "bg-slate-900 text-white" : "border border-black/[0.06] bg-white text-[#6e6e73] hover:bg-black/[0.03]"}`}
+            >
+              {o.l}
+            </button>
+          ))}
+        </div>
+        {(shipper || cashF || courierF) && (
           <button
             type="button"
-            onClick={() => { setShipper(""); setCashF(""); }}
+            onClick={() => { setShipper(""); setCashF(""); setCourierF(""); }}
             className="ml-auto text-[11px] font-semibold text-[#8e8e93] underline decoration-dotted hover:text-[#1d1d1f]"
           >
             ↺ Poništi
