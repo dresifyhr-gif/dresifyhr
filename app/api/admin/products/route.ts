@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { revalidateTag } from "next/cache";
+
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { jerseys, adultSizes, kidSizes, streetwearSizes, getJerseyDescription, getJerseySizeOptions } from "@/lib/data/jerseys";
@@ -204,12 +206,13 @@ export async function POST(request: Request) {
         sizeStock: sizeStockVal,
         outOfStock,
         soldOutSizes: sizes.join(","),
-        hidden,
+          hidden,
         badge,
         featured,
         description
       }
     });
+    revalidateTag("products"); // dućan pokaže promjenu ODMAH, ne za 60 s
     return NextResponse.json({ ok: true });
   }
 
@@ -248,5 +251,6 @@ export async function POST(request: Request) {
     update: data
   });
 
+  revalidateTag("products"); // dućan pokaže promjenu ODMAH, ne za 60 s
   return NextResponse.json({ ok: true });
 }
