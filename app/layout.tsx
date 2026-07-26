@@ -18,6 +18,7 @@ import { CartDrawer } from "@/components/site/cart-drawer";
 import { ContentProtection } from "@/components/site/content-protection";
 import { ChatWidget } from "@/components/site/chat-widget";
 import { Footer } from "@/components/site/footer";
+import { CookieNotice } from "@/components/site/cookie-notice";
 import { Navbar } from "@/components/site/navbar";
 import { SocialProof } from "@/components/site/social-proof";
 import { PromoCapture } from "@/components/site/promo-capture";
@@ -134,6 +135,7 @@ export default async function RootLayout({
         </LanguageProvider>
         </ShopSettingsProvider>
         <MetaPixel />
+        <CookieNotice />
       </body>
       <SiteGoogleAnalytics gaId="G-NKPLWRWPN9" />
     </html>
