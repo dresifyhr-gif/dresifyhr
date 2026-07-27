@@ -573,11 +573,11 @@ export function OrdersManager() {
           {showNew ? "✕ Zatvori" : "➕ Nova narudžba (ručno)"}
         </button>
         <a
-          href={`/api/admin/export/orders/?q=${encodeURIComponent(q)}&status=${status}&shipper=${shipper}&cash=${cashF}&courier=${courierF}`}
+          href={`/api/admin/export/orders/xlsx/?q=${encodeURIComponent(q)}&status=${status}&shipper=${shipper}&cash=${cashF}&courier=${courierF}`}
           className="rounded-[10px] border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-[12px] font-semibold text-emerald-700 transition hover:bg-emerald-100"
-          title="Preuzmi trenutačno filtrirane narudžbe kao CSV (Excel) — za knjigovođu/obrt"
+          title="Preuzmi trenutačno filtrirane narudžbe kao uređeni Excel (.xlsx) — boje, širi stupci, filteri"
         >
-          ⬇️ Izvezi CSV{total > 0 ? ` (${total})` : ""}
+          ⬇️ Izvezi Excel{total > 0 ? ` (${total})` : ""}
         </a>
       </div>
       {showNew && <NewOrderForm onCreated={() => { setShowNew(false); fetchPage(q, 1, false); }} />}
