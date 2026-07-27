@@ -1,9 +1,7 @@
 import ExcelJS from "exceljs";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { codAmount, getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
-import { promoGrantsFreeShipping } from "@/lib/promo-db";
 import { formatCroatianName, repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -64,6 +62,9 @@ export async function GET(request: Request) {
       return inName || inAddr || inPhone;
     });
   }
+  // Otkazane ne idu u Excel — nikad nisu ni poslane, na njih nije izgubljeno ništa.
+  // Vraćene ostaju (kupac odbio pouzeće, izgubljena dostava).
+  rows = rows.filter((o) => o.status !== "cancelled");
 
   const wb = new ExcelJS.Workbook();
   wb.creator = "Dresify";
@@ -75,50 +76,49 @@ export async function GET(request: Request) {
 
   const money = "#,##0.00 €";
   ws.columns = [
-    { header: "Datum", key: "datum", width: 12 },
-    { header: "Broj narudžbe", key: "ref", width: 20 },
-    { header: "Kupac", key: "kupac", width: 24 },
-    { header: "Telefon", key: "tel", width: 15 },
-    { header: "Email", key: "email", width: 26 },
-    { header: "Adresa", key: "adresa", width: 34 },
-    { header: "Artikli", key: "artikli", width: 46 },
-    { header: "Kom", key: "kom", width: 6 },
-    { header: "Roba", key: "roba", width: 12, style: { numFmt: money } },
-    { header: "Dostava", key: "dostava", width: 11, style: { numFmt: money } },
-    { header: "Ukupno", key: "ukupno", width: 12, style: { numFmt: money } },
-    { header: "Pouzeće", key: "pouzece", width: 12, style: { numFmt: money } },
-    { header: "Status", key: "status", width: 14 },
-    { header: "Poslao", key: "poslao", width: 10 },
-    { header: "Kurir", key: "kurir", width: 8 },
-    { header: "Naplaćeno", key: "naplaceno", width: 11 },
-    { header: "Tracking", key: "tracking", width: 18 },
-    { header: "Promo", key: "promo", width: 14 }
+    { header: "Datum", key: "datum", width: 13 },
+    { header: "Kupac", key: "kupac", width: 26 },
+    { header: "Telefon", key: "tel", width: 16 },
+    { header: "Email", key: "email", width: 28 },
+    { header: "Adresa", key: "adresa", width: 36 },
+    { header: "Artikli", key: "artikli", width: 50 },
+    { header: "Kom", key: "kom", width: 7 },
+    { header: "Roba", key: "roba", width: 13, style: { numFmt: money } },
+    { header: "Dostava", key: "dostava", width: 12, style: { numFmt: money } },
+    { header: "Ukupno", key: "ukupno", width: 13, style: { numFmt: money } },
+    { header: "Status", key: "status", width: 15 },
+    { header: "Poslao", key: "poslao", width: 11 },
+    { header: "Kurir", key: "kurir", width: 9 },
+    { header: "Naplaćeno", key: "naplaceno", width: 12 },
+    { header: "Tracking", key: "tracking", width: 20 },
+    { header: "Promo", key: "promo", width: 15 }
   ];
 
   // ── Header: crna pozadina, limeta tekst, podebljano ────────────────────────
   const head = ws.getRow(1);
-  head.height = 26;
+  head.height = 30;
   head.eachCell((c) => {
     c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0D0D0D" } };
-    c.font = { bold: true, color: { argb: "FFE8FF3C" }, size: 11 };
+    c.font = { bold: true, color: { argb: "FFE8FF3C" }, size: 13 };
     c.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
     c.border = { bottom: { style: "thin", color: { argb: "FF000000" } } };
   });
 
   // ── Redovi ─────────────────────────────────────────────────────────────────
+  const sum = { poslCount: 0, poslTotal: 0, naplCount: 0, naplTotal: 0, vratCount: 0, vratTotal: 0 };
   for (const o of rows) {
     const goods = o.total - (o.shipping ?? 0);
-    const isCod = o.payment?.toLowerCase().includes("pouze") || !o.payment;
-    const freeShip = await promoGrantsFreeShipping(o.promoCode, goods);
-    const cod = isCod ? codAmount(o.total, o.shipping, o.promoCode, freeShip) : 0;
     const artikli = o.items
       .map((it) => `${repairText([it.klub, it.igrac].filter(Boolean).join(" "))}${it.size ? ` (${it.size})` : ""}${it.quantity > 1 ? ` x${it.quantity}` : ""}`)
       .join(" · ");
     const sent = isSent(o.status);
 
+    // Zbrojevi (nad onim što je u tablici): poslano, naplaćeno, vraćeno — po iznosu "Ukupno".
+    if (sent) { sum.poslCount++; sum.poslTotal += o.total; if (o.cashCollected) { sum.naplCount++; sum.naplTotal += o.total; } }
+    if (o.status === "returned") { sum.vratCount++; sum.vratTotal += o.total; }
+
     const row = ws.addRow({
       datum: o.createdAt.toLocaleDateString("hr-HR"),
-      ref: o.reference || getOrderReference(o.createdAt.toISOString()),
       kupac: formatCroatianName(o.customerName),
       tel: o.phone || "",
       email: o.email || "",
@@ -128,7 +128,6 @@ export async function GET(request: Request) {
       roba: goods,
       dostava: o.shipping ?? 0,
       ukupno: o.total,
-      pouzece: cod,
       status: STATUS_HR[o.status] || o.status,
       poslao: o.shippedBy ? (o.shippedBy === "ivica" ? "Ivica" : "Igor") : "",
       kurir: sent ? (o.courier === "hp" ? "HP" : "GLS") : "",
@@ -137,45 +136,67 @@ export async function GET(request: Request) {
       promo: o.promoCode || ""
     });
 
+    // Podebljano i malo veći font kroz cijeli red (Gazda tražio).
+    row.font = { bold: true, size: 12 };
+    row.height = 20;
+    row.alignment = { vertical: "middle" };
+
     // Statusna ćelija u boji
     const sc = STATUS_FILL[o.status];
     if (sc) {
       const cell = row.getCell("status");
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: sc.bg } };
-      cell.font = { bold: true, color: { argb: sc.fg } };
-      cell.alignment = { horizontal: "center" };
+      cell.font = { bold: true, size: 12, color: { argb: sc.fg } };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
     }
     // Naplaćeno DA/NE u boji
     if (sent) {
       const nc = row.getCell("naplaceno");
       const ok = o.cashCollected;
       nc.fill = { type: "pattern", pattern: "solid", fgColor: { argb: ok ? "FFD6F5DD" : "FFFFF4CC" } };
-      nc.font = { bold: true, color: { argb: ok ? "FF166534" : "FF8A6D00" } };
-      nc.alignment = { horizontal: "center" };
+      nc.font = { bold: true, size: 12, color: { argb: ok ? "FF166534" : "FF8A6D00" } };
+      nc.alignment = { horizontal: "center", vertical: "middle" };
       // Kurir u boji
       const kc = row.getCell("kurir");
       const hp = o.courier === "hp";
       kc.fill = { type: "pattern", pattern: "solid", fgColor: { argb: hp ? "FFD6E4FF" : "FFFFE0CC" } };
-      kc.font = { bold: true, color: { argb: hp ? "FF1E40AF" : "FF9A3412" } };
-      kc.alignment = { horizontal: "center" };
+      kc.font = { bold: true, size: 12, color: { argb: hp ? "FF1E40AF" : "FF9A3412" } };
+      kc.alignment = { horizontal: "center", vertical: "middle" };
     }
-    row.alignment = { vertical: "middle" };
   }
 
-  // Naizmjenično sjenčanje redova (bez header-a) za čitljivost
-  ws.eachRow((r, i) => {
-    if (i === 1) return;
-    if (i % 2 === 0) {
-      r.eachCell((c) => {
-        if (!c.fill || (c.fill as ExcelJS.FillPattern).fgColor?.argb === undefined) {
-          c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF7F7F5" } };
-        }
-      });
-    }
-  });
+  const dataLastRow = ws.rowCount; // zadnji red PODATAKA (prije zbrojeva)
 
-  // Filteri na zaglavlju
+  // Naizmjenično sjenčanje redova podataka (bez header-a) za čitljivost
+  for (let i = 2; i <= dataLastRow; i++) {
+    if (i % 2 !== 0) continue;
+    ws.getRow(i).eachCell((c) => {
+      if (!c.fill || (c.fill as ExcelJS.FillPattern).fgColor?.argb === undefined) {
+        c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF7F7F5" } };
+      }
+    });
+  }
+
+  // Filteri na zaglavlju (samo nad podacima)
   ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: ws.columns.length } };
+
+  // ── Zbrojevi na dnu ─────────────────────────────────────────────────────────
+  ws.addRow({}); // razmak (prekida i doseg filtera)
+  const addSummary = (label: string, count: number, total: number, bg: string, fg: string) => {
+    const r = ws.addRow({ kupac: label, ukupno: total });
+    r.height = 24;
+    for (let col = 1; col <= ws.columns.length; col++) {
+      const c = r.getCell(col);
+      c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: bg } };
+      c.font = { bold: true, size: 13, color: { argb: fg } };
+      c.alignment = { vertical: "middle" };
+    }
+    r.getCell("kupac").value = `${label} — ${count} narudžbi`;
+    r.getCell("ukupno").numFmt = "#,##0.00 €";
+  };
+  addSummary("UKUPNO POSLANO", sum.poslCount, sum.poslTotal, "FFD6F5DD", "FF166534");
+  addSummary("UKUPNO NAPLAĆENO", sum.naplCount, sum.naplTotal, "FFCDEEDD", "FF0F5132");
+  addSummary("UKUPNO VRAĆENO", sum.vratCount, sum.vratTotal, "FFFAD4D4", "FF991B1B");
 
   const buf = await wb.xlsx.writeBuffer();
   const today = new Date().toISOString().slice(0, 10);
