@@ -39,8 +39,6 @@ model Order {
   shippedAt    DateTime?
   courier      String?     // "gls" | "hp" — preko kojeg kurira je poslano (prazno = GLS, čest slučaj)
   tracking     String?     // broj pošiljke / tracking
-  pin          String?     // GLS paketomat PIN (auto-uvoz iz paket.hr maila) — za otvaranje ormarića
-  paketId      String?     // paket.hr "ID narudžbe" — za dedupe kod uvoza PIN-a
   apologySent  Boolean     @default(false) // označeno da je isprika poslana (miče iz win-back liste)
   cashCollected   Boolean   @default(false) // pouzeće: novci prikupljeni (poštar predao). Prikupio = shippedBy.
   cashCollectedAt DateTime?

@@ -203,7 +203,6 @@ export async function GET(request: Request) {
       shippedBy: o.shippedBy || null,
       courier: o.courier || null,
       tracking: o.tracking || "",
-      pin: null, // stupac se dodaje u bazu naknadno (prisma db push); do tad ne selektiramo
       promoCode: o.promoCode || null,
       cashCollected: o.cashCollected,
       risk: { ...riskFor(o), min: riskMinFailed },

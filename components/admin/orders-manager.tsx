@@ -30,7 +30,6 @@ type Order = {
   shippedBy: string | null;
   courier: string | null; // "gls" | "hp" — preko kojeg kurira je poslano
   tracking: string;
-  pin: string | null; // GLS paketomat PIN (auto-uvoz iz paket.hr)
   promoCode: string | null;
   cashCollected: boolean;
   risk?: { failed: number; collected: number; priorOrders: number; min?: number };
@@ -753,16 +752,6 @@ export function OrdersManager() {
                           }`}
                         >
                           🚚 {o.courier === "hp" ? "HP" : "GLS"}
-                        </button>
-                      )}
-                      {o.pin && (
-                        <button
-                          type="button"
-                          onClick={() => navigator.clipboard?.writeText(o.pin || "").catch(() => {})}
-                          title="GLS paketomat PIN (auto-uvezen iz paket.hr) — klikni za kopiranje"
-                          className="rounded-md bg-lime-300 px-2 py-0.5 text-sm font-black tracking-wider text-black shadow-sm transition hover:bg-lime-400"
-                        >
-                          🔑 {o.pin}
                         </button>
                       )}
                       {o.risk && o.risk.failed >= (o.risk.min ?? 1) && o.risk.failed > 0 && (
