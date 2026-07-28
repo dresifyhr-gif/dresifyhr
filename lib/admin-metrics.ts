@@ -18,6 +18,11 @@ const kompletItemWhere = {
 const GLS_SHIP_UNDER = 5.5; // roba do uključivo 60 €
 const GLS_SHIP_OVER = 6.5;  // roba preko 60 € ili komplet (veći paket)
 
+// GLS saldo dostave vrijedi tek od ovog datuma (nove narudžbe). Starije narudžbe
+// ostaju po dosadašnjem računu (fiksni deliveryCost/returnCost, bez GLS marže) —
+// da se već zatvorena/tekuća stara podjela ne mijenja unatrag.
+const GLS_LOGIC_SINCE = new Date("2026-07-28T00:00:00Z");
+
 type ShipItem = { slug?: string | null; klub?: string | null; igrac?: string | null };
 const itemIsKomplet = (it: ShipItem) =>
   /komplet/i.test(it.slug || "") || /komplet/i.test(it.klub || "") || /komplet/i.test(it.igrac || "");
@@ -27,10 +32,11 @@ const glsCostFor = (goods: number, items: ShipItem[], threshold: number) =>
 // Dobit/gubitak dostave po narudžbi (dodaje se na maržu).
 //  GLS: plaćena → (kupac platio − GLS trošak); besplatna → −GLS trošak; vraćena → −GLS trošak (odlazak).
 //  HP (promjenjivo, legacy): plaćena → 0 (ne znamo točan trošak); besplatna → −deliveryCost; vraćena → −returnCost.
-type ShipOrder = { total: number; shipping: number | null; status?: string; courier?: string | null; items: ShipItem[] };
+type ShipOrder = { total: number; shipping: number | null; status?: string; courier?: string | null; createdAt?: Date; items: ShipItem[] };
 function shipPLFor(o: ShipOrder, threshold: number, deliveryCost: number, returnCost: number) {
   const goods = o.total - (o.shipping ?? 0);
-  const isHP = o.courier === "hp";
+  // Stare narudžbe (prije GLS_LOGIC_SINCE) računaju se kao dosad = kao HP (fiksni trošak, bez GLS marže).
+  const isHP = o.courier === "hp" || (!!o.createdAt && o.createdAt < GLS_LOGIC_SINCE);
   const paid = (o.shipping ?? 0) > 0;
   if (o.status === "returned") return isHP ? -returnCost : -glsCostFor(goods, o.items, threshold);
   if (isHP) return paid ? 0 : -deliveryCost;
@@ -115,7 +121,7 @@ export async function getDashboardMetrics() {
     // da se brojke poklapaju s onima na stranici Narudžbe.
     prisma.order.findMany({
       where: { status: { in: ["shipped", "done"] } },
-      select: { total: true, shipping: true, cashCollected: true, courier: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
+      select: { total: true, shipping: true, cashCollected: true, courier: true, createdAt: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
     })
   ]);
   const settlementsP = prisma.settlement.findMany({ orderBy: { settledAt: "desc" }, take: 6 });
@@ -243,7 +249,7 @@ export async function getDashboardMetrics() {
     }),
     prisma.order.findMany({
       where: { status: { in: ["shipped", "done"] }, cashCollected: true, ...collectedSinceFilter },
-      select: { total: true, shipping: true, shippedBy: true, promoCode: true, courier: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
+      select: { total: true, shipping: true, shippedBy: true, promoCode: true, courier: true, createdAt: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
     }),
     profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter }),
     prisma.adSpend.aggregate({ _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined }),
