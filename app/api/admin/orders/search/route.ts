@@ -52,6 +52,7 @@ export async function GET(request: Request) {
       courier: true,
       reference: true,
       tracking: true,
+      pin: true,
       promoCode: true,
       cashCollected: true,
       items: { select: { id: true, slug: true, klub: true, igrac: true, size: true, quantity: true, unitPrice: true } }
@@ -203,6 +204,7 @@ export async function GET(request: Request) {
       shippedBy: o.shippedBy || null,
       courier: o.courier || null,
       tracking: o.tracking || "",
+      pin: o.pin || null,
       promoCode: o.promoCode || null,
       cashCollected: o.cashCollected,
       risk: { ...riskFor(o), min: riskMinFailed },
