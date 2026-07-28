@@ -21,6 +21,14 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => ({}));
+
+  // Test slanja maila (za provjeru Resend/inbox) — pošalje "poslano" primjer na zadanu adresu.
+  const testEmail = String(body?.testEmail || "").trim();
+  if (testEmail) {
+    const r = await sendShippedTrackingEmail({ email: testEmail, customerName: "Test Kupac", tracking: "08025585905", courier: "gls" });
+    return NextResponse.json({ ok: true, test: true, configured: r.configured, sent: r.sent });
+  }
+
   const pin = String(body?.pin || "").trim();
   const tracking = String(body?.tracking || "").trim();
   const ime = String(body?.ime || "").trim();
