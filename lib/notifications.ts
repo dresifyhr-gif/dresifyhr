@@ -114,6 +114,51 @@ async function sendCustomerEmail(order: OrderPayload): Promise<ChannelResult> {
   }
 }
 
+// "Tvoja narudžba je poslana" + tracking broj + link za praćenje. Šalje se automatski
+// kad GLS tracking stigne (iz pin-import endpointa). Best-effort: ako SMTP nije
+// postavljen ili kupac nema email, tiho preskoči (ne ruši uvoz trackinga).
+export async function sendShippedTrackingEmail(o: {
+  email?: string | null;
+  customerName: string;
+  tracking: string;
+  courier?: string | null;
+}): Promise<{ configured: boolean; sent: boolean }> {
+  const transporter = createTransporter();
+  if (!transporter || !o.email?.trim()) return { configured: Boolean(transporter), sent: false };
+  try {
+    const from = process.env.ORDER_FROM_EMAIL?.trim() || process.env.SMTP_USER?.trim() || CONTACT_EMAIL;
+    const isHp = o.courier === "hp";
+    const courierName = isHp ? "Hrvatske pošte" : "GLS-a";
+    const trackUrl = isHp
+      ? "https://posiljka.posta.hr/"
+      : `https://gls-group.com/HR/hr/pracenje-posiljke?match=${encodeURIComponent(o.tracking)}`;
+    const first = (o.customerName || "").trim().split(/\s+/)[0] || "";
+    const subject = "Tvoja Dresify narudžba je poslana 🚚";
+    const text =
+      `Bok ${first}!\n\nTvoja narudžba je poslana putem ${courierName}.\n` +
+      `Broj pošiljke za praćenje: ${o.tracking}\nPrati paket: ${trackUrl}\n\n` +
+      `Plaćaš pouzećem kad paket stigne. Hvala na povjerenju!\nDresify`;
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;color:#111111;background:#ffffff;border:1px solid #eeeeee;">
+        <div style="background:#0A0A0A;color:#E8FF3C;padding:20px 24px;font-size:22px;font-weight:800;letter-spacing:1px;">DRESIFY</div>
+        <div style="padding:24px;background:#ffffff;">
+          <h1 style="font-size:20px;margin:0 0 12px;">Bok ${first}! Tvoja narudžba je poslana 🚚</h1>
+          <p style="font-size:15px;line-height:1.6;color:#333;margin:0 0 16px;">Poslana je putem <b>${courierName}</b>. Plaćaš pouzećem kad paket stigne.</p>
+          <div style="background:#F5F5F5;border-radius:10px;padding:16px;text-align:center;margin:0 0 16px;">
+            <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#888;">Broj pošiljke za praćenje</div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:2px;margin-top:4px;">${o.tracking}</div>
+          </div>
+          <a href="${trackUrl}" style="display:inline-block;background:#E8FF3C;color:#000;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:8px;">📦 Prati paket</a>
+          <p style="font-size:13px;color:#888;margin:20px 0 0;">Hvala na povjerenju! — Dresify</p>
+        </div>
+      </div>`;
+    await transporter.sendMail({ from, to: o.email.trim(), subject, text, html });
+    return { configured: true, sent: true };
+  } catch {
+    return { configured: true, sent: false };
+  }
+}
+
 async function sendWhatsAppViaTwilio(order: OrderPayload): Promise<ChannelResult> {
   const configured = hasEnvironment([
     "TWILIO_ACCOUNT_SID",

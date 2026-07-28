@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { sendShippedTrackingEmail } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,12 +31,15 @@ export async function POST(request: Request) {
   // Spaja se na narudžbu po paket.hr ID-u (koji smo spremili kad je stigao PIN).
   if (tracking) {
     if (!paketId) return NextResponse.json({ ok: false, message: "Tracking bez paketId" }, { status: 400 });
-    const ord = await prisma.order.findFirst({ where: { paketId }, select: { id: true, customerName: true, tracking: true } });
+    const ord = await prisma.order.findFirst({ where: { paketId }, select: { id: true, customerName: true, tracking: true, email: true, courier: true } });
     if (!ord) return NextResponse.json({ ok: true, matched: false, reason: "Nema narudžbe s tim paket.hr ID-om", paketId });
+    let emailed = false;
     if (ord.tracking !== tracking) {
       await prisma.order.update({ where: { id: ord.id }, data: { tracking } });
+      // Auto-mail kupcu "poslano + tracking" — samo kad tracking prvi put dođe (best-effort).
+      try { emailed = (await sendShippedTrackingEmail({ email: ord.email, customerName: ord.customerName, tracking, courier: ord.courier })).sent; } catch {}
     }
-    return NextResponse.json({ ok: true, matched: true, orderId: ord.id, customerName: ord.customerName, tracking });
+    return NextResponse.json({ ok: true, matched: true, orderId: ord.id, customerName: ord.customerName, tracking, emailed });
   }
 
   if (!pin || (!ime && !prezime)) {
