@@ -1,7 +1,7 @@
 export const SITE_NAME = "DRESIFY";
 export const SITE_URL = "https://dresifyshop.com";
 export const SITE_DESCRIPTION =
-  "Kupuj nogometne dresove online u Hrvatskoj — dresovi za djecu i odrasle. Svaki dres. Svaki klub. 20\u20ac.";
+  "Nogometni dresovi za djecu i odrasle — svi klubovi i reprezentacije, retro klasici. Vrhunska izrada, 20\u20ac, dostava po cijeloj Hrvatskoj uz pla\u0107anje pouze\u0107em.";
 export const WHATSAPP_NUMBER = "385976047510";
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 export const INSTAGRAM_HANDLE = "@dresify.hr";
