@@ -58,7 +58,7 @@ export function buildMetadata({
         {
           url: imageUrl,
           width: 1200,
-          height: 1166,
+          height: 630,
           alt: title
         }
       ]
