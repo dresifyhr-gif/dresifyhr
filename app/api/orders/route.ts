@@ -4,8 +4,36 @@ import { parseOrderPayload } from "@/lib/orders";
 import { sendOrderNotifications } from "@/lib/notifications";
 import { logOrderToSheet } from "@/lib/sheets";
 import { saveOrderToDb } from "@/lib/order-db";
+import { getProductBySlug } from "@/lib/data/product-overrides";
+import { getJerseyBySlug, getJerseySizeOptions } from "@/lib/data/jerseys";
 
 export const runtime = "nodejs";
+
+// Serverska provjera dostupnosti pri narudžbi — da rasprodana veličina/segment
+// NE prođe čak i ako je kupac imao staru (keširanu) stranicu otvorenu. Čita ažurno
+// stanje (keš override-a se briše na revalidateTag("products") čim admin spremi).
+// Fail-open: ako provjera pukne, ne blokira narudžbu (nikad ne rušimo prodaju).
+async function findUnavailableItems(items: { slug: string; klub: string; igrac: string; size: string }[]) {
+  const bad: string[] = [];
+  for (const it of items) {
+    if (!it.slug || !it.size) continue; // ručne stavke / bez veličine — preskoči
+    try {
+      const product = await getProductBySlug(it.slug, getJerseyBySlug(it.slug));
+      if (!product) continue; // nepoznat slug — ne blokiraj
+      const opts = getJerseySizeOptions(product);
+      const isAdultSize = (opts.adults as readonly string[]).includes(it.size);
+      const isKidSize = (opts.kids as readonly string[]).includes(it.size);
+      const oos =
+        (isAdultSize && opts.adultsOutOfStock) ||
+        (isKidSize && opts.kidsOutOfStock) ||
+        opts.soldOutSizes.includes(it.size);
+      if (oos) bad.push(`${product.klub} ${product.igrac} (${it.size})`.replace(/\s+/g, " ").trim());
+    } catch {
+      // fail-open — ne blokiraj narudžbu zbog greške u provjeri
+    }
+  }
+  return bad;
+}
 
 export async function POST(request: Request) {
   try {
@@ -19,6 +47,20 @@ export async function POST(request: Request) {
           message: errors[0]
         },
         { status: 400 }
+      );
+    }
+
+    // Odbij narudžbu za rasprodanu veličinu/segment PRIJE slanja obavijesti —
+    // da OOS narudžba nikad ne uđe (npr. kupac imao staru stranicu otvorenu).
+    const unavailable = await findUnavailableItems(payload!.items ?? []);
+    if (unavailable.length) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: "OUT_OF_STOCK",
+          message: `Nažalost, u međuvremenu je rasprodano: ${unavailable.join(", ")}. Ukloni iz košarice ili odaberi drugu veličinu.`
+        },
+        { status: 409 }
       );
     }
 
