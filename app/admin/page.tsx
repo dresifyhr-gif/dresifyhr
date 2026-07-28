@@ -235,7 +235,15 @@ export default async function AdminOverview() {
                 <div className="mt-3 space-y-1.5 text-sm">
                   <div className="flex justify-between gap-2 text-[#6e6e73]"><span>Poslano</span><span className="text-right font-semibold text-[#1d1d1f]">{komLabel(p.c.sentDresovi, p.c.sentKompleti)}</span></div>
                   <div className="flex justify-between gap-2 text-[#6e6e73]"><span>Prikupio</span><span className="text-right font-semibold text-emerald-600">{eur(p.c.collected)} <span className="font-normal text-[#8e8e93]">({komLabel(p.c.collectedDresovi, p.c.collectedKompleti)})</span></span></div>
-                  {p.c.pending > 0 && <div className="flex justify-between gap-2 text-[#6e6e73]"><span>Za prikupit (fali)</span><span className="font-semibold text-amber-600">{eur(p.c.pending)}</span></div>}
+                  {p.c.pending > 0 && (
+                    <div className="flex justify-between gap-2 text-[#6e6e73]">
+                      <span>Za prikupit (fali)</span>
+                      <span className="text-right">
+                        <span className="font-semibold text-amber-600">{eur(p.c.pending)}</span>
+                        <span className="block text-[11px] font-normal text-[#8e8e93]">od toga naše ~{eur(p.c.pendingMargin)} · svakom {eur(p.c.pendingMargin / 2)}</span>
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

@@ -250,7 +250,7 @@ export async function getDashboardMetrics() {
     // Vraćene pošiljke OD ZADNJEG PORAVNANJA — njihov trošak (4 € svaka) skida se sa zajedničke marže.
     prisma.order.count({ where: { status: "returned", ...sinceFilter } })
   ]);
-  const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, sentStreet: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, collectedStreet: 0, pending: 0 });
+  const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, sentStreet: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, collectedStreet: 0, pending: 0, pendingDresovi: 0, pendingKompleti: 0, pendingStreet: 0, pendingMargin: 0 });
   const cashSplit: Record<"igor" | "ivica", ReturnType<typeof mkCash>> = { igor: mkCash(), ivica: mkCash() };
   let freeDeliveries = 0; // prikupljene narudžbe s besplatnom dostavom (mi platili dostavu ~5€)
   for (const o of cashOrders) {
@@ -262,7 +262,12 @@ export async function getDashboardMetrics() {
     for (const it of o.items) { const q = it.quantity || 1; if (it.slug && streetwearSlugs.has(it.slug)) s += q; else if (isKomplet(it)) k += q; else d += q; }
     const b = cashSplit[who];
     b.sentCount++; b.sentDresovi += d; b.sentKompleti += k; b.sentStreet += s;
-    if (!o.cashCollected) b.pending += amt;
+    if (!o.cashCollected) { b.pending += amt; b.pendingDresovi += d; b.pendingKompleti += k; b.pendingStreet += s; }
+  }
+  // Neto marža neprikupljenog (fali) po osobi = bruto pending − nabava robe u tim narudžbama.
+  for (const who of ["igor", "ivica"] as const) {
+    const b = cashSplit[who];
+    b.pendingMargin = b.pending - (b.pendingDresovi * costDres + b.pendingKompleti * costKomplet + b.pendingStreet * costStreetwear);
   }
   let shipPLCollected = 0; // saldo dostave nad prikupljenim narudžbama (GLS marža − besplatne dostave)
   for (const o of collectedCashOrders) {
