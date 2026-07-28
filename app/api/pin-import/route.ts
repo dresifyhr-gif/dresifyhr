@@ -21,9 +21,23 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => ({}));
   const pin = String(body?.pin || "").trim();
+  const tracking = String(body?.tracking || "").trim();
   const ime = String(body?.ime || "").trim();
   const prezime = String(body?.prezime || "").trim();
   const paketId = String(body?.paketId || "").trim() || null;
+
+  // ── Uvoz TRACKING broja (drugi paket.hr mail, nakon predaje u paketomat) ──
+  // Spaja se na narudžbu po paket.hr ID-u (koji smo spremili kad je stigao PIN).
+  if (tracking) {
+    if (!paketId) return NextResponse.json({ ok: false, message: "Tracking bez paketId" }, { status: 400 });
+    const ord = await prisma.order.findFirst({ where: { paketId }, select: { id: true, customerName: true, tracking: true } });
+    if (!ord) return NextResponse.json({ ok: true, matched: false, reason: "Nema narudžbe s tim paket.hr ID-om", paketId });
+    if (ord.tracking !== tracking) {
+      await prisma.order.update({ where: { id: ord.id }, data: { tracking } });
+    }
+    return NextResponse.json({ ok: true, matched: true, orderId: ord.id, customerName: ord.customerName, tracking });
+  }
+
   if (!pin || (!ime && !prezime)) {
     return NextResponse.json({ ok: false, message: "Nedostaje pin ili ime" }, { status: 400 });
   }
