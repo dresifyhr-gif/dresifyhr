@@ -99,6 +99,7 @@ async function sendCustomerEmail(order: OrderPayload): Promise<ChannelResult> {
     await transporter.sendMail({
       from,
       to: order.email.trim(),
+      replyTo: process.env.REPLY_TO_EMAIL?.trim() || CONTACT_EMAIL, // odgovori kupaca → naš gmail
       subject: buildCustomerOrderSubject(order),
       text: buildCustomerOrderText(order),
       html: buildCustomerOrderHtml(order)
@@ -152,7 +153,7 @@ export async function sendShippedTrackingEmail(o: {
           <p style="font-size:13px;color:#888;margin:20px 0 0;">Hvala na povjerenju! — Dresify</p>
         </div>
       </div>`;
-    await transporter.sendMail({ from, to: o.email.trim(), subject, text, html });
+    await transporter.sendMail({ from, to: o.email.trim(), replyTo: process.env.REPLY_TO_EMAIL?.trim() || CONTACT_EMAIL, subject, text, html });
     return { configured: true, sent: true };
   } catch {
     return { configured: true, sent: false };
