@@ -209,11 +209,15 @@ export default async function AdminOverview() {
             <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
               <span className="text-[#6e6e73]">Prikupljeno <b className="ml-1 text-[#1d1d1f]">{eur(m.split.totalCollected)}</b></span>
               <span className="text-[#6e6e73]">− Roba natrag Ivici <b className="ml-1 text-[#1d1d1f]">{eur(m.split.collectedCost)}</b></span>
-              {m.split.returnLossSettle > 0 && (
-                <span className="text-[#6e6e73]">− Povrati <b className="ml-1 text-red-600">{eur(m.split.returnLossSettle)}</b> <span className="text-[#8e8e93]">({m.split.returnedSinceCount} vraćenih × {m.split.returnCostEach}€ · po {m.split.returnCostEach / 2}€ svakome)</span></span>
+              {m.split.shipPLCollected !== 0 && (
+                <span className="text-[#6e6e73]">
+                  {m.split.shipPLCollected >= 0 ? "+ Dostava (saldo)" : "− Dostava (saldo)"}
+                  <b className={`ml-1 ${m.split.shipPLCollected >= 0 ? "text-emerald-600" : "text-red-600"}`}>{eur(Math.abs(m.split.shipPLCollected))}</b>
+                  <span className="text-[#8e8e93]"> (GLS marža − besplatne dostave)</span>
+                </span>
               )}
-              {m.split.freeDeliveries > 0 && (
-                <span className="text-[#6e6e73]">− Dostave <b className="ml-1 text-[#1d1d1f]">{eur(m.split.freeShipCost)}</b> <span className="text-[#8e8e93]">({m.split.freeDeliveries} besplatnih × 3€)</span></span>
+              {m.split.returnShipLossSettle < 0 && (
+                <span className="text-[#6e6e73]">− Povrati <b className="ml-1 text-red-600">{eur(Math.abs(m.split.returnShipLossSettle))}</b> <span className="text-[#8e8e93]">({m.split.returnedSinceCount} vraćenih · po pola svakome)</span></span>
               )}
               <span className="text-[#6e6e73]">= Marža <b className="ml-1 text-emerald-600">{eur(m.split.collectedMargin)}</b> <span className="text-[#8e8e93]">· svakom {eur(m.split.marginHalf)}</span></span>
             </div>
