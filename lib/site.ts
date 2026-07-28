@@ -10,7 +10,7 @@ export const CONTACT_PHONE_DISPLAY = "+385 97 604 7510";
 export const CONTACT_EMAIL = "dresify.hr@gmail.com";
 export const CURRENCY_LABEL = "20\u20ac";
 export const DELIVERY_LABEL = "Dostava 2-5 dana po HR";
-export const DEFAULT_OG_IMAGE = "/og-default.png";
+export const DEFAULT_OG_IMAGE = "/og-banner-v2.png"; // nova adresa = zaobilazi FB/CDN keš stare slike
 export const JERSEY_PRICE_EUR = 20;
 
 // Zadane nabavne cijene (za profit/poravnanje) — mogu se prepisati u Postavkama.
