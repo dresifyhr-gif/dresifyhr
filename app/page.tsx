@@ -21,7 +21,7 @@ import { getServerTranslations } from "@/lib/get-server-translations";
 export const metadata = buildMetadata({
   title: "Dresovi — Nogometni dresovi za djecu i odrasle | 20€",
   description:
-    "Kupuj nogometne dresove online u Hrvatskoj. Dresovi za djecu i odrasle — Barcelona, Real Madrid, Hrvatska i retro klasici. Fiksna cijena 20€, dostava pouzećem.",
+    "Nogometni dresovi za djecu i odrasle — Barcelona, Real Madrid, Hrvatska i retro klasici. Vrhunska izrada, fiksna cijena 20€, dostava pouzećem po cijeloj Hrvatskoj.",
   path: "/",
   keywords: [
     "dresovi",
