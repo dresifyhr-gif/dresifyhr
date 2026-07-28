@@ -26,9 +26,8 @@ function isActive(pathname: string, href: string) {
 function Brand() {
   return (
     <Link href="/admin" className="flex items-center gap-2.5">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white">
-        D<span className="text-lime-400">R</span>
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/favicon.png" alt="Dresify" className="h-9 w-9 rounded-xl object-cover" />
       <div className="leading-tight">
         <div className="text-[15px] font-bold tracking-tight text-[#1d1d1f]">Dresify</div>
         <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8e8e93]">Admin</div>
