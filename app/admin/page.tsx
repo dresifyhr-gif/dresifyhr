@@ -81,7 +81,7 @@ export default async function AdminOverview() {
         <Stat
           label="Za prikupiti"
           value={eur(m.cashOverview.pendingTotal)}
-          sub={`${m.cashOverview.pendingCount} narudžbi · ${komLabel(m.cashOverview.pendingDresovi, m.cashOverview.pendingKompleti)}${m.cashOverview.pendingStreet ? ` + ${m.cashOverview.pendingStreet} street` : ""}`}
+          sub={`🚚 HP ${eur(m.cashOverview.pendingHP)} · GLS ${eur(m.cashOverview.pendingGLS)} · ${m.cashOverview.pendingCount} narudžbi`}
         />
         <Stat
           label="Poslano komada"

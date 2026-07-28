@@ -296,6 +296,7 @@ export async function getDashboardMetrics() {
   const cashOverview = {
     collectedTotal: 0, collectedDresovi: 0, collectedKompleti: 0, collectedStreet: 0, collectedCount: 0,
     pendingTotal: 0, pendingDresovi: 0, pendingKompleti: 0, pendingStreet: 0, pendingCount: 0,
+    pendingHP: 0, pendingGLS: 0, // koliko još fali prikupiti, razdvojeno po kuriru
     sentDresovi: 0, sentKompleti: 0, sentStreet: 0, sentCount: 0
   };
   for (const o of allSentOrders) {
@@ -309,6 +310,7 @@ export async function getDashboardMetrics() {
     } else {
       cashOverview.pendingCount++; cashOverview.pendingTotal += amt;
       cashOverview.pendingDresovi += d; cashOverview.pendingKompleti += k; cashOverview.pendingStreet += s;
+      if (o.courier === "hp") cashOverview.pendingHP += amt; else cashOverview.pendingGLS += amt; // null = GLS
     }
   }
 
