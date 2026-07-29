@@ -46,8 +46,10 @@ async function hpStatus(tracking: string): Promise<DeliveryStatus> {
 // Prođe kroz sve poslane narudžbe s trackingom (GLS + HP), dohvati status i spremi
 // deliveryStatus (deliveredAt kad je dostavljeno). Male grupe da ne gnjavimo kurire.
 export async function checkGlsDeliveries(opts: { dryRun?: boolean } = {}) {
+  // Samo NE-prikupljene — prikupljeno pouzeće znači da je paket dostavljen i posao završen,
+  // ne zanima nas više u praćenju dostave (i puno manje upita kuririma).
   const orders = await prisma.order.findMany({
-    where: { status: { in: ["shipped", "done"] } },
+    where: { status: { in: ["shipped", "done"] }, cashCollected: false },
     select: { id: true, customerName: true, tracking: true, courier: true, deliveryStatus: true }
   });
   const cand = orders.filter((o) => (o.tracking || "").trim());

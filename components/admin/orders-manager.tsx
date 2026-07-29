@@ -456,6 +456,7 @@ export function OrdersManager() {
   const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingDresovi: number; pendingKompleti: number; collectedTotal: number; collectedDresovi: number; collectedKompleti: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorDresovi: number; igorKompleti: number; ivicaDresovi: number; ivicaKompleti: number } | null>(null);
+  const [deliveredPending, setDeliveredPending] = useState<{ total: number; count: number } | null>(null);
   const [total, setTotal] = useState(0);
   const [filteredItems, setFilteredItems] = useState({ dresovi: 0, kompleti: 0 });
   const [cancelReasons, setCancelReasons] = useState<{ reason: string; count: number }[]>([]);
@@ -498,6 +499,7 @@ export function OrdersManager() {
         setPages(d.pages);
         setPage(p);
         if (d.cash) setCash(d.cash);
+        if (d.deliveredPending) setDeliveredPending(d.deliveredPending);
         setCancelReasons(Array.isArray(d.cancelReasons) ? d.cancelReasons : []);
       }
     } catch {
@@ -615,6 +617,9 @@ export function OrdersManager() {
           <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
             <span>Za prikupiti (poslano): <b className="text-amber-600">{eur(cash.pendingTotal)}</b> <span className="text-[#8e8e93]">· {cash.pendingCount} narudžbi · {komLabel(cash.pendingDresovi, cash.pendingKompleti)}</span></span>
             <span>Prikupljeno: <b className="text-emerald-600">{eur(cash.collectedTotal)}</b> <span className="text-[#8e8e93]">· {komLabel(cash.collectedDresovi, cash.collectedKompleti)}</span></span>
+            {deliveredPending && deliveredPending.count > 0 && (
+              <span title="Dostavljeno kupcu, još nenaplaćeno — novac koji treba sjesti na račun">💰 Za sjesti na račun (dostavljeno): <b className="text-sky-600">{eur(deliveredPending.total)}</b> <span className="text-[#8e8e93]">· {deliveredPending.count} narudžbi</span></span>
+            )}
           </div>
           <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-[#6e6e73]">
             <span>💰 Igor prikupio: <b className="text-[#1d1d1f]">{eur(cash.igorCollected)}</b> <span className="text-[#8e8e93]">({komLabel(cash.igorDresovi, cash.igorKompleti)})</span>{cash.igorPending > 0 ? <> · fali {eur(cash.igorPending)}</> : null}</span>
@@ -806,9 +811,9 @@ export function OrdersManager() {
                           🔑 {o.pin}
                         </button>
                       )}
-                      {o.deliveryStatus && (
+                      {o.deliveryStatus && !o.cashCollected && (
                         <span
-                          title="GLS status dostave (auto-provjera)"
+                          title="Status dostave (auto-provjera) — samo za nenaplaćene"
                           className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
                             o.deliveryStatus === "delivered" ? "bg-emerald-100 text-emerald-700"
                               : o.deliveryStatus === "transit" ? "bg-sky-100 text-sky-700"

@@ -119,9 +119,10 @@ export async function GET(request: Request) {
   if (courierF === "gls" || courierF === "hp") {
     filtered = filtered.filter((o) => isSent(o.status) && (courierF === "hp" ? o.courier === "hp" : o.courier !== "hp"));
   }
-  // Status dostave (GLS auto-provjera): dostavljeno / na dostavi / u pripremi.
+  // Status dostave (auto-provjera): dostavljeno / na dostavi / u pripremi.
+  // Samo NE-prikupljene — prikupljeno = završeno, ne prati se više dostava.
   if (deliveryF === "delivered" || deliveryF === "transit" || deliveryF === "prep") {
-    filtered = filtered.filter((o) => (o.deliveryStatus || "") === deliveryF);
+    filtered = filtered.filter((o) => (o.deliveryStatus || "") === deliveryF && !o.cashCollected);
   }
 
   if (sort === "old") {
@@ -187,6 +188,15 @@ export async function GET(request: Request) {
     }
   }
 
+  // Dostavljeno ali još NENAPLAĆENO — novac koji treba sjesti na račun (pouzeće u pipelineu).
+  let deliveredPendingTotal = 0, deliveredPendingCount = 0;
+  for (const o of all) {
+    if (isSent(o.status) && o.deliveryStatus === "delivered" && !o.cashCollected) {
+      deliveredPendingTotal += o.total - (o.shipping ?? 0);
+      deliveredPendingCount++;
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     page,
@@ -195,6 +205,7 @@ export async function GET(request: Request) {
     filteredDresovi,
     filteredKompleti,
     cash,
+    deliveredPending: { total: deliveredPendingTotal, count: deliveredPendingCount },
     cancelReasons,
     orders: slice.map((o) => ({
       id: o.id,
