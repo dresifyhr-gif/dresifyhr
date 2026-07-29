@@ -1,11 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { formatCroatianPhone, phoneKey } from "@/lib/utils";
 import { waLink } from "@/components/admin/ui";
 
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
+
+// Čista stat-pločica za sažetke (ikona u boji + velika brojka + podnaslov).
+const TILE_TONES: Record<string, string> = {
+  amber: "bg-amber-50 text-amber-600",
+  sky: "bg-sky-50 text-sky-600",
+  emerald: "bg-emerald-50 text-emerald-600",
+  slate: "bg-slate-100 text-slate-600"
+};
+function Tile({ icon, label, value, sub, tone }: { icon: string; label: string; value: string; sub?: ReactNode; tone: keyof typeof TILE_TONES }) {
+  return (
+    <div className="rounded-2xl border border-black/[0.05] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="flex items-center gap-3">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg ${TILE_TONES[tone]}`}>{icon}</div>
+        <div className="min-w-0">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8e8e93]">{label}</div>
+          <div className="truncate text-[19px] font-bold leading-tight text-[#1d1d1f]">{value}</div>
+        </div>
+      </div>
+      {sub ? <div className="mt-2 text-[11px] text-[#6e6e73]">{sub}</div> : null}
+    </div>
+  );
+}
 
 // "12 dresova + 3 kompleta" (izostavi dio koji je 0; ako oba 0 → "0 kom").
 const komLabel = (dresovi: number, kompleti: number) => {
@@ -613,15 +635,23 @@ export function OrdersManager() {
       </div>
       {showNew && <NewOrderForm onCreated={() => { setShowNew(false); fetchPage(q, 1, false); }} />}
       {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (
-        <div className="a-sub mb-4 p-3">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
-            <span>Za prikupiti (poslano): <b className="text-amber-600">{eur(cash.pendingTotal)}</b> <span className="text-[#8e8e93]">· {cash.pendingCount} narudžbi · {komLabel(cash.pendingDresovi, cash.pendingKompleti)}</span></span>
-            <span>Prikupljeno: <b className="text-emerald-600">{eur(cash.collectedTotal)}</b> <span className="text-[#8e8e93]">· {komLabel(cash.collectedDresovi, cash.collectedKompleti)}</span></span>
-            {deliveredPending && deliveredPending.count > 0 && (
-              <span title="Dostavljeno kupcu, još nenaplaćeno — novac koji treba sjesti na račun">💰 Za sjesti na račun (dostavljeno): <b className="text-sky-600">{eur(deliveredPending.total)}</b> <span className="text-[#8e8e93]">· {deliveredPending.count} narudžbi</span></span>
-            )}
+        <div className="mb-4">
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+            <Tile
+              icon="🛍️" tone="amber" label="Za prikupiti (poslano)" value={eur(cash.pendingTotal)}
+              sub={`${cash.pendingCount} narudžbi · ${komLabel(cash.pendingDresovi, cash.pendingKompleti)}`}
+            />
+            <Tile
+              icon="🚚" tone="sky" label="Za sjesti na račun"
+              value={eur(deliveredPending?.total ?? 0)}
+              sub={`${deliveredPending?.count ?? 0} dostavljeno · nenaplaćeno`}
+            />
+            <Tile
+              icon="📦" tone="emerald" label="Prikupljeno" value={eur(cash.collectedTotal)}
+              sub={komLabel(cash.collectedDresovi, cash.collectedKompleti)}
+            />
           </div>
-          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-[#6e6e73]">
+          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 px-1 text-xs text-[#6e6e73]">
             <span>💰 Igor prikupio: <b className="text-[#1d1d1f]">{eur(cash.igorCollected)}</b> <span className="text-[#8e8e93]">({komLabel(cash.igorDresovi, cash.igorKompleti)})</span>{cash.igorPending > 0 ? <> · fali {eur(cash.igorPending)}</> : null}</span>
             <span>💰 Ivica prikupila: <b className="text-[#1d1d1f]">{eur(cash.ivicaCollected)}</b> <span className="text-[#8e8e93]">({komLabel(cash.ivicaDresovi, cash.ivicaKompleti)})</span>{cash.ivicaPending > 0 ? <> · fali {eur(cash.ivicaPending)}</> : null}</span>
           </div>
