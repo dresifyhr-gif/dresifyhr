@@ -31,7 +31,7 @@ type Order = {
   courier: string | null; // "gls" | "hp" — preko kojeg kurira je poslano
   tracking: string;
   pin: string | null; // GLS paketomat PIN (auto-uvoz iz paket.hr)
-  delivered: boolean; // GLS označio dostavljeno (auto-provjera)
+  deliveryStatus: "prep" | "transit" | "delivered" | null; // GLS status dostave (auto-provjera)
   promoCode: string | null;
   cashCollected: boolean;
   risk?: { failed: number; collected: number; priorOrders: number; min?: number };
@@ -447,6 +447,7 @@ export function OrdersManager() {
   const [shipper, setShipper] = useState(""); // "" | igor | ivica
   const [cashF, setCashF] = useState(""); // "" | collected | pending
   const [courierF, setCourierF] = useState(""); // "" | gls | hp
+  const [deliveryF, setDeliveryF] = useState(""); // "" | delivered | transit | prep
   const [sort, setSort] = useState(""); // "" new-first | new | old
   const [editing, setEditing] = useState<string | null>(null);
   const [editingContact, setEditingContact] = useState<string | null>(null);
@@ -478,13 +479,15 @@ export function OrdersManager() {
   cashRef.current = cashF;
   const courierRef = useRef("");
   courierRef.current = courierF;
+  const deliveryRef = useRef("");
+  deliveryRef.current = deliveryF;
 
   const fetchPage = useCallback(async (query: string, p: number, append: boolean) => {
     const my = ++reqId.current;
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/admin/orders/search/?q=${encodeURIComponent(query)}&status=${statusRef.current}&shipper=${shipperRef.current}&cash=${cashRef.current}&courier=${courierRef.current}&sort=${sortRef.current}&page=${p}`
+        `/api/admin/orders/search/?q=${encodeURIComponent(query)}&status=${statusRef.current}&shipper=${shipperRef.current}&cash=${cashRef.current}&courier=${courierRef.current}&delivery=${deliveryRef.current}&sort=${sortRef.current}&page=${p}`
       );
       const d = await res.json();
       if (my !== reqId.current) return; // stale response, ignore
@@ -514,7 +517,7 @@ export function OrdersManager() {
     clearTimeout(debounce.current);
     debounce.current = setTimeout(() => fetchPage(q, 1, false), 300);
     return () => clearTimeout(debounce.current);
-  }, [q, status, shipper, cashF, courierF, sort, fetchPage]);
+  }, [q, status, shipper, cashF, courierF, deliveryF, sort, fetchPage]);
 
   // infinite scroll
   useEffect(() => {
@@ -552,7 +555,7 @@ export function OrdersManager() {
     const res = await fetch("/api/admin/gls-check/", { method: "POST" }).then((r) => r.json()).catch(() => null);
     setGlsChecking(false);
     if (res?.ok) {
-      alert(`GLS provjera gotova.\nProvjereno: ${res.checked}\nNovih dostavljeno: ${res.delivered}`);
+      alert(`GLS provjera gotova (${res.checked} pošiljki).\n✅ Dostavljeno: ${res.delivered} · 🚚 Na dostavi: ${res.transit} · 📦 U pripremi: ${res.prep}\nNovih dostavljeno: ${res.newlyDelivered}`);
       await fetchPage(q, 1, false);
     } else {
       alert("Greška pri provjeri dostave. Pokušaj ponovno.");
@@ -685,10 +688,23 @@ export function OrdersManager() {
             </button>
           ))}
         </div>
-        {(shipper || cashF || courierF) && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Dostava</span>
+          {[{ v: "", l: "Sve" }, { v: "delivered", l: "✅ Dostavljeno" }, { v: "transit", l: "🚚 Na dostavi" }, { v: "prep", l: "📦 U pripremi" }].map((o) => (
+            <button
+              key={o.v}
+              type="button"
+              onClick={() => setDeliveryF(o.v)}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${deliveryF === o.v ? "bg-slate-900 text-white" : "border border-black/[0.06] bg-white text-[#6e6e73] hover:bg-black/[0.03]"}`}
+            >
+              {o.l}
+            </button>
+          ))}
+        </div>
+        {(shipper || cashF || courierF || deliveryF) && (
           <button
             type="button"
-            onClick={() => { setShipper(""); setCashF(""); setCourierF(""); }}
+            onClick={() => { setShipper(""); setCashF(""); setCourierF(""); setDeliveryF(""); }}
             className="ml-auto text-[11px] font-semibold text-[#8e8e93] underline decoration-dotted hover:text-[#1d1d1f]"
           >
             ↺ Poništi
@@ -790,9 +806,16 @@ export function OrdersManager() {
                           🔑 {o.pin}
                         </button>
                       )}
-                      {o.delivered && (
-                        <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700" title="GLS: dostavljeno primatelju">
-                          ✅ Dostavljeno
+                      {o.deliveryStatus && (
+                        <span
+                          title="GLS status dostave (auto-provjera)"
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                            o.deliveryStatus === "delivered" ? "bg-emerald-100 text-emerald-700"
+                              : o.deliveryStatus === "transit" ? "bg-sky-100 text-sky-700"
+                              : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          {o.deliveryStatus === "delivered" ? "✅ Dostavljeno" : o.deliveryStatus === "transit" ? "🚚 Na dostavi" : "📦 U pripremi"}
                         </span>
                       )}
                       {o.risk && o.risk.failed >= (o.risk.min ?? 1) && o.risk.failed > 0 && (

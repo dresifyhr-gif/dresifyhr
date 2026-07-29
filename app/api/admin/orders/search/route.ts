@@ -30,6 +30,7 @@ export async function GET(request: Request) {
   const shipper = url.searchParams.get("shipper") || ""; // "" | igor | ivica  (tko je poslao)
   const cashF = url.searchParams.get("cash") || ""; // "" | collected | pending  (naplata poslanih)
   const courierF = url.searchParams.get("courier") || ""; // "" | gls | hp  (kurir poslanih)
+  const deliveryF = url.searchParams.get("delivery") || ""; // "" | delivered | transit | prep  (GLS status dostave)
   const sort = url.searchParams.get("sort") || ""; // "" (new-first) | old | new
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
 
@@ -54,6 +55,7 @@ export async function GET(request: Request) {
       tracking: true,
       pin: true,
       deliveredAt: true,
+      deliveryStatus: true,
       promoCode: true,
       cashCollected: true,
       items: { select: { id: true, slug: true, klub: true, igrac: true, size: true, quantity: true, unitPrice: true } }
@@ -116,6 +118,10 @@ export async function GET(request: Request) {
   // Kurir — poslane preko GLS-a ili HP-a. null tretiramo kao GLS (kao i prikaz).
   if (courierF === "gls" || courierF === "hp") {
     filtered = filtered.filter((o) => isSent(o.status) && (courierF === "hp" ? o.courier === "hp" : o.courier !== "hp"));
+  }
+  // Status dostave (GLS auto-provjera): dostavljeno / na dostavi / u pripremi.
+  if (deliveryF === "delivered" || deliveryF === "transit" || deliveryF === "prep") {
+    filtered = filtered.filter((o) => (o.deliveryStatus || "") === deliveryF);
   }
 
   if (sort === "old") {
@@ -207,6 +213,7 @@ export async function GET(request: Request) {
       tracking: o.tracking || "",
       pin: o.pin || null,
       delivered: !!o.deliveredAt,
+      deliveryStatus: o.deliveryStatus || null,
       promoCode: o.promoCode || null,
       cashCollected: o.cashCollected,
       risk: { ...riskFor(o), min: riskMinFailed },
