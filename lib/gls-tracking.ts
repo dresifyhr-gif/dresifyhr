@@ -2,15 +2,17 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 
-// Čita GLS tracking stranicu (nema službeni API) i mapira status u 3 kategorije:
-//  "delivered" = 05-Dostavljeno (isporučeno primatelju)
-//  "transit"   = u mreži / na dostavi (03-Depo ulaz, 04-Sken dostavne liste)
-//  "prep"      = tek predano / u obradi (97-Predano u Paketomat, 85/84-P&S, 01-APL…)
+// Čita status dostave s tracking stranica kurira (nema službeni API) i mapira u:
+//  "delivered" = uručeno / dostavljeno primatelju
+//  "transit"   = u mreži / na dostavi
+//  "prep"      = tek zaprimljeno / u obradi
 const GLS_TT = "https://online.gls-croatia.com/tt_page.php?tt_value=";
+const HP_TT = "https://posiljka.posta.hr/hr/tracking/trackingdata?barcode=";
 
-export type GlsStatus = "delivered" | "transit" | "prep" | null;
+export type DeliveryStatus = "delivered" | "transit" | "prep" | null;
 
-export async function glsStatus(tracking: string): Promise<GlsStatus> {
+// GLS: statusi tipa "05-Dostavljeno", "04-Sken dostavne liste", "03-Depo ulaz"…
+async function glsStatus(tracking: string): Promise<DeliveryStatus> {
   try {
     const res = await fetch(GLS_TT + encodeURIComponent(tracking), { signal: AbortSignal.timeout(12000) });
     if (!res.ok) return null;
@@ -23,12 +25,30 @@ export async function glsStatus(tracking: string): Promise<GlsStatus> {
   }
 }
 
-// Prođe kroz sve poslane GLS narudžbe s trackingom, dohvati GLS status i spremi ga
-// (deliveryStatus; deliveredAt kad je dostavljeno). Male grupe da ne gnjavimo GLS.
+// HP (Hrvatska pošta): "Uručeno" (č kao &#x10D; entitet), "Otprema", "zaprimljeno"…
+async function hpStatus(tracking: string): Promise<DeliveryStatus> {
+  try {
+    const res = await fetch(HP_TT + encodeURIComponent(tracking), {
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      signal: AbortSignal.timeout(12000)
+    });
+    if (!res.ok) return null;
+    const t = (await res.text()).replace(/<[^>]*>/g, " ");
+    // "Uru\S{0,10}eno" hvata i "Uručeno" i HTML-kodirano "Uru&#x10D;eno".
+    if (/Uru\S{0,10}eno|Isporu\S{0,10}eno|Dostavljeno/i.test(t)) return "delivered";
+    if (/Otprem|prispje|u dostavi|dostavlja|izlazn|u prijenosu/i.test(t)) return "transit";
+    return "prep";
+  } catch {
+    return null;
+  }
+}
+
+// Prođe kroz sve poslane narudžbe s trackingom (GLS + HP), dohvati status i spremi
+// deliveryStatus (deliveredAt kad je dostavljeno). Male grupe da ne gnjavimo kurire.
 export async function checkGlsDeliveries(opts: { dryRun?: boolean } = {}) {
   const orders = await prisma.order.findMany({
-    where: { status: { in: ["shipped", "done"] }, courier: { not: "hp" } },
-    select: { id: true, customerName: true, tracking: true, deliveryStatus: true }
+    where: { status: { in: ["shipped", "done"] } },
+    select: { id: true, customerName: true, tracking: true, courier: true, deliveryStatus: true }
   });
   const cand = orders.filter((o) => (o.tracking || "").trim());
   const counts = { delivered: 0, transit: 0, prep: 0, unknown: 0 };
@@ -37,7 +57,11 @@ export async function checkGlsDeliveries(opts: { dryRun?: boolean } = {}) {
   for (let i = 0; i < cand.length; i += BATCH) {
     const chunk = cand.slice(i, i + BATCH);
     const results = await Promise.all(
-      chunk.map(async (o) => ({ o, st: await glsStatus((o.tracking || "").trim()) }))
+      chunk.map(async (o) => {
+        const tr = (o.tracking || "").trim();
+        const st = o.courier === "hp" ? await hpStatus(tr) : await glsStatus(tr);
+        return { o, st };
+      })
     );
     for (const { o, st } of results) {
       if (!st) { counts.unknown++; continue; }
