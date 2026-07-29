@@ -29,6 +29,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, test: true, configured: r.configured, sent: r.sent });
   }
 
+  // Backfill "poslano" maila za već poslane narudžbe s trackingom koje kupci nisu dobili.
+  // dryRun (default) samo vrati listu; slanje tek kad se izričito pošalje dryRun:false.
+  if (body?.backfill === true) {
+    const sinceDays = Number(body?.sinceDays) > 0 ? Number(body.sinceDays) : 3;
+    const dryRun = body?.dryRun !== false;
+    const exclude = new Set((Array.isArray(body?.exclude) ? body.exclude : []).map((e: string) => String(e).toLowerCase().trim()));
+    const cutoff = new Date(Date.now() - sinceDays * 86_400_000);
+    const rows = await prisma.order.findMany({
+      where: { status: { in: ["shipped", "done"] }, shippedEmailAt: null, shippedAt: { gte: cutoff } },
+      select: { id: true, customerName: true, email: true, tracking: true, courier: true, shippedAt: true }
+    });
+    const cand = rows.filter((o) => (o.tracking || "").trim() && (o.email || "").trim() && !exclude.has((o.email || "").toLowerCase().trim()));
+    if (dryRun) {
+      return NextResponse.json({
+        ok: true, backfill: true, dryRun: true, count: cand.length,
+        preview: cand.map((o) => ({ ime: o.customerName, email: o.email, tracking: o.tracking, poslano: o.shippedAt }))
+      });
+    }
+    let sent = 0;
+    for (const o of cand) {
+      try {
+        const r = await sendShippedTrackingEmail({ email: o.email, customerName: o.customerName, tracking: (o.tracking || "").trim(), courier: o.courier });
+        if (r.sent) { await prisma.order.update({ where: { id: o.id }, data: { shippedEmailAt: new Date() } }); sent++; }
+      } catch {}
+    }
+    return NextResponse.json({ ok: true, backfill: true, sent, total: cand.length });
+  }
+
   const pin = String(body?.pin || "").trim();
   const tracking = String(body?.tracking || "").trim();
   const ime = String(body?.ime || "").trim();
@@ -39,13 +67,18 @@ export async function POST(request: Request) {
   // Spaja se na narudžbu po paket.hr ID-u (koji smo spremili kad je stigao PIN).
   if (tracking) {
     if (!paketId) return NextResponse.json({ ok: false, message: "Tracking bez paketId" }, { status: 400 });
-    const ord = await prisma.order.findFirst({ where: { paketId }, select: { id: true, customerName: true, tracking: true, email: true, courier: true } });
+    const ord = await prisma.order.findFirst({ where: { paketId }, select: { id: true, customerName: true, tracking: true, email: true, courier: true, shippedEmailAt: true } });
     if (!ord) return NextResponse.json({ ok: true, matched: false, reason: "Nema narudžbe s tim paket.hr ID-om", paketId });
     let emailed = false;
     if (ord.tracking !== tracking) {
       await prisma.order.update({ where: { id: ord.id }, data: { tracking } });
-      // Auto-mail kupcu "poslano + tracking" — samo kad tracking prvi put dođe (best-effort).
-      try { emailed = (await sendShippedTrackingEmail({ email: ord.email, customerName: ord.customerName, tracking, courier: ord.courier })).sent; } catch {}
+      // Auto-mail kupcu "poslano + tracking" — samo kad tracking prvi put dođe i ako nije već poslan (dedup).
+      if (!ord.shippedEmailAt) {
+        try {
+          const r = await sendShippedTrackingEmail({ email: ord.email, customerName: ord.customerName, tracking, courier: ord.courier });
+          if (r.sent) { await prisma.order.update({ where: { id: ord.id }, data: { shippedEmailAt: new Date() } }); emailed = true; }
+        } catch {}
+      }
     }
     return NextResponse.json({ ok: true, matched: true, orderId: ord.id, customerName: ord.customerName, tracking, emailed });
   }
