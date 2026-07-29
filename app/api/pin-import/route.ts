@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { sendShippedTrackingEmail } from "@/lib/notifications";
+import { checkGlsDeliveries } from "@/lib/gls-tracking";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 // Automatski uvoz GLS paketomat PIN-ova iz paket.hr mailova.
 // Google Apps Script čita nove mailove, izvuče PIN + ime primatelja + paket.hr ID,
@@ -27,6 +29,12 @@ export async function POST(request: Request) {
   if (testEmail) {
     const r = await sendShippedTrackingEmail({ email: testEmail, customerName: "Test Kupac", tracking: "08025585905", courier: "gls" });
     return NextResponse.json({ ok: true, test: true, configured: r.configured, sent: r.sent });
+  }
+
+  // Provjera GLS dostave — čita tracking stranicu za sve poslane GLS pošiljke i označi dostavljene.
+  if (body?.glsCheck === true) {
+    const r = await checkGlsDeliveries({ dryRun: body?.dryRun === true });
+    return NextResponse.json({ ok: true, glsCheck: true, dryRun: body?.dryRun === true, ...r });
   }
 
   // Backfill "poslano" maila za već poslane narudžbe s trackingom koje kupci nisu dobili.

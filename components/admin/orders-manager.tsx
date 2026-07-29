@@ -31,6 +31,7 @@ type Order = {
   courier: string | null; // "gls" | "hp" — preko kojeg kurira je poslano
   tracking: string;
   pin: string | null; // GLS paketomat PIN (auto-uvoz iz paket.hr)
+  delivered: boolean; // GLS označio dostavljeno (auto-provjera)
   promoCode: string | null;
   cashCollected: boolean;
   risk?: { failed: number; collected: number; priorOrders: number; min?: number };
@@ -463,6 +464,7 @@ export function OrdersManager() {
   const [busy, setBusy] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [glsChecking, setGlsChecking] = useState(false);
   const debounce = useRef<ReturnType<typeof setTimeout>>();
   const sentinel = useRef<HTMLDivElement>(null);
   const reqId = useRef(0);
@@ -543,6 +545,20 @@ export function OrdersManager() {
     setBusy(null);
   }
 
+  // Provjeri GLS dostavu za sve poslane pošiljke i označi dostavljene.
+  async function checkDeliveries() {
+    if (glsChecking) return;
+    setGlsChecking(true);
+    const res = await fetch("/api/admin/gls-check/", { method: "POST" }).then((r) => r.json()).catch(() => null);
+    setGlsChecking(false);
+    if (res?.ok) {
+      alert(`GLS provjera gotova.\nProvjereno: ${res.checked}\nNovih dostavljeno: ${res.delivered}`);
+      await fetchPage(q, 1, false);
+    } else {
+      alert("Greška pri provjeri dostave. Pokušaj ponovno.");
+    }
+  }
+
   function toggleSel(id: string) {
     setSelected((cur) => {
       const next = new Set(cur);
@@ -580,6 +596,15 @@ export function OrdersManager() {
         >
           ⬇️ Izvezi Excel{total > 0 ? ` (${total})` : ""}
         </a>
+        <button
+          type="button"
+          onClick={checkDeliveries}
+          disabled={glsChecking}
+          title="Provjeri na GLS-u koje su pošiljke dostavljene i označi ih (može potrajati par sekundi)"
+          className="rounded-[10px] border border-sky-300 bg-sky-50 px-3 py-1.5 text-[12px] font-semibold text-sky-700 transition hover:bg-sky-100 disabled:opacity-50"
+        >
+          {glsChecking ? "⏳ Provjeravam…" : "🚚 Provjeri dostave (GLS)"}
+        </button>
       </div>
       {showNew && <NewOrderForm onCreated={() => { setShowNew(false); fetchPage(q, 1, false); }} />}
       {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (
@@ -764,6 +789,11 @@ export function OrdersManager() {
                         >
                           🔑 {o.pin}
                         </button>
+                      )}
+                      {o.delivered && (
+                        <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700" title="GLS: dostavljeno primatelju">
+                          ✅ Dostavljeno
+                        </span>
                       )}
                       {o.risk && o.risk.failed >= (o.risk.min ?? 1) && o.risk.failed > 0 && (
                         <span
