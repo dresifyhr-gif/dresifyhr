@@ -15,7 +15,8 @@ const TILE_TONES: Record<string, string> = {
   emerald: "bg-[var(--a-good-bg)] text-[var(--a-good)]",
   slate: "bg-[var(--a-surface-2)] text-[var(--a-text-2)]"
 };
-function Tile({ icon, label, value, sub, tone, hero }: { icon: string; label: string; value: string; sub?: ReactNode; tone: keyof typeof TILE_TONES; hero?: boolean }) {
+function Tile({ icon, label, value, sub, tone, hero, progress }: { icon: string; label: string; value: string; sub?: ReactNode; tone: keyof typeof TILE_TONES; hero?: boolean; progress?: { pct: number; caption: ReactNode } }) {
+  const pct = progress ? Math.max(0, Math.min(100, Math.round(progress.pct * 100))) : 0;
   return (
     <div className={`relative overflow-hidden rounded-2xl border bg-[var(--a-card)] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${hero ? "border-[var(--a-accent)]/40" : "border-[var(--a-line)]"}`}>
       {hero && (
@@ -30,6 +31,17 @@ function Tile({ icon, label, value, sub, tone, hero }: { icon: string; label: st
       </div>
       <div className="mt-2.5 text-[24px] font-extrabold leading-none tracking-[-0.02em] text-[var(--a-text)] tabular-nums">{value}</div>
       {sub ? <div className="mt-2.5 text-[11.5px] leading-snug text-[var(--a-text-2)]">{sub}</div> : null}
+      {progress ? (
+        <div className="mt-3">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--a-surface-2)]">
+            <div className="h-full rounded-full bg-[var(--a-good)] transition-[width] duration-500 ease-out" style={{ width: `${pct}%` }} />
+          </div>
+          <div className="mt-1.5 flex items-center justify-between text-[10.5px] font-semibold text-[var(--a-text-3)]">
+            <span className="text-[var(--a-good)]">{pct}%</span>
+            <span>{progress.caption}</span>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -682,6 +694,10 @@ export function OrdersManager() {
             <Tile
               icon="📦" tone="emerald" label="Prikupljeno" value={eur(cash.collectedTotal)}
               sub={komLabel(cash.collectedDresovi, cash.collectedKompleti)}
+              progress={{
+                pct: cash.collectedTotal + cash.pendingTotal > 0 ? cash.collectedTotal / (cash.collectedTotal + cash.pendingTotal) : 0,
+                caption: <>od {eur(cash.collectedTotal + cash.pendingTotal)} poslano</>
+              }}
             />
           </div>
           <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 px-1 text-xs text-[var(--a-text-2)]">
