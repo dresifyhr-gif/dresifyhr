@@ -15,6 +15,13 @@ const TILE_TONES: Record<string, string> = {
   emerald: "bg-[var(--a-good-bg)] text-[var(--a-good)]",
   slate: "bg-[var(--a-surface-2)] text-[var(--a-text-2)]"
 };
+// Boja progress-bara po tonu kartice (usklađeno s ikonom).
+const BAR_TONES: Record<string, string> = {
+  amber: "var(--a-warn)",
+  sky: "var(--a-info)",
+  emerald: "var(--a-good)",
+  slate: "var(--a-text-3)"
+};
 function Tile({ icon, label, value, sub, tone, hero, progress }: { icon: string; label: string; value: string; sub?: ReactNode; tone: keyof typeof TILE_TONES; hero?: boolean; progress?: { pct: number; caption: ReactNode } }) {
   const pct = progress ? Math.max(0, Math.min(100, Math.round(progress.pct * 100))) : 0;
   return (
@@ -34,10 +41,10 @@ function Tile({ icon, label, value, sub, tone, hero, progress }: { icon: string;
       {progress ? (
         <div className="mt-3">
           <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--a-surface-2)]">
-            <div className="h-full rounded-full bg-[var(--a-good)] transition-[width] duration-500 ease-out" style={{ width: `${pct}%` }} />
+            <div className="h-full rounded-full transition-[width] duration-500 ease-out" style={{ width: `${pct}%`, background: BAR_TONES[tone] }} />
           </div>
           <div className="mt-1.5 flex items-center justify-between text-[10.5px] font-semibold text-[var(--a-text-3)]">
-            <span className="text-[var(--a-good)]">{pct}%</span>
+            <span style={{ color: BAR_TONES[tone] }}>{pct}%</span>
             <span>{progress.caption}</span>
           </div>
         </div>
@@ -678,25 +685,37 @@ export function OrdersManager() {
         </button>
       </div>
       {showNew && <NewOrderForm onCreated={() => { setShowNew(false); fetchPage(q, 1, false); }} />}
-      {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (
+      {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (() => {
+        // "Kolač" = ukupno poslano u pouzeću (prikupljeno + za prikupiti). Sve tri pločice
+        // pokazuju svoj udio tog istog iznosa, pa se progress-barovi nadovezuju.
+        const kolac = cash.collectedTotal + cash.pendingTotal;
+        return (
         <div className="mb-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Tile
               hero
               icon="🛍️" tone="amber" label="Za prikupiti · poslano" value={eur(cash.pendingTotal)}
               sub={`${cash.pendingCount} narudžbi · ${komLabel(cash.pendingDresovi, cash.pendingKompleti)}`}
+              progress={{
+                pct: kolac > 0 ? cash.pendingTotal / kolac : 0,
+                caption: <>još otvoreno</>
+              }}
             />
             <Tile
               icon="🚚" tone="sky" label="Za sjesti na račun · dostavljeno"
               value={eur(deliveredPending?.total ?? 0)}
               sub={`${deliveredPending?.count ?? 0} dostavljeno · nenaplaćeno`}
+              progress={{
+                pct: kolac > 0 ? (deliveredPending?.total ?? 0) / kolac : 0,
+                caption: <>spremno za račun</>
+              }}
             />
             <Tile
               icon="📦" tone="emerald" label="Prikupljeno" value={eur(cash.collectedTotal)}
               sub={komLabel(cash.collectedDresovi, cash.collectedKompleti)}
               progress={{
-                pct: cash.collectedTotal + cash.pendingTotal > 0 ? cash.collectedTotal / (cash.collectedTotal + cash.pendingTotal) : 0,
-                caption: <>od {eur(cash.collectedTotal + cash.pendingTotal)} poslano</>
+                pct: kolac > 0 ? cash.collectedTotal / kolac : 0,
+                caption: <>od {eur(kolac)} poslano</>
               }}
             />
           </div>
@@ -705,7 +724,8 @@ export function OrdersManager() {
             <span>💰 Ivica prikupila: <b className="text-[var(--a-text)]">{eur(cash.ivicaCollected)}</b> <span className="text-[var(--a-text-3)]">({komLabel(cash.ivicaDresovi, cash.ivicaKompleti)})</span>{cash.ivicaPending > 0 ? <> · fali {eur(cash.ivicaPending)}</> : null}</span>
           </div>
         </div>
-      )}
+        );
+      })()}
       <div className="mb-3 flex flex-wrap gap-1.5">
         {TABS.map((tb) => (
           <button
