@@ -82,8 +82,8 @@ export function PromoManager() {
       <div className="a-card p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <div className="text-[15px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">Popust-kodovi</div>
-            <div className="mt-0.5 text-[12px] text-[#8e8e93]">
+            <div className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--a-text)]">Popust-kodovi</div>
+            <div className="mt-0.5 text-[12px] text-[var(--a-text-3)]">
               {loading ? "Učitavam…" : `${codes.length} kodova · mijenjaj bez diranja koda`}
             </div>
           </div>
@@ -97,7 +97,7 @@ export function PromoManager() {
         </div>
 
         {open && (
-          <div className="mt-4 rounded-[12px] bg-black/[0.03] p-3">
+          <div className="mt-4 rounded-[12px] bg-[var(--a-surface-2)] p-3">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <span className={lbl}>Šifra koda</span>
@@ -142,7 +142,7 @@ export function PromoManager() {
               <button type="button" onClick={save} disabled={saving || !f.code.trim()} className="a-btn a-btn-primary px-4 py-2 text-sm disabled:opacity-40">
                 {saving ? "Spremam…" : "Spremi kod"}
               </button>
-              <label className="flex cursor-pointer items-center gap-1.5 text-[13px] text-[#6e6e73]">
+              <label className="flex cursor-pointer items-center gap-1.5 text-[13px] text-[var(--a-text-2)]">
                 <input type="checkbox" checked={f.active} onChange={(e) => setF({ ...f, active: e.target.checked })} className="h-4 w-4 accent-[#1d1d1f]" />
                 Aktivan
               </label>
@@ -159,25 +159,25 @@ export function PromoManager() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-[10px] bg-black/[0.06] px-2 py-0.5 font-mono text-[13px] font-bold text-[#1d1d1f]">{c.code}</span>
-                    <span className="text-[13px] text-[#6e6e73]">
+                    <span className="rounded-[10px] bg-[var(--a-surface-2)] px-2 py-0.5 font-mono text-[13px] font-bold text-[var(--a-text)]">{c.code}</span>
+                    <span className="text-[13px] text-[var(--a-text-2)]">
                       {c.kind === "freeship" ? "besplatna dostava" : `−${c.value}%`}
                       {c.minSubtotal > 0 ? ` · od ${eur(c.minSubtotal)}` : ""}
                     </span>
-                    {!c.active && <span className="rounded bg-black/[0.06] px-1.5 py-0.5 text-[10px] font-bold uppercase text-[#8e8e93]">ugašen</span>}
+                    {!c.active && <span className="rounded bg-[var(--a-surface-2)] px-1.5 py-0.5 text-[10px] font-bold uppercase text-[var(--a-text-3)]">ugašen</span>}
                     {c.expiresAt && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">do {c.expiresAt}</span>}
                     {c.maxUses !== "" && <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-700">limit {c.maxUses}</span>}
                   </div>
-                  {c.label && <div className="mt-0.5 text-[12px] text-[#8e8e93]">{c.label}</div>}
+                  {c.label && <div className="mt-0.5 text-[12px] text-[var(--a-text-3)]">{c.label}</div>}
                   <div className="mt-1 text-[12px]">
-                    <span className="font-semibold text-[#1d1d1f]">{c.uses}× iskorišten</span>
-                    {c.discountGiven > 0 && <span className="text-[#8e8e93]"> · dano {eur(c.discountGiven)} popusta</span>}
-                    {c.note && <span className="text-[#8e8e93]"> · {c.note}</span>}
+                    <span className="font-semibold text-[var(--a-text)]">{c.uses}× iskorišten</span>
+                    {c.discountGiven > 0 && <span className="text-[var(--a-text-3)]"> · dano {eur(c.discountGiven)} popusta</span>}
+                    {c.note && <span className="text-[var(--a-text-3)]"> · {c.note}</span>}
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-                  <button type="button" onClick={() => edit(c)} className="a-input px-2.5 py-1 text-[12px] font-medium text-[#6e6e73] hover:text-[#1d1d1f]">✏️ Uredi</button>
-                  <button type="button" onClick={() => toggle(c)} className="a-input px-2.5 py-1 text-[12px] font-medium text-[#6e6e73] hover:text-[#1d1d1f]">
+                  <button type="button" onClick={() => edit(c)} className="a-input px-2.5 py-1 text-[12px] font-medium text-[var(--a-text-2)] hover:text-[var(--a-text)]">✏️ Uredi</button>
+                  <button type="button" onClick={() => toggle(c)} className="a-input px-2.5 py-1 text-[12px] font-medium text-[var(--a-text-2)] hover:text-[var(--a-text)]">
                     {c.active ? "⏸ Ugasi" : "▶️ Upali"}
                   </button>
                   <button type="button" onClick={() => remove(c.code)} className="rounded-[10px] px-2.5 py-1 text-[12px] font-medium text-red-500 hover:bg-red-50">🗑</button>

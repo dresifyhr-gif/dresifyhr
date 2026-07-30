@@ -58,8 +58,8 @@ function Card({ title, hint, children }: { title: string; hint?: string; childre
   return (
     <div className="a-card p-4 sm:p-5">
       <div className="mb-3">
-        <div className="text-[15px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">{title}</div>
-        {hint && <div className="mt-0.5 text-[12px] text-[#8e8e93]">{hint}</div>}
+        <div className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--a-text)]">{title}</div>
+        {hint && <div className="mt-0.5 text-[12px] text-[var(--a-text-3)]">{hint}</div>}
       </div>
       {children}
     </div>
@@ -78,7 +78,7 @@ export function SettingsForm() {
       .catch(() => {});
   }, []);
 
-  if (!s) return <div className="text-sm text-[#8e8e93]">Učitavam postavke…</div>;
+  if (!s) return <div className="text-sm text-[var(--a-text-3)]">Učitavam postavke…</div>;
 
   const setNum = (k: keyof Settings) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, [k]: e.target.value } as unknown as Settings : cur));
@@ -147,27 +147,27 @@ export function SettingsForm() {
           <div>
             <span className={label}>Trošak besplatne dostave (€)</span>
             <input value={s.deliveryCost} onChange={setNum("deliveryCost")} inputMode="decimal" className={inp} />
-            <p className="mt-1 text-[11px] text-[#8e8e93]">Koliko NAS košta kad je dostava besplatna — skida se s marže.</p>
+            <p className="mt-1 text-[11px] text-[var(--a-text-3)]">Koliko NAS košta kad je dostava besplatna — skida se s marže.</p>
           </div>
           <div>
             <span className={label}>Trošak vraćene pošiljke (€)</span>
             <input value={s.returnCost} onChange={setNum("returnCost")} inputMode="decimal" className={inp} />
-            <p className="mt-1 text-[11px] text-[#8e8e93]">Sad 0 jer ne plaćamo povrat. Stavi iznos ako se to promijeni.</p>
+            <p className="mt-1 text-[11px] text-[var(--a-text-3)]">Sad 0 jer ne plaćamo povrat. Stavi iznos ako se to promijeni.</p>
           </div>
           <div>
             <span className={label}>Igorov udio u marži (%)</span>
             <input value={s.igorSharePct} onChange={setNum("igorSharePct")} inputMode="decimal" className={inp} />
-            <p className="mt-1 text-[11px] text-[#8e8e93]">50 = pola-pola. Ivici ide ostatak. Mijenja poravnanje.</p>
+            <p className="mt-1 text-[11px] text-[var(--a-text-3)]">50 = pola-pola. Ivici ide ostatak. Mijenja poravnanje.</p>
           </div>
           <div>
             <span className={label}>Vrati kupca nakon (dana)</span>
             <input value={s.winbackDays} onChange={setNum("winbackDays")} inputMode="numeric" className={inp} />
-            <p className="mt-1 text-[11px] text-[#8e8e93]">Koliko dana bez kupnje da kupac uđe u popis za vraćanje.</p>
+            <p className="mt-1 text-[11px] text-[var(--a-text-3)]">Koliko dana bez kupnje da kupac uđe u popis za vraćanje.</p>
           </div>
           <div>
             <span className={label}>Rizičan od (broj odbijanja)</span>
             <input value={s.riskMinFailed} onChange={setNum("riskMinFailed")} inputMode="numeric" className={inp} />
-            <p className="mt-1 text-[11px] text-[#8e8e93]">1 = već prvo odbijanje. Stavi 2 ako ti je prestrogo.</p>
+            <p className="mt-1 text-[11px] text-[var(--a-text-3)]">1 = već prvo odbijanje. Stavi 2 ako ti je prestrogo.</p>
           </div>
         </div>
       </Card>
@@ -175,8 +175,8 @@ export function SettingsForm() {
       <Card title="Pošiljatelji (naljepnice)" hint="Ime i adresa koji se ispisuju na naljepnici — Igor ili Ivica.">
         <div className="grid gap-4 sm:grid-cols-2">
           {(["igor", "ivica"] as const).map((who) => (
-            <div key={who} className="space-y-2 rounded-[12px] border border-black/[0.04] bg-black/[0.03] p-3">
-              <div className="text-[13px] font-semibold capitalize text-[#1d1d1f]">{who}</div>
+            <div key={who} className="space-y-2 rounded-[12px] border border-black/[0.04] bg-[var(--a-surface-2)] p-3">
+              <div className="text-[13px] font-semibold capitalize text-[var(--a-text)]">{who}</div>
               <div><span className={label}>Ime i prezime</span><input value={s.senders[who].name} onChange={setSender(who, "name")} className={inp} /></div>
               <div><span className={label}>Adresa</span><input value={s.senders[who].address} onChange={setSender(who, "address")} className={inp} /></div>
               <div><span className={label}>Poštanski broj i mjesto</span><input value={s.senders[who].city} onChange={setSender(who, "city")} className={inp} /></div>
@@ -195,7 +195,7 @@ export function SettingsForm() {
       </Card>
 
       <Card title="Traka obavijesti" hint="Žuta traka na vrhu shopa. Prazan tekst = zadane poruke koje se izmjenjuju.">
-        <label className="mb-3 flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
+        <label className="mb-3 flex cursor-pointer items-center gap-2 text-[14px] text-[var(--a-text)]">
           <input type="checkbox" checked={s.announcementActive} onChange={(e) => setS((cur) => (cur ? { ...cur, announcementActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />
           Prikaži traku
         </label>
@@ -221,7 +221,7 @@ export function SettingsForm() {
           {SECTIONS.map(([key, lab]) => {
             const visible = !s.hiddenSections.includes(key);
             return (
-              <label key={key} className="flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
+              <label key={key} className="flex cursor-pointer items-center gap-2 text-[14px] text-[var(--a-text)]">
                 <input
                   type="checkbox"
                   checked={visible}
@@ -241,18 +241,18 @@ export function SettingsForm() {
       </Card>
 
       <Card title="🎡 Kolo sreće" hint="Stranica /kolo. Jedna vrtnja po broju mobitela, plus nova za svaku narudžbu od 60 €. Dok je isključeno, stranica ne postoji.">
-        <label className="flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
+        <label className="flex cursor-pointer items-center gap-2 text-[14px] text-[var(--a-text)]">
           <input type="checkbox" checked={s.koloActive} onChange={(e) => setS((cur) => (cur ? { ...cur, koloActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />
           Kolo je uključeno
         </label>
-        <p className="mt-2 text-[11px] text-[#8e8e93]">
+        <p className="mt-2 text-[11px] text-[var(--a-text-3)]">
           Dobitna šansa ~27 %: 5 % / 10 % / 20 % popusta, besplatna dostava i gratis dres (1 %).
           Šifre vrijede 48 h i vezane su uz broj mobitela.
         </p>
       </Card>
 
       <Card title="🎁 Dresify Klub" hint="Vjernost po broju mobitela — bez računa i lozinki. Broje se samo PREUZETE narudžbe.">
-        <label className="mb-3 flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
+        <label className="mb-3 flex cursor-pointer items-center gap-2 text-[14px] text-[var(--a-text)]">
           <input type="checkbox" checked={s.klubActive} onChange={(e) => setS((cur) => (cur ? { ...cur, klubActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />
           Klub je uključen
         </label>
@@ -260,7 +260,7 @@ export function SettingsForm() {
           <div>
             <span className={label}>Nagrada nakon (preuzetih narudžbi)</span>
             <input value={s.klubTarget} onChange={setNum("klubTarget")} inputMode="numeric" className={inp} />
-            <p className="mt-1 text-[11px] text-[#8e8e93]">Broje se samo plaćene (preuzete) narudžbe — da se ne može farmati.</p>
+            <p className="mt-1 text-[11px] text-[var(--a-text-3)]">Broje se samo plaćene (preuzete) narudžbe — da se ne može farmati.</p>
           </div>
           <div>
             <span className={label}>Vrsta nagrade</span>
@@ -274,7 +274,7 @@ export function SettingsForm() {
             <div>
               <span className={label}>{s.klubRewardKind === "percent" ? "Popust (%)" : "Popust (€)"}</span>
               <input value={s.klubRewardValue} onChange={setNum("klubRewardValue")} inputMode="decimal" className={inp} />
-              <p className="mt-1 text-[11px] text-[#8e8e93]">20 € = gratis dres (kupac plati samo dostavu).</p>
+              <p className="mt-1 text-[11px] text-[var(--a-text-3)]">20 € = gratis dres (kupac plati samo dostavu).</p>
             </div>
           )}
           <div>
@@ -304,7 +304,7 @@ export function SettingsForm() {
           rows={7}
           className={`${inp} font-mono text-[13px]`}
         />
-        <p className="mt-1 text-[11px] text-[#8e8e93]">Prazni redovi se zanemaruju. Ako ostaviš prazno, koriste se zadane lige.</p>
+        <p className="mt-1 text-[11px] text-[var(--a-text-3)]">Prazni redovi se zanemaruju. Ako ostaviš prazno, koriste se zadane lige.</p>
       </Card>
 
       <Card title="Obavijesti o narudžbi" hint="Koje kanale koristimo kad padne nova narudžba.">
@@ -314,7 +314,7 @@ export function SettingsForm() {
             ["notifyTelegram", "Telegram"],
             ["notifyWhatsapp", "WhatsApp / Zapier"]
           ] as const).map(([k, lab]) => (
-            <label key={k} className="flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]">
+            <label key={k} className="flex cursor-pointer items-center gap-2 text-[14px] text-[var(--a-text)]">
               <input
                 type="checkbox"
                 checked={s[k]}
@@ -325,7 +325,7 @@ export function SettingsForm() {
             </label>
           ))}
         </div>
-        <p className="mt-2 text-[11px] text-[#8e8e93]">Kanal radi samo ako je i postavljen na serveru. Ovdje ga možeš privremeno ugasiti.</p>
+        <p className="mt-2 text-[11px] text-[var(--a-text-3)]">Kanal radi samo ako je i postavljen na serveru. Ovdje ga možeš privremeno ugasiti.</p>
       </Card>
 
       <div className="sticky bottom-4 flex items-center gap-3">

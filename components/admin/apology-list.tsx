@@ -25,15 +25,15 @@ export function ApologyList({ rows }: { rows: OldUnshippedRow[] }) {
 
   return (
     <>
-      <p className="mb-3 -mt-2 text-xs text-[#8e8e93]">
+      <p className="mb-3 -mt-2 text-xs text-[var(--a-text-3)]">
         Prošlo je dosta od narudžbe, a nije poslana. Klikni „WhatsApp isprika” — poruka je već napisana, samo pošalji. Kad si javio, klikni ✕ da makneš s liste.
       </p>
       <ul className="space-y-2">
         {rows.map((o) => (
           <li key={o.id} className="flex flex-col items-start gap-2 rounded-[12px] border border-black/[0.04] px-2.5 py-2 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <span className="min-w-0 text-[#1d1d1f]">
-              <span className="text-[#8e8e93]">{o.dateLabel}</span> · {o.name}{" "}
-              <span className="text-[#8e8e93]">· {o.product} · {eur(o.total)}</span>
+            <span className="min-w-0 text-[var(--a-text)]">
+              <span className="text-[var(--a-text-3)]">{o.dateLabel}</span> · {o.name}{" "}
+              <span className="text-[var(--a-text-3)]">· {o.product} · {eur(o.total)}</span>
             </span>
             <span className="flex shrink-0 items-center gap-1.5">
               {o.wa ? (
@@ -53,7 +53,7 @@ export function ApologyList({ rows }: { rows: OldUnshippedRow[] }) {
                 onClick={() => dismiss(o.id)}
                 disabled={busy === o.id}
                 title="Javio sam se — makni s liste"
-                className="rounded-[10px] border border-black/[0.06] px-2 py-1 text-[11px] font-medium text-[#8e8e93] transition hover:border-black/[0.12] hover:text-[#6e6e73] disabled:opacity-50"
+                className="rounded-[10px] border border-[var(--a-line)] px-2 py-1 text-[11px] font-medium text-[var(--a-text-3)] transition hover:border-[var(--a-line)] hover:text-[var(--a-text-2)] disabled:opacity-50"
               >
                 {busy === o.id ? "…" : "✕"}
               </button>

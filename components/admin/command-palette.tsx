@@ -105,32 +105,32 @@ export function CommandPalette() {
   return (
     <div className="fixed inset-0 z-[90] flex items-start justify-center px-4 pt-[12vh]" role="dialog" aria-modal="true">
       <button type="button" aria-label="Zatvori" onClick={() => setOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-      <div className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-2xl">
+      <div className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-[var(--a-line)] bg-[var(--a-card)] shadow-2xl">
         <div className="flex items-center gap-2.5 border-b border-black/[0.04] px-4">
-          <Search className="h-4 w-4 shrink-0 text-[#8e8e93]" />
+          <Search className="h-4 w-4 shrink-0 text-[var(--a-text-3)]" />
           <input
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Traži kupca, telefon, broj narudžbe ili proizvod…"
-            className="h-12 w-full bg-transparent text-sm text-[#1d1d1f] outline-none placeholder:text-[#8e8e93]"
+            className="h-12 w-full bg-transparent text-sm text-[var(--a-text)] outline-none placeholder:text-[var(--a-text-3)]"
           />
-          <kbd className="shrink-0 rounded border border-black/[0.06] px-1.5 py-0.5 text-[10px] font-semibold text-[#8e8e93]">ESC</kbd>
+          <kbd className="shrink-0 rounded border border-[var(--a-line)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--a-text-3)]">ESC</kbd>
         </div>
 
         <div className="max-h-[52vh] overflow-y-auto py-1.5">
           {!q.trim() ? (
-            <p className="px-4 py-6 text-center text-xs text-[#8e8e93]">Upiši pojam — npr. ime kupca, „0915…”, „DRS-…” ili „Yamal”.</p>
+            <p className="px-4 py-6 text-center text-xs text-[var(--a-text-3)]">Upiši pojam — npr. ime kupca, „0915…”, „DRS-…” ili „Yamal”.</p>
           ) : loading ? (
-            <p className="px-4 py-6 text-center text-xs text-[#8e8e93]">Tražim…</p>
+            <p className="px-4 py-6 text-center text-xs text-[var(--a-text-3)]">Tražim…</p>
           ) : flat.length === 0 ? (
-            <p className="px-4 py-6 text-center text-xs text-[#8e8e93]">Nema rezultata.</p>
+            <p className="px-4 py-6 text-center text-xs text-[var(--a-text-3)]">Nema rezultata.</p>
           ) : (
             <>
               {orders.length > 0 && (
                 <div className="px-2 pb-1">
-                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#8e8e93]">Narudžbe</div>
+                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--a-text-3)]">Narudžbe</div>
                   {orders.map((o, i) => {
                     const idx = i;
                     return (
@@ -139,13 +139,13 @@ export function CommandPalette() {
                         type="button"
                         onMouseEnter={() => setActive(idx)}
                         onClick={() => go({ kind: "order", hit: o })}
-                        className={`flex w-full items-center justify-between gap-3 rounded-[12px] px-2 py-2 text-left ${active === idx ? "bg-black/[0.06]" : "hover:bg-black/[0.03]"}`}
+                        className={`flex w-full items-center justify-between gap-3 rounded-[12px] px-2 py-2 text-left ${active === idx ? "bg-[var(--a-surface-2)]" : "hover:bg-[var(--a-surface-2)]"}`}
                       >
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium text-[#1d1d1f]">{o.customerName}</span>
-                          <span className="block truncate text-[11px] text-[#8e8e93]">{o.reference} · {o.date} · {STATUS_HR[o.status] || o.status}</span>
+                          <span className="block truncate text-sm font-medium text-[var(--a-text)]">{o.customerName}</span>
+                          <span className="block truncate text-[11px] text-[var(--a-text-3)]">{o.reference} · {o.date} · {STATUS_HR[o.status] || o.status}</span>
                         </span>
-                        <span className="shrink-0 text-xs font-semibold text-[#6e6e73]">{eur(o.total)}</span>
+                        <span className="shrink-0 text-xs font-semibold text-[var(--a-text-2)]">{eur(o.total)}</span>
                       </button>
                     );
                   })}
@@ -153,7 +153,7 @@ export function CommandPalette() {
               )}
               {products.length > 0 && (
                 <div className="px-2 pt-1">
-                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#8e8e93]">Proizvodi</div>
+                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--a-text-3)]">Proizvodi</div>
                   {products.map((p, i) => {
                     const idx = orders.length + i;
                     return (
@@ -162,13 +162,13 @@ export function CommandPalette() {
                         type="button"
                         onMouseEnter={() => setActive(idx)}
                         onClick={() => go({ kind: "product", hit: p })}
-                        className={`flex w-full items-center justify-between gap-3 rounded-[12px] px-2 py-2 text-left ${active === idx ? "bg-black/[0.06]" : "hover:bg-black/[0.03]"}`}
+                        className={`flex w-full items-center justify-between gap-3 rounded-[12px] px-2 py-2 text-left ${active === idx ? "bg-[var(--a-surface-2)]" : "hover:bg-[var(--a-surface-2)]"}`}
                       >
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium text-[#1d1d1f]">{p.klub} — {p.igrac}</span>
-                          <span className="block truncate text-[11px] text-[#8e8e93]">{p.liga}</span>
+                          <span className="block truncate text-sm font-medium text-[var(--a-text)]">{p.klub} — {p.igrac}</span>
+                          <span className="block truncate text-[11px] text-[var(--a-text-3)]">{p.liga}</span>
                         </span>
-                        <span className="shrink-0 text-[11px] text-[#8e8e93]">otvori →</span>
+                        <span className="shrink-0 text-[11px] text-[var(--a-text-3)]">otvori →</span>
                       </button>
                     );
                   })}

@@ -34,16 +34,16 @@ export function AssignShipper({ orders }: { orders: UnassignedOrder[] }) {
 
   const remaining = orders.filter((o) => !done.has(o.id));
   if (remaining.length === 0) {
-    return <div className="text-sm text-[#8e8e93]">Sve poslane narudžbe imaju označenog pošiljatelja ✅</div>;
+    return <div className="text-sm text-[var(--a-text-3)]">Sve poslane narudžbe imaju označenog pošiljatelja ✅</div>;
   }
 
   return (
     <ul className="max-h-96 space-y-2 overflow-y-auto">
       {remaining.map((o) => (
         <li key={o.id} className="flex items-center justify-between gap-2 rounded-[12px] border border-black/[0.04] px-2.5 py-2 text-sm">
-          <span className="min-w-0 truncate text-[#1d1d1f]">
-            <span className="text-[#8e8e93]">{o.dateLabel}</span> · {o.customerName}{" "}
-            <span className="text-[#8e8e93]">· {eur(o.total)}</span>
+          <span className="min-w-0 truncate text-[var(--a-text)]">
+            <span className="text-[var(--a-text-3)]">{o.dateLabel}</span> · {o.customerName}{" "}
+            <span className="text-[var(--a-text-3)]">· {eur(o.total)}</span>
           </span>
           <span className="flex shrink-0 items-center gap-1.5">
             <button

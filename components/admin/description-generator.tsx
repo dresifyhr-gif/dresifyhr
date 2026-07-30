@@ -75,12 +75,12 @@ export function DescriptionGenerator() {
     <div className="a-card mb-5 p-4 sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <div className="text-[15px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">✍️ Jedinstveni opisi (SEO)</div>
-          <div className="mt-0.5 text-[12px] text-[#8e8e93]">
+          <div className="text-[15px] font-semibold tracking-[-0.01em] text-[var(--a-text)]">✍️ Jedinstveni opisi (SEO)</div>
+          <div className="mt-0.5 text-[12px] text-[var(--a-text-3)]">
             Automatski opisi su gotovo isti na svim proizvodima, pa ih Google ne indeksira. AI napiše poseban opis za svaki.
           </div>
           {(running || msg) && (
-            <div className="mt-2 text-[13px] font-medium text-[#1d1d1f]">
+            <div className="mt-2 text-[13px] font-medium text-[var(--a-text)]">
               {running ? `Pišem… ${done} gotovo${remaining != null ? `, još ${remaining}` : ""}` : msg}
             </div>
           )}

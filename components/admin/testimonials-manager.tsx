@@ -32,14 +32,14 @@ function Row({ t, onChange }: { t: T; onChange: () => void }) {
 
   return (
     <div className="flex gap-3 rounded-[12px] border border-black/[0.04] p-2">
-      <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded bg-black/[0.06]">
+      <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded bg-[var(--a-surface-2)]">
         <Image src={t.imageUrl} alt="" fill sizes="80px" className="object-cover" />
       </span>
       <div className="min-w-0 flex-1 space-y-1.5">
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ime kupca (opcionalno)" className="w-full rounded-[10px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 text-sm outline-none focus:border-slate-400" />
-        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Kratki tekst / dojam (opcionalno)" className="w-full rounded-[10px] border border-black/[0.06] bg-black/[0.03] px-2 py-1 text-sm outline-none focus:border-slate-400" />
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ime kupca (opcionalno)" className="w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-sm outline-none focus:border-slate-400" />
+        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Kratki tekst / dojam (opcionalno)" className="w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-sm outline-none focus:border-slate-400" />
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => setHidden((v) => !v)} className={`rounded-[10px] px-2 py-1 text-[11px] font-medium ${hidden ? "bg-amber-500 text-white" : "border border-black/[0.06] text-[#6e6e73]"}`}>{hidden ? "🙈 Skriveno" : "👁 Vidljivo"}</button>
+          <button type="button" onClick={() => setHidden((v) => !v)} className={`rounded-[10px] px-2 py-1 text-[11px] font-medium ${hidden ? "bg-amber-500 text-white" : "border border-[var(--a-line)] text-[var(--a-text-2)]"}`}>{hidden ? "🙈 Skriveno" : "👁 Vidljivo"}</button>
           <button type="button" onClick={save} disabled={saving || !dirty} className="rounded-[10px] bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white disabled:opacity-40">{saving ? "…" : "Spremi"}</button>
           <button type="button" onClick={del} className="rounded-[10px] border border-red-200 px-2 py-1 text-[11px] text-red-500 hover:bg-red-50">Obriši</button>
         </div>
@@ -72,8 +72,8 @@ export function TestimonialsManager() {
 
   return (
     <div className="a-card p-4 sm:p-5">
-      <div className="mb-1 text-sm font-bold text-[#1d1d1f]">Zadovoljni kupci (recenzije)</div>
-      <p className="mb-3 text-xs text-[#8e8e93]">Uploadaj slike koje su ti kupci slali (Instagram/WhatsApp). Prikazuju se na naslovnici kao društveni dokaz. Ime/tekst su opcionalni.</p>
+      <div className="mb-1 text-sm font-bold text-[var(--a-text)]">Zadovoljni kupci (recenzije)</div>
+      <p className="mb-3 text-xs text-[var(--a-text-3)]">Uploadaj slike koje su ti kupci slali (Instagram/WhatsApp). Prikazuju se na naslovnici kao društveni dokaz. Ime/tekst su opcionalni.</p>
 
       <ImageUploader value={newImages} onChange={setNewImages} slug="recenzije" />
       {newImages.length > 0 && (

@@ -165,15 +165,15 @@ export function CustomProducts() {
           gumbi stisnuli naslov na jednu riječ po retku. */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <div className="text-sm font-bold text-[#1d1d1f]">Novi proizvodi — dresovi i streetwear</div>
-          <div className="text-xs text-[#8e8e93]">{list.length} dodano · dodaj dres ili 🔥 streetwear sa slikama</div>
+          <div className="text-sm font-bold text-[var(--a-text)]">Novi proizvodi — dresovi i streetwear</div>
+          <div className="text-xs text-[var(--a-text-3)]">{list.length} dodano · dodaj dres ili 🔥 streetwear sa slikama</div>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
           {list.length > 0 && (
             <button
               type="button"
               onClick={() => setShowList((v) => !v)}
-              className="rounded-[12px] border border-black/[0.06] px-3 py-1.5 text-xs font-semibold text-[#6e6e73] transition hover:bg-black/[0.03]"
+              className="rounded-[12px] border border-[var(--a-line)] px-3 py-1.5 text-xs font-semibold text-[var(--a-text-2)] transition hover:bg-[var(--a-surface-2)]"
             >
               {showList ? "Sakrij popis" : `📋 Popis (${list.length})`}
             </button>
@@ -198,9 +198,9 @@ export function CustomProducts() {
       {showBulk && <BulkAdd onDone={load} />}
 
       {open && (
-        <div className="mt-4 space-y-3 rounded-[12px] border border-black/[0.06] bg-black/[0.03] p-4">
+        <div className="mt-4 space-y-3 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-4">
           <div className="flex items-center gap-2 rounded-[12px] border border-orange-200 bg-orange-50/50 p-2.5">
-            <span className="text-xs font-semibold text-[#6e6e73]">Što dodaješ?</span>
+            <span className="text-xs font-semibold text-[var(--a-text-2)]">Što dodaješ?</span>
             {[
               { v: "dres", label: "👕 Dres" },
               { v: "streetwear", label: "🔥 Streetwear" }
@@ -209,7 +209,7 @@ export function CustomProducts() {
                 key={c.v}
                 type="button"
                 onClick={() => setF({ ...f, category: c.v, price: c.v === "streetwear" && (f.price === "20" || !f.price) ? "50" : c.v === "dres" && f.price === "50" ? "20" : f.price })}
-                className={`rounded-[10px] px-3 py-1.5 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : "bg-slate-900 text-white") : "border border-black/[0.06] bg-white text-[#6e6e73] hover:bg-black/[0.03]"}`}
+                className={`rounded-[10px] px-3 py-1.5 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : "bg-[var(--a-text)] text-[var(--a-card)]") : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
               >
                 {c.label}
               </button>
@@ -217,39 +217,39 @@ export function CustomProducts() {
           </div>
           {f.category === "dres" && (
             <div className="rounded-[12px] border border-slate-900/10 bg-slate-900/5 p-3">
-              <div className="mb-1.5 text-xs font-semibold text-[#1d1d1f]">🪄 AI popuni — upiši naziv, ostalo složi AI</div>
+              <div className="mb-1.5 text-xs font-semibold text-[var(--a-text)]">🪄 AI popuni — upiši naziv, ostalo složi AI</div>
               <div className="flex gap-2">
                 <input
                   value={aiName}
                   onChange={(e) => setAiName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); aiFill(); } }}
                   placeholder="npr. Hrvatska Modrić 2026"
-                  className="min-w-0 flex-1 rounded-[10px] border border-black/[0.06] bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+                  className="min-w-0 flex-1 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-2 text-sm outline-none focus:border-slate-400"
                 />
                 <button type="button" onClick={aiFill} disabled={aiBusy || !aiName.trim()} className="shrink-0 rounded-[10px] bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:opacity-40">
                   {aiBusy ? "Slažem…" : "🪄 Popuni"}
                 </button>
               </div>
-              <div className="mt-1 text-[11px] text-[#8e8e93]">Ispuni klub, igrača, ligu i opis. Ti dodaš cijenu i slike.</div>
+              <div className="mt-1 text-[11px] text-[var(--a-text-3)]">Ispuni klub, igrača, ligu i opis. Ti dodaš cijenu i slike.</div>
             </div>
           )}
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="text-xs font-medium text-[#6e6e73]">{f.category === "streetwear" ? "Brend (npr. Nike)" : "Klub / reprezentacija"}
-              <input value={f.klub} onChange={(e) => setF({ ...f, klub: e.target.value })} placeholder={f.category === "streetwear" ? "npr. Nike" : "npr. Hrvatska"} className="mt-1 w-full rounded-[10px] border border-black/[0.06] bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none focus:border-slate-400" />
+            <label className="text-xs font-medium text-[var(--a-text-2)]">{f.category === "streetwear" ? "Brend (npr. Nike)" : "Klub / reprezentacija"}
+              <input value={f.klub} onChange={(e) => setF({ ...f, klub: e.target.value })} placeholder={f.category === "streetwear" ? "npr. Nike" : "npr. Hrvatska"} className="mt-1 w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-2 text-sm text-[var(--a-text)] outline-none focus:border-slate-400" />
             </label>
-            <label className="text-xs font-medium text-[#6e6e73]">{f.category === "streetwear" ? "Model / naziv" : "Igrač / naziv"}
-              <input value={f.igrac} onChange={(e) => setF({ ...f, igrac: e.target.value })} placeholder={f.category === "streetwear" ? "npr. Cortez — bijele" : "npr. Modrić nr10 — 2026"} className="mt-1 w-full rounded-[10px] border border-black/[0.06] bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none focus:border-slate-400" />
+            <label className="text-xs font-medium text-[var(--a-text-2)]">{f.category === "streetwear" ? "Model / naziv" : "Igrač / naziv"}
+              <input value={f.igrac} onChange={(e) => setF({ ...f, igrac: e.target.value })} placeholder={f.category === "streetwear" ? "npr. Cortez — bijele" : "npr. Modrić nr10 — 2026"} className="mt-1 w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-2 text-sm text-[var(--a-text)] outline-none focus:border-slate-400" />
             </label>
             {f.category === "dres" && (
-              <label className="text-xs font-medium text-[#6e6e73]">Liga
-                <select value={f.liga} onChange={(e) => setF({ ...f, liga: e.target.value })} className="mt-1 w-full rounded-[10px] border border-black/[0.06] bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none focus:border-slate-400">
+              <label className="text-xs font-medium text-[var(--a-text-2)]">Liga
+                <select value={f.liga} onChange={(e) => setF({ ...f, liga: e.target.value })} className="mt-1 w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-2 text-sm text-[var(--a-text)] outline-none focus:border-slate-400">
                   {LIGE.map((l) => <option key={l} value={l}>{l}</option>)}
                 </select>
               </label>
             )}
-            <label className="text-xs font-medium text-[#6e6e73]">Cijena (€)
-              <input value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} inputMode="decimal" className="mt-1 w-full rounded-[10px] border border-black/[0.06] bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none focus:border-slate-400" />
+            <label className="text-xs font-medium text-[var(--a-text-2)]">Cijena (€)
+              <input value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} inputMode="decimal" className="mt-1 w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-2 text-sm text-[var(--a-text)] outline-none focus:border-slate-400" />
               {f.category === "streetwear" && (
                 <span className="mt-1 flex gap-1.5">
                   {[
@@ -264,25 +264,25 @@ export function CustomProducts() {
             </label>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#6e6e73]">
-            <span className="font-medium text-[#6e6e73]">Veličine:</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--a-text-2)]">
+            <span className="font-medium text-[var(--a-text-2)]">Veličine:</span>
             {f.category === "streetwear" ? (
               <span className="rounded-[10px] bg-orange-50 px-3 py-1 font-semibold text-orange-600">XS · S · M · L (streetwear)</span>
             ) : (
               <>
-                <button type="button" onClick={() => setF({ ...f, adults: !f.adults })} className={`rounded-[10px] px-3 py-1 font-semibold transition ${f.adults ? "bg-slate-900 text-white" : "border border-black/[0.06] text-[#8e8e93] hover:bg-black/[0.03]"}`}>Odrasli S–XXL</button>
-                <button type="button" onClick={() => setF({ ...f, kids: !f.kids })} className={`rounded-[10px] px-3 py-1 font-semibold transition ${f.kids ? "bg-slate-900 text-white" : "border border-black/[0.06] text-[#8e8e93] hover:bg-black/[0.03]"}`}>Djeca 104–176</button>
+                <button type="button" onClick={() => setF({ ...f, adults: !f.adults })} className={`rounded-[10px] px-3 py-1 font-semibold transition ${f.adults ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] text-[var(--a-text-3)] hover:bg-[var(--a-surface-2)]"}`}>Odrasli S–XXL</button>
+                <button type="button" onClick={() => setF({ ...f, kids: !f.kids })} className={`rounded-[10px] px-3 py-1 font-semibold transition ${f.kids ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] text-[var(--a-text-3)] hover:bg-[var(--a-surface-2)]"}`}>Djeca 104–176</button>
                 {!f.adults && !f.kids && <span className="text-red-500">Odaberi barem jedno</span>}
               </>
             )}
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-[#6e6e73]">
+          <div className="flex items-center gap-4 text-xs text-[var(--a-text-2)]">
             {f.category === "dres" && (
               <label className="flex items-center gap-1.5"><input type="checkbox" checked={f.retro} onChange={(e) => setF({ ...f, retro: e.target.checked })} /> Retro</label>
             )}
             <label className="flex items-center gap-1.5">Badge:
-              <select value={f.badge} onChange={(e) => setF({ ...f, badge: e.target.value })} className="rounded border border-black/[0.06] bg-white px-2 py-1">
+              <select value={f.badge} onChange={(e) => setF({ ...f, badge: e.target.value })} className="rounded border border-[var(--a-line)] bg-[var(--a-card)] px-2 py-1">
                 <option value="">Bez</option>
                 <option value="bestseller">⭐ Bestseller</option>
                 <option value="novo">🆕 Novo</option>
@@ -290,7 +290,7 @@ export function CustomProducts() {
             </label>
           </div>
 
-          <label className="block text-xs font-medium text-[#6e6e73]">
+          <label className="block text-xs font-medium text-[var(--a-text-2)]">
             <span className="flex items-center justify-between">
               <span>Opis (svaki red = odlomak)</span>
               {f.category === "streetwear" && (
@@ -304,12 +304,12 @@ export function CustomProducts() {
                 </button>
               )}
             </span>
-            <textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} rows={4} className="mt-1 w-full rounded-[10px] border border-black/[0.06] bg-white px-3 py-2 text-[13px] leading-6 text-[#1d1d1f] outline-none focus:border-slate-400" />
+            <textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} rows={4} className="mt-1 w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-2 text-[13px] leading-6 text-[var(--a-text)] outline-none focus:border-slate-400" />
           </label>
 
           <div>
             <div className="mb-1 flex items-center justify-between">
-              <span className="text-xs font-medium text-[#6e6e73]">Slike</span>
+              <span className="text-xs font-medium text-[var(--a-text-2)]">Slike</span>
               {f.images.length > 0 && (
                 <button
                   type="button"
@@ -327,7 +327,7 @@ export function CustomProducts() {
               <p className="mt-1.5 text-[11px] font-medium text-violet-600">🪄 AI čita sliku — popunjavam polja…</p>
             )}
             {!aiImgBusy && aiImgInfo && (
-              <p className={`mt-1.5 break-words text-[11px] ${aiImgInfo.confidence === "low" ? "text-amber-600" : "text-[#6e6e73]"}`}>
+              <p className={`mt-1.5 break-words text-[11px] ${aiImgInfo.confidence === "low" ? "text-amber-600" : "text-[var(--a-text-2)]"}`}>
                 {aiImgInfo.confidence === "low" ? "⚠️ " : "👁 "}
                 {aiImgInfo.seen}
                 {aiImgInfo.confidence === "low" && " — provjeri podatke prije spremanja."}
@@ -346,17 +346,17 @@ export function CustomProducts() {
           {list.map((p) => (
             <li key={p.id} className="flex items-center justify-between gap-3 rounded-[12px] border border-black/[0.04] p-2 text-sm">
               <span className="flex min-w-0 items-center gap-2">
-                <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-black/[0.06]">
+                <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-[var(--a-surface-2)]">
                   {p.images[0] && <Image src={p.images[0]} alt="" fill sizes="40px" className="object-cover" />}
                 </span>
                 <span className="min-w-0">
-                  <span className="block truncate font-medium text-[#1d1d1f]">{p.klub} — {p.igrac}</span>
-                  <span className="text-[11px] text-[#8e8e93]">{p.liga} · {p.price} € · {p.images.length} slika{p.hidden ? " · skriveno" : ""}</span>
+                  <span className="block truncate font-medium text-[var(--a-text)]">{p.klub} — {p.igrac}</span>
+                  <span className="text-[11px] text-[var(--a-text-3)]">{p.liga} · {p.price} € · {p.images.length} slika{p.hidden ? " · skriveno" : ""}</span>
                 </span>
               </span>
               <span className="flex shrink-0 gap-1.5">
-                <a href={`/dres/${p.slug}`} target="_blank" rel="noopener noreferrer" className="rounded-[10px] border border-black/[0.06] px-2 py-1 text-[11px] text-[#6e6e73] hover:text-[#1d1d1f]">Vidi</a>
-                <button type="button" onClick={() => edit(p)} className="rounded-[10px] border border-black/[0.06] px-2 py-1 text-[11px] text-[#6e6e73] hover:bg-black/[0.03]">Uredi</button>
+                <a href={`/dres/${p.slug}`} target="_blank" rel="noopener noreferrer" className="rounded-[10px] border border-[var(--a-line)] px-2 py-1 text-[11px] text-[var(--a-text-2)] hover:text-[var(--a-text)]">Vidi</a>
+                <button type="button" onClick={() => edit(p)} className="rounded-[10px] border border-[var(--a-line)] px-2 py-1 text-[11px] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]">Uredi</button>
                 <button type="button" onClick={() => remove(p.id)} className="rounded-[10px] border border-red-200 px-2 py-1 text-[11px] text-red-500 hover:bg-red-50">Obriši</button>
               </span>
             </li>

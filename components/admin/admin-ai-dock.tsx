@@ -26,13 +26,13 @@ export function AdminAiDock() {
       {open && (
         <div className="fixed inset-0 z-50">
           <button type="button" aria-label="Zatvori" className="absolute inset-0 bg-black/30" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-black/[0.03] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-black/[0.06] bg-white px-4 py-3.5">
+          <div className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-[var(--a-surface-2)] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[var(--a-line)] bg-[var(--a-card)] px-4 py-3.5">
               <div className="flex items-center gap-2">
                 <Image src="/dresify-robot.png" alt="Dresify AI" width={40} height={40} className="h-10 w-10 object-contain" />
-                <span className="text-sm font-bold text-[#1d1d1f]">Dresify AI</span>
+                <span className="text-sm font-bold text-[var(--a-text)]">Dresify AI</span>
               </div>
-              <button type="button" onClick={() => setOpen(false)} className="text-[#8e8e93] transition hover:text-[#1d1d1f]">
+              <button type="button" onClick={() => setOpen(false)} className="text-[var(--a-text-3)] transition hover:text-[var(--a-text)]">
                 <X className="h-5 w-5" />
               </button>
             </div>

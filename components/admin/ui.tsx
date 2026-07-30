@@ -51,9 +51,9 @@ export function Stat({
       </div>
       {/* nowrap + tabularne znamenke: iznos se ne smije lomiti u dva reda
           (inače kartica naraste i red se razlije) */}
-      <div className="mt-1.5 whitespace-nowrap text-[22px] font-semibold tabular-nums tracking-[-0.03em] text-[#1d1d1f] xl:text-[25px]">{value}</div>
+      <div className="mt-1.5 whitespace-nowrap text-[22px] font-semibold tabular-nums tracking-[-0.03em] text-[var(--a-text)] xl:text-[25px]">{value}</div>
       {profit && <div className="mt-0.5 text-xs font-semibold text-emerald-600">{profit} profit</div>}
-      {sub && <div className="mt-0.5 text-xs text-[#8e8e93]">{sub}</div>}
+      {sub && <div className="mt-0.5 text-xs text-[var(--a-text-3)]">{sub}</div>}
     </div>
   );
 }

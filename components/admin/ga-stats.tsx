@@ -20,16 +20,16 @@ function Col({ title, rows, unit }: { title: string; rows: { label: string; valu
   // kolona bježi izvan kartice na mobitelu i brojke se odrežu. S min-w-0 truncate radi.
   return (
     <div className="min-w-0">
-      <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">{title}</div>
+      <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">{title}</div>
       {rows.length === 0 ? (
         <div className="text-[13px] text-[#c7c7cc]">—</div>
       ) : (
         <ul className="space-y-1.5">
           {rows.map((r) => (
             <li key={r.label} className="flex items-center justify-between gap-2 text-[13px]">
-              <span className="min-w-0 truncate text-[#1d1d1f]">{r.label}</span>
-              <span className="shrink-0 font-semibold text-[#1d1d1f]">
-                {r.value.toLocaleString("hr-HR")} <span className="text-[10px] font-normal text-[#a0a0a5]">{unit}</span>
+              <span className="min-w-0 truncate text-[var(--a-text)]">{r.label}</span>
+              <span className="shrink-0 font-semibold text-[var(--a-text)]">
+                {r.value.toLocaleString("hr-HR")} <span className="text-[10px] font-normal text-[var(--a-text-3)]">{unit}</span>
               </span>
             </li>
           ))}
@@ -43,7 +43,7 @@ export function GaStatsPanel({ ga }: { ga: GaStats }) {
   if (!ga.ok) {
     return (
       <Panel title="🌍 Posjete (Google Analytics)">
-        <p className="text-sm text-[#8e8e93]">
+        <p className="text-sm text-[var(--a-text-3)]">
           Još nije spojeno. Kad odradiš Apps Script korak (kod ti je spreman), ovdje se povuku posjetitelji,
           države, najgledanije stranice i izvori prometa — bez otvaranja Google taba.
         </p>
@@ -55,17 +55,17 @@ export function GaStatsPanel({ ga }: { ga: GaStats }) {
     <Panel title="🌍 Posjete (Google Analytics)">
       <div className="mb-4 flex flex-wrap items-end gap-x-8 gap-y-3">
         <div>
-          <div className="text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Posjetitelji (7 dana)</div>
+          <div className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Posjetitelji (7 dana)</div>
           <div className="mt-0.5 flex items-baseline gap-2">
-            <span className="text-[26px] font-bold leading-none text-[#1d1d1f]">{ga.visitors.toLocaleString("hr-HR")}</span>
+            <span className="text-[26px] font-bold leading-none text-[var(--a-text)]">{ga.visitors.toLocaleString("hr-HR")}</span>
             <Trend now={ga.visitors} prev={ga.visitorsPrev} />
           </div>
         </div>
         <div>
-          <div className="text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Uživo (~30 min)</div>
+          <div className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Uživo (~30 min)</div>
           <div className="mt-0.5 flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-[26px] font-bold leading-none text-[#1d1d1f]">{ga.realtime}</span>
+            <span className="text-[26px] font-bold leading-none text-[var(--a-text)]">{ga.realtime}</span>
           </div>
         </div>
       </div>
@@ -76,7 +76,7 @@ export function GaStatsPanel({ ga }: { ga: GaStats }) {
         <Col title="Države" rows={ga.countries.slice(0, 6).map((c) => ({ label: c.name, value: c.users }))} unit="ljudi" />
       </div>
 
-      <p className="mt-3 text-[10px] text-[#a0a0a5]">Osvježava se svakih ~10 min. Puni izvještaji na analytics.google.com.</p>
+      <p className="mt-3 text-[10px] text-[var(--a-text-3)]">Osvježava se svakih ~10 min. Puni izvještaji na analytics.google.com.</p>
     </Panel>
   );
 }

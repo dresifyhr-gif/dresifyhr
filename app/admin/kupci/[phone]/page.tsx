@@ -57,9 +57,9 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
   await issueKlubRewardIfEarned(latest.phone).catch(() => null);
   const klub = await getKlubProgress(latest.phone);
 
-  const Stat = ({ label, value, cls = "text-[#1d1d1f]" }: { label: string; value: string; cls?: string }) => (
-    <div className="rounded-[12px] border border-black/[0.06] bg-white p-3">
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-[#8e8e93]">{label}</div>
+  const Stat = ({ label, value, cls = "text-[var(--a-text)]" }: { label: string; value: string; cls?: string }) => (
+    <div className="rounded-[12px] border border-[var(--a-line)] bg-[var(--a-card)] p-3">
+      <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--a-text-3)]">{label}</div>
       <div className={`mt-0.5 text-lg font-bold ${cls}`}>{value}</div>
     </div>
   );
@@ -67,7 +67,7 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
   return (
     <AdminShell title={name || "Kupac"} subtitle="Profil kupca — sve narudžbe i podaci na jednom mjestu">
       <div className="mb-4">
-        <Link href="/admin/kupci" className="text-sm font-medium text-[#6e6e73] hover:text-[#1d1d1f]">← Natrag na kupce</Link>
+        <Link href="/admin/kupci" className="text-sm font-medium text-[var(--a-text-2)] hover:text-[var(--a-text)]">← Natrag na kupce</Link>
       </div>
 
       {/* Kontakt + rizik */}
@@ -75,14 +75,14 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-bold text-[#1d1d1f]">{name || "—"}</h2>
+              <h2 className="text-lg font-bold text-[var(--a-text)]">{name || "—"}</h2>
               {failed.length > 0 && (
                 <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-700">
                   ⚠️ Rizičan · {failed.length}× odbio
                 </span>
               )}
             </div>
-            <div className="mt-1 space-y-0.5 text-sm text-[#6e6e73]">
+            <div className="mt-1 space-y-0.5 text-sm text-[var(--a-text-2)]">
               {phoneDisplay && <div>📞 {phoneDisplay}</div>}
               {email && <div>✉️ {email}</div>}
               {address && <div>📍 {address}</div>}
@@ -101,8 +101,8 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
         <div className="mb-4 a-card p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-[15px] font-semibold text-[#1d1d1f]">🎁 Dresify Klub</div>
-              <div className="mt-0.5 text-[13px] text-[#6e6e73]">
+              <div className="text-[15px] font-semibold text-[var(--a-text)]">🎁 Dresify Klub</div>
+              <div className="mt-0.5 text-[13px] text-[var(--a-text-2)]">
                 {klub.inCycle}/{klub.target} preuzetih narudžbi
                 {klub.remaining > 0 ? <> — još <b>{klub.remaining}</b> do nagrade</> : <> — <b className="text-emerald-600">nagrada spremna</b></>}
                 {klub.earned > 0 && <> · zaslužio <b>{klub.earned}</b>×</>}
@@ -110,10 +110,10 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
             </div>
             <div className="flex flex-wrap gap-1.5">
               {klub.codes.length === 0 ? (
-                <span className="text-[12px] text-[#8e8e93]">još nema nagrada</span>
+                <span className="text-[12px] text-[var(--a-text-3)]">još nema nagrada</span>
               ) : (
                 klub.codes.map((c) => (
-                  <span key={c.code} className={`rounded-[10px] px-2 py-1 font-mono text-[12px] font-bold ${c.used ? "bg-black/[0.06] text-[#8e8e93] line-through" : "bg-accent/60 text-[#1d1d1f]"}`}>
+                  <span key={c.code} className={`rounded-[10px] px-2 py-1 font-mono text-[12px] font-bold ${c.used ? "bg-[var(--a-surface-2)] text-[var(--a-text-3)] line-through" : "bg-accent/60 text-[var(--a-text)]"}`}>
                     {c.code}{c.used ? "" : " ✓"}
                   </span>
                 ))
@@ -121,7 +121,7 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
             </div>
           </div>
           {/* Traka napretka */}
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-black/[0.06]">
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[var(--a-surface-2)]">
             <div className="h-full rounded-full bg-accent" style={{ width: `${Math.round((klub.inCycle / klub.target) * 100)}%` }} />
           </div>
         </div>
@@ -132,37 +132,37 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
         <Stat label="Ukupno narudžbi" value={String(orders.length)} />
         <Stat label="Potrošeno (preuzeto)" value={eur(totalSpent)} cls="text-emerald-600" />
         <Stat label="Preuzeto / čeka" value={`${collected.length} / ${pending.length}`} />
-        <Stat label="Vraćene pošiljke" value={String(failed.length)} cls={failed.length ? "text-red-600" : "text-[#1d1d1f]"} />
+        <Stat label="Vraćene pošiljke" value={String(failed.length)} cls={failed.length ? "text-red-600" : "text-[var(--a-text)]"} />
       </div>
-      <div className="mb-5 text-xs text-[#8e8e93]">
+      <div className="mb-5 text-xs text-[var(--a-text-3)]">
         Prvi put: {firstAt.toLocaleDateString("hr-HR")} · Zadnji put: {latest.createdAt.toLocaleDateString("hr-HR")}
       </div>
 
       {/* Sve narudžbe */}
       <div className="a-card p-4 sm:p-5">
-        <div className="mb-3 text-sm font-bold text-[#1d1d1f]">Sve narudžbe ({orders.length})</div>
+        <div className="mb-3 text-sm font-bold text-[var(--a-text)]">Sve narudžbe ({orders.length})</div>
         <div className="space-y-2">
           {orders.map((o) => {
-            const st = STATUS[o.status] || { label: o.status, cls: "bg-black/[0.06] text-[#6e6e73]" };
+            const st = STATUS[o.status] || { label: o.status, cls: "bg-[var(--a-surface-2)] text-[var(--a-text-2)]" };
             const goods = o.total - (o.shipping ?? 0);
             const ref = o.reference || getOrderReference(o.createdAt.toISOString());
             return (
-              <div key={o.id} className="rounded-[12px] border border-black/[0.06] p-3">
+              <div key={o.id} className="rounded-[12px] border border-[var(--a-line)] p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold text-[#6e6e73]">{o.createdAt.toLocaleDateString("hr-HR")}</span>
-                    <span className="text-[11px] text-[#8e8e93]">{ref}</span>
+                    <span className="text-xs font-semibold text-[var(--a-text-2)]">{o.createdAt.toLocaleDateString("hr-HR")}</span>
+                    <span className="text-[11px] text-[var(--a-text-3)]">{ref}</span>
                     <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
                     {isSent(o.status) && (
                       <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${o.cashCollected ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
                         {o.cashCollected ? "naplaćeno" : "čeka naplatu"}
                       </span>
                     )}
-                    {o.shippedBy && <span className="text-[10px] text-[#8e8e93]">({o.shippedBy})</span>}
+                    {o.shippedBy && <span className="text-[10px] text-[var(--a-text-3)]">({o.shippedBy})</span>}
                   </div>
-                  <span className="text-sm font-semibold text-[#1d1d1f]">{eur(goods)}</span>
+                  <span className="text-sm font-semibold text-[var(--a-text)]">{eur(goods)}</span>
                 </div>
-                <div className="mt-1 text-xs text-[#6e6e73]">
+                <div className="mt-1 text-xs text-[var(--a-text-2)]">
                   {o.items.map((it) => `${repairText([it.klub, it.igrac].filter(Boolean).join(" "))}${it.size ? ` (${it.size})` : ""}${it.quantity > 1 ? ` ×${it.quantity}` : ""}`).join(" · ")}
                 </div>
               </div>

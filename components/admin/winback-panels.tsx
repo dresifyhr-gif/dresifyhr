@@ -9,8 +9,8 @@ export function ReturnedList({ items }: { items: { id: string; createdAt: Date; 
     <ul className="max-h-80 space-y-2 overflow-y-auto pr-1">
       {items.map((o) => (
         <li key={o.id} className="flex items-center justify-between gap-2 text-sm">
-          <span className="min-w-0 truncate text-[#1d1d1f]">
-            <span className="text-[#8e8e93]">{o.createdAt.toLocaleDateString("hr-HR")}</span> · {formatCroatianName(o.customerName)}
+          <span className="min-w-0 truncate text-[var(--a-text)]">
+            <span className="text-[var(--a-text-3)]">{o.createdAt.toLocaleDateString("hr-HR")}</span> · {formatCroatianName(o.customerName)}
           </span>
           <span className="shrink-0 font-semibold text-red-500">{eur(o.total)}</span>
         </li>

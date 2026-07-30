@@ -266,10 +266,10 @@ body::before {
   --a-bg: #0b0b0c;
   --a-card: #151517;
   --a-surface-2: #1c1c20;
-  --a-text: #f1f1ee;
-  --a-text-2: #9c9c97;
-  --a-text-3: #7a7a74;
-  --a-line: rgba(255, 255, 255, 0.09);
+  --a-text: #f4f4f1;
+  --a-text-2: #b0b0aa;
+  --a-text-3: #8c8c86;
+  --a-line: rgba(255, 255, 255, 0.10);
   --a-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 18px 40px -24px rgba(0, 0, 0, 0.7);
   --a-shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.03);
   --a-good: #34d399; --a-good-bg: rgba(52, 211, 153, 0.14);

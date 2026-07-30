@@ -130,13 +130,13 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
     <div className={`a-card ${fill ? "flex h-full flex-col" : ""}`}>
       <div className="flex items-center gap-2 border-b border-black/[0.04] px-5 py-3">
         <Image src="/dresify-robot.png" alt="Dresify AI" width={40} height={40} className="h-10 w-10 object-contain" />
-        <span className="text-sm font-semibold text-[#1d1d1f]">Dresify AI</span>
+        <span className="text-sm font-semibold text-[var(--a-text)]">Dresify AI</span>
         {messages.length > 0 && (
           <button
             type="button"
             onClick={newChat}
             title="Obriši razgovor i kreni ispočetka"
-            className="ml-auto rounded-[10px] border border-black/[0.06] px-2 py-1 text-[11px] font-semibold text-[#6e6e73] transition hover:bg-black/[0.03] hover:text-[#1d1d1f]"
+            className="ml-auto rounded-[10px] border border-[var(--a-line)] px-2 py-1 text-[11px] font-semibold text-[var(--a-text-2)] transition hover:bg-[var(--a-surface-2)] hover:text-[var(--a-text)]"
           >
             🗑 Novi razgovor
           </button>
@@ -145,7 +145,7 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
 
       <div className={`overflow-y-auto px-5 py-4 ${fill ? "flex-1" : "max-h-80 min-h-[3rem]"}`}>
         {messages.length === 0 ? (
-          <p className="text-sm text-[#8e8e93]">Pitaj me bilo što o svom shopu — brojke, prodaji, kupcima, prijedlozima.</p>
+          <p className="text-sm text-[var(--a-text-3)]">Pitaj me bilo što o svom shopu — brojke, prodaji, kupcima, prijedlozima.</p>
         ) : (
           <div className="space-y-3">
             {messages.map((msg, i) =>
@@ -158,7 +158,7 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
               ) : (
                 <div key={i} className="flex items-start gap-2">
                   <Image src="/dresify-robot.png" alt="AI" width={28} height={28} className="mt-0.5 h-7 w-7 shrink-0 object-contain" />
-                  <div className="inline-block max-w-[85%] whitespace-pre-wrap rounded-2xl bg-black/[0.06] px-3.5 py-2 text-sm text-[#1d1d1f]">
+                  <div className="inline-block max-w-[85%] whitespace-pre-wrap rounded-2xl bg-[var(--a-surface-2)] px-3.5 py-2 text-sm text-[var(--a-text)]">
                     {msg.content ? renderRich(msg.content) : (loading ? "…" : "")}
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
               key={s}
               onClick={() => ask(s)}
               disabled={loading}
-              className="rounded-full border border-black/[0.06] bg-black/[0.03] px-2.5 py-1 text-xs text-[#6e6e73] transition hover:border-black/[0.12] hover:text-[#1d1d1f] disabled:opacity-50"
+              className="rounded-full border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2.5 py-1 text-xs text-[var(--a-text-2)] transition hover:border-[var(--a-line)] hover:text-[var(--a-text)] disabled:opacity-50"
             >
               {s}
             </button>
@@ -193,7 +193,7 @@ export function AdminAiChat({ fill = false }: { fill?: boolean }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Napiši pitanje…"
-            className="flex-1 rounded-[12px] border border-black/[0.06] bg-black/[0.03] px-3.5 py-2.5 text-sm text-[#1d1d1f] outline-none transition focus:border-slate-400 focus:bg-white"
+            className="flex-1 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-3.5 py-2.5 text-sm text-[var(--a-text)] outline-none transition focus:border-slate-400 focus:bg-[var(--a-card)]"
           />
           <button
             type="submit"

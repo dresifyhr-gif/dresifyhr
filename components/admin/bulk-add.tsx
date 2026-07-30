@@ -191,17 +191,17 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
   const readyCount = rows.filter((r) => r.status === "ready" && r.checked).length;
   const savedCount = rows.filter((r) => r.status === "saved").length;
   const dupCount = rows.filter((r) => r.dup).length;
-  const inp = "rounded border border-black/[0.06] bg-white px-2 py-1 text-[12px] outline-none focus:border-slate-400";
+  const inp = "rounded border border-[var(--a-line)] bg-[var(--a-card)] px-2 py-1 text-[12px] outline-none focus:border-slate-400";
 
   return (
     <div className="mt-4 rounded-[12px] border border-violet-200 bg-violet-50/40 p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <div className="text-sm font-bold text-[#1d1d1f]">📦 Masovno dodavanje</div>
-          <div className="text-xs text-[#6e6e73]">Ubaci više slika odjednom — AI svaku pročita, ti pregledaš i spremiš sve.</div>
+          <div className="text-sm font-bold text-[var(--a-text)]">📦 Masovno dodavanje</div>
+          <div className="text-xs text-[var(--a-text-2)]">Ubaci više slika odjednom — AI svaku pročita, ti pregledaš i spremiš sve.</div>
         </div>
         {rows.length > 0 && (
-          <button type="button" onClick={() => setRows([])} className="text-[11px] font-semibold text-[#8e8e93] underline decoration-dotted hover:text-[#1d1d1f]">
+          <button type="button" onClick={() => setRows([])} className="text-[11px] font-semibold text-[var(--a-text-3)] underline decoration-dotted hover:text-[var(--a-text)]">
             ↺ Očisti listu
           </button>
         )}
@@ -211,11 +211,11 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); const f = Array.from(e.dataTransfer.files); if (f.length) addFiles(f); }}
         onClick={() => inputRef.current?.click()}
-        className="flex cursor-pointer flex-col items-center gap-1 rounded-[12px] border-2 border-dashed border-violet-300 bg-white p-5 text-center text-sm transition hover:border-violet-500"
+        className="flex cursor-pointer flex-col items-center gap-1 rounded-[12px] border-2 border-dashed border-violet-300 bg-[var(--a-card)] p-5 text-center text-sm transition hover:border-violet-500"
       >
         <span className="text-2xl">🖼️</span>
-        <span className="font-medium text-[#6e6e73]">{busy ? "Obrađujem…" : "Povuci više slika ovdje ili klikni za odabir"}</span>
-        <span className="text-[11px] text-[#8e8e93]">Svaka slika = jedan proizvod · AI čita klub, igrača, broj i boje</span>
+        <span className="font-medium text-[var(--a-text-2)]">{busy ? "Obrađujem…" : "Povuci više slika ovdje ili klikni za odabir"}</span>
+        <span className="text-[11px] text-[var(--a-text-3)]">Svaka slika = jedan proizvod · AI čita klub, igrača, broj i boje</span>
         <input
           ref={inputRef}
           type="file"
@@ -228,7 +228,7 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
 
       {rows.length > 0 && (
         <>
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#6e6e73]">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[var(--a-text-2)]">
             <span>{rows.length} slika</span>
             {dupCount > 0 && <span className="font-semibold text-amber-600">⚠️ {dupCount} mogućih duplikata (odznačeni)</span>}
             {savedCount > 0 && <span className="font-semibold text-emerald-600">✓ {savedCount} spremljeno</span>}
@@ -236,7 +236,7 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
 
           <ul className="mt-2 space-y-2">
             {rows.map((r) => (
-              <li key={r.key} className={`rounded-[12px] border p-2.5 ${r.status === "saved" ? "border-emerald-200 bg-emerald-50/50" : r.status === "error" ? "border-red-200 bg-red-50/50" : r.dup ? "border-amber-200 bg-amber-50/40" : "border-black/[0.06] bg-white"}`}>
+              <li key={r.key} className={`rounded-[12px] border p-2.5 ${r.status === "saved" ? "border-emerald-200 bg-emerald-50/50" : r.status === "error" ? "border-red-200 bg-red-50/50" : r.dup ? "border-amber-200 bg-amber-50/40" : "border-[var(--a-line)] bg-[var(--a-card)]"}`}>
                 <div className="flex items-start gap-2.5">
                   <input
                     type="checkbox"
@@ -245,7 +245,7 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
                     onChange={(e) => patch(r.key, { checked: e.target.checked })}
                     className="mt-1 h-4 w-4 shrink-0"
                   />
-                  <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded border border-black/[0.06] bg-white">
+                  <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded border border-[var(--a-line)] bg-[var(--a-card)]">
                     <Image src={r.imageUrl || r.preview} alt="" fill sizes="56px" className="object-contain p-0.5" unoptimized={!r.imageUrl} />
                   </span>
 
@@ -253,10 +253,10 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
                     {r.status === "uploading" || r.status === "reading" || r.status === "waiting" ? (
                       <p className="py-3 text-[12px] font-medium text-violet-600">
                         {r.status === "waiting" ? "⏳ Čeka…" : r.status === "uploading" ? "⬆️ Uploadam…" : "🪄 AI čita sliku…"}
-                        <span className="ml-1 text-[#8e8e93]">{r.fileName}</span>
+                        <span className="ml-1 text-[var(--a-text-3)]">{r.fileName}</span>
                       </p>
                     ) : r.status === "error" ? (
-                      <p className="py-3 text-[12px] font-medium text-red-600">✗ {r.error} <span className="text-[#8e8e93]">({r.fileName})</span></p>
+                      <p className="py-3 text-[12px] font-medium text-red-600">✗ {r.error} <span className="text-[var(--a-text-3)]">({r.fileName})</span></p>
                     ) : r.status === "saved" ? (
                       <p className="py-3 text-[12px] font-semibold text-emerald-700">✓ Spremljeno: {r.klub} — {r.igrac}</p>
                     ) : (
@@ -272,13 +272,13 @@ export function BulkAdd({ onDone }: { onDone: () => void }) {
                             {LIGE.map((l) => <option key={l} value={l}>{l}</option>)}
                           </select>
                           <input value={r.price} onChange={(e) => patch(r.key, { price: e.target.value })} inputMode="decimal" className={`${inp} w-14`} />
-                          <span className="text-[11px] text-[#8e8e93]">€</span>
+                          <span className="text-[11px] text-[var(--a-text-3)]">€</span>
                         </div>
                         {r.dup && (
                           <p className="mt-1 text-[11px] font-semibold text-amber-700">⚠️ Vjerojatno već postoji: {r.dup} — odznačeno da se ne duplicira</p>
                         )}
                         {r.seen && !r.dup && (
-                          <p className={`mt-1 break-words text-[11px] ${r.confidence === "low" ? "text-amber-600" : "text-[#8e8e93]"}`}>
+                          <p className={`mt-1 break-words text-[11px] ${r.confidence === "low" ? "text-amber-600" : "text-[var(--a-text-3)]"}`}>
                             {r.confidence === "low" ? "⚠️ " : "👁 "}{r.seen}
                           </p>
                         )}
