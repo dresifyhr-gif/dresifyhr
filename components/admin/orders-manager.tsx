@@ -16,15 +16,15 @@ const TILE_TONES: Record<string, string> = {
 };
 function Tile({ icon, label, value, sub, tone }: { icon: string; label: string; value: string; sub?: ReactNode; tone: keyof typeof TILE_TONES }) {
   return (
-    <div className="rounded-2xl border border-[var(--a-line)] bg-[var(--a-card)] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <div className="flex items-center gap-3">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg ${TILE_TONES[tone]}`}>{icon}</div>
+    <div className="rounded-2xl border border-[var(--a-line)] bg-[var(--a-card)] p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:p-4">
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base sm:h-10 sm:w-10 sm:text-lg ${TILE_TONES[tone]}`}>{icon}</div>
         <div className="min-w-0">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--a-text-3)]">{label}</div>
-          <div className="truncate text-[19px] font-bold leading-tight text-[var(--a-text)]">{value}</div>
+          <div className="text-[9px] font-semibold uppercase leading-tight tracking-[0.08em] text-[var(--a-text-3)] sm:text-[10px]">{label}</div>
+          <div className="text-[18px] font-bold leading-tight tracking-tight text-[var(--a-text)] tabular-nums sm:text-[19px]">{value}</div>
         </div>
       </div>
-      {sub ? <div className="mt-2 text-[11px] text-[var(--a-text-2)]">{sub}</div> : null}
+      {sub ? <div className="mt-1.5 text-[11px] leading-snug text-[var(--a-text-2)] sm:mt-2">{sub}</div> : null}
     </div>
   );
 }
@@ -496,6 +496,7 @@ export function OrdersManager() {
   const [cashF, setCashF] = useState(""); // "" | collected | pending
   const [courierF, setCourierF] = useState(""); // "" | gls | hp
   const [deliveryF, setDeliveryF] = useState(""); // "" | delivered | transit | prep
+  const [filtersOpen, setFiltersOpen] = useState(false); // mobitel: skrij napredne filtere dok ne zatrebaju
   const [sort, setSort] = useState(""); // "" new-first | new | old
   const [editing, setEditing] = useState<string | null>(null);
   const [editingContact, setEditingContact] = useState<string | null>(null);
@@ -708,8 +709,28 @@ export function OrdersManager() {
         </div>
       )}
 
+      {/* Mobitel: gumb koji otvara/zatvara napredne filtere (na desktopu su uvijek vidljivi). */}
+      {(() => {
+        const activeCount = [shipper, cashF, courierF, deliveryF].filter(Boolean).length;
+        return (
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((o) => !o)}
+            className="mb-2 flex w-full items-center justify-between rounded-[12px] border border-[var(--a-line)] px-3 py-2 text-xs font-semibold text-[var(--a-text-2)] lg:hidden"
+          >
+            <span className="flex items-center gap-2">
+              🔎 Filteri
+              {activeCount > 0 && (
+                <span className="rounded-full bg-[var(--a-text)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--a-card)]">{activeCount}</span>
+              )}
+            </span>
+            <span className="text-[var(--a-text-3)]">{filtersOpen ? "▲ sakrij" : "▼ prikaži"}</span>
+          </button>
+        );
+      })()}
+
       {/* Odvojeno po pošiljatelju i po naplati — za organizirano praćenje */}
-      <div className="a-sub mb-3 flex flex-wrap items-center gap-x-5 gap-y-2 px-3 py-2">
+      <div className={`a-sub mb-3 ${filtersOpen ? "flex" : "hidden"} flex-wrap items-center gap-x-5 gap-y-2 px-3 py-2 lg:flex`}>
         <FilterGroup label="Poslao" value={shipper} onChange={setShipper}
           options={[{ v: "", l: "Svi" }, { v: "igor", l: "Igor" }, { v: "ivica", l: "Ivica" }]} />
         <FilterDivider />
