@@ -9,10 +9,10 @@ const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 
 // Čista stat-pločica za sažetke (ikona u boji + velika brojka + podnaslov).
 const TILE_TONES: Record<string, string> = {
-  amber: "bg-amber-50 text-amber-600",
-  sky: "bg-sky-50 text-sky-600",
-  emerald: "bg-emerald-50 text-emerald-600",
-  slate: "bg-slate-100 text-slate-600"
+  amber: "bg-[var(--a-warn-bg)] text-[var(--a-warn)]",
+  sky: "bg-[var(--a-info-bg)] text-[var(--a-info)]",
+  emerald: "bg-[var(--a-good-bg)] text-[var(--a-good)]",
+  slate: "bg-[var(--a-surface-2)] text-[var(--a-text-2)]"
 };
 function Tile({ icon, label, value, sub, tone }: { icon: string; label: string; value: string; sub?: ReactNode; tone: keyof typeof TILE_TONES }) {
   return (
@@ -406,12 +406,38 @@ function TrackingRow({ id, initial, courier }: { id: string; initial: string; co
   );
 }
 
+// Jedna skupina filter-pilula (Poslao / Naplata / Kurir / Dostava) — isti izgled svugdje.
+function FilterGroup({ label, value, onChange, options }: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { v: string; l: string }[];
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">{label}</span>
+      {options.map((o) => (
+        <button
+          key={o.v}
+          type="button"
+          onClick={() => onChange(o.v)}
+          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${value === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
+        >
+          {o.l}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+const FilterDivider = () => <span className="hidden h-5 w-px shrink-0 bg-[var(--a-line)] sm:block" />;
+
 const STATUS: Record<string, { label: string; cls: string }> = {
-  new: { label: "čeka slanje", cls: "bg-amber-100 text-amber-700" },
-  shipped: { label: "poslano", cls: "bg-emerald-100 text-emerald-700" },
-  done: { label: "gotovo", cls: "bg-emerald-100 text-emerald-700" },
-  returned: { label: "vraćeno", cls: "bg-red-100 text-red-700" },
-  cancelled: { label: "otkazano", cls: "bg-slate-200 text-[var(--a-text-2)]" }
+  new: { label: "čeka slanje", cls: "bg-[var(--a-warn-bg)] text-[var(--a-warn)]" },
+  shipped: { label: "poslano", cls: "bg-[var(--a-good-bg)] text-[var(--a-good)]" },
+  done: { label: "gotovo", cls: "bg-[var(--a-good-bg)] text-[var(--a-good)]" },
+  returned: { label: "vraćeno", cls: "bg-[var(--a-bad-bg)] text-[var(--a-bad)]" },
+  cancelled: { label: "otkazano", cls: "bg-[var(--a-surface-2)] text-[var(--a-text-2)]" }
 };
 
 const TABS = [
@@ -435,9 +461,9 @@ const CANCEL_REASONS = [
 function CancelPicker({ onPick, onClose }: { onPick: (reason: string) => void; onClose: () => void }) {
   const [other, setOther] = useState("");
   return (
-    <div className="mt-2 rounded-[12px] border border-red-200 bg-red-50/60 p-3">
+    <div className="mt-2 rounded-[12px] border border-[var(--a-bad)]/30 bg-[var(--a-bad-bg)] p-3">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-wide text-red-700">Zašto otkazuješ?</span>
+        <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-bad)]">Zašto otkazuješ?</span>
         <button type="button" onClick={onClose} className="text-[11px] text-[var(--a-text-3)] hover:text-[var(--a-text)]">✕ odustani</button>
       </div>
       <div className="flex flex-wrap gap-1.5">
@@ -676,7 +702,7 @@ export function OrdersManager() {
           <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Razlozi</span>
           {cancelReasons.map((r) => (
             <span key={r.reason} className="text-[12px] text-[var(--a-text)]">
-              {r.reason} <b className="text-red-600">{r.count}×</b>
+              {r.reason} <b className="text-[var(--a-bad)]">{r.count}×</b>
             </span>
           ))}
         </div>
@@ -684,58 +710,17 @@ export function OrdersManager() {
 
       {/* Odvojeno po pošiljatelju i po naplati — za organizirano praćenje */}
       <div className="a-sub mb-3 flex flex-wrap items-center gap-x-5 gap-y-2 px-3 py-2">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Poslao</span>
-          {[{ v: "", l: "Svi" }, { v: "igor", l: "Igor" }, { v: "ivica", l: "Ivica" }].map((o) => (
-            <button
-              key={o.v}
-              type="button"
-              onClick={() => setShipper(o.v)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${shipper === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
-            >
-              {o.l}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Naplata</span>
-          {[{ v: "", l: "Sve" }, { v: "collected", l: "💰 Prikupljeno" }, { v: "pending", l: "⏳ Nije prikupljeno" }].map((o) => (
-            <button
-              key={o.v}
-              type="button"
-              onClick={() => setCashF(o.v)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${cashF === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
-            >
-              {o.l}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Kurir</span>
-          {[{ v: "", l: "Svi" }, { v: "gls", l: "🚚 GLS" }, { v: "hp", l: "🚚 HP" }].map((o) => (
-            <button
-              key={o.v}
-              type="button"
-              onClick={() => setCourierF(o.v)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${courierF === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
-            >
-              {o.l}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Dostava</span>
-          {[{ v: "", l: "Sve" }, { v: "delivered", l: "✅ Dostavljeno" }, { v: "transit", l: "🚚 Na dostavi" }, { v: "prep", l: "📦 U pripremi" }].map((o) => (
-            <button
-              key={o.v}
-              type="button"
-              onClick={() => setDeliveryF(o.v)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${deliveryF === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
-            >
-              {o.l}
-            </button>
-          ))}
-        </div>
+        <FilterGroup label="Poslao" value={shipper} onChange={setShipper}
+          options={[{ v: "", l: "Svi" }, { v: "igor", l: "Igor" }, { v: "ivica", l: "Ivica" }]} />
+        <FilterDivider />
+        <FilterGroup label="Naplata" value={cashF} onChange={setCashF}
+          options={[{ v: "", l: "Sve" }, { v: "collected", l: "💰 Prikupljeno" }, { v: "pending", l: "⏳ Nije prikupljeno" }]} />
+        <FilterDivider />
+        <FilterGroup label="Kurir" value={courierF} onChange={setCourierF}
+          options={[{ v: "", l: "Svi" }, { v: "gls", l: "🚚 GLS" }, { v: "hp", l: "🚚 HP" }]} />
+        <FilterDivider />
+        <FilterGroup label="Dostava" value={deliveryF} onChange={setDeliveryF}
+          options={[{ v: "", l: "Sve" }, { v: "delivered", l: "✅ Dostavljeno" }, { v: "transit", l: "🚚 Na dostavi" }, { v: "prep", l: "📦 U pripremi" }]} />
         {(shipper || cashF || courierF || deliveryF) && (
           <button
             type="button"
@@ -807,12 +792,12 @@ export function OrdersManager() {
                       )}
                       <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
                       {o.status === "cancelled" && o.cancelReason && (
-                        <span className="rounded bg-red-50 px-1.5 py-0.5 text-[10px] text-red-600" title="Razlog otkazivanja">↳ {o.cancelReason}</span>
+                        <span className="rounded bg-[var(--a-bad-bg)] px-1.5 py-0.5 text-[10px] text-[var(--a-bad)]" title="Razlog otkazivanja">↳ {o.cancelReason}</span>
                       )}
                       {o.promoCode && (
                         <span
                           title="Osvojena nagrada na igrici — besplatna dostava (bez +7 €)"
-                          className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700"
+                          className="rounded bg-[var(--a-warn-bg)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--a-warn)]"
                         >
                           🎁 {o.promoCode} · bespl. dostava
                         </span>
@@ -907,28 +892,13 @@ export function OrdersManager() {
                         💬 WhatsApp
                       </a>
                     )}
-                    <a
-                      href={`/admin/print/${o.id}/pdf/?sender=igor`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-[10px] bg-indigo-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-indigo-600"
-                    >
-                      📄 Igor
-                    </a>
-                    <a
-                      href={`/admin/print/${o.id}/pdf/?sender=ivica`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-[10px] bg-purple-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-purple-600"
-                    >
-                      📄 Ivica
-                    </a>
+                    {/* Igor/Ivica PDF naljepnice (za HP) maknute — sve ide preko GLS-a */}
                     <a
                       href={`/admin/print/${o.id}/gls/`}
                       target="_blank"
                       rel="noopener noreferrer"
                       title="GLS naljepnica: ime kupca + logo + QR na Instagram (adresu radi GLS)"
-                      className="rounded-[10px] bg-orange-500 px-2 py-1 text-[11px] font-semibold text-white hover:bg-orange-600"
+                      className="a-btn-sm px-2 py-1 text-[11px]"
                     >
                       🚚 GLS
                     </a>
@@ -949,7 +919,7 @@ export function OrdersManager() {
                   {(o.status === "shipped" || o.status === "done") && (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
                       title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}
-                      className={`rounded-[10px] px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-emerald-600 text-white hover:bg-emerald-700" : "border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"}`}>
+                      className={`rounded-[10px] px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-[var(--a-good)] text-[var(--a-card)] hover:opacity-90" : "border border-[var(--a-warn)]/40 bg-[var(--a-warn-bg)] text-[var(--a-warn)] hover:opacity-90"}`}>
                       {o.cashCollected ? "💰 Prikupljeno ✓" : "💰 Prikupljeno?"}
                     </button>
                   )}
