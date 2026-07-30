@@ -189,9 +189,11 @@ export async function GET(request: Request) {
   }
 
   // Dostavljeno ali još NENAPLAĆENO — novac koji treba sjesti na račun (pouzeće u pipelineu).
+  // SAMO GLS: kod GLS-a pouzeće ide preko GLS-a na bankovni račun. HP dostave su keš u ruci
+  // (dobiješ gotovinu na dostavi), to ne sjeda na račun pa se ovdje ne broji.
   let deliveredPendingTotal = 0, deliveredPendingCount = 0;
   for (const o of all) {
-    if (isSent(o.status) && o.deliveryStatus === "delivered" && !o.cashCollected) {
+    if (isSent(o.status) && o.deliveryStatus === "delivered" && !o.cashCollected && o.courier !== "hp") {
       deliveredPendingTotal += o.total - (o.shipping ?? 0);
       deliveredPendingCount++;
     }
