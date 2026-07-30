@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { formatCroatianPhone, phoneKey } from "@/lib/utils";
 import { waLink } from "@/components/admin/ui";
 
-const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
+const eur = (n: number) =>
+  `${(n ?? 0).toLocaleString("hr-HR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 
 // Čista stat-pločica za sažetke (ikona u boji + velika brojka + podnaslov).
 const TILE_TONES: Record<string, string> = {
@@ -14,17 +15,21 @@ const TILE_TONES: Record<string, string> = {
   emerald: "bg-[var(--a-good-bg)] text-[var(--a-good)]",
   slate: "bg-[var(--a-surface-2)] text-[var(--a-text-2)]"
 };
-function Tile({ icon, label, value, sub, tone }: { icon: string; label: string; value: string; sub?: ReactNode; tone: keyof typeof TILE_TONES }) {
+function Tile({ icon, label, value, sub, tone, hero }: { icon: string; label: string; value: string; sub?: ReactNode; tone: keyof typeof TILE_TONES; hero?: boolean }) {
   return (
-    <div className="rounded-2xl border border-[var(--a-line)] bg-[var(--a-card)] p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:p-4">
-      <div className="flex items-center gap-2.5 sm:gap-3">
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base sm:h-10 sm:w-10 sm:text-lg ${TILE_TONES[tone]}`}>{icon}</div>
-        <div className="min-w-0">
-          <div className="text-[9px] font-semibold uppercase leading-tight tracking-[0.08em] text-[var(--a-text-3)] sm:text-[10px]">{label}</div>
-          <div className="text-[18px] font-bold leading-tight tracking-tight text-[var(--a-text)] tabular-nums sm:text-[19px]">{value}</div>
-        </div>
+    <div className={`relative overflow-hidden rounded-2xl border bg-[var(--a-card)] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${hero ? "border-[var(--a-accent)]/40" : "border-[var(--a-line)]"}`}>
+      {hero && (
+        <div
+          className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full"
+          style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--a-accent) 24%, transparent), transparent 70%)" }}
+        />
+      )}
+      <div className="flex items-center gap-2">
+        <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm ${TILE_TONES[tone]}`}>{icon}</div>
+        <div className="text-[10px] font-bold uppercase leading-tight tracking-[0.09em] text-[var(--a-text-3)]">{label}</div>
       </div>
-      {sub ? <div className="mt-1.5 text-[11px] leading-snug text-[var(--a-text-2)] sm:mt-2">{sub}</div> : null}
+      <div className="mt-2.5 text-[24px] font-extrabold leading-none tracking-[-0.02em] text-[var(--a-text)] tabular-nums">{value}</div>
+      {sub ? <div className="mt-2.5 text-[11.5px] leading-snug text-[var(--a-text-2)]">{sub}</div> : null}
     </div>
   );
 }
@@ -663,13 +668,14 @@ export function OrdersManager() {
       {showNew && <NewOrderForm onCreated={() => { setShowNew(false); fetchPage(q, 1, false); }} />}
       {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (
         <div className="mb-4">
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Tile
-              icon="🛍️" tone="amber" label="Za prikupiti (poslano)" value={eur(cash.pendingTotal)}
+              hero
+              icon="🛍️" tone="amber" label="Za prikupiti · poslano" value={eur(cash.pendingTotal)}
               sub={`${cash.pendingCount} narudžbi · ${komLabel(cash.pendingDresovi, cash.pendingKompleti)}`}
             />
             <Tile
-              icon="🚚" tone="sky" label="Za sjesti na račun"
+              icon="🚚" tone="sky" label="Za sjesti na račun · dostavljeno"
               value={eur(deliveredPending?.total ?? 0)}
               sub={`${deliveredPending?.count ?? 0} dostavljeno · nenaplaćeno`}
             />
