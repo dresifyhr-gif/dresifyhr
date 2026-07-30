@@ -192,9 +192,17 @@ export async function GET(request: Request) {
   // SAMO GLS: kod GLS-a pouzeće ide preko GLS-a na bankovni račun. HP dostave su keš u ruci
   // (dobiješ gotovinu na dostavi), to ne sjeda na račun pa se ovdje ne broji.
   let deliveredPendingTotal = 0, deliveredPendingCount = 0;
+  // glsPendingTotal = SVE GLS pouzeće koje tek treba sjesti na račun (poslano + nenaplaćeno,
+  // bez obzira je li već dostavljeno ili je još u dostavi). To je nazivnik za postotak:
+  // "od svega GLS-a što treba sjesti na račun, koliko je već dostavljeno (spremno)".
+  let glsPendingTotal = 0;
   for (const o of all) {
-    if (isSent(o.status) && o.deliveryStatus === "delivered" && !o.cashCollected && o.courier !== "hp") {
-      deliveredPendingTotal += o.total - (o.shipping ?? 0);
+    const isGlsPending = isSent(o.status) && !o.cashCollected && o.courier !== "hp";
+    if (!isGlsPending) continue;
+    const amt = o.total - (o.shipping ?? 0);
+    glsPendingTotal += amt;
+    if (o.deliveryStatus === "delivered") {
+      deliveredPendingTotal += amt;
       deliveredPendingCount++;
     }
   }
@@ -207,7 +215,7 @@ export async function GET(request: Request) {
     filteredDresovi,
     filteredKompleti,
     cash,
-    deliveredPending: { total: deliveredPendingTotal, count: deliveredPendingCount },
+    deliveredPending: { total: deliveredPendingTotal, count: deliveredPendingCount, glsPendingTotal },
     cancelReasons,
     orders: slice.map((o) => ({
       id: o.id,

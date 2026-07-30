@@ -529,7 +529,7 @@ export function OrdersManager() {
   const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingDresovi: number; pendingKompleti: number; collectedTotal: number; collectedDresovi: number; collectedKompleti: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorDresovi: number; igorKompleti: number; ivicaDresovi: number; ivicaKompleti: number } | null>(null);
-  const [deliveredPending, setDeliveredPending] = useState<{ total: number; count: number } | null>(null);
+  const [deliveredPending, setDeliveredPending] = useState<{ total: number; count: number; glsPendingTotal: number } | null>(null);
   const [total, setTotal] = useState(0);
   const [filteredItems, setFilteredItems] = useState({ dresovi: 0, kompleti: 0 });
   const [cancelReasons, setCancelReasons] = useState<{ reason: string; count: number }[]>([]);
@@ -706,8 +706,9 @@ export function OrdersManager() {
               value={eur(deliveredPending?.total ?? 0)}
               sub={`${deliveredPending?.count ?? 0} dostavljeno · nenaplaćeno`}
               progress={{
-                pct: kolac > 0 ? (deliveredPending?.total ?? 0) / kolac : 0,
-                caption: <>spremno za račun</>
+                // GLS nazivnik: od SVEG GLS pouzeća što treba sjesti na račun, koliko je već dostavljeno.
+                pct: (deliveredPending?.glsPendingTotal ?? 0) > 0 ? (deliveredPending?.total ?? 0) / (deliveredPending?.glsPendingTotal ?? 1) : 0,
+                caption: <>od {eur(deliveredPending?.glsPendingTotal ?? 0)} GLS pouzeća</>
               }}
             />
             <Tile
