@@ -252,6 +252,32 @@ body::before {
   letter-spacing: -0.01em;
 }
 
+/* Dodatni tokeni (svijetla tema) — površine i semantičke boje statusa. */
+.admin-root {
+  --a-surface-2: #eef0f2;
+  --a-good: #12915a; --a-good-bg: #e4f6ec;
+  --a-warn: #b37400; --a-warn-bg: #fbefd8;
+  --a-bad: #c33a30; --a-bad-bg: #fbe5e3;
+  --a-info: #2160e6; --a-info-bg: #e4ecfd;
+}
+
+/* Tamna tema — prebacuje se preko data-theme na .admin-root (prekidač u headeru). */
+.admin-root[data-theme="dark"] {
+  --a-bg: #0b0b0c;
+  --a-card: #151517;
+  --a-surface-2: #1c1c20;
+  --a-text: #f1f1ee;
+  --a-text-2: #9c9c97;
+  --a-text-3: #7a7a74;
+  --a-line: rgba(255, 255, 255, 0.09);
+  --a-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 18px 40px -24px rgba(0, 0, 0, 0.7);
+  --a-shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.03);
+  --a-good: #34d399; --a-good-bg: rgba(52, 211, 153, 0.14);
+  --a-warn: #fbbf24; --a-warn-bg: rgba(251, 191, 36, 0.14);
+  --a-bad: #f87171; --a-bad-bg: rgba(248, 113, 113, 0.14);
+  --a-info: #60a5fa; --a-info-bg: rgba(96, 165, 250, 0.14);
+}
+
 /* Kartica — meka, bez oštrih rubova */
 .admin-root .a-card {
   background: var(--a-card);
@@ -319,7 +345,8 @@ body::before {
    što je rušilo glatkoću (~30 fps, pogotovo na mobitelu). Gotovo neprozirna
    pozadina izgleda praktički isto, a listanje je opet glatko. */
 .admin-root .a-blur {
-  background: rgba(245, 245, 247, 0.97);
+  background: color-mix(in srgb, var(--a-bg) 94%, transparent);
+  backdrop-filter: saturate(1.4) blur(8px);
 }
 
 /* Apple sitni elementi za admin — NAMJERNO JEFTINI.
@@ -337,12 +364,12 @@ body::before {
 .admin-root .a-btn-sm:disabled { opacity: 0.4; }
 
 /* Obojane varijante (potvrda / upozorenje / opasnost) */
-.admin-root .a-btn-ok { background: #e7f8ee; color: #0a7d3f; }
-.admin-root .a-btn-ok:hover { background: #d6f2e2; }
-.admin-root .a-btn-warn { background: #fff4e0; color: #a35b00; }
-.admin-root .a-btn-warn:hover { background: #ffe9c7; }
-.admin-root .a-btn-danger { background: #ffeceb; color: #c2352c; }
-.admin-root .a-btn-danger:hover { background: #ffdbd9; }
+.admin-root .a-btn-ok { background: var(--a-good-bg); color: var(--a-good); }
+.admin-root .a-btn-ok:hover { background: color-mix(in srgb, var(--a-good) 20%, var(--a-card)); }
+.admin-root .a-btn-warn { background: var(--a-warn-bg); color: var(--a-warn); }
+.admin-root .a-btn-warn:hover { background: color-mix(in srgb, var(--a-warn) 20%, var(--a-card)); }
+.admin-root .a-btn-danger { background: var(--a-bad-bg); color: var(--a-bad); }
+.admin-root .a-btn-danger:hover { background: color-mix(in srgb, var(--a-bad) 20%, var(--a-card)); }
 
 /* Oznaka statusa (pill) */
 .admin-root .a-chip {

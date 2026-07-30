@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
-import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Ticket } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Ticket, Sun, Moon } from "lucide-react";
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
 import { CommandPalette } from "@/components/admin/command-palette";
@@ -29,8 +29,8 @@ function Brand() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/favicon.png" alt="Dresify" className="h-9 w-9 rounded-xl object-cover" />
       <div className="leading-tight">
-        <div className="text-[15px] font-bold tracking-tight text-[#1d1d1f]">Dresify</div>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8e8e93]">Admin</div>
+        <div className="text-[15px] font-bold tracking-tight text-[var(--a-text)]">Dresify</div>
+        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--a-text-3)]">Admin</div>
       </div>
     </Link>
   );
@@ -38,11 +38,22 @@ function Brand() {
 
 export function AdminShell({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   const pathname = usePathname();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  // Učitaj spremljenu (ili sistemsku) temu nakon montiranja — bez hydration mismatcha.
+  useEffect(() => {
+    const saved = localStorage.getItem("dresify-admin-theme");
+    if (saved === "dark" || saved === "light") setTheme(saved);
+    else if (window.matchMedia("(prefers-color-scheme: dark)").matches) setTheme("dark");
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("dresify-admin-theme", theme); } catch {}
+  }, [theme]);
 
   return (
-    <div className="admin-root min-h-screen overflow-x-hidden">
+    <div className="admin-root min-h-screen overflow-x-hidden" data-theme={theme}>
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-black/[0.06] bg-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[var(--a-line)] bg-[var(--a-card)] lg:flex">
         <div className="px-5 py-6">
           <Brand />
         </div>
@@ -55,13 +66,13 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
                 key={item.href}
                 href={item.href}
                 className={`group flex items-center gap-3 rounded-[12px] px-3 py-2.5 transition-all duration-150 ${
-                  active ? "bg-accent/60 text-[#1d1d1f]" : "text-[#6e6e73] hover:bg-black/[0.04]"
+                  active ? "bg-accent/60 text-[var(--a-text)]" : "text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"
                 }`}
               >
-                <Icon className={`h-[19px] w-[19px] ${active ? "text-[#1d1d1f]" : "text-[#8e8e93] group-hover:text-[#1d1d1f]"}`} />
+                <Icon className={`h-[19px] w-[19px] ${active ? "text-[var(--a-text)]" : "text-[var(--a-text-3)] group-hover:text-[var(--a-text)]"}`} />
                 <span className="flex flex-col">
                   <span className="text-[14px] font-semibold leading-tight">{item.label}</span>
-                  <span className={`text-[11px] leading-tight ${active ? "text-[#1d1d1f]/55" : "text-[#8e8e93]"}`}>{item.hint}</span>
+                  <span className={`text-[11px] leading-tight ${active ? "text-[var(--a-text-3)]" : "text-[var(--a-text-3)]"}`}>{item.hint}</span>
                 </span>
               </Link>
             );
@@ -69,7 +80,7 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
         </nav>
         <a
           href="/api/admin/logout"
-          className="m-3 flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[#8e8e93] transition hover:bg-black/[0.04] hover:text-[#1d1d1f]"
+          className="m-3 flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[var(--a-text-3)] transition hover:bg-[var(--a-surface-2)] hover:text-[var(--a-text)]"
         >
           <LogOut className="h-[18px] w-[18px]" />
           Odjava
@@ -79,36 +90,44 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
       {/* Main column */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <header className="a-blur sticky top-0 z-20 border-b border-black/[0.06] px-4 py-3 sm:px-6">
+        <header className="a-blur sticky top-0 z-20 border-b border-[var(--a-line)] px-4 py-3 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="lg:hidden">
               <Brand />
             </div>
             <div className="hidden lg:block">
-              <h1 className="text-[19px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{title}</h1>
-              {subtitle && <p className="text-[12px] text-[#8e8e93]">{subtitle}</p>}
+              <h1 className="text-[19px] font-semibold tracking-[-0.02em] text-[var(--a-text)]">{title}</h1>
+              {subtitle && <p className="text-[12px] text-[var(--a-text-3)]">{subtitle}</p>}
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
-                className="a-input flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-[#8e8e93] transition hover:text-[#1d1d1f]"
+                className="a-input flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-[var(--a-text-3)] transition hover:text-[var(--a-text)]"
                 title="Globalno pretraživanje (⌘K)"
               >
                 <Search className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Traži…</span>
-                <kbd className="hidden rounded-[10px] bg-black/[0.06] px-1.5 py-0.5 text-[9px] font-semibold text-[#8e8e93] sm:inline">⌘K</kbd>
+                <kbd className="hidden rounded-[10px] bg-[var(--a-surface-2)] px-1.5 py-0.5 text-[9px] font-semibold text-[var(--a-text-3)] sm:inline">⌘K</kbd>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+                className="a-input flex h-8 w-8 items-center justify-center text-[var(--a-text-3)] transition hover:text-[var(--a-text)]"
+                title={theme === "dark" ? "Svijetla tema" : "Tamna tema"}
+              >
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
               <Link
                 href="/admin/postavke"
-                className="a-input flex h-8 w-8 items-center justify-center text-[#8e8e93] transition hover:text-[#1d1d1f]"
+                className="a-input flex h-8 w-8 items-center justify-center text-[var(--a-text-3)] transition hover:text-[var(--a-text)]"
                 title="Postavke"
               >
                 <Settings className="h-4 w-4" />
               </Link>
               <a
                 href="/api/admin/logout"
-                className="a-input px-3 py-1.5 text-xs font-medium text-[#6e6e73] transition hover:text-[#1d1d1f] lg:hidden"
+                className="a-input px-3 py-1.5 text-xs font-medium text-[var(--a-text-2)] transition hover:text-[var(--a-text)] lg:hidden"
               >
                 Odjava
               </a>
@@ -116,8 +135,8 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
           </div>
           {/* Mobile page title */}
           <div className="mt-3 lg:hidden">
-            <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{title}</h1>
-            {subtitle && <p className="text-[12px] text-[#8e8e93]">{subtitle}</p>}
+            <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--a-text)]">{title}</h1>
+            {subtitle && <p className="text-[12px] text-[var(--a-text-3)]">{subtitle}</p>}
           </div>
         </header>
 
@@ -131,7 +150,7 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
       <CommandPalette />
 
       {/* Mobile bottom nav */}
-      <nav className="a-blur fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-black/[0.06] pb-[env(safe-area-inset-bottom)] lg:hidden">
+      <nav className="a-blur fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-[var(--a-line)] pb-[env(safe-area-inset-bottom)] lg:hidden">
         {NAV.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;
@@ -140,11 +159,11 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center gap-1 py-2 text-[10px] font-semibold transition ${
-                active ? "text-[#1d1d1f]" : "text-[#8e8e93]"
+                active ? "text-[var(--a-text)]" : "text-[var(--a-text-3)]"
               }`}
             >
               <span className={`flex h-8 w-12 items-center justify-center rounded-full transition-all duration-150 ${active ? "bg-accent/60" : ""}`}>
-                <Icon className={`h-[18px] w-[18px] ${active ? "text-[#1d1d1f]" : "text-[#8e8e93]"}`} />
+                <Icon className={`h-[18px] w-[18px] ${active ? "text-[var(--a-text)]" : "text-[var(--a-text-3)]"}`} />
               </span>
               {item.label}
             </Link>

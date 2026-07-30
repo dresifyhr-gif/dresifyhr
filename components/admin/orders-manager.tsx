@@ -16,15 +16,15 @@ const TILE_TONES: Record<string, string> = {
 };
 function Tile({ icon, label, value, sub, tone }: { icon: string; label: string; value: string; sub?: ReactNode; tone: keyof typeof TILE_TONES }) {
   return (
-    <div className="rounded-2xl border border-black/[0.05] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <div className="rounded-2xl border border-[var(--a-line)] bg-[var(--a-card)] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex items-center gap-3">
         <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg ${TILE_TONES[tone]}`}>{icon}</div>
         <div className="min-w-0">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8e8e93]">{label}</div>
-          <div className="truncate text-[19px] font-bold leading-tight text-[#1d1d1f]">{value}</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--a-text-3)]">{label}</div>
+          <div className="truncate text-[19px] font-bold leading-tight text-[var(--a-text)]">{value}</div>
         </div>
       </div>
-      {sub ? <div className="mt-2 text-[11px] text-[#6e6e73]">{sub}</div> : null}
+      {sub ? <div className="mt-2 text-[11px] text-[var(--a-text-2)]">{sub}</div> : null}
     </div>
   );
 }
@@ -134,13 +134,13 @@ function ContactEditor({ orderId, initial, onSaved }: { orderId: string; initial
 
   return (
     <div className="a-sub mt-2 space-y-2 p-2.5">
-      <label className="block text-[11px] font-medium text-[#6e6e73]">Ime i prezime
+      <label className="block text-[11px] font-medium text-[var(--a-text-2)]">Ime i prezime
         <input value={name} onChange={(e) => setName(e.target.value)} className="a-input mt-0.5 w-full px-2 py-1 text-[13px]" />
       </label>
-      <label className="block text-[11px] font-medium text-[#6e6e73]">Telefon
+      <label className="block text-[11px] font-medium text-[var(--a-text-2)]">Telefon
         <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" className="a-input mt-0.5 w-full px-2 py-1 text-[13px]" />
       </label>
-      <label className="block text-[11px] font-medium text-[#6e6e73]">Adresa (ulica, poštanski broj, mjesto)
+      <label className="block text-[11px] font-medium text-[var(--a-text-2)]">Adresa (ulica, poštanski broj, mjesto)
         <input value={address} onChange={(e) => setAddress(e.target.value)} className="a-input mt-0.5 w-full px-2 py-1 text-[13px]" />
       </label>
       <button type="button" onClick={save} disabled={saving} className="a-btn a-btn-primary px-3 py-1.5 text-[11px]">
@@ -190,11 +190,11 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
     }
   }
 
-  const inp = "rounded border border-black/[0.06] bg-white px-2 py-1.5 text-[13px] outline-none focus:border-slate-400";
+  const inp = "rounded border border-[var(--a-line)] bg-[var(--a-card)] px-2 py-1.5 text-[13px] outline-none focus:border-slate-400";
 
   return (
-    <div className="mb-4 rounded-[12px] border border-black/[0.12] bg-white p-3">
-      <div className="mb-2 text-sm font-semibold text-[#1d1d1f]">➕ Nova narudžba (ručno — Instagram)</div>
+    <div className="mb-4 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-card)] p-3">
+      <div className="mb-2 text-sm font-semibold text-[var(--a-text)]">➕ Nova narudžba (ručno — Instagram)</div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ime i prezime *" className={`col-span-2 ${inp}`} />
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Telefon (09…)" inputMode="tel" className={`col-span-2 ${inp}`} />
@@ -203,7 +203,7 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
       </div>
 
       <div className="mt-3 space-y-1.5">
-        <div className="text-[11px] font-medium uppercase tracking-wide text-[#8e8e93]">Artikli</div>
+        <div className="text-[11px] font-medium uppercase tracking-wide text-[var(--a-text-3)]">Artikli</div>
         {rows.map((r, i) => (
           <div key={i} className="flex flex-wrap items-center gap-1.5">
             <input value={r.klub} onChange={(e) => setRow(i, { klub: e.target.value })} placeholder="Klub" className={`w-28 ${inp}`} />
@@ -217,18 +217,18 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
-        <label className="flex items-center gap-1 text-[#6e6e73]">Dostava <input value={shipping} onChange={(e) => setShipping(e.target.value.replace(/[^0-9.,]/g, ""))} inputMode="decimal" className={`w-14 ${inp}`} /> €</label>
-        <label className="flex items-center gap-1 text-[#6e6e73]">Šalje
+        <label className="flex items-center gap-1 text-[var(--a-text-2)]">Dostava <input value={shipping} onChange={(e) => setShipping(e.target.value.replace(/[^0-9.,]/g, ""))} inputMode="decimal" className={`w-14 ${inp}`} /> €</label>
+        <label className="flex items-center gap-1 text-[var(--a-text-2)]">Šalje
           <select value={shippedBy} onChange={(e) => setShippedBy(e.target.value as "" | "igor" | "ivica")} className={inp}>
             <option value="">—</option><option value="igor">Igor</option><option value="ivica">Ivica</option>
           </select>
         </label>
-        <label className="flex items-center gap-1 text-[#6e6e73]">Status
+        <label className="flex items-center gap-1 text-[var(--a-text-2)]">Status
           <select value={status} onChange={(e) => setStatus(e.target.value as "new" | "shipped")} className={inp}>
             <option value="new">Nova</option><option value="shipped">Poslano</option>
           </select>
         </label>
-        <span className="ml-auto text-[#6e6e73]">Roba: <b className="text-[#1d1d1f]">{subtotal.toFixed(0)} €</b> · Ukupno (s dostavom): <b className="text-[#1d1d1f]">{total.toFixed(0)} €</b></span>
+        <span className="ml-auto text-[var(--a-text-2)]">Roba: <b className="text-[var(--a-text)]">{subtotal.toFixed(0)} €</b> · Ukupno (s dostavom): <b className="text-[var(--a-text)]">{total.toFixed(0)} €</b></span>
       </div>
 
       <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Napomena (nije obavezno)" className={`mt-2 w-full ${inp}`} />
@@ -315,13 +315,13 @@ function GlsCopyPanel({ order }: { order: Order }) {
   }
 
   return (
-    <div className="mt-2 rounded-[12px] border border-black/[0.08] bg-black/[0.02] p-3">
+    <div className="mt-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-3">
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Za GLS formu (klikni za kopiranje)</span>
+        <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Za GLS formu (klikni za kopiranje)</span>
         <button
           type="button"
           onClick={() => copy("all", fields.filter((f) => f.value).map((f) => `${f.label}: ${f.value}`).join("\n"))}
-          className="rounded-[8px] bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-slate-800"
+          className="rounded-[8px] bg-[var(--a-text)] px-2 py-0.5 text-[10px] font-semibold text-[var(--a-card)] hover:opacity-90"
         >
           {copied === "all" ? "✓ kopirano" : "Kopiraj sve"}
         </button>
@@ -334,21 +334,21 @@ function GlsCopyPanel({ order }: { order: Order }) {
             onClick={() => copy(f.label, f.value)}
             disabled={!f.value}
             title={f.value ? "Klikni za kopiranje" : "Nema podatka — raščlani ručno"}
-            className="flex items-center justify-between gap-2 rounded-[8px] border border-black/[0.06] bg-white px-2 py-1 text-left text-[12px] transition hover:border-slate-400 disabled:cursor-default disabled:opacity-50"
+            className="flex items-center justify-between gap-2 rounded-[8px] border border-[var(--a-line)] bg-[var(--a-card)] px-2 py-1 text-left text-[12px] transition hover:border-slate-400 disabled:cursor-default disabled:opacity-50"
           >
             <span className="min-w-0">
-              <span className="block text-[9px] uppercase tracking-wide text-[#a0a0a5]">{f.label}</span>
-              <span className="block truncate text-[#1d1d1f]">{f.value || "—"}</span>
+              <span className="block text-[9px] uppercase tracking-wide text-[var(--a-text-3)]">{f.label}</span>
+              <span className="block truncate text-[var(--a-text)]">{f.value || "—"}</span>
             </span>
             {f.value && (
-              <span className={`shrink-0 rounded-[6px] px-1.5 py-0.5 text-[10px] font-semibold ${copied === f.label ? "bg-emerald-100 text-emerald-700" : "bg-slate-900 text-white"}`}>
+              <span className={`shrink-0 rounded-[6px] px-1.5 py-0.5 text-[10px] font-semibold ${copied === f.label ? "bg-emerald-100 text-emerald-700" : "bg-[var(--a-text)] text-[var(--a-card)]"}`}>
                 {copied === f.label ? "✓ ok" : "Kopiraj"}
               </span>
             )}
           </button>
         ))}
       </div>
-      <p className="mt-1.5 text-[10px] text-[#a0a0a5]">Država je uvijek Hrvatska. Provjeri ulicu/broj ako adresa nije standardna.</p>
+      <p className="mt-1.5 text-[10px] text-[var(--a-text-3)]">Država je uvijek Hrvatska. Provjeri ulicu/broj ako adresa nije standardna.</p>
     </div>
   );
 }
@@ -381,13 +381,13 @@ function TrackingRow({ id, initial, courier }: { id: string; initial: string; co
         value={val}
         onChange={(e) => setVal(e.target.value)}
         placeholder="Tracking / broj pošiljke"
-        className="w-full min-w-0 flex-1 basis-[140px] rounded-[10px] border border-black/[0.06] bg-black/[0.03] px-2.5 py-1 text-[12px] text-[#1d1d1f] outline-none focus:border-slate-400 focus:bg-white"
+        className="w-full min-w-0 flex-1 basis-[140px] rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2.5 py-1 text-[12px] text-[var(--a-text)] outline-none focus:border-slate-400 focus:bg-[var(--a-card)]"
       />
       <button
         type="button"
         onClick={save}
         disabled={saving || val === initial}
-        className="rounded-[10px] border border-black/[0.06] px-2.5 py-1 text-[11px] font-medium text-[#6e6e73] transition hover:bg-black/[0.03] disabled:opacity-40"
+        className="rounded-[10px] border border-[var(--a-line)] px-2.5 py-1 text-[11px] font-medium text-[var(--a-text-2)] transition hover:bg-[var(--a-surface-2)] disabled:opacity-40"
       >
         {saving ? "…" : saved ? "✓ spremljeno" : "Spremi"}
       </button>
@@ -396,7 +396,7 @@ function TrackingRow({ id, initial, courier }: { id: string; initial: string; co
           href={trackUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="shrink-0 rounded-[10px] bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-slate-800"
+          className="shrink-0 rounded-[10px] bg-[var(--a-text)] px-2.5 py-1 text-[11px] font-semibold text-[var(--a-card)] transition hover:opacity-90"
           title={isHp ? "Otvori praćenje na Hrvatskoj pošti" : "Otvori praćenje na GLS-u"}
         >
           🔗 {trackLabel}
@@ -411,7 +411,7 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   shipped: { label: "poslano", cls: "bg-emerald-100 text-emerald-700" },
   done: { label: "gotovo", cls: "bg-emerald-100 text-emerald-700" },
   returned: { label: "vraćeno", cls: "bg-red-100 text-red-700" },
-  cancelled: { label: "otkazano", cls: "bg-slate-200 text-[#6e6e73]" }
+  cancelled: { label: "otkazano", cls: "bg-slate-200 text-[var(--a-text-2)]" }
 };
 
 const TABS = [
@@ -438,17 +438,17 @@ function CancelPicker({ onPick, onClose }: { onPick: (reason: string) => void; o
     <div className="mt-2 rounded-[12px] border border-red-200 bg-red-50/60 p-3">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-[11px] font-bold uppercase tracking-wide text-red-700">Zašto otkazuješ?</span>
-        <button type="button" onClick={onClose} className="text-[11px] text-[#8e8e93] hover:text-[#1d1d1f]">✕ odustani</button>
+        <button type="button" onClick={onClose} className="text-[11px] text-[var(--a-text-3)] hover:text-[var(--a-text)]">✕ odustani</button>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {CANCEL_REASONS.map((r) => (
           <button key={r} type="button" onClick={() => onPick(r)}
-            className="rounded-[10px] border border-red-200 bg-white px-2.5 py-1 text-[12px] text-[#1d1d1f] transition hover:border-red-400 hover:bg-red-100">
+            className="rounded-[10px] border border-red-200 bg-[var(--a-card)] px-2.5 py-1 text-[12px] text-[var(--a-text)] transition hover:border-red-400 hover:bg-red-100">
             {r}
           </button>
         ))}
         <button type="button" onClick={() => onPick("")}
-          className="rounded-[10px] border border-black/[0.08] bg-white px-2.5 py-1 text-[12px] text-[#6e6e73] transition hover:bg-black/[0.03]">
+          className="rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-2.5 py-1 text-[12px] text-[var(--a-text-2)] transition hover:bg-[var(--a-surface-2)]">
           Bez razloga
         </button>
       </div>
@@ -651,9 +651,9 @@ export function OrdersManager() {
               sub={komLabel(cash.collectedDresovi, cash.collectedKompleti)}
             />
           </div>
-          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 px-1 text-xs text-[#6e6e73]">
-            <span>💰 Igor prikupio: <b className="text-[#1d1d1f]">{eur(cash.igorCollected)}</b> <span className="text-[#8e8e93]">({komLabel(cash.igorDresovi, cash.igorKompleti)})</span>{cash.igorPending > 0 ? <> · fali {eur(cash.igorPending)}</> : null}</span>
-            <span>💰 Ivica prikupila: <b className="text-[#1d1d1f]">{eur(cash.ivicaCollected)}</b> <span className="text-[#8e8e93]">({komLabel(cash.ivicaDresovi, cash.ivicaKompleti)})</span>{cash.ivicaPending > 0 ? <> · fali {eur(cash.ivicaPending)}</> : null}</span>
+          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 px-1 text-xs text-[var(--a-text-2)]">
+            <span>💰 Igor prikupio: <b className="text-[var(--a-text)]">{eur(cash.igorCollected)}</b> <span className="text-[var(--a-text-3)]">({komLabel(cash.igorDresovi, cash.igorKompleti)})</span>{cash.igorPending > 0 ? <> · fali {eur(cash.igorPending)}</> : null}</span>
+            <span>💰 Ivica prikupila: <b className="text-[var(--a-text)]">{eur(cash.ivicaCollected)}</b> <span className="text-[var(--a-text-3)]">({komLabel(cash.ivicaDresovi, cash.ivicaKompleti)})</span>{cash.ivicaPending > 0 ? <> · fali {eur(cash.ivicaPending)}</> : null}</span>
           </div>
         </div>
       )}
@@ -663,7 +663,7 @@ export function OrdersManager() {
             key={tb.value}
             type="button"
             onClick={() => setStatus(tb.value)}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${status === tb.value ? "bg-slate-900 text-white" : "border border-black/[0.06] text-[#6e6e73] hover:bg-black/[0.03]"}`}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${status === tb.value ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
           >
             {tb.label}
           </button>
@@ -673,9 +673,9 @@ export function OrdersManager() {
       {/* Sažetak razloga otkazivanja — vidi se samo na filteru "Otkazano". */}
       {status === "cancelled" && cancelReasons.length > 0 && (
         <div className="a-sub mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-3 py-2">
-          <span className="text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Razlozi</span>
+          <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Razlozi</span>
           {cancelReasons.map((r) => (
-            <span key={r.reason} className="text-[12px] text-[#1d1d1f]">
+            <span key={r.reason} className="text-[12px] text-[var(--a-text)]">
               {r.reason} <b className="text-red-600">{r.count}×</b>
             </span>
           ))}
@@ -685,52 +685,52 @@ export function OrdersManager() {
       {/* Odvojeno po pošiljatelju i po naplati — za organizirano praćenje */}
       <div className="a-sub mb-3 flex flex-wrap items-center gap-x-5 gap-y-2 px-3 py-2">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Poslao</span>
+          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Poslao</span>
           {[{ v: "", l: "Svi" }, { v: "igor", l: "Igor" }, { v: "ivica", l: "Ivica" }].map((o) => (
             <button
               key={o.v}
               type="button"
               onClick={() => setShipper(o.v)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${shipper === o.v ? "bg-slate-900 text-white" : "border border-black/[0.06] bg-white text-[#6e6e73] hover:bg-black/[0.03]"}`}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${shipper === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
             >
               {o.l}
             </button>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Naplata</span>
+          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Naplata</span>
           {[{ v: "", l: "Sve" }, { v: "collected", l: "💰 Prikupljeno" }, { v: "pending", l: "⏳ Nije prikupljeno" }].map((o) => (
             <button
               key={o.v}
               type="button"
               onClick={() => setCashF(o.v)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${cashF === o.v ? "bg-slate-900 text-white" : "border border-black/[0.06] bg-white text-[#6e6e73] hover:bg-black/[0.03]"}`}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${cashF === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
             >
               {o.l}
             </button>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Kurir</span>
+          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Kurir</span>
           {[{ v: "", l: "Svi" }, { v: "gls", l: "🚚 GLS" }, { v: "hp", l: "🚚 HP" }].map((o) => (
             <button
               key={o.v}
               type="button"
               onClick={() => setCourierF(o.v)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${courierF === o.v ? "bg-slate-900 text-white" : "border border-black/[0.06] bg-white text-[#6e6e73] hover:bg-black/[0.03]"}`}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${courierF === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
             >
               {o.l}
             </button>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[#8e8e93]">Dostava</span>
+          <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Dostava</span>
           {[{ v: "", l: "Sve" }, { v: "delivered", l: "✅ Dostavljeno" }, { v: "transit", l: "🚚 Na dostavi" }, { v: "prep", l: "📦 U pripremi" }].map((o) => (
             <button
               key={o.v}
               type="button"
               onClick={() => setDeliveryF(o.v)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${deliveryF === o.v ? "bg-slate-900 text-white" : "border border-black/[0.06] bg-white text-[#6e6e73] hover:bg-black/[0.03]"}`}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${deliveryF === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
             >
               {o.l}
             </button>
@@ -740,7 +740,7 @@ export function OrdersManager() {
           <button
             type="button"
             onClick={() => { setShipper(""); setCashF(""); setCourierF(""); setDeliveryF(""); }}
-            className="ml-auto text-[11px] font-semibold text-[#8e8e93] underline decoration-dotted hover:text-[#1d1d1f]"
+            className="ml-auto text-[11px] font-semibold text-[var(--a-text-3)] underline decoration-dotted hover:text-[var(--a-text)]"
           >
             ↺ Poništi
           </button>
@@ -757,23 +757,23 @@ export function OrdersManager() {
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="shrink-0 rounded-[12px] border border-black/[0.06] bg-black/[0.03] px-3 py-2.5 text-sm text-[#1d1d1f] outline-none focus:border-slate-400"
+          className="shrink-0 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-3 py-2.5 text-sm text-[var(--a-text)] outline-none focus:border-slate-400"
         >
           <option value="">Zadano (za slanje prvo)</option>
           <option value="new">Najnovije prvo</option>
           <option value="old">Najstarije prvo</option>
         </select>
-        <span className="shrink-0 text-xs text-[#8e8e93]">{total} narudžbi · {komLabel(filteredItems.dresovi, filteredItems.kompleti)}</span>
+        <span className="shrink-0 text-xs text-[var(--a-text-3)]">{total} narudžbi · {komLabel(filteredItems.dresovi, filteredItems.kompleti)}</span>
       </div>
 
       {/* Skupne akcije — pojave se kad je nešto označeno */}
       {selected.size > 0 && (
-        <div className="sticky top-2 z-10 mb-3 flex flex-wrap items-center gap-2 rounded-[12px] border border-black/[0.12] bg-slate-900 px-3 py-2 text-white shadow-lg">
+        <div className="sticky top-2 z-10 mb-3 flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-text)] px-3 py-2 text-[var(--a-card)] shadow-lg">
           <span className="text-sm font-semibold">{selected.size} označeno</span>
           <span className="text-white/40">·</span>
           <span className="text-xs text-white/70">Označi poslano:</span>
-          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "igor")} className="rounded-[10px] bg-white/10 px-2.5 py-1 text-xs font-semibold hover:bg-white/20 disabled:opacity-50">📦 Igor</button>
-          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "ivica")} className="rounded-[10px] bg-white/10 px-2.5 py-1 text-xs font-semibold hover:bg-white/20 disabled:opacity-50">📦 Ivica</button>
+          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "igor")} className="rounded-[10px] bg-[var(--a-card)]/10 px-2.5 py-1 text-xs font-semibold hover:bg-[var(--a-card)]/20 disabled:opacity-50">📦 Igor</button>
+          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "ivica")} className="rounded-[10px] bg-[var(--a-card)]/10 px-2.5 py-1 text-xs font-semibold hover:bg-[var(--a-card)]/20 disabled:opacity-50">📦 Ivica</button>
           <span className="text-white/40">·</span>
           <button type="button" disabled={bulkBusy} onClick={() => bulk("collect")} className="a-btn-sm a-btn-ok px-2.5 py-1 text-xs">💰 Naplaćeno</button>
           <button type="button" onClick={() => setSelected(new Set())} className="ml-auto rounded-[10px] px-2 py-1 text-xs text-white/60 hover:text-white">Odznači</button>
@@ -781,14 +781,14 @@ export function OrdersManager() {
       )}
 
       {orders.length === 0 ? (
-        <div className="py-8 text-center text-sm text-[#8e8e93]">{loading ? "Učitavam…" : "Nema rezultata."}</div>
+        <div className="py-8 text-center text-sm text-[var(--a-text-3)]">{loading ? "Učitavam…" : "Nema rezultata."}</div>
       ) : (
         <div className="grid gap-3 xl:grid-cols-2">
           {orders.map((o) => {
-            const st = STATUS[o.status] || { label: o.status, cls: "bg-black/[0.06] text-[#6e6e73]" };
+            const st = STATUS[o.status] || { label: o.status, cls: "bg-[var(--a-surface-2)] text-[var(--a-text-2)]" };
             const isBusy = busy === o.id;
             return (
-              <div key={o.id} className={`a-row p-3 ${selected.has(o.id) ? "!border-black/20 !bg-black/[0.03]" : ""}`}>
+              <div key={o.id} className={`a-row p-3 ${selected.has(o.id) ? "!border-black/20 !bg-[var(--a-surface-2)]" : ""}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="flex min-w-0 max-w-full items-start gap-2">
                     <input
@@ -801,9 +801,9 @@ export function OrdersManager() {
                     <div className="min-w-0 max-w-full">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       {phoneKey(o.phone) ? (
-                        <a href={`/admin/kupci/${phoneKey(o.phone)}`} className="font-semibold text-[#1d1d1f] underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500" title="Otvori profil kupca">{o.customerName}</a>
+                        <a href={`/admin/kupci/${phoneKey(o.phone)}`} className="font-semibold text-[var(--a-text)] underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500" title="Otvori profil kupca">{o.customerName}</a>
                       ) : (
-                        <span className="font-semibold text-[#1d1d1f]">{o.customerName}</span>
+                        <span className="font-semibold text-[var(--a-text)]">{o.customerName}</span>
                       )}
                       <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
                       {o.status === "cancelled" && o.cancelReason && (
@@ -817,7 +817,7 @@ export function OrdersManager() {
                           🎁 {o.promoCode} · bespl. dostava
                         </span>
                       )}
-                      {o.shippedBy && <span className="text-[10px] text-[#8e8e93]">({o.shippedBy})</span>}
+                      {o.shippedBy && <span className="text-[10px] text-[var(--a-text-3)]">({o.shippedBy})</span>}
                       {(o.status === "shipped" || o.status === "done") && (
                         <button
                           type="button"
@@ -862,7 +862,7 @@ export function OrdersManager() {
                         </span>
                       )}
                     </div>
-                    <div className="mt-0.5 text-xs text-[#6e6e73]">
+                    <div className="mt-0.5 text-xs text-[var(--a-text-2)]">
                       {o.date} · {formatCroatianPhone(o.phone)}
                       {o.address ? (
                         <>
@@ -879,17 +879,17 @@ export function OrdersManager() {
                       ) : null}
                     </div>
                     {o.email ? (
-                      <div className="mt-0.5 break-all text-xs text-[#6e6e73]">
-                        ✉️ <a href={`mailto:${o.email}`} className="font-medium text-[#6e6e73] hover:text-[#1d1d1f] hover:underline">{o.email}</a>
+                      <div className="mt-0.5 break-all text-xs text-[var(--a-text-2)]">
+                        ✉️ <a href={`mailto:${o.email}`} className="font-medium text-[var(--a-text-2)] hover:text-[var(--a-text)] hover:underline">{o.email}</a>
                       </div>
                     ) : null}
-                    <div className="mt-0.5 text-xs text-[#8e8e93]">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-[#1d1d1f]">{eur(o.total)}</span></div>
+                    <div className="mt-0.5 text-xs text-[var(--a-text-3)]">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-[var(--a-text)]">{eur(o.total)}</span></div>
                     {o.items.length > 0 && (
                       <ul className="mt-1.5 space-y-0.5">
                         {o.items.map((it, idx) => (
-                          <li key={idx} className="text-[13px] text-[#1d1d1f]">
+                          <li key={idx} className="text-[13px] text-[var(--a-text)]">
                             📦 {it.quantity > 1 ? `${it.quantity}× ` : ""}<span className="font-medium">{it.label}</span>
-                            {it.size ? <span className="text-[#6e6e73]"> · veličina {it.size}</span> : null}
+                            {it.size ? <span className="text-[var(--a-text-2)]"> · veličina {it.size}</span> : null}
                           </li>
                         ))}
                       </ul>
@@ -990,7 +990,7 @@ export function OrdersManager() {
 
       {/* infinite-scroll sentinel */}
       <div ref={sentinel} className="h-8" />
-      {loading && orders.length > 0 && <div className="py-3 text-center text-xs text-[#8e8e93]">Učitavam još…</div>}
+      {loading && orders.length > 0 && <div className="py-3 text-center text-xs text-[var(--a-text-3)]">Učitavam još…</div>}
       {page >= pages && orders.length > 0 && <div className="py-3 text-center text-xs text-[#c7c7cc]">— kraj popisa —</div>}
     </div>
   );
