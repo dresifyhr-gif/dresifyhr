@@ -34,7 +34,13 @@ export async function GET(request: Request) {
   const sort = url.searchParams.get("sort") || ""; // "" (new-first) | old | new
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
 
-  const { riskMinFailed } = await getSettings();
+  const { riskMinFailed, costDres, costKomplet, costStreetwear } = await getSettings();
+  // Streetwear slugovi imaju svoju nabavu (prodaja 50 €), da se ne broje kao dres.
+  const streetwearSlugs = new Set(
+    (await prisma.customProduct.findMany({ where: { category: "streetwear" }, select: { slug: true } }))
+      .map((p) => p.slug)
+      .filter((s): s is string => !!s)
+  );
   const all = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     select: {
@@ -191,7 +197,19 @@ export async function GET(request: Request) {
   // Dostavljeno ali još NENAPLAĆENO — novac koji treba sjesti na račun (pouzeće u pipelineu).
   // SAMO GLS: kod GLS-a pouzeće ide preko GLS-a na bankovni račun. HP dostave su keš u ruci
   // (dobiješ gotovinu na dostavi), to ne sjeda na račun pa se ovdje ne broji.
-  let deliveredPendingTotal = 0, deliveredPendingCount = 0;
+  // Nabava po artiklu (uz količinu): streetwear > komplet > dres. Neto = cijena − nabava
+  // (isti model kao profit u admin-metrics; dostava se ne oduzima, kao kod "komplet 40 − 18 = 22").
+  const orderCost = (o: { items: { slug?: string | null; klub?: string | null; igrac?: string | null; quantity?: number | null }[] }) => {
+    let c = 0;
+    for (const it of o.items) {
+      const qty = it.quantity || 1;
+      const unit = it.slug && streetwearSlugs.has(it.slug) ? costStreetwear : isKomplet(it) ? costKomplet : costDres;
+      c += unit * qty;
+    }
+    return c;
+  };
+
+  let deliveredPendingTotal = 0, deliveredPendingCount = 0, deliveredPendingNet = 0;
   // glsPendingTotal = SVE GLS pouzeće koje tek treba sjesti na račun (poslano + nenaplaćeno,
   // bez obzira je li već dostavljeno ili je još u dostavi). To je nazivnik za postotak:
   // "od svega GLS-a što treba sjesti na račun, koliko je već dostavljeno (spremno)".
@@ -203,6 +221,7 @@ export async function GET(request: Request) {
     glsPendingTotal += amt;
     if (o.deliveryStatus === "delivered") {
       deliveredPendingTotal += amt;
+      deliveredPendingNet += amt - orderCost(o);
       deliveredPendingCount++;
     }
   }
@@ -215,7 +234,7 @@ export async function GET(request: Request) {
     filteredDresovi,
     filteredKompleti,
     cash,
-    deliveredPending: { total: deliveredPendingTotal, count: deliveredPendingCount, glsPendingTotal },
+    deliveredPending: { total: deliveredPendingTotal, count: deliveredPendingCount, glsPendingTotal, net: deliveredPendingNet },
     cancelReasons,
     orders: slice.map((o) => ({
       id: o.id,

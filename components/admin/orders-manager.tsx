@@ -529,7 +529,7 @@ export function OrdersManager() {
   const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingDresovi: number; pendingKompleti: number; collectedTotal: number; collectedDresovi: number; collectedKompleti: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorDresovi: number; igorKompleti: number; ivicaDresovi: number; ivicaKompleti: number } | null>(null);
-  const [deliveredPending, setDeliveredPending] = useState<{ total: number; count: number; glsPendingTotal: number } | null>(null);
+  const [deliveredPending, setDeliveredPending] = useState<{ total: number; count: number; glsPendingTotal: number; net: number } | null>(null);
   const [total, setTotal] = useState(0);
   const [filteredItems, setFilteredItems] = useState({ dresovi: 0, kompleti: 0 });
   const [cancelReasons, setCancelReasons] = useState<{ reason: string; count: number }[]>([]);
@@ -704,7 +704,7 @@ export function OrdersManager() {
             <Tile
               icon="🚚" tone="sky" label="Za sjesti na račun · dostavljeno"
               value={eur(deliveredPending?.total ?? 0)}
-              sub={`${deliveredPending?.count ?? 0} dostavljeno · nenaplaćeno`}
+              sub={<>{deliveredPending?.count ?? 0} dostavljeno · nenaplaćeno<br /><span className="text-[var(--a-text-3)]">od toga neto <b className="text-[var(--a-text-2)]">{eur(deliveredPending?.net ?? 0)}</b></span></>}
               progress={{
                 // GLS nazivnik: od SVEG GLS pouzeća što treba sjesti na račun, koliko je već dostavljeno.
                 pct: (deliveredPending?.glsPendingTotal ?? 0) > 0 ? (deliveredPending?.total ?? 0) / (deliveredPending?.glsPendingTotal ?? 1) : 0,
