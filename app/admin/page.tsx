@@ -111,7 +111,7 @@ export default async function AdminOverview() {
         />
         <Stat label="Za slanje" value={eur(m.pendingTotal)} profit={eur(m.pendingProfit)} sub={`${m.pendingCount} narudžbi`} />
         <Stat label="Poslano ukupno" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
-        <Stat label="Neto nakon reklama" value={eur(m.netAfterAds)} sub="dostava + povrati + oglasi odbijeni" />
+        <Stat label="Ovaj mjesec" value={eur(m.monthCalRev)} profit={eur(m.monthCalProfit)} sub={`${m.monthCalOrders} narudžbi`} />
         <Stat label="Prosj. košarica" value={eur(m.aov)} />
         <Stat label="Procjena dana" value={eur(ceo.projection)} sub="predviđeni promet" />
       </div>

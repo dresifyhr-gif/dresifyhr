@@ -172,6 +172,11 @@ export async function getDashboardMetrics() {
   // Mjesečni cilj prometa: koliko je ostvareno OVAJ kalendarski mjesec + projekcija po tempu.
   const monthCalRev = net(await rev(startMonthCal));
   const monthProjected = dayOfMonth > 0 ? (monthCalRev / dayOfMonth) * daysInMonth : monthCalRev;
+  // Profit i broj narudžbi ovog kalendarskog mjeseca (za "Ovaj mjesec" karticu).
+  const [monthCalProfit, monthCalOrders] = await Promise.all([
+    profitFor({ createdAt: { gte: startMonthCal }, ...notVoid }),
+    prisma.order.count({ where: { createdAt: { gte: startMonthCal }, ...notVoid } })
+  ]);
 
   // ── Extras (trends, shipping queue, win-back, cities, ad ROI): već pokrenuto gore, samo await ──
   const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll, riskRows, allSentOrders] = await extrasP;
@@ -388,6 +393,8 @@ export async function getDashboardMetrics() {
     monthlyGoal,
     monthCalRev,
     monthProjected,
+    monthCalProfit,
+    monthCalOrders,
     dailyGoal: daysInMonth > 0 ? monthlyGoal / daysInMonth : monthlyGoal,
     // Ukupni profit + saldo dostave (GLS marža umanjena za besplatne dostave i povrate).
     totalProfit: totalProfit + shipPLTotal,
