@@ -26,19 +26,30 @@ export function waLinkText(phone: string | null, text: string) {
   return base ? `${base}?text=${encodeURIComponent(text)}` : null;
 }
 
+const BAR_TONE: Record<string, string> = {
+  good: "var(--a-good)",
+  warn: "var(--a-warn)",
+  info: "var(--a-info)",
+  accent: "var(--a-accent)"
+};
+
 export function Stat({
   label,
   value,
   profit,
   sub,
-  change
+  change,
+  progress
 }: {
   label: string;
   value: string;
   profit?: string;
   sub?: string;
   change?: number | null;
+  progress?: { pct: number; caption?: ReactNode; tone?: keyof typeof BAR_TONE };
 }) {
+  const pct = progress ? Math.max(0, Math.min(100, Math.round(progress.pct * 100))) : 0;
+  const barColor = progress ? BAR_TONE[progress.tone || "good"] : "";
   return (
     <div className="a-card p-4">
       <div className="flex items-center justify-between">
@@ -54,6 +65,17 @@ export function Stat({
       <div className="mt-1.5 whitespace-nowrap text-[22px] font-semibold tabular-nums tracking-[-0.03em] text-[var(--a-text)] xl:text-[25px]">{value}</div>
       {profit && <div className="mt-0.5 text-xs font-semibold text-emerald-600">{profit} profit</div>}
       {sub && <div className="mt-0.5 text-xs text-[var(--a-text-3)]">{sub}</div>}
+      {progress && (
+        <div className="mt-2.5">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--a-surface-2)]">
+            <div className="h-full rounded-full transition-[width] duration-500 ease-out" style={{ width: `${pct}%`, background: barColor }} />
+          </div>
+          <div className="mt-1 flex items-center justify-between text-[10.5px] font-semibold text-[var(--a-text-3)]">
+            <span style={{ color: barColor }}>{pct}%</span>
+            {progress.caption && <span>{progress.caption}</span>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

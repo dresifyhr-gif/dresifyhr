@@ -105,10 +105,13 @@ export default async function AdminOverview() {
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <Stat label="Promet danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} sub={`${m.todayOrders} novih`} />
+        <Stat
+          label="Promet danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} sub={`${m.todayOrders} novih`}
+          progress={{ pct: m.dailyGoal > 0 ? m.todayRev / m.dailyGoal : 0, caption: <>dnevni cilj {eur(m.dailyGoal)}</>, tone: "accent" }}
+        />
         <Stat label="Za slanje" value={eur(m.pendingTotal)} profit={eur(m.pendingProfit)} sub={`${m.pendingCount} narudžbi`} />
         <Stat label="Poslano ukupno" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
-        <Stat label="Sve narudžbe" value={eur(m.totalRev)} profit={eur(m.totalProfit)} sub={`${m.orderCount} narudžbi`} />
+        <Stat label="Neto nakon reklama" value={eur(m.netAfterAds)} sub="dostava + povrati + oglasi odbijeni" />
         <Stat label="Prosj. košarica" value={eur(m.aov)} />
         <Stat label="Procjena dana" value={eur(ceo.projection)} sub="predviđeni promet" />
       </div>
@@ -117,26 +120,39 @@ export default async function AdminOverview() {
 
       {/* Ukupno (sve poslano, neovisno o poravnanju) — iste brojke kao na Narudžbama */}
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <Stat
-          label="Prikupljeno"
-          value={eur(m.cashOverview.collectedTotal)}
-          sub={`${m.cashOverview.collectedCount} narudžbi · ${komLabel(m.cashOverview.collectedDresovi, m.cashOverview.collectedKompleti)}${m.cashOverview.collectedStreet ? ` + ${m.cashOverview.collectedStreet} street` : ""}`}
-        />
-        <Stat
-          label="Za prikupiti"
-          value={eur(m.cashOverview.pendingTotal)}
-          sub={`🚚 HP ${eur(m.cashOverview.pendingHP)} · GLS ${eur(m.cashOverview.pendingGLS)} · ${m.cashOverview.pendingCount} narudžbi`}
-        />
-        <Stat
-          label="Poslano komada"
-          value={String(m.cashOverview.sentDresovi + m.cashOverview.sentKompleti + m.cashOverview.sentStreet)}
-          sub={`${komLabel(m.cashOverview.sentDresovi, m.cashOverview.sentKompleti)}${m.cashOverview.sentStreet ? ` + ${m.cashOverview.sentStreet} street` : ""}`}
-        />
-        <Stat
-          label="Čeka preuzimanje"
-          value={String(m.cashOverview.pendingDresovi + m.cashOverview.pendingKompleti + m.cashOverview.pendingStreet)}
-          sub={`${komLabel(m.cashOverview.pendingDresovi, m.cashOverview.pendingKompleti)}${m.cashOverview.pendingStreet ? ` + ${m.cashOverview.pendingStreet} street` : ""}`}
-        />
+        {(() => {
+          const co = m.cashOverview;
+          const pipeline = co.collectedTotal + co.pendingTotal; // sve poslano u pouzeću
+          const sentPieces = co.sentDresovi + co.sentKompleti + co.sentStreet;
+          const pendingPieces = co.pendingDresovi + co.pendingKompleti + co.pendingStreet;
+          return (
+            <>
+              <Stat
+                label="Prikupljeno"
+                value={eur(co.collectedTotal)}
+                sub={`${co.collectedCount} narudžbi · ${komLabel(co.collectedDresovi, co.collectedKompleti)}${co.collectedStreet ? ` + ${co.collectedStreet} street` : ""}`}
+                progress={{ pct: pipeline > 0 ? co.collectedTotal / pipeline : 0, caption: <>naplaćeno od {eur(pipeline)}</>, tone: "good" }}
+              />
+              <Stat
+                label="Za prikupiti"
+                value={eur(co.pendingTotal)}
+                sub={`🚚 HP ${eur(co.pendingHP)} · GLS ${eur(co.pendingGLS)} · ${co.pendingCount} narudžbi`}
+                progress={{ pct: pipeline > 0 ? co.pendingTotal / pipeline : 0, caption: <>još otvoreno</>, tone: "warn" }}
+              />
+              <Stat
+                label="Poslano komada"
+                value={String(sentPieces)}
+                sub={`${komLabel(co.sentDresovi, co.sentKompleti)}${co.sentStreet ? ` + ${co.sentStreet} street` : ""}`}
+              />
+              <Stat
+                label="Čeka preuzimanje"
+                value={String(pendingPieces)}
+                sub={`${komLabel(co.pendingDresovi, co.pendingKompleti)}${co.pendingStreet ? ` + ${co.pendingStreet} street` : ""}`}
+                progress={{ pct: sentPieces > 0 ? pendingPieces / sentPieces : 0, caption: <>od {sentPieces} poslanih</>, tone: "info" }}
+              />
+            </>
+          );
+        })()}
       </div>
 
       <SectionHeading>⚡ Za danas</SectionHeading>

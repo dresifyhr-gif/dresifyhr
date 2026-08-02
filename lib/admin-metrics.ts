@@ -388,6 +388,7 @@ export async function getDashboardMetrics() {
     monthlyGoal,
     monthCalRev,
     monthProjected,
+    dailyGoal: daysInMonth > 0 ? monthlyGoal / daysInMonth : monthlyGoal,
     // Ukupni profit + saldo dostave (GLS marža umanjena za besplatne dostave i povrate).
     totalProfit: totalProfit + shipPLTotal,
     orderCount,
