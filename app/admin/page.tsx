@@ -107,7 +107,7 @@ export default async function AdminOverview() {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <Stat
           label="Promet danas" value={eur(m.todayRev)} profit={eur(m.todayProfit)} sub={`${m.todayOrders} novih`}
-          progress={{ pct: m.dailyGoal > 0 ? m.todayRev / m.dailyGoal : 0, caption: <>dnevni cilj {eur(m.dailyGoal)}</>, tone: "accent" }}
+          progress={{ pct: m.dailyGoal > 0 ? m.todayRev / m.dailyGoal : 0, caption: <>dnevni cilj {eur(m.dailyGoal)}</>, tone: "good" }}
         />
         <Stat label="Za slanje" value={eur(m.pendingTotal)} profit={eur(m.pendingProfit)} sub={`${m.pendingCount} narudžbi`} />
         <Stat label="Poslano ukupno" value={eur(m.shippedRev)} profit={eur(m.shippedProfit)} sub={`${m.shippedCount} narudžbi`} />
