@@ -316,7 +316,9 @@ export async function getDashboardMetrics() {
     sentDresovi: 0, sentKompleti: 0, sentStreet: 0, sentCount: 0
   };
   for (const o of allSentOrders) {
-    const amt = o.total - (o.shipping ?? 0);
+    // PRIKAZ: puni iznos pouzeća (roba + dostava) jer to je što stvarno prođe kroz račun —
+    // usklađeno s "za sjesti na račun" i bankom. Obračun (cashSplit) i dalje koristi neto robu.
+    const amt = o.total;
     let d = 0, k = 0, s = 0;
     for (const it of o.items) { const q = it.quantity || 1; if (it.slug && streetwearSlugs.has(it.slug)) s += q; else if (isKomplet(it)) k += q; else d += q; }
     cashOverview.sentCount++; cashOverview.sentDresovi += d; cashOverview.sentKompleti += k; cashOverview.sentStreet += s;

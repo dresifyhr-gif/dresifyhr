@@ -180,7 +180,8 @@ export async function GET(request: Request) {
     igorDresovi: 0, igorKompleti: 0, ivicaDresovi: 0, ivicaKompleti: 0
   };
   for (const o of sent) {
-    const amt = o.total - (o.shipping ?? 0);
+    // PRIKAZ: puni iznos pouzeća (roba + dostava) — usklađeno s "za sjesti na račun" i bankom.
+    const amt = o.total;
     let dresovi = 0, kompleti = 0;
     for (const it of o.items) { const q = it.quantity || 1; if (isKomplet(it)) kompleti += q; else dresovi += q; }
     const who = o.shippedBy === "ivica" ? "ivica" : o.shippedBy === "igor" ? "igor" : "";
