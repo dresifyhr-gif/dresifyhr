@@ -27,10 +27,12 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
   return <h3 className="mb-3 mt-8 text-sm font-bold uppercase tracking-[0.14em] text-[var(--a-text-2)]">{children}</h3>;
 }
 
-function GoalBar({ current, goal, projected }: { current: number; goal: number; projected: number }) {
+function GoalBar({ current, goal, projected, day }: { current: number; goal: number; projected: number; day: number }) {
   const pct = goal > 0 ? Math.max(0, Math.min(100, (current / goal) * 100)) : 0;
   const onTrack = projected >= goal;
   const remaining = Math.max(0, goal - current);
+  // Prvih par dana projekcija je iz premalo podataka (šum) — ne palimo zastavicu.
+  const early = day < 5;
   // Marker gdje projekcija po tempu pada (može biti i preko 100%).
   const projPct = goal > 0 ? Math.max(0, Math.min(100, (projected / goal) * 100)) : 0;
   return (
@@ -53,14 +55,20 @@ function GoalBar({ current, goal, projected }: { current: number; goal: number; 
       </div>
       <div className="relative mt-3 h-3 w-full overflow-hidden rounded-full bg-[var(--a-surface-2)]">
         <div className="h-full rounded-full bg-[var(--a-good)] transition-[width] duration-500 ease-out" style={{ width: `${pct}%` }} />
-        {/* Marker: gdje ćemo završiti po trenutnom tempu */}
-        <div className="absolute inset-y-0 w-[2px] bg-[var(--a-text)]" style={{ left: `calc(${projPct}% - 1px)` }} title="Projekcija po tempu" />
+        {/* Marker: gdje ćemo završiti po trenutnom tempu (ne prikazuje se prvih par dana — šum) */}
+        {!early && <div className="absolute inset-y-0 w-[2px] bg-[var(--a-text)]" style={{ left: `calc(${projPct}% - 1px)` }} title="Projekcija po tempu" />}
       </div>
       <div className="mt-2 text-[12px] font-semibold">
-        <span className={onTrack ? "text-[var(--a-good)]" : "text-[var(--a-warn)]"}>
-          {onTrack ? "✅ Na dobrom si putu" : "⚠️ Ispod tempa"}
-        </span>
-        <span className="text-[var(--a-text-3)]"> · projekcija po tempu ~{eur(projected)}</span>
+        {early ? (
+          <span className="text-[var(--a-text-3)]">🗓️ Mjesec tek počeo — projekcija za koji dan</span>
+        ) : (
+          <>
+            <span className={onTrack ? "text-[var(--a-good)]" : "text-[var(--a-warn)]"}>
+              {onTrack ? "✅ Na dobrom si putu" : "⚠️ Ispod tempa"}
+            </span>
+            <span className="text-[var(--a-text-3)]"> · projekcija po tempu ~{eur(projected)}</span>
+          </>
+        )}
       </div>
     </div>
   );
@@ -100,7 +108,7 @@ export default async function AdminOverview() {
 
       {/* Mjesečni cilj prometa — progress + projekcija */}
       <div className="mb-5">
-        <GoalBar current={m.monthCalRev} goal={m.monthlyGoal} projected={m.monthProjected} />
+        <GoalBar current={m.monthCalRev} goal={m.monthlyGoal} projected={m.monthProjected} day={m.dayOfMonth} />
       </div>
 
       {/* KPI strip */}

@@ -396,6 +396,7 @@ export async function getDashboardMetrics() {
     monthlyGoal,
     monthCalRev,
     monthProjected,
+    dayOfMonth,
     monthCalProfit,
     monthCalOrders,
     toShipPieces,
