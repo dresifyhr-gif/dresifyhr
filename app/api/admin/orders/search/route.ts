@@ -210,18 +210,19 @@ export async function GET(request: Request) {
   };
 
   let deliveredPendingTotal = 0, deliveredPendingCount = 0, deliveredPendingNet = 0;
-  // glsPendingTotal = SVE GLS pouzeće koje tek treba sjesti na račun (poslano + nenaplaćeno,
-  // bez obzira je li već dostavljeno ili je još u dostavi). To je nazivnik za postotak:
-  // "od svega GLS-a što treba sjesti na račun, koliko je već dostavljeno (spremno)".
+  // glsPendingTotal = SVE GLS pouzeće koje tek treba sjesti na račun (poslano + nenaplaćeno).
+  // Iznosi su PUNI iznos pouzeća (roba + dostava) jer GLS na račun uplati baš toliko —
+  // tako se "za sjesti na račun" poklapa s bankom i s alatom GLS isplata.
   let glsPendingTotal = 0;
   for (const o of all) {
     const isGlsPending = isSent(o.status) && !o.cashCollected && o.courier !== "hp";
     if (!isGlsPending) continue;
-    const amt = o.total - (o.shipping ?? 0);
-    glsPendingTotal += amt;
+    const cod = o.total; // puni iznos pouzeća (sjeda na račun)
+    const netRobe = o.total - (o.shipping ?? 0); // neto roba (za profit; dostava nije prihod)
+    glsPendingTotal += cod;
     if (o.deliveryStatus === "delivered") {
-      deliveredPendingTotal += amt;
-      deliveredPendingNet += amt - orderCost(o);
+      deliveredPendingTotal += cod;
+      deliveredPendingNet += netRobe - orderCost(o);
       deliveredPendingCount++;
     }
   }
