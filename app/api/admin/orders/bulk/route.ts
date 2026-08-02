@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { markOrderShippedInSheet, markCashCollectedInSheet } from "@/lib/sheets";
+import { issueKlubRewardIfEarned } from "@/lib/klub";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,6 +46,8 @@ export async function POST(request: Request) {
         data: { cashCollected: true, cashCollectedAt: new Date() }
       });
       await markCashCollectedInSheet({ phone: o.phone, name: o.customerName, createdAt: o.createdAt, collected: true, by: o.shippedBy }).catch(() => {});
+      // Dresify Klub: preuzeta narudžba može značiti novu nagradu (idempotentno).
+      await issueKlubRewardIfEarned(o.phone).catch(() => {});
       done++;
     }
   }

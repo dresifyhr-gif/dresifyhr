@@ -683,6 +683,13 @@ export function OrdersManager() {
         >
           {glsChecking ? "⏳ Provjeravam…" : "🚚 Provjeri dostave"}
         </button>
+        <a
+          href="/admin/gls-isplata"
+          title="Označi prikupljeno po iznosu tjedne GLS uplate"
+          className="rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-1.5 text-[12px] font-semibold text-[var(--a-text-2)] transition hover:bg-[var(--a-surface-2)] hover:text-[var(--a-text)]"
+        >
+          💶 GLS isplata
+        </a>
       </div>
       {showNew && <NewOrderForm onCreated={() => { setShowNew(false); fetchPage(q, 1, false); }} />}
       {cash && (cash.pendingCount > 0 || cash.collectedTotal > 0) && (() => {
