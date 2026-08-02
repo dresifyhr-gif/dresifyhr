@@ -181,6 +181,9 @@ export async function getDashboardMetrics() {
   // ── Extras (trends, shipping queue, win-back, cities, ad ROI): već pokrenuto gore, samo await ──
   const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll, riskRows, allSentOrders] = await extrasP;
 
+  // Komadi koji ČEKAJU slanje (nove narudžbe) — za progress na "Poslano komada".
+  const toShipPieces = pending.reduce((s, o) => s + o.items.reduce((a, it) => a + (it.quantity || 1), 0), 0);
+
   // ── Rizični kupci ─────────────────────────────────────────────────────────
   // Grupiraj sve narudžbe po telefonu (phoneKey iz lib/utils) i izbroji propale
   // (otkazano/vraćeno) vs. uredno preuzete. Rizičan = ≥1 propala.
@@ -395,6 +398,7 @@ export async function getDashboardMetrics() {
     monthProjected,
     monthCalProfit,
     monthCalOrders,
+    toShipPieces,
     dailyGoal: daysInMonth > 0 ? monthlyGoal / daysInMonth : monthlyGoal,
     // Ukupni profit + saldo dostave (GLS marža umanjena za besplatne dostave i povrate).
     totalProfit: totalProfit + shipPLTotal,

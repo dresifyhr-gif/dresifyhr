@@ -143,6 +143,11 @@ export default async function AdminOverview() {
                 label="Poslano komada"
                 value={String(sentPieces)}
                 sub={`${komLabel(co.sentDresovi, co.sentKompleti)}${co.sentStreet ? ` + ${co.sentStreet} street` : ""}`}
+                progress={{
+                  pct: sentPieces + m.toShipPieces > 0 ? sentPieces / (sentPieces + m.toShipPieces) : 1,
+                  caption: m.toShipPieces > 0 ? <>još {m.toShipPieces} za slanje</> : <>sve poslano ✓</>,
+                  tone: "good"
+                }}
               />
               <Stat
                 label="Čeka preuzimanje"
