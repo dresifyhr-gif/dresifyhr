@@ -239,6 +239,8 @@ model Settings {
   klubRewardLabel     String?  // opis nagrade koji vidi kupac
   contactPhone        String?
   contactEmail        String?
+  // Ciljevi (progress na Pregledu)
+  monthlyGoal         Float?   // mjesečni cilj prometa u € (npr. 15000)
   updatedAt           DateTime @updatedAt
 }
 

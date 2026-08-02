@@ -72,7 +72,8 @@ export async function POST(request: Request) {
     klubRewardLabel: strOrNull(b?.klubRewardLabel),
     businessName: strOrNull(b?.businessName),
     contactPhone: strOrNull(b?.contactPhone),
-    contactEmail: strOrNull(b?.contactEmail)
+    contactEmail: strOrNull(b?.contactEmail),
+    monthlyGoal: numOrNull(b?.monthlyGoal)
   };
 
   await prisma.settings.upsert({

@@ -46,7 +46,7 @@ function shipPLFor(o: ShipOrder, threshold: number, deliveryCost: number, return
 export async function getDashboardMetrics() {
   const now = new Date();
   // Nabavne cijene iz Postavki (fallback na zadane) — utječu na profit i poravnanje.
-  const { costDres, costKomplet, costStreetwear, deliveryCost, returnCost, freeShipThreshold, igorSharePct, winbackDays, riskMinFailed } = await getSettings();
+  const { costDres, costKomplet, costStreetwear, deliveryCost, returnCost, freeShipThreshold, igorSharePct, winbackDays, riskMinFailed, monthlyGoal } = await getSettings();
   // Početak današnjeg dana po Europe/Zagreb (Vercel radi u UTC-u) kao UTC instant —
   // inače bi "promet danas" u ranim satima gledao krivi (UTC) dan.
   const zp = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zagreb", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
@@ -59,6 +59,10 @@ export async function getDashboardMetrics() {
   // Rolling windows so periods are always nested (7d ≤ 30d) — no month-boundary confusion.
   const startWeek = new Date(now.getTime() - 7 * DAY);
   const startMonth = new Date(now.getTime() - 30 * DAY);
+  // Kalendarski mjesec (1. u mjesecu po Zagrebu) — za mjesečni CILJ prometa i projekciju.
+  const startMonthCal = new Date(Date.UTC(zGet("year"), zGet("month") - 1, 1) - zagrebOffsetMin * 60000);
+  const dayOfMonth = zGet("day");
+  const daysInMonth = new Date(Date.UTC(zGet("year"), zGet("month"), 0)).getUTCDate();
 
   // Otkazane i vraćene narudžbe NE ulaze u promet/zaradu/količine (nisu prodaja).
   const VOID = ["cancelled", "returned"];
@@ -164,6 +168,10 @@ export async function getDashboardMetrics() {
   const deadProducts = jerseys.filter((j) => j.liga !== "Komplet" && !sold.has(j.slug)).map((j) => `${j.klub} — ${j.igrac}`);
 
   const totalRev = net(total);
+
+  // Mjesečni cilj prometa: koliko je ostvareno OVAJ kalendarski mjesec + projekcija po tempu.
+  const monthCalRev = net(await rev(startMonthCal));
+  const monthProjected = dayOfMonth > 0 ? (monthCalRev / dayOfMonth) * daysInMonth : monthCalRev;
 
   // ── Extras (trends, shipping queue, win-back, cities, ad ROI): već pokrenuto gore, samo await ──
   const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll, riskRows, allSentOrders] = await extrasP;
@@ -376,6 +384,10 @@ export async function getDashboardMetrics() {
     monthOrders: month._count,
     monthProfit,
     totalRev,
+    // Mjesečni cilj prometa (Postavke) + ostvareno ovaj kalendarski mjesec + projekcija po tempu.
+    monthlyGoal,
+    monthCalRev,
+    monthProjected,
     // Ukupni profit + saldo dostave (GLS marža umanjena za besplatne dostave i povrate).
     totalProfit: totalProfit + shipPLTotal,
     orderCount,

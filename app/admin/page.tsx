@@ -27,6 +27,45 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
   return <h3 className="mb-3 mt-8 text-sm font-bold uppercase tracking-[0.14em] text-[var(--a-text-2)]">{children}</h3>;
 }
 
+function GoalBar({ current, goal, projected }: { current: number; goal: number; projected: number }) {
+  const pct = goal > 0 ? Math.max(0, Math.min(100, (current / goal) * 100)) : 0;
+  const onTrack = projected >= goal;
+  const remaining = Math.max(0, goal - current);
+  // Marker gdje projekcija po tempu pada (može biti i preko 100%).
+  const projPct = goal > 0 ? Math.max(0, Math.min(100, (projected / goal) * 100)) : 0;
+  return (
+    <div className="a-card relative overflow-hidden p-4 sm:p-5">
+      <div
+        className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full"
+        style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--a-accent) 22%, transparent), transparent 70%)" }}
+      />
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--a-text-3)]">🎯 Mjesečni cilj prometa</div>
+          <div className="mt-1 text-[26px] font-extrabold leading-none tracking-[-0.02em] text-[var(--a-text)] tabular-nums">
+            {eur(current)} <span className="text-[15px] font-semibold text-[var(--a-text-3)]">/ {eur(goal)}</span>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-[22px] font-extrabold leading-none text-[var(--a-text)] tabular-nums">{Math.round(pct)}%</div>
+          <div className="text-[11px] font-semibold text-[var(--a-text-3)]">do cilja fali {eur(remaining)}</div>
+        </div>
+      </div>
+      <div className="relative mt-3 h-3 w-full overflow-hidden rounded-full bg-[var(--a-surface-2)]">
+        <div className="h-full rounded-full bg-[var(--a-good)] transition-[width] duration-500 ease-out" style={{ width: `${pct}%` }} />
+        {/* Marker: gdje ćemo završiti po trenutnom tempu */}
+        <div className="absolute inset-y-0 w-[2px] bg-[var(--a-text)]" style={{ left: `calc(${projPct}% - 1px)` }} title="Projekcija po tempu" />
+      </div>
+      <div className="mt-2 text-[12px] font-semibold">
+        <span className={onTrack ? "text-[var(--a-good)]" : "text-[var(--a-warn)]"}>
+          {onTrack ? "✅ Na dobrom si putu" : "⚠️ Ispod tempa"}
+        </span>
+        <span className="text-[var(--a-text-3)]"> · projekcija po tempu ~{eur(projected)}</span>
+      </div>
+    </div>
+  );
+}
+
 function Highlight({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="a-card p-4">
@@ -57,6 +96,11 @@ export default async function AdminOverview() {
         <p className="text-sm text-[var(--a-text-2)]">
           {new Date().toLocaleDateString("hr-HR", { timeZone: "Europe/Zagreb", weekday: "long", day: "numeric", month: "long", year: "numeric" })}
         </p>
+      </div>
+
+      {/* Mjesečni cilj prometa — progress + projekcija */}
+      <div className="mb-5">
+        <GoalBar current={m.monthCalRev} goal={m.monthlyGoal} projected={m.monthProjected} />
       </div>
 
       {/* KPI strip */}

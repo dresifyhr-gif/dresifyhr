@@ -36,6 +36,7 @@ type Settings = {
   klubRewardKind: string;
   klubRewardValue: number;
   klubRewardLabel: string;
+  monthlyGoal: number;
 };
 
 const SECTIONS: [string, string][] = [
@@ -115,7 +116,8 @@ export function SettingsForm() {
         hiddenSections: s.hiddenSections, accentColor: s.accentColor,
         koloActive: s.koloActive,
         klubActive: s.klubActive, klubTarget: s.klubTarget, klubRewardKind: s.klubRewardKind,
-        klubRewardValue: s.klubRewardValue, klubRewardLabel: s.klubRewardLabel
+        klubRewardValue: s.klubRewardValue, klubRewardLabel: s.klubRewardLabel,
+        monthlyGoal: s.monthlyGoal
       })
     }).catch(() => {});
     setSaving(false);
@@ -168,6 +170,11 @@ export function SettingsForm() {
             <span className={label}>Rizičan od (broj odbijanja)</span>
             <input value={s.riskMinFailed} onChange={setNum("riskMinFailed")} inputMode="numeric" className={inp} />
             <p className="mt-1 text-[11px] text-[var(--a-text-3)]">1 = već prvo odbijanje. Stavi 2 ako ti je prestrogo.</p>
+          </div>
+          <div>
+            <span className={label}>Mjesečni cilj prometa (€)</span>
+            <input value={s.monthlyGoal} onChange={setNum("monthlyGoal")} inputMode="numeric" className={inp} />
+            <p className="mt-1 text-[11px] text-[var(--a-text-3)]">Cilj za progress-traku na Pregledu. Npr. 15000.</p>
           </div>
         </div>
       </Card>

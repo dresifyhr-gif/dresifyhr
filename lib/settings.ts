@@ -59,6 +59,8 @@ export type ShopSettings = {
   klubRewardLabel: string;
   contactPhone: string;
   contactEmail: string;
+  // Ciljevi (progress na Pregledu)
+  monthlyGoal: number;
 };
 
 // Zadane lige (dosad zakucane u formama proizvoda).
@@ -101,7 +103,8 @@ const DEFAULTS: ShopSettings = {
   klubRewardValue: 20,
   klubRewardLabel: "Gratis dres — Dresify Klub 🎁",
   contactPhone: CONTACT_PHONE_DISPLAY,
-  contactEmail: CONTACT_EMAIL
+  contactEmail: CONTACT_EMAIL,
+  monthlyGoal: 15000
 };
 
 const bool = (v: boolean | null | undefined, d: boolean) => (typeof v === "boolean" ? v : d);
@@ -178,7 +181,8 @@ export async function getSettings(): Promise<ShopSettings> {
     klubRewardValue: num(r.klubRewardValue, DEFAULTS.klubRewardValue),
     klubRewardLabel: str(r.klubRewardLabel, DEFAULTS.klubRewardLabel),
     contactPhone: str(r.contactPhone, DEFAULTS.contactPhone),
-    contactEmail: str(r.contactEmail, DEFAULTS.contactEmail)
+    contactEmail: str(r.contactEmail, DEFAULTS.contactEmail),
+    monthlyGoal: num(r.monthlyGoal, DEFAULTS.monthlyGoal)
   };
 }
 
