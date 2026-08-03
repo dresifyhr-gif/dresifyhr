@@ -77,7 +77,7 @@ type Order = {
   courier: string | null; // "gls" | "hp" — preko kojeg kurira je poslano
   tracking: string;
   pin: string | null; // GLS paketomat PIN (auto-uvoz iz paket.hr)
-  deliveryStatus: "prep" | "transit" | "delivered" | null; // GLS status dostave (auto-provjera)
+  deliveryStatus: "prep" | "transit" | "delivered" | "returned" | null; // GLS status dostave (auto-provjera)
   promoCode: string | null;
   cashCollected: boolean;
   risk?: { failed: number; collected: number; priorOrders: number; min?: number };
@@ -630,7 +630,7 @@ export function OrdersManager() {
     const res = await fetch("/api/admin/gls-check/", { method: "POST" }).then((r) => r.json()).catch(() => null);
     setGlsChecking(false);
     if (res?.ok) {
-      alert(`GLS provjera gotova (${res.checked} pošiljki).\n✅ Dostavljeno: ${res.delivered} · 🚚 Na dostavi: ${res.transit} · 📦 U pripremi: ${res.prep}\nNovih dostavljeno: ${res.newlyDelivered}`);
+      alert(`GLS provjera gotova (${res.checked} pošiljki).\n✅ Dostavljeno: ${res.delivered} · ↩ Vraćeno: ${res.returned ?? 0} · 🚚 Na dostavi: ${res.transit} · 📦 U pripremi: ${res.prep}\nNovih dostavljeno: ${res.newlyDelivered} · Novih vraćeno: ${res.newlyReturned ?? 0}`);
       await fetchPage(q, 1, false);
     } else {
       alert("Greška pri provjeri dostave. Pokušaj ponovno.");
@@ -791,7 +791,7 @@ export function OrdersManager() {
           options={[{ v: "", l: "Svi" }, { v: "gls", l: "🚚 GLS" }, { v: "hp", l: "🚚 HP" }]} />
         <FilterDivider />
         <FilterGroup label="Dostava" value={deliveryF} onChange={setDeliveryF}
-          options={[{ v: "", l: "Sve" }, { v: "delivered", l: "✅ Dostavljeno" }, { v: "transit", l: "🚚 Na dostavi" }, { v: "prep", l: "📦 U pripremi" }]} />
+          options={[{ v: "", l: "Sve" }, { v: "delivered", l: "✅ Dostavljeno" }, { v: "returned", l: "↩ Vraćeno" }, { v: "transit", l: "🚚 Na dostavi" }, { v: "prep", l: "📦 U pripremi" }]} />
         {(shipper || cashF || courierF || deliveryF) && (
           <button
             type="button"
@@ -902,11 +902,12 @@ export function OrdersManager() {
                           title="Status dostave (auto-provjera) — samo za nenaplaćene"
                           className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
                             o.deliveryStatus === "delivered" ? "bg-emerald-100 text-emerald-700"
+                              : o.deliveryStatus === "returned" ? "bg-red-100 text-red-700"
                               : o.deliveryStatus === "transit" ? "bg-sky-100 text-sky-700"
                               : "bg-slate-100 text-slate-600"
                           }`}
                         >
-                          {o.deliveryStatus === "delivered" ? "✅ Dostavljeno" : o.deliveryStatus === "transit" ? "🚚 Na dostavi" : "📦 U pripremi"}
+                          {o.deliveryStatus === "delivered" ? "✅ Dostavljeno" : o.deliveryStatus === "returned" ? "↩ Vraćeno (kurir)" : o.deliveryStatus === "transit" ? "🚚 Na dostavi" : "📦 U pripremi"}
                         </span>
                       )}
                       {o.risk && o.risk.failed >= (o.risk.min ?? 1) && o.risk.failed > 0 && (
