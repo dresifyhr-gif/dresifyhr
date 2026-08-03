@@ -901,7 +901,7 @@ export function OrdersManager() {
                           🔑 {o.pin}
                         </button>
                       )}
-                      {o.deliveryStatus && !o.cashCollected && (
+                      {o.deliveryStatus && !o.cashCollected && (o.status === "shipped" || o.status === "done") && (
                         <span
                           title="Status dostave (auto-provjera) — samo za nenaplaćene"
                           className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${

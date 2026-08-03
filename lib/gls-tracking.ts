@@ -14,7 +14,10 @@ export type DeliveryStatus = "delivered" | "returned" | "transit" | "prep" | nul
 
 // Prepoznaje POVRAT — "Dostavljeno" je dvosmisleno (paket može biti uručen NAMA natrag),
 // pa povrat provjeravamo PRVO. Hvata: vraćeno/vraća pošiljatelju, povrat, neuručeno, odbijeno.
-const RETURN_RE = /vra[cć]\w*\s*(po[sš]iljatelj|nazad|natrag)|po[sš]iljk\w*\s*vra[cć]|povrat\w*|neuru[cč]\w*|neisporu[cč]\w*|odbij\w*|return\s+to\s+sender|returned/i;
+// Temeljeno na STVARNIM GLS statusima vraćene pošiljke: "23-Vratiti pošiljatelju",
+// "22-Vratiti u HUB". Namjerno NE hvatamo samo "Odbijanje"/"Nema primatelja" jer
+// paket može biti kasnije uspješno dostavljen u ponovnom pokušaju (lažni povrat).
+const RETURN_RE = /vratiti\s+(po[sš]iljatelj|u\s+hub)|\b2[23]\s*-\s*vrat|vra[cć]en\w*\s+po[sš]iljatelj|povrat\s+po[sš]iljatelj|return\s+to\s+sender/i;
 
 // GLS: statusi tipa "05-Dostavljeno", "04-Sken dostavne liste", "03-Depo ulaz"…
 async function glsStatus(tracking: string): Promise<DeliveryStatus> {
