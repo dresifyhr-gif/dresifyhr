@@ -1,11 +1,12 @@
 import QRCode from "qrcode";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import { getOrderReference } from "@/lib/orders";
 import { getKlubProgress } from "@/lib/klub";
+import { deliverNewsletterSignup } from "@/lib/newsletter";
 import { phoneKey } from "@/lib/utils";
 
 export const metadata = { title: "Moj Dresify", robots: { index: false, follow: false } };
@@ -56,6 +57,16 @@ export default async function AccountPage() {
   const clerkPhone = user.primaryPhoneNumber?.phoneNumber || "";
   const firstName = user.firstName || (email ? email.split("@")[0] : "") || "navijaču";
   const avatar = user.imageUrl;
+
+  // Auto-prijava na newsletter kod prve posjete profila (kao drugi webshopovi).
+  // Idempotentno: zapamti u Clerk metapodacima da se ne ponavlja svaki put.
+  if (email && !(user.publicMetadata as { newsletter?: boolean })?.newsletter) {
+    deliverNewsletterSignup(email).catch(() => {});
+    try {
+      const client = await clerkClient();
+      await client.users.updateUserMetadata(user.id, { publicMetadata: { newsletter: true } });
+    } catch {}
+  }
 
   const candidates = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
