@@ -1,8 +1,11 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 import { LOCALE_COOKIE, HR_COUNTRIES, type Locale } from "@/lib/i18n";
 
-export function middleware(request: NextRequest) {
+// Clerk omotava postojeću logiku (host + jezik). Ne štiti rute ovdje — /racun se
+// štiti u samoj stranici (redirect na /prijava ako korisnik nije prijavljen).
+export default clerkMiddleware((auth, request) => {
   // Canonicalize host: redirect www.dresifyshop.com -> dresifyshop.com so the
   // same content isn't served on two hostnames (which confuses indexing).
   const host = request.headers.get("host");
@@ -30,7 +33,7 @@ export function middleware(request: NextRequest) {
   });
 
   return response;
-}
+});
 
 export const config = {
   matcher: [
