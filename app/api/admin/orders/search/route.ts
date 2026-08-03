@@ -128,7 +128,7 @@ export async function GET(request: Request) {
   }
   // Status dostave (auto-provjera): dostavljeno / na dostavi / u pripremi.
   // Samo NE-prikupljene — prikupljeno = završeno, ne prati se više dostava.
-  if (deliveryF === "delivered" || deliveryF === "transit" || deliveryF === "prep") {
+  if (deliveryF === "delivered" || deliveryF === "returned" || deliveryF === "transit" || deliveryF === "prep") {
     filtered = filtered.filter((o) => (o.deliveryStatus || "") === deliveryF && !o.cashCollected);
   }
 
