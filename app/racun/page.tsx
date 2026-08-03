@@ -175,7 +175,7 @@ export default async function AccountPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="Narudžbi" value={String(orders.length)} sub={recent30 ? `+${recent30} u 30 dana` : undefined} />
             <Stat label="Potrošeno" value={eur(spent)} />
-            <Stat label="Klub" value={`${klub.inCycle}/${klub.target}`} sub={klub.hasReward ? "nagrada spremna! 🎁" : `još ${klub.remaining} do gratis`} />
+            <Stat label="Klub" value={`${klub.inCycle}/${klub.target}`} sub={klub.hasReward ? "🎁 mystery gift spreman!" : `još ${klub.remaining} do mystery gift-a`} />
             <Stat label="Kuponi" value={String(personalCodes.length)} sub="aktivni" />
           </div>
 
@@ -273,8 +273,10 @@ export default async function AccountPage() {
                   {personalCodes.map((c) => (
                     <div key={c.code} className="flex items-center justify-between rounded-xl border border-dashed border-accent/40 bg-accent/5 px-3 py-2.5">
                       <div>
-                        <div className="text-base font-bold text-accent">{c.kind === "freeship" ? "GRATIS DOSTAVA" : `${c.value}% POPUSTA`}</div>
-                        <div className="text-[11px] text-white/40">{c.label || "Osobni kupon"}{c.minSubtotal ? ` · min ${eur(c.minSubtotal)}` : ""}</div>
+                        <div className="text-base font-bold text-accent">
+                          {c.kind === "freeship" ? "GRATIS DOSTAVA" : c.value > 0 ? `${c.value}% POPUSTA` : (c.label || "🎁 NAGRADA")}
+                        </div>
+                        <div className="text-[11px] text-white/40">{c.value > 0 || c.kind === "freeship" ? (c.label || "Osobni kupon") : "Klub nagrada · stiže uz narudžbu"}{c.minSubtotal ? ` · min ${eur(c.minSubtotal)}` : ""}</div>
                       </div>
                       <code className="rounded bg-black/40 px-2 py-1 text-xs font-bold tracking-wider text-white">{c.code}</code>
                     </div>
