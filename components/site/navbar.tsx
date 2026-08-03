@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, ShoppingBag, X } from "lucide-react";
+import { Menu, ShoppingBag, User, X } from "lucide-react";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 
 import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
@@ -93,6 +94,27 @@ export function Navbar() {
             </div>
 
             <SearchOverlay />
+
+            <SignedOut>
+              <Link
+                href="/prijava"
+                className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+                aria-label="Prijava"
+                title="Prijava / Registracija"
+              >
+                <User className="h-5 w-5" />
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link
+                href="/racun"
+                className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+                aria-label="Moj profil"
+                title="Moj Dresify"
+              >
+                <User className="h-5 w-5" />
+              </Link>
+            </SignedIn>
 
             <button
               type="button"

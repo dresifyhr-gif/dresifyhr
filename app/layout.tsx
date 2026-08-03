@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { hrHR } from "@clerk/localizations";
 import { Barlow, Bebas_Neue } from "next/font/google";
 import { cookies } from "next/headers";
 
@@ -102,7 +103,7 @@ export default async function RootLayout({
   const locale: Locale = rawLocale === "en" ? "en" : "hr";
 
   return (
-    <ClerkProvider signInUrl="/prijava" signUpUrl="/registracija" signInFallbackRedirectUrl="/racun" signUpFallbackRedirectUrl="/racun">
+    <ClerkProvider localization={hrHR} signInUrl="/prijava" signUpUrl="/registracija" signInFallbackRedirectUrl="/racun" signUpFallbackRedirectUrl="/racun">
     <html lang={locale} suppressHydrationWarning>
       <body className={`${bebas.variable} ${barlow.variable}`}>
         <script
