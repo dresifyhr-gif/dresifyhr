@@ -25,34 +25,34 @@ export async function POST(request: Request) {
     select: { id: true, phone: true, customerName: true, createdAt: true, shippedBy: true, status: true }
   });
 
-  let done = 0;
-
-  for (const o of orders) {
-    if (action === "ship") {
-      await prisma.order.update({
-        where: { id: o.id },
-        data: { status: "shipped", shippedBy: by, shippedAt: new Date(), courier: "gls" }
-      });
-      await markOrderShippedInSheet({ phone: o.phone, name: o.customerName, createdAt: o.createdAt, shipped: true, by }).catch(() => {});
-      done++;
-    } else if (action === "assign") {
-      // Dodijeli pošiljatelja bez mijenjanja statusa (za već poslane).
-      await prisma.order.update({ where: { id: o.id }, data: { shippedBy: by } });
-      await markOrderShippedInSheet({ phone: o.phone, name: o.customerName, createdAt: o.createdAt, shipped: true, by }).catch(() => {});
-      done++;
-    } else if (action === "collect") {
-      await prisma.order.update({
-        where: { id: o.id },
-        data: { cashCollected: true, cashCollectedAt: new Date() }
-      });
-      await markCashCollectedInSheet({ phone: o.phone, name: o.customerName, createdAt: o.createdAt, collected: true, by: o.shippedBy }).catch(() => {});
-      // Dresify Klub: preuzeta narudžba može značiti novu nagradu (idempotentno).
-      await issueKlubRewardIfEarned(o.phone).catch(() => {});
-      done++;
-    }
+  if (!["ship", "assign", "collect"].includes(action)) {
+    return NextResponse.json({ ok: false, message: "Nepoznata akcija" }, { status: 400 });
   }
 
-  if (!action || done === 0) return NextResponse.json({ ok: false, message: "Nepoznata akcija" }, { status: 400 });
+  // DB izmjena odjednom (instant) — bez čekanja na Google Sheet mirror po narudžbi.
+  const now = new Date();
+  if (action === "ship") {
+    await prisma.order.updateMany({ where: { id: { in: ids } }, data: { status: "shipped", shippedBy: by, shippedAt: now, courier: "gls" } });
+  } else if (action === "assign") {
+    await prisma.order.updateMany({ where: { id: { in: ids } }, data: { shippedBy: by } });
+  } else if (action === "collect") {
+    await prisma.order.updateMany({ where: { id: { in: ids } }, data: { cashCollected: true, cashCollectedAt: now } });
+  }
+
+  // Sporedni efekti (Google Sheet mirror + Klub nagrade) — PARALELNO i best-effort,
+  // da skupna akcija ne traje minutama (prije je bilo sekvencijalno → i po 5 min).
+  await Promise.allSettled(
+    orders.map(async (o) => {
+      if (action === "collect") {
+        await markCashCollectedInSheet({ phone: o.phone, name: o.customerName, createdAt: o.createdAt, collected: true, by: o.shippedBy }).catch(() => {});
+        await issueKlubRewardIfEarned(o.phone).catch(() => {});
+      } else {
+        await markOrderShippedInSheet({ phone: o.phone, name: o.customerName, createdAt: o.createdAt, shipped: true, by: action === "assign" ? by : by }).catch(() => {});
+      }
+    })
+  );
+
+  const done = orders.length;
 
   return NextResponse.json({ ok: true, done });
 }
