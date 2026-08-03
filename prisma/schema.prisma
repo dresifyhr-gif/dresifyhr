@@ -11,6 +11,35 @@ datasource db {
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
+// Spremljene adrese kupca (Clerk userId) — za brži checkout u "Moj Dresify".
+model CustomerAddress {
+  id         String   @id @default(cuid())
+  userId     String   // Clerk user id
+  label      String?  // "Kuća", "Posao"…
+  name       String
+  phone      String?
+  street     String
+  city       String
+  postalCode String
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Wishlist / omiljeni proizvodi kupca (Clerk userId + slug proizvoda).
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  slug      String
+  klub      String?
+  igrac     String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
+
 model Order {
   id           String      @id @default(cuid())
   reference    String?     // e.g. DRS-260629-0909

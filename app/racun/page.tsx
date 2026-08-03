@@ -8,6 +8,7 @@ import { getOrderReference } from "@/lib/orders";
 import { getKlubProgress } from "@/lib/klub";
 import { deliverNewsletterSignup } from "@/lib/newsletter";
 import { phoneKey } from "@/lib/utils";
+import { AddressManager } from "@/components/site/address-manager";
 
 export const metadata = { title: "Moj Dresify", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -34,10 +35,11 @@ const NAV = [
   { href: "#pregled", label: "Pregled", icon: "🏠" },
   { href: "#narudzbe", label: "Moje narudžbe", icon: "📦" },
   { href: "#kuponi", label: "Moji kuponi", icon: "🎟️" },
+  { href: "#adrese", label: "Moje adrese", icon: "📍" },
   { href: "#iskaznica", label: "Članska iskaznica", icon: "💳" },
   { href: "#postignuca", label: "Postignuća", icon: "🏆" }
 ];
-const SOON = ["Moje adrese", "Omiljeni proizvodi", "Obavijesti"];
+const SOON = ["Omiljeni proizvodi", "Obavijesti"];
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -280,6 +282,12 @@ export default async function AccountPage() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Adrese */}
+          <div id="adrese" className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+            <div className="mb-3 font-heading text-lg uppercase tracking-wide">Moje adrese</div>
+            <AddressManager />
           </div>
 
           {/* Članska iskaznica */}
