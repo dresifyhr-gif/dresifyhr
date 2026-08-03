@@ -15,8 +15,8 @@ const kompletItemWhere = {
 
 // GLS fiksne cijene dostave koje GLS naplati NAMA (kupac plaća punu dostavu iz Postavki).
 // Povratni put je besplatan (GLS/HP ne naplate povrat) → gubitak povrata = samo odlazak.
-const GLS_SHIP_UNDER = 5.5; // roba do uključivo 60 €
-const GLS_SHIP_OVER = 6.5;  // roba preko 60 € ili komplet (veći paket)
+const GLS_SHIP_UNDER = 5.5; // GLS nam uvijek naplati 5,50 (i velike i male i povrat)
+const GLS_SHIP_OVER = 5.5;
 
 // GLS saldo dostave vrijedi tek od ovog datuma (nove narudžbe). Starije narudžbe
 // ostaju po dosadašnjem računu (fiksni deliveryCost/returnCost, bez GLS marže) —

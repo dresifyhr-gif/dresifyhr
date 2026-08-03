@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { ArrowRight, Loader2, Truck } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
@@ -114,25 +115,31 @@ export function ContactForm() {
   // Dresify Klub: napredak po broju mobitela (bez prijave).
   const [klub, setKlub] = useState<{ inCycle: number; target: number; remaining: number; hasReward: boolean } | null>(null);
 
+  // Pogodnosti (besplatna dostava, popusti, kodovi) SAMO za prijavljene kupce.
+  const { isSignedIn } = useUser();
+  const signedIn = isSignedIn === true;
+
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
   const orderSubtotal = hasCartItems ? subtotal : JERSEY_PRICE_EUR;
-  // A free-shipping reward (e.g. DOSTAVA) zeros shipping when its minimum is met.
-  // GOL15/GOL20 require €80/€100, so the classic €60 threshold already covers them.
+  // Besplatna dostava kod prijavljenih iznad praga; kod za besplatnu dostavu samo prijavljenima.
   const promoFreeShipping =
-    appliedPromo?.kind === "freeship" && orderSubtotal >= appliedPromo.minSubtotal;
-  // Streetwear ima besplatnu dostavu.
-  const hasStreetwear = items.some((i) => i.category === "streetwear");
+    signedIn && appliedPromo?.kind === "freeship" && orderSubtotal >= appliedPromo.minSubtotal;
   const freeShipping =
-    orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR || promoFreeShipping || hasStreetwear;
+    (signedIn && orderSubtotal >= FREE_SHIPPING_THRESHOLD_EUR) || promoFreeShipping;
   const shipping = freeShipping ? 0 : selectedOption.price;
-  const discount = computePromoDiscount(appliedPromo, orderSubtotal);
+  // Popusti vrijede samo za prijavljene — gost plaća punu cijenu.
+  const discount = signedIn ? computePromoDiscount(appliedPromo, orderSubtotal) : 0;
   const total = orderSubtotal - discount + shipping;
-  // A reward is "active" if it gives a discount OR free shipping.
-  const rewardActive = !!appliedPromo && (discount > 0 || promoFreeShipping);
+  const rewardActive = signedIn && !!appliedPromo && (discount > 0 || promoFreeShipping);
 
   // Kodovi žive u bazi (uređuju se u adminu) → provjera ide na server.
   async function applyPromo() {
+    if (!signedIn) {
+      setAppliedPromo(null);
+      setPromoMessage("Popusti i kodovi vrijede samo za prijavljene kupce — prijavi se ili registriraj.");
+      return;
+    }
     const result = await checkPromo(promoInput, orderSubtotal);
     if (result.ok) {
       setAppliedPromo(result.promo);
@@ -565,6 +572,12 @@ export function ContactForm() {
                   Ukloni promo kod
                 </button>
               ) : (
+                <div className="space-y-2">
+                {!signedIn && (
+                  <a href="/prijava" className="block rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] text-white/70 transition hover:bg-accent/10">
+                    🔒 <b className="text-accent">Prijavi se</b> za besplatnu dostavu iznad 60&nbsp;€ i popuste.
+                  </a>
+                )}
                 <div className="flex gap-2">
                   <input
                     type="password"
@@ -581,6 +594,7 @@ export function ContactForm() {
                   >
                     Primijeni
                   </button>
+                </div>
                 </div>
               )}
               {promoMessage ? (
