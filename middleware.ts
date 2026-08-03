@@ -6,6 +6,10 @@ import { LOCALE_COOKIE, HR_COUNTRIES, type Locale } from "@/lib/i18n";
 // Clerk omotava postojeću logiku (host + jezik). Ne štiti rute ovdje — /racun se
 // štiti u samoj stranici (redirect na /prijava ako korisnik nije prijavljen).
 export default clerkMiddleware((auth, request) => {
+  // API rute: Clerk kontekst je već postavljen (da auth() radi u /api/orders),
+  // ali host/locale logika im ne treba — preskoči.
+  if (request.nextUrl.pathname.startsWith("/api")) return NextResponse.next();
+
   // Canonicalize host: redirect www.dresifyshop.com -> dresifyshop.com so the
   // same content isn't served on two hostnames (which confuses indexing).
   const host = request.headers.get("host");
@@ -45,5 +49,7 @@ export const config = {
      * - API routes
      */
     "/((?!_next/static|_next/image|favicon|og-|api/).*)",
+    // Uključi API rute da Clerk auth() radi u njima (npr. /api/orders za prijavljene).
+    "/(api)(.*)",
   ],
 };

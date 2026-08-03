@@ -78,6 +78,7 @@ type Order = {
   tracking: string;
   pin: string | null; // GLS paketomat PIN (auto-uvoz iz paket.hr)
   deliveryStatus: "prep" | "transit" | "delivered" | "returned" | null; // GLS status dostave (auto-provjera)
+  registered?: boolean; // kupac bio prijavljen (Clerk) pri narudžbi
   promoCode: string | null;
   cashCollected: boolean;
   risk?: { failed: number; collected: number; priorOrders: number; min?: number };
@@ -862,6 +863,9 @@ export function OrdersManager() {
                         <span className="font-semibold text-[var(--a-text)]">{o.customerName}</span>
                       )}
                       <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${st.cls}`}>{st.label}</span>
+                      {o.registered && (
+                        <span className="rounded bg-[var(--a-info-bg)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--a-info)]" title="Kupac je bio prijavljen (registriran) pri narudžbi">★ Registriran</span>
+                      )}
                       {o.status === "cancelled" && o.cancelReason && (
                         <span className="rounded bg-[var(--a-bad-bg)] px-1.5 py-0.5 text-[10px] text-[var(--a-bad)]" title="Razlog otkazivanja">↳ {o.cancelReason}</span>
                       )}

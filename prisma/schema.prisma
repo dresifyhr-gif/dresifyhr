@@ -24,6 +24,7 @@ model Order {
   channel      String      @default("web")
   fulfillment  String?
   payment      String?
+  userId       String?     // Clerk user id ako je kupac bio prijavljen (registriran) pri narudžbi
 
   subtotal     Float       @default(0)
   shipping     Float       @default(0)

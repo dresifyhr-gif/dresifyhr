@@ -64,6 +64,7 @@ export async function GET(request: Request) {
       deliveryStatus: true,
       promoCode: true,
       cashCollected: true,
+      userId: true,
       items: { select: { id: true, slug: true, klub: true, igrac: true, size: true, quantity: true, unitPrice: true } }
     }
   });
@@ -258,6 +259,7 @@ export async function GET(request: Request) {
       deliveryStatus: o.deliveryStatus || null,
       promoCode: o.promoCode || null,
       cashCollected: o.cashCollected,
+      registered: !!o.userId,
       risk: { ...riskFor(o), min: riskMinFailed },
       items: o.items.map((it) => ({
         id: it.id,

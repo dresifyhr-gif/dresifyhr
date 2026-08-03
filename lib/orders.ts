@@ -30,6 +30,7 @@ export type OrderPayload = {
   total: number;
   discount?: number;
   promoCode?: string;
+  userId?: string | null; // Clerk user id ako je kupac prijavljen (postavlja server)
   itemCount: number;
   createdAt: string;
   items?: OrderLineInput[];

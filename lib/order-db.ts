@@ -54,6 +54,7 @@ export async function saveOrderToDb(payload: OrderPayload) {
         channel: payload.contactChannel,
         fulfillment: payload.fulfillment,
         payment: payload.payment,
+        userId: payload.userId || null,
         subtotal: payload.subtotal,
         shipping: payload.shipping,
         discount: payload.discount ?? 0,

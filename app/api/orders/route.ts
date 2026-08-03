@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 
 import { parseOrderPayload } from "@/lib/orders";
+import { lookupPromo } from "@/lib/promo-db";
+import { SHIPPING_PRICE_EUR, FREE_SHIPPING_THRESHOLD_EUR } from "@/lib/site";
 import { sendOrderNotifications } from "@/lib/notifications";
 import { logOrderToSheet } from "@/lib/sheets";
 import { saveOrderToDb } from "@/lib/order-db";
@@ -49,6 +52,30 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // ── SIGURNOST NOVCA: server prekalkulira dostavu i popust; NE vjeruje klijentu. ──
+    // Pogodnosti (besplatna dostava ≥60€, popusti) vrijede SAMO za prijavljene kupce.
+    // Ovako nitko ne može podvaliti dostava=0 ni lažni popust (bitno za Igor/Ivica podjelu).
+    const { userId } = await auth();
+    const signedIn = !!userId;
+    const goods = payload!.subtotal;
+    let discount = 0;
+    let freeship = false;
+    let promoCode: string | undefined;
+    if (signedIn && payload!.promoCode) {
+      const look = await lookupPromo(payload!.promoCode, goods);
+      if (look.ok) {
+        promoCode = look.promo.code;
+        discount = look.discount;
+        freeship = look.promo.kind === "freeship";
+      }
+    }
+    const shipping = signedIn && (goods >= FREE_SHIPPING_THRESHOLD_EUR || freeship) ? 0 : SHIPPING_PRICE_EUR;
+    payload!.shipping = shipping;
+    payload!.discount = discount;
+    payload!.promoCode = promoCode;
+    payload!.total = Math.max(0, goods - discount) + shipping;
+    payload!.userId = signedIn ? userId : null;
 
     // Odbij narudžbu za rasprodanu veličinu/segment PRIJE slanja obavijesti —
     // da OOS narudžba nikad ne uđe (npr. kupac imao staru stranicu otvorenu).
