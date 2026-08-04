@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, X } from "lucide-react";
 
 import { JerseyVisual } from "@/components/site/jersey-visual";
+import { WishlistButton } from "@/components/site/wishlist-button";
 import { Stars } from "@/components/site/stars";
 import { useCart } from "@/components/providers/cart-provider";
 import { type Jersey, getJerseyStock, getStockTone, getJerseySizeOptions } from "@/lib/data/jerseys";
@@ -89,6 +90,7 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
 
         <div className="relative">
           <JerseyVisual product={product} priority={priority} />
+          <WishlistButton slug={product.slug} klub={product.klub} igrac={product.igrac} className="absolute right-2.5 top-2.5 z-20" />
           {(product.badge || product.retro) && (
             <span className={`absolute left-2.5 top-2.5 z-20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] ${
               product.badge === "bestseller"

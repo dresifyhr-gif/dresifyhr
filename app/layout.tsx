@@ -14,6 +14,7 @@ import "@/app/globals.css";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { SiteGoogleAnalytics } from "@/components/analytics/google-analytics";
 import { SiteProviders } from "@/components/providers/site-providers";
+import { WishlistProvider } from "@/components/providers/wishlist-provider";
 import { AddToCartModal } from "@/components/site/add-to-cart-modal";
 import { AnnouncementBar } from "@/components/site/announcement-bar";
 import { CartDrawer } from "@/components/site/cart-drawer";
@@ -117,6 +118,7 @@ export default async function RootLayout({
         <ShopSettingsProvider value={publicSettings}>
         <LanguageProvider initialLocale={locale}>
           <SiteProviders>
+            <WishlistProvider>
             <SiteChrome
               header={
                 <>
@@ -138,6 +140,7 @@ export default async function RootLayout({
             >
               {children}
             </SiteChrome>
+            </WishlistProvider>
           </SiteProviders>
         </LanguageProvider>
         </ShopSettingsProvider>

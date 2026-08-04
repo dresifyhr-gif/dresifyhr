@@ -36,10 +36,11 @@ const NAV = [
   { href: "#narudzbe", label: "Moje narudžbe", icon: "📦" },
   { href: "#kuponi", label: "Moji kuponi", icon: "🎟️" },
   { href: "#adrese", label: "Moje adrese", icon: "📍" },
+  { href: "#wishlist", label: "Omiljeni", icon: "❤️" },
   { href: "#iskaznica", label: "Članska iskaznica", icon: "💳" },
   { href: "#postignuca", label: "Postignuća", icon: "🏆" }
 ];
-const SOON = ["Omiljeni proizvodi", "Obavijesti"];
+const SOON = ["Obavijesti", "Brza ponovna kupnja"];
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -82,6 +83,8 @@ export default async function AccountPage() {
 
   const orderPhone = clerkPhone || orders.find((o) => o.phone)?.phone || "";
   const pk = phoneKey(orderPhone);
+
+  const wishlist = await prisma.wishlistItem.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } });
 
   const [klub, personalCodes] = await Promise.all([
     getKlubProgress(orderPhone),
@@ -290,6 +293,25 @@ export default async function AccountPage() {
           <div id="adrese" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
             <div className="mb-3 font-heading text-lg uppercase tracking-wide">Moje adrese</div>
             <AddressManager />
+          </div>
+
+          {/* Omiljeni proizvodi */}
+          <div id="wishlist" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
+            <div className="mb-3 font-heading text-lg uppercase tracking-wide">Omiljeni proizvodi</div>
+            {wishlist.length === 0 ? (
+              <div className="py-3 text-center text-[13px] text-white/50">
+                Još nemaš omiljenih. Klikni ❤️ na proizvodu da ga spremiš ovdje.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {wishlist.map((w) => (
+                  <a key={w.id} href={`/dres/${w.slug}/`} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 transition hover:border-accent/40">
+                    <div className="truncate text-sm font-bold">{w.klub || "Dres"}</div>
+                    <div className="truncate text-[12px] text-white/50">{w.igrac || w.slug}</div>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Članska iskaznica */}
