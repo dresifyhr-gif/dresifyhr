@@ -121,8 +121,8 @@ export default async function AccountPage() {
   const qr = await QRCode.toDataURL(`DRESIFY:${memberId}`, { margin: 1, width: 220, color: { dark: "#0a0a0a", light: "#e8ff3c" } });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 text-white">
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+    <div className="mx-auto max-w-6xl px-3 py-5 text-white sm:px-4 sm:py-8">
+      <div className="grid gap-4 lg:grid-cols-[260px_1fr] lg:gap-6">
         {/* SIDEBAR */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
@@ -161,7 +161,7 @@ export default async function AccountPage() {
         </aside>
 
         {/* CONTENT */}
-        <div className="min-w-0 space-y-4">
+        <div className="min-w-0 space-y-3 sm:space-y-4">
           {/* Header */}
           <div id="pregled" className="flex items-center justify-between">
             <div>
@@ -208,7 +208,7 @@ export default async function AccountPage() {
 
           {/* Aktivna pošiljka */}
           {active && (
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
               <div className="flex items-center justify-between">
                 <div className="font-heading text-lg uppercase tracking-wide">Pošiljka u tijeku 🚚</div>
                 <span className="text-xs text-white/40">#{getOrderReference(active.createdAt.toISOString())}</span>
@@ -230,10 +230,10 @@ export default async function AccountPage() {
 
           <div className="grid gap-4 lg:grid-cols-2">
             {/* Narudžbe */}
-            <div id="narudzbe" className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+            <div id="narudzbe" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
               <div className="mb-3 font-heading text-lg uppercase tracking-wide">Moje narudžbe</div>
               {orders.length === 0 ? (
-                <div className="py-6 text-center text-sm text-white/50">
+                <div className="py-3 text-center text-[13px] text-white/50">
                   Nemamo narudžbi povezanih s tvojim računom.
                   <br />
                   <span className="text-white/30">Povezuju se po emailu ili broju mobitela s kojim si naručivao.</span>
@@ -260,10 +260,10 @@ export default async function AccountPage() {
             </div>
 
             {/* Kuponi */}
-            <div id="kuponi" className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+            <div id="kuponi" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
               <div className="mb-3 font-heading text-lg uppercase tracking-wide">Moji kuponi</div>
               {personalCodes.length === 0 ? (
-                <div className="py-6 text-center text-sm text-white/50">
+                <div className="py-3 text-center text-[13px] text-white/50">
                   Još nemaš osobnih kupona.
                   <br />
                   <span className="text-white/30">Kroz Dresify Klub i Kolo sreće zaslužuješ popuste.</span>
@@ -287,7 +287,7 @@ export default async function AccountPage() {
           </div>
 
           {/* Adrese */}
-          <div id="adrese" className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+          <div id="adrese" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
             <div className="mb-3 font-heading text-lg uppercase tracking-wide">Moje adrese</div>
             <AddressManager />
           </div>
@@ -313,7 +313,7 @@ export default async function AccountPage() {
           </div>
 
           {/* Bedževi */}
-          <div id="postignuca" className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+          <div id="postignuca" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
             <div className="mb-3 font-heading text-lg uppercase tracking-wide">Postignuća</div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {achievements.map((a) => (
