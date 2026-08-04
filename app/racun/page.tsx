@@ -44,10 +44,10 @@ const SOON = ["Obavijesti", "Brza ponovna kupnja"];
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-      <div className="text-[10px] font-bold uppercase tracking-widest text-white/40">{label}</div>
-      <div className="mt-1 text-2xl font-bold tabular-nums text-white">{value}</div>
-      {sub && <div className="mt-0.5 text-[11px] text-white/40">{sub}</div>}
+    <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 sm:rounded-2xl sm:p-4">
+      <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 sm:text-[10px]">{label}</div>
+      <div className="mt-0.5 text-lg font-bold leading-tight tabular-nums text-white sm:mt-1 sm:text-2xl">{value}</div>
+      {sub && <div className="text-[10px] leading-tight text-white/40 sm:mt-0.5 sm:text-[11px]">{sub}</div>}
     </div>
   );
 }
@@ -168,8 +168,8 @@ export default async function AccountPage() {
           {/* Header */}
           <div id="pregled" className="flex items-center justify-between">
             <div>
-              <h1 className="font-heading text-3xl uppercase leading-none tracking-wide">Bok, {firstName}! 👋</h1>
-              <p className="mt-1 text-sm text-white/50">Dobrodošao natrag u svoj Dresify profil.</p>
+              <h1 className="font-heading text-2xl uppercase leading-none tracking-wide sm:text-3xl">Bok, {firstName}! 👋</h1>
+              <p className="mt-1 text-[13px] text-white/50 sm:text-sm">Dobrodošao natrag u svoj Dresify profil.</p>
             </div>
             <UserButton afterSignOutUrl="/" />
           </div>
@@ -183,7 +183,7 @@ export default async function AccountPage() {
           </div>
 
           {/* XP panel */}
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-violet-600/25 via-fuchsia-600/10 to-transparent p-5">
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-violet-600/25 via-fuchsia-600/10 to-transparent p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-2xl">{tier.emoji}</div>
@@ -234,7 +234,7 @@ export default async function AccountPage() {
           <div className="grid gap-4 lg:grid-cols-2">
             {/* Narudžbe */}
             <div id="narudzbe" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
-              <div className="mb-3 font-heading text-lg uppercase tracking-wide">Moje narudžbe</div>
+              <div className="mb-2 font-heading text-base uppercase tracking-wide sm:mb-3 sm:text-lg">Moje narudžbe</div>
               {orders.length === 0 ? (
                 <div className="py-3 text-center text-[13px] text-white/50">
                   Nemamo narudžbi povezanih s tvojim računom.
@@ -264,7 +264,7 @@ export default async function AccountPage() {
 
             {/* Kuponi */}
             <div id="kuponi" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
-              <div className="mb-3 font-heading text-lg uppercase tracking-wide">Moji kuponi</div>
+              <div className="mb-2 font-heading text-base uppercase tracking-wide sm:mb-3 sm:text-lg">Moji kuponi</div>
               {personalCodes.length === 0 ? (
                 <div className="py-3 text-center text-[13px] text-white/50">
                   Još nemaš osobnih kupona.
@@ -291,13 +291,13 @@ export default async function AccountPage() {
 
           {/* Adrese */}
           <div id="adrese" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
-            <div className="mb-3 font-heading text-lg uppercase tracking-wide">Moje adrese</div>
+            <div className="mb-2 font-heading text-base uppercase tracking-wide sm:mb-3 sm:text-lg">Moje adrese</div>
             <AddressManager />
           </div>
 
           {/* Omiljeni proizvodi */}
           <div id="wishlist" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
-            <div className="mb-3 font-heading text-lg uppercase tracking-wide">Omiljeni proizvodi</div>
+            <div className="mb-2 font-heading text-base uppercase tracking-wide sm:mb-3 sm:text-lg">Omiljeni proizvodi</div>
             {wishlist.length === 0 ? (
               <div className="py-3 text-center text-[13px] text-white/50">
                 Još nemaš omiljenih. Klikni ❤️ na proizvodu da ga spremiš ovdje.
@@ -336,7 +336,7 @@ export default async function AccountPage() {
 
           {/* Bedževi */}
           <div id="postignuca" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
-            <div className="mb-3 font-heading text-lg uppercase tracking-wide">Postignuća</div>
+            <div className="mb-2 font-heading text-base uppercase tracking-wide sm:mb-3 sm:text-lg">Postignuća</div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {achievements.map((a) => (
                 <div key={a.name} className={`rounded-xl border p-3 text-center ${a.earned ? "border-accent/40 bg-accent/5" : "border-white/10 bg-white/[0.02] opacity-50"}`}>
