@@ -124,7 +124,7 @@ export default async function AccountPage() {
   const qr = await QRCode.toDataURL(`DRESIFY:${memberId}`, { margin: 1, width: 220, color: { dark: "#0a0a0a", light: "#e8ff3c" } });
 
   return (
-    <div className="mx-auto w-full max-w-6xl overflow-x-hidden px-3 py-5 text-white sm:px-4 sm:py-8">
+    <div className="mx-auto w-full max-w-6xl overflow-x-clip px-3 py-5 text-white sm:px-4 sm:py-8">
       <div className="grid gap-4 lg:grid-cols-[260px_1fr] lg:gap-6">
         {/* SIDEBAR */}
         <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
@@ -146,7 +146,7 @@ export default async function AccountPage() {
             </div>
           </div>
 
-          <nav className="mt-3 flex gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.04] p-2 lg:flex-col lg:overflow-visible">
+          <nav className="mt-3 hidden gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-2 lg:flex lg:flex-col">
             {NAV.map((n) => (
               <a key={n.href} href={n.href} className="flex shrink-0 items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/10 hover:text-white">
                 <span>{n.icon}</span> {n.label}
