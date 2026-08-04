@@ -124,10 +124,10 @@ export default async function AccountPage() {
   const qr = await QRCode.toDataURL(`DRESIFY:${memberId}`, { margin: 1, width: 220, color: { dark: "#0a0a0a", light: "#e8ff3c" } });
 
   return (
-    <div className="mx-auto max-w-6xl px-3 py-5 text-white sm:px-4 sm:py-8">
+    <div className="mx-auto w-full max-w-6xl overflow-x-hidden px-3 py-5 text-white sm:px-4 sm:py-8">
       <div className="grid gap-4 lg:grid-cols-[260px_1fr] lg:gap-6">
         {/* SIDEBAR */}
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -168,7 +168,7 @@ export default async function AccountPage() {
           {/* Header */}
           <div id="pregled" className="flex items-center justify-between">
             <div>
-              <h1 className="font-heading text-2xl uppercase leading-none tracking-wide sm:text-3xl">Bok, {firstName}! 👋</h1>
+              <h1 className="font-heading text-2xl uppercase leading-none tracking-wide sm:text-3xl">Pozdrav, {firstName}! 👋</h1>
               <p className="mt-1 text-[13px] text-white/50 sm:text-sm">Dobrodošao natrag u svoj Dresify profil.</p>
             </div>
             <UserButton afterSignOutUrl="/" />
