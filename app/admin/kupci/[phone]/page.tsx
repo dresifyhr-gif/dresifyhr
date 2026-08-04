@@ -51,6 +51,18 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
   const pending = orders.filter((o) => isSent(o.status) && !o.cashCollected);
   const totalSpent = collected.reduce((s, o) => s + (o.total - (o.shipping ?? 0)), 0);
   const firstAt = orders[orders.length - 1].createdAt;
+
+  // XP razina (isti izračun kao kupčev profil): preuzete narudžbe * 100 + potrošeno.
+  const XP_TIERS = [
+    { name: "Rookie Fan", min: 0, emoji: "⚽" },
+    { name: "Ultra Fan", min: 100, emoji: "🔥" },
+    { name: "Legend", min: 500, emoji: "👑" },
+    { name: "GOAT", min: 1500, emoji: "💎" }
+  ];
+  const xp = collected.length * 100 + Math.floor(totalSpent);
+  let xpTierIdx = 0;
+  for (let i = XP_TIERS.length - 1; i >= 0; i--) if (xp >= XP_TIERS[i].min) { xpTierIdx = i; break; }
+  const xpTier = XP_TIERS[xpTierIdx];
   const wa = latest.phone ? `https://wa.me/${String(latest.phone).replace(/\D/g, "").replace(/^00/, "")}` : null;
   // Nagrade zaslužene prije uvođenja Kluba (ili propuštene) izdaju se ovdje —
   // idempotentno je i vidi ga samo admin.
@@ -76,6 +88,9 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-bold text-[var(--a-text)]">{name || "—"}</h2>
+              <span className="rounded-full bg-[var(--a-info-bg)] px-2 py-0.5 text-[11px] font-bold text-[var(--a-info)]" title={`${xp} XP`}>
+                {xpTier.emoji} {xpTier.name} · {xp} XP
+              </span>
               {failed.length > 0 && (
                 <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-700">
                   ⚠️ Rizičan · {failed.length}× odbio
