@@ -12,12 +12,18 @@ const HP_TT = "https://posiljka.posta.hr/hr/tracking/trackingdata?barcode=";
 
 export type DeliveryStatus = "delivered" | "returned" | "transit" | "prep" | null;
 
-// Prepoznaje POVRAT — "Dostavljeno" je dvosmisleno (paket može biti uručen NAMA natrag),
-// pa povrat provjeravamo PRVO. Hvata: vraćeno/vraća pošiljatelju, povrat, neuručeno, odbijeno.
-// Temeljeno na STVARNIM GLS statusima vraćene pošiljke: "23-Vratiti pošiljatelju",
-// "22-Vratiti u HUB". Namjerno NE hvatamo samo "Odbijanje"/"Nema primatelja" jer
-// paket može biti kasnije uspješno dostavljen u ponovnom pokušaju (lažni povrat).
-const RETURN_RE = /vratiti\s+(po[sš]iljatelj|u\s+hub)|\b2[23]\s*-\s*vrat|vra[cć]en\w*\s+po[sš]iljatelj|povrat\s+po[sš]iljatelj|return\s+to\s+sender/i;
+// KONAČNI povrat — roba definitivno ide natrag pošiljatelju (nama). Kad se ovo pojavi,
+// pošiljka je vraćena čak i ako poslije piše "05-Dostavljeno" (to je dostavljeno NAMA,
+// ne kupcu). Statusi: "23-Vratiti pošiljatelju", "return to sender", "vraćeno pošiljatelju".
+const STRONG_RETURN_RE = /vratiti\s+po[sš]iljatelj|\b23\s*-\s*vrat|vra[cć]en\w*\s+po[sš]iljatelj|povrat\s+po[sš]iljatelj|return\s+to\s+sender/i;
+
+// MEĐUKORAK "22-Vratiti u HUB" — NIJE nužno povrat; paket može biti kasnije uspješno
+// dostavljen kupcu u ponovnom pokušaju (npr. Toni: 22-Vratiti u HUB → pa 05-Dostavljeno).
+// Zato ga vrednujemo POZICIJSKI (vidi glsStatus), ne kao konačni povrat.
+const HUB_RETURN_RE = /\b22\s*-\s*vrat|vratiti\s+u\s+hub/i;
+
+// Zadržano za HP (Hrvatska pošta) — širi uzorak povrata.
+const RETURN_RE = STRONG_RETURN_RE;
 
 // Vrati poziciju (indeks) prvog poklapanja regexa u tekstu, ili Infinity ako ga nema.
 function firstIdx(text: string, re: RegExp): number {
@@ -34,13 +40,17 @@ async function glsStatus(tracking: string): Promise<DeliveryStatus> {
     const res = await fetch(GLS_TT + encodeURIComponent(tracking), { signal: AbortSignal.timeout(12000) });
     if (!res.ok) return null;
     const t = (await res.text()).replace(/<[^>]*>/g, " ");
+    // Konačni povrat pošiljatelju je definitivan — čak i ako je poslije "Dostavljeno"
+    // (to je dostavljeno NAMA natrag, ne kupcu).
+    if (STRONG_RETURN_RE.test(t)) return "returned";
+    // Inače pobjeđuje status najbliže vrhu (najnoviji): dostavljeno / vraćanje u HUB / u prijenosu.
     const iDelivered = firstIdx(t, /05-\s*Dostavljeno/i);
-    const iReturned = firstIdx(t, RETURN_RE);
+    const iHubReturn = firstIdx(t, HUB_RETURN_RE);
     const iTransit = firstIdx(t, /0[34]-\s*(Depo|Sken)/i);
-    const min = Math.min(iDelivered, iReturned, iTransit);
+    const min = Math.min(iDelivered, iHubReturn, iTransit);
     if (min === Infinity) return "prep";
     if (min === iDelivered) return "delivered";
-    if (min === iReturned) return "returned";
+    if (min === iHubReturn) return "returned";
     return "transit";
   } catch {
     return null;
