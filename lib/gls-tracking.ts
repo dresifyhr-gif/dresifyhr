@@ -19,16 +19,29 @@ export type DeliveryStatus = "delivered" | "returned" | "transit" | "prep" | nul
 // paket može biti kasnije uspješno dostavljen u ponovnom pokušaju (lažni povrat).
 const RETURN_RE = /vratiti\s+(po[sš]iljatelj|u\s+hub)|\b2[23]\s*-\s*vrat|vra[cć]en\w*\s+po[sš]iljatelj|povrat\s+po[sš]iljatelj|return\s+to\s+sender/i;
 
-// GLS: statusi tipa "05-Dostavljeno", "04-Sken dostavne liste", "03-Depo ulaz"…
+// Vrati poziciju (indeks) prvog poklapanja regexa u tekstu, ili Infinity ako ga nema.
+function firstIdx(text: string, re: RegExp): number {
+  const m = re.exec(text);
+  return m ? m.index : Infinity;
+}
+
+// GLS lista ide NAJNOVIJI STATUS NA VRHU (npr. "05-Dostavljeno" gore, "01-APL" dolje).
+// Zato NE smijemo tražiti "vratiti" bilo gdje — paket koji je bio "22-Vratiti u HUB"
+// može kasnije biti ipak dostavljen. Pobjeđuje status koji je NAJBLIŽE VRHU (najmanji
+// indeks = najnoviji događaj). Delivered tipa "05-Dostavljeno", transit "03/04-Depo/Sken".
 async function glsStatus(tracking: string): Promise<DeliveryStatus> {
   try {
     const res = await fetch(GLS_TT + encodeURIComponent(tracking), { signal: AbortSignal.timeout(12000) });
     if (!res.ok) return null;
     const t = (await res.text()).replace(/<[^>]*>/g, " ");
-    if (RETURN_RE.test(t)) return "returned";
-    if (/05-\s*Dostavljeno/i.test(t)) return "delivered";
-    if (/0[34]-\s*(Depo|Sken)/i.test(t)) return "transit";
-    return "prep";
+    const iDelivered = firstIdx(t, /05-\s*Dostavljeno/i);
+    const iReturned = firstIdx(t, RETURN_RE);
+    const iTransit = firstIdx(t, /0[34]-\s*(Depo|Sken)/i);
+    const min = Math.min(iDelivered, iReturned, iTransit);
+    if (min === Infinity) return "prep";
+    if (min === iDelivered) return "delivered";
+    if (min === iReturned) return "returned";
+    return "transit";
   } catch {
     return null;
   }
