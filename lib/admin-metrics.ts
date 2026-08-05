@@ -234,6 +234,37 @@ export async function getDashboardMetrics() {
   const pendingCount = pendingAgg._count._all;
   const pendingTotal = net(pendingAgg);
 
+  // ── UKUPNA ČISTA ZARADA (trajna evidencija — NE resetira se poravnanjem) ──────
+  // "Koliko mi je stvarno ostalo u džepu do sad." Uzima SVE naplaćene narudžbe ikad:
+  //   neto roba − nabava robe + saldo dostave (GLS marža/besplatne) − svi povrati − svi oglasi.
+  // Rezultat se dijeli po vlasničkom udjelu (igorSharePct). Ovo je čisti profit, ne bruto cash.
+  const lifeShareIgor = Math.min(100, Math.max(0, igorSharePct)) / 100;
+  let lifeNet = 0, lifeD = 0, lifeK = 0, lifeS = 0, lifeShipPL = 0, lifeCollectedCount = 0;
+  for (const o of allSentOrders) {
+    if (!o.cashCollected) continue;
+    lifeCollectedCount++;
+    lifeNet += o.total - (o.shipping ?? 0);
+    for (const it of o.items) {
+      const q = it.quantity || 1;
+      if (it.slug && streetwearSlugs.has(it.slug)) lifeS += q;
+      else if (itemIsKomplet(it)) lifeK += q;
+      else lifeD += q;
+    }
+    lifeShipPL += shipPLFor({ ...o, status: "shipped" }, freeShipThreshold, deliveryCost, returnCost);
+  }
+  const lifeReturnPL = returned.reduce((s, o) => s + shipPLFor({ ...o, status: "returned" }, freeShipThreshold, deliveryCost, returnCost), 0);
+  const lifeCost = lifeD * costDres + lifeK * costKomplet + lifeS * costStreetwear;
+  const lifeMargin = lifeNet - lifeCost + lifeShipPL + lifeReturnPL;
+  const lifeCleanProfit = lifeMargin - adSpendTotal; // čista zarada oba partnera zajedno
+  const lifeProfit = {
+    total: lifeCleanProfit,
+    igor: lifeCleanProfit * lifeShareIgor,
+    ivica: lifeCleanProfit * (1 - lifeShareIgor),
+    collectedCount: lifeCollectedCount,
+    margin: lifeMargin,
+    ads: adSpendTotal
+  };
+
   // ── Podjela po pošiljatelju (Igor / Ivica) — poslane narudžbe OD zadnjeg poravnanja ──
   const settlements = await settlementsP;
   const lastSettlement = settlements[0] ?? null;
@@ -380,6 +411,7 @@ export async function getDashboardMetrics() {
     cancelledQty: cancelled.reduce((s, o) => s + (o.itemCount ?? 0), 0),
     topCities,
     adSpendTotal,
+    lifeProfit,
     roas: adSpendTotal > 0 ? totalRev / adSpendTotal : null,
     netAfterAds: totalProfit + shipPLTotal - adSpendTotal,
     // Saldo dostave (GLS marža + / besplatne dostave − / povrati −) nad svime poslanim + vraćenim.

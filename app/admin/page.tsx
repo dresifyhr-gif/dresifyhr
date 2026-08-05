@@ -275,6 +275,29 @@ export default async function AdminOverview() {
       {/* Partner split */}
       <div className="mt-5">
         <Panel title="Podjela Igor / Ivica (50 / 50, samo poslano)">
+          {/* Trajna evidencija — čista zarada od početka, NE resetira se poravnanjem */}
+          <div className="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] p-4">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600">
+              💰 Ukupno zarađeno do sad (čisto, od početka)
+            </div>
+            <div className="mt-2 grid gap-3 sm:grid-cols-3">
+              <div>
+                <div className="text-2xl font-extrabold text-emerald-600">{eur(m.lifeProfit.igor)}</div>
+                <div className="text-[12px] text-[var(--a-text-3)]">Igor</div>
+              </div>
+              <div>
+                <div className="text-2xl font-extrabold text-sky-600">{eur(m.lifeProfit.ivica)}</div>
+                <div className="text-[12px] text-[var(--a-text-3)]">Ivica</div>
+              </div>
+              <div>
+                <div className="text-2xl font-extrabold text-[var(--a-text)]">{eur(m.lifeProfit.total)}</div>
+                <div className="text-[12px] text-[var(--a-text-3)]">Zajedno</div>
+              </div>
+            </div>
+            <p className="mt-2 text-[11px] text-[var(--a-text-3)]">
+              Samo naplaćene narudžbe ({m.lifeProfit.collectedCount}) · nakon nabave robe, salda dostave, povrata i oglasa ({eur(m.lifeProfit.ads)}). Ne dira poravnanja — trajna evidencija.
+            </p>
+          </div>
           <div className="mb-4 rounded-xl border border-[var(--a-line)] bg-[var(--a-surface-2)] p-4">
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--a-text-3)]">
               Podjela prikupljene gotovine {m.split.lastSettlement ? `od zadnjeg poravnanja (${m.split.lastSettlement.settledAt.toLocaleDateString("hr-HR")})` : "(od početka)"}
