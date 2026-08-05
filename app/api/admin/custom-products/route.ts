@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
@@ -60,9 +61,11 @@ export async function POST(request: Request) {
 
   if (editId) {
     await prisma.customProduct.update({ where: { id: editId }, data: coreData });
+    revalidateTag("products"); // odmah osvježi katalog/tražilicu (bez 60s čekanja)
     return NextResponse.json({ ok: true, id: editId });
   }
   const created = await prisma.customProduct.create({ data: { ...coreData, slug } });
+  revalidateTag("products"); // novi proizvod odmah vidljiv u tražilici i listama
   return NextResponse.json({ ok: true, id: created.id, slug });
 }
 
