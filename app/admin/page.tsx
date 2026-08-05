@@ -126,7 +126,6 @@ export default async function AdminOverview() {
           sub={m.avgMonthsCounted > 0 ? `${m.avgMonthsCounted} punih mj. (od lipnja)` : "još nema punog mjeseca"}
         />
         <Stat label="Prosj. košarica" value={eur(m.aov)} />
-        <Stat label="Procjena dana" value={eur(ceo.projection)} sub="predviđeni promet" />
       </div>
 
       <SectionHeading>💰 Pouzeće — novac i roba</SectionHeading>
