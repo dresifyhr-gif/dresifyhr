@@ -38,7 +38,10 @@ const fetchGaRaw = unstable_cache(
     if (!url || process.env.GA_STATS_ENABLED !== "1") return EMPTY;
     try {
       const sep = url.includes("?") ? "&" : "?";
-      const res = await fetch(`${url}${sep}action=ga`, { method: "GET" });
+      // Timeout 6s — bez ovoga spor/zaglavljen webhook obješava cijelu Analitiku (RSC nikad ne vrati).
+      // no-store: rate-limit radi unstable_cache (600s); sam fetch mora biti svjež, da se ne
+      // zakešira prazan/stari odgovor u Next Data Cache i "zaglavi" GA na prazno.
+      const res = await fetch(`${url}${sep}action=ga`, { method: "GET", cache: "no-store", signal: AbortSignal.timeout(6000) });
       if (!res.ok) return EMPTY;
       const d = await res.json().catch(() => null);
       if (!d || d.ok === false) return EMPTY;

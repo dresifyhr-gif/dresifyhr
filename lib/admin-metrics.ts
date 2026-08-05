@@ -178,6 +178,15 @@ export async function getDashboardMetrics() {
     prisma.order.count({ where: { createdAt: { gte: startMonthCal }, ...notVoid } })
   ]);
 
+  // Prosjek narudžbi po mjesecu — od LIPNJA 2026 (prvi pravi mjesec; ožujak je test).
+  // Tekući (nepotpuni) mjesec se NE broji — ulazi u prosjek tek kad završi.
+  const BUSINESS_START = new Date(Date.UTC(2026, 5, 1)); // lipanj = mjesec index 5
+  const monthsElapsed = (zGet("year") - 2026) * 12 + (zGet("month") - 6); // puni mjeseci prije tekućeg
+  const completedOrdersCount = await prisma.order.count({
+    where: { createdAt: { gte: BUSINESS_START, lt: startMonthCal }, ...notVoid }
+  });
+  const avgMonthlyOrders = monthsElapsed > 0 ? completedOrdersCount / monthsElapsed : null;
+
   // ── Extras (trends, shipping queue, win-back, cities, ad ROI): već pokrenuto gore, samo await ──
   const [prev7, prev30, pending, pendingAgg, inactive, allAddr, adAll, returned, cancelled, unassignedShipped, returnedCountAll, riskRows, allSentOrders] = await extrasP;
 
@@ -448,6 +457,8 @@ export async function getDashboardMetrics() {
     totalRev,
     // Mjesečni cilj prometa (Postavke) + ostvareno ovaj kalendarski mjesec + projekcija po tempu.
     monthlyGoal,
+    avgMonthlyOrders,
+    avgMonthsCounted: monthsElapsed,
     monthCalRev,
     monthProjected,
     dayOfMonth,
