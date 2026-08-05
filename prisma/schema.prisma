@@ -27,6 +27,16 @@ model CustomerAddress {
   @@index([userId])
 }
 
+// Referral: svaki prijavljeni kupac ima kod; kad 3 preporučena frenda KUPE
+// (naplaćeno pouzeće, anti-prijevara) dobije nagradu (osobni popust kod).
+model Referral {
+  id        String   @id @default(cuid())
+  userId    String   @unique // Clerk user id (preporučitelj)
+  code      String   @unique
+  rewarded  Int      @default(0) // koliko je nagrada već izdano (za više krugova)
+  createdAt DateTime @default(now())
+}
+
 // Wishlist / omiljeni proizvodi kupca (Clerk userId + slug proizvoda).
 model WishlistItem {
   id        String   @id @default(cuid())
@@ -212,6 +222,7 @@ model AdSpend {
   date      DateTime @default(now())
   amount    Float
   note      String?
+  paidBy    String?  // "igor" | "ivica" — tko je platio oglas (null = legacy, tretira se kao Igor)
   createdAt DateTime @default(now())
 
   @@index([date])

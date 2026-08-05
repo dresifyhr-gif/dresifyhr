@@ -240,6 +240,7 @@ export async function getDashboardMetrics() {
   // Rezultat se dijeli po vlasničkom udjelu (igorSharePct). Ovo je čisti profit, ne bruto cash.
   const lifeShareIgor = Math.min(100, Math.max(0, igorSharePct)) / 100;
   let lifeNet = 0, lifeD = 0, lifeK = 0, lifeS = 0, lifeShipPL = 0, lifeCollectedCount = 0;
+  let lifeDelivMargin = 0, lifeDelivFreeCost = 0, lifeFreeShipCount = 0, lifePaidShipCount = 0; // razdvojena dostava
   for (const o of allSentOrders) {
     if (!o.cashCollected) continue;
     lifeCollectedCount++;
@@ -250,7 +251,11 @@ export async function getDashboardMetrics() {
       else if (itemIsKomplet(it)) lifeK += q;
       else lifeD += q;
     }
-    lifeShipPL += shipPLFor({ ...o, status: "shipped" }, freeShipThreshold, deliveryCost, returnCost);
+    const pl = shipPLFor({ ...o, status: "shipped" }, freeShipThreshold, deliveryCost, returnCost);
+    lifeShipPL += pl;
+    // pl > 0 = plaćena dostava (naplatili 7, platili 5,50 → +1,50); pl < 0 = besplatna (mi platili).
+    if (pl > 0) { lifeDelivMargin += pl; lifePaidShipCount++; }
+    else if (pl < 0) { lifeDelivFreeCost += pl; lifeFreeShipCount++; }
   }
   const lifeReturnPL = returned.reduce((s, o) => s + shipPLFor({ ...o, status: "returned" }, freeShipThreshold, deliveryCost, returnCost), 0);
   const lifeCost = lifeD * costDres + lifeK * costKomplet + lifeS * costStreetwear;
@@ -261,6 +266,15 @@ export async function getDashboardMetrics() {
     igor: lifeCleanProfit * lifeShareIgor,
     ivica: lifeCleanProfit * (1 - lifeShareIgor),
     collectedCount: lifeCollectedCount,
+    netGoods: lifeNet,           // neto roba (bez dostave)
+    cost: lifeCost,              // nabava robe (natrag Ivici)
+    grossMargin: lifeNet - lifeCost,
+    shipSaldo: lifeShipPL + lifeReturnPL, // dostava + povrati (obično negativno)
+    delivMargin: lifeDelivMargin,         // + marža na plaćene dostave (1,50 po komadu)
+    delivFreeCost: lifeDelivFreeCost,     // − trošak besplatnih dostava (negativan)
+    returnCostTotal: lifeReturnPL,        // − trošak povrata (negativan)
+    paidShipCount: lifePaidShipCount,
+    freeShipCount: lifeFreeShipCount,
     margin: lifeMargin,
     ads: adSpendTotal
   };
@@ -299,7 +313,7 @@ export async function getDashboardMetrics() {
       select: { total: true, shipping: true, shippedBy: true, promoCode: true, courier: true, createdAt: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
     }),
     profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter }),
-    prisma.adSpend.aggregate({ _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined }),
+    prisma.adSpend.groupBy({ by: ["paidBy"], _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined }),
     // Vraćene pošiljke OD ZADNJEG PORAVNANJA — njihov trošak (4 € svaka) skida se sa zajedničke marže.
     prisma.order.count({ where: { status: "returned", ...sinceFilter } })
   ]);
@@ -372,10 +386,13 @@ export async function getDashboardMetrics() {
   // Udio iz Postavki (50 = pola-pola). Igorov udio; Ivici ide ostatak.
   const igorShare = Math.min(100, Math.max(0, igorSharePct)) / 100;
   const halfShare = shippedProfitTotal * igorShare;
-  const adsSpend = adsAgg._sum.amount ?? 0;
+  // Oglasi razdvojeni po platiocu (null = legacy → tretiramo kao Igor).
+  const igorAds = adsAgg.filter((g) => g.paidBy !== "ivica").reduce((s, g) => s + (g._sum.amount ?? 0), 0);
+  const ivicaAds = adsAgg.filter((g) => g.paidBy === "ivica").reduce((s, g) => s + (g._sum.amount ?? 0), 0);
+  const adsSpend = igorAds + ivicaAds;
 
   // Poravnanje: Ivica je platila SVU robu → prvo joj se vrati nabava prikupljenih artikala,
-  // pa se ostatak (marža) dijeli 50/50, pa pola oglasa (Igor platio → Ivica vraća pola).
+  // pa se ostatak (marža) dijeli 50/50, pa oglasi po platiocu (svatko snosi svoj udio).
   const totalCollected = cashSplit.igor.collected + cashSplit.ivica.collected;
   const collectedDresovi = cashSplit.igor.collectedDresovi + cashSplit.ivica.collectedDresovi;
   const collectedKompleti = cashSplit.igor.collectedKompleti + cashSplit.ivica.collectedKompleti;
@@ -386,9 +403,12 @@ export async function getDashboardMetrics() {
   const collectedMargin = totalCollected - collectedCost + shipPLCollected + shipPLReturnedSettle;
   const marginHalf = collectedMargin * igorShare;
   // Igor treba zadržati samo svoju polovicu marže; sve preko toga (koje drži) ide Ivici (roba + njena marža).
-  // Oglasi: Igor platio → Ivica vraća pola. Pozitivno = Ivica → Igoru; negativno = Igor → Ivici.
-  // Oglase (Igor plaća) Ivica vraća razmjerno svom udjelu (1 − igorShare).
-  const ivicaToIgor = adsSpend * (1 - igorShare) - (cashSplit.igor.collected - marginHalf);
+  // Oglasi: svatko snosi svoj udio ukupnih oglasa. Onaj tko je platio više od svog udjela
+  // dobiva razliku natrag. adsReconcile > 0 = Ivica → Igoru (Igor preplatio oglase).
+  //   igorAds·(1−udio) = Ivicin dug za Igorom plaćene oglase; ivicaAds·udio = Igorov dug za Ivicom plaćene.
+  const adsReconcile = igorAds * (1 - igorShare) - ivicaAds * igorShare;
+  // Pozitivno = Ivica → Igoru; negativno = Igor → Ivici.
+  const ivicaToIgor = adsReconcile - (cashSplit.igor.collected - marginHalf);
   const settleAmount = Math.abs(ivicaToIgor);
   const settleFrom = ivicaToIgor > 0.005 ? "ivica" : ivicaToIgor < -0.005 ? "igor" : null;
 
@@ -442,7 +462,7 @@ export async function getDashboardMetrics() {
     shippedRev: net(shippedAgg),
     shippedProfit,
     aov: orderCount ? totalRev / orderCount : 0,
-    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, collectedCost, freeDeliveries, shipPLCollected, returnedSinceCount, returnShipLossSettle: shipPLReturnedSettle, collectedMargin, marginHalf, adsSpend, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
+    split: { igor, ivica, unassigned, shippedProfitTotal, halfShare, totalCollected, collectedCost, freeDeliveries, shipPLCollected, returnedSinceCount, returnShipLossSettle: shipPLReturnedSettle, collectedMargin, marginHalf, adsSpend, igorAds, ivicaAds, settleAmount, settleFrom, lastSettlement, settlements, cashSplit },
     topItems,
     bestCustomers,
     riskyCustomers,

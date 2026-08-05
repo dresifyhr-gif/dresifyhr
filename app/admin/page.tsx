@@ -294,8 +294,23 @@ export default async function AdminOverview() {
                 <div className="text-[12px] text-[var(--a-text-3)]">Zajedno</div>
               </div>
             </div>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-emerald-500/20 pt-2.5 text-[12px] text-[var(--a-text-2)]">
+              <span>Neto roba <b className="text-[var(--a-text)]">{eur(m.lifeProfit.netGoods)}</b></span>
+              <span>− Nabava <b className="text-[var(--a-text)]">{eur(m.lifeProfit.cost)}</b></span>
+              <span>= Bruto marža <b className="text-emerald-600">{eur(m.lifeProfit.grossMargin)}</b></span>
+              {m.lifeProfit.delivMargin > 0 && (
+                <span title={`${m.lifeProfit.paidShipCount} plaćenih dostava × ~1,50 €`}>+ Marža dostave <b className="text-emerald-600">{eur(m.lifeProfit.delivMargin)}</b></span>
+              )}
+              {m.lifeProfit.delivFreeCost < 0 && (
+                <span title={`${m.lifeProfit.freeShipCount} besplatnih dostava × ~5,50 €`}>− Besplatne dostave <b className="text-red-600">{eur(Math.abs(m.lifeProfit.delivFreeCost))}</b></span>
+              )}
+              {m.lifeProfit.returnCostTotal < 0 && (
+                <span>− Povrati <b className="text-red-600">{eur(Math.abs(m.lifeProfit.returnCostTotal))}</b></span>
+              )}
+              <span>− Oglasi <b className="text-[var(--a-text)]">{eur(m.lifeProfit.ads)}</b></span>
+            </div>
             <p className="mt-2 text-[11px] text-[var(--a-text-3)]">
-              Samo naplaćene narudžbe ({m.lifeProfit.collectedCount}) · nakon nabave robe, salda dostave, povrata i oglasa ({eur(m.lifeProfit.ads)}). Ne dira poravnanja — trajna evidencija.
+              Samo naplaćene narudžbe ({m.lifeProfit.collectedCount}) · čisto nakon svih troškova. Ne dira poravnanja — trajna evidencija.
             </p>
           </div>
           <div className="mb-4 rounded-xl border border-[var(--a-line)] bg-[var(--a-surface-2)] p-4">
@@ -345,9 +360,14 @@ export default async function AdminOverview() {
             ))}
           </div>
           {m.split.adsSpend > 0 && (
-            <div className="mt-3 flex items-center justify-between rounded-xl border border-[var(--a-line)] bg-[var(--a-surface-2)] px-4 py-2.5 text-sm">
-              <span className="text-[var(--a-text-2)]">📣 Oglasi (platio Igor) — dijeli se 50/50</span>
-              <span className="text-[var(--a-text)]"><span className="font-semibold text-[var(--a-text)]">{eur(m.split.adsSpend)}</span> · svakom {eur(m.split.adsSpend / 2)}</span>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--a-line)] bg-[var(--a-surface-2)] px-4 py-2.5 text-sm">
+              <span className="text-[var(--a-text-2)]">
+                📣 Oglasi <b className="text-[var(--a-text)]">{eur(m.split.adsSpend)}</b> — dijeli se 50/50
+                <span className="ml-2 text-[12px] text-[var(--a-text-3)]">
+                  (Igor platio {eur(m.split.igorAds)} · Ivica platila {eur(m.split.ivicaAds)})
+                </span>
+              </span>
+              <span className="text-[var(--a-text)]">svakom {eur(m.split.adsSpend / 2)}</span>
             </div>
           )}
           <div className="mt-4 flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-[var(--a-line)] bg-[var(--a-surface-2)] p-4 text-center">

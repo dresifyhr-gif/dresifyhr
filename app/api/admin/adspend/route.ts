@@ -14,8 +14,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "Neispravan iznos" }, { status: 400 });
   }
 
+  const paidBy = body?.paidBy === "ivica" ? "ivica" : "igor";
   await prisma.adSpend.create({
-    data: { amount, note: typeof body?.note === "string" ? body.note : null }
+    data: { amount, note: typeof body?.note === "string" ? body.note : null, paidBy }
   });
 
   return NextResponse.json({ ok: true });
