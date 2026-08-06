@@ -6,6 +6,7 @@ import { HeroSection } from "@/components/home/hero-section";
 import { HomeCatalogTabs } from "@/components/home/home-catalog-tabs";
 import { InstagramSection } from "@/components/home/instagram-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
+import { Ps5HomeBanner } from "@/components/home/ps5-home-banner";
 import { ReviewsSection } from "@/components/home/reviews-section";
 import { StreetwearBanner } from "@/components/home/streetwear-banner";
 import { TrustStrip } from "@/components/home/trust-strip";
@@ -61,6 +62,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <Ps5HomeBanner />
       <HeroSection />
       {show("trust") && <TrustStrip />}
       {show("streetwear") && streetwear.length > 0 && (
