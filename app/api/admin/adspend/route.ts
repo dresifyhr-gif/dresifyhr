@@ -5,6 +5,26 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
+// Popis unosa oglasa TRENUTNOG razdoblja (od zadnjeg poravnanja) — za uređivanje/brisanje.
+export async function GET() {
+  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  const last = await prisma.settlement.findFirst({ orderBy: { settledAt: "desc" } });
+  const where = last ? { date: { gt: last.settledAt } } : {};
+  const rows = await prisma.adSpend.findMany({ where, orderBy: { date: "desc" }, take: 100, select: { id: true, amount: true, paidBy: true, date: true } });
+  return NextResponse.json({ ok: true, entries: rows });
+}
+
+// Ispravak unosa (npr. krivo označen platilac). { id, paidBy }
+export async function PATCH(request: Request) {
+  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  const body = await request.json().catch(() => ({}));
+  const id = typeof body?.id === "string" ? body.id : null;
+  if (!id) return NextResponse.json({ ok: false }, { status: 400 });
+  const paidBy = body?.paidBy === "ivica" ? "ivica" : "igor";
+  await prisma.adSpend.update({ where: { id }, data: { paidBy } }).catch(() => null);
+  return NextResponse.json({ ok: true });
+}
+
 export async function POST(request: Request) {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
@@ -22,9 +42,16 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true });
 }
 
-// Reset oglasa TRENUTNOG razdoblja (od zadnjeg poravnanja) → obriše te zapise, cifra pada na 0.
-export async function DELETE() {
+// DELETE ?id=... → briše JEDAN unos (npr. slučajno dodan). Bez id → reset svih
+// oglasa trenutnog razdoblja (od zadnjeg poravnanja), cifra pada na 0.
+export async function DELETE(request: Request) {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+
+  const id = new URL(request.url).searchParams.get("id");
+  if (id) {
+    await prisma.adSpend.delete({ where: { id } }).catch(() => null);
+    return NextResponse.json({ ok: true, deleted: 1 });
+  }
 
   const last = await prisma.settlement.findFirst({ orderBy: { settledAt: "desc" } });
   const where = last ? { date: { gt: last.settledAt } } : {};
