@@ -113,7 +113,7 @@ export async function getDashboardMetrics() {
     prisma.customer.findMany({ where: { lastOrderAt: { lt: new Date(now.getTime() - winbackDays * DAY) }, totalOrders: { gt: 0 } }, orderBy: { totalSpent: "desc" }, take: 20 }),
     prisma.order.findMany({ select: { address: true, total: true, shipping: true } }),
     prisma.adSpend.aggregate({ _sum: { amount: true } }),
-    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 500, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true, courier: true, items: { select: { slug: true, klub: true, igrac: true } } } }),
+    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 500, select: { id: true, createdAt: true, returnedAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true, courier: true, items: { select: { slug: true, klub: true, igrac: true } } } }),
     prisma.order.findMany({ where: { status: "cancelled" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
     prisma.order.findMany({ where: { status: { in: ["shipped", "done"] }, shippedBy: null }, orderBy: { createdAt: "desc" }, take: 200, select: { id: true, createdAt: true, customerName: true, total: true } }),
     // Točan ukupan broj vraćenih (lista gore je ograničena na 50) — za trošak povrata.
@@ -309,7 +309,7 @@ export async function getDashboardMetrics() {
   const isKomplet = (it: { slug?: string | null; klub?: string | null; igrac?: string | null }) =>
     /komplet/i.test(it.slug || "") || /komplet/i.test(it.klub || "") || /komplet/i.test(it.igrac || "");
   // ── Faza B: sve ovisi o sinceFilter → jedan paralelni batch (bez sekvencijalnih upita) ──
-  const [igor, ivica, unassigned, cashOrders, collectedCashOrders, shippedProfitTotal, adsAgg, returnedSinceCount] = await Promise.all([
+  const [igor, ivica, unassigned, cashOrders, collectedCashOrders, shippedProfitTotal, adsAgg] = await Promise.all([
     byShipper("igor"),
     byShipper("ivica"),
     byShipper(null),
@@ -322,9 +322,7 @@ export async function getDashboardMetrics() {
       select: { total: true, shipping: true, shippedBy: true, promoCode: true, courier: true, createdAt: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
     }),
     profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter }),
-    prisma.adSpend.groupBy({ by: ["paidBy"], _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined }),
-    // Vraćene pošiljke OD ZADNJEG PORAVNANJA — njihov trošak (4 € svaka) skida se sa zajedničke marže.
-    prisma.order.count({ where: { status: "returned", ...sinceFilter } })
+    prisma.adSpend.groupBy({ by: ["paidBy"], _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined })
   ]);
   const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, sentStreet: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, collectedStreet: 0, pending: 0, pendingDresovi: 0, pendingKompleti: 0, pendingStreet: 0, pendingMargin: 0 });
   const cashSplit: Record<"igor" | "ivica", ReturnType<typeof mkCash>> = { igor: mkCash(), ivica: mkCash() };
@@ -388,7 +386,13 @@ export async function getDashboardMetrics() {
 
   // Povrati od zadnjeg poravnanja: njihov trošak dostave (GLS 5,50/6,50 · HP fiksni returnCost)
   // skida se sa zajedničke marže (po pola svakome). shipPLReturnedSettle je negativan.
-  const returnedSince = lastSettlement ? returned.filter((o) => o.createdAt > lastSettlement.settledAt) : returned;
+  // Filtriramo po returnedAt (KAD je označeno vraćeno), ne po createdAt — inače stara
+  // narudžba označena vraćenom danas ne bi ušla u tekuće poravnanje. Fallback na createdAt
+  // za povrate označene prije uvođenja returnedAt.
+  const returnedSince = lastSettlement
+    ? returned.filter((o) => (o.returnedAt ?? o.createdAt) > lastSettlement.settledAt)
+    : returned;
+  const returnedSinceCount = returnedSince.length;
   const shipPLReturnedSettle = returnedSince.reduce((s, o) => s + shipPLFor({ ...o, status: "returned" }, freeShipThreshold, deliveryCost, returnCost), 0);
 
   // Profit poslanih i oglasi od zadnjeg poravnanja — oboje već dohvaćeno u Fazi B.

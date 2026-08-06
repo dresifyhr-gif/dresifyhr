@@ -23,7 +23,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   await prisma.order.update({
     where: { id },
-    data: returned ? { status: "returned" } : { status: "new", shippedBy: null, shippedAt: null }
+    // returnedAt bilježi KAD je označeno vraćeno → poravnanje računa povrat u ispravno razdoblje
+    // (ne po datumu kreiranja narudžbe). Poništavanje povrata ga očisti.
+    data: returned
+      ? { status: "returned", returnedAt: new Date() }
+      : { status: "new", shippedBy: null, shippedAt: null, returnedAt: null }
   });
 
   if (returned) {

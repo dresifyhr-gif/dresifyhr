@@ -15,7 +15,7 @@ const NAV = [
   { href: "/admin/kupci", label: "Kupci", hint: "Tko kupuje", icon: Users },
   { href: "/admin/kodovi", label: "Kodovi", hint: "Popusti", icon: Ticket },
   { href: "/admin/analitika", label: "Analitika", hint: "Brojke i trendovi", icon: BarChart3 },
-  { href: "/admin/nagradna-igra", label: "Nagradna igra", hint: "PS5 prijave", icon: Gift }
+  { href: "/admin/nagradna-igra", label: "Nagradna igra", short: "Igra", hint: "PS5 prijave", icon: Gift }
 ];
 
 function isActive(pathname: string, href: string) {
@@ -151,7 +151,10 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
       <CommandPalette />
 
       {/* Mobile bottom nav */}
-      <nav className="a-blur fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-[var(--a-line)] pb-[env(safe-area-inset-bottom)] lg:hidden">
+      <nav
+        className="a-blur fixed inset-x-0 bottom-0 z-30 grid border-t border-[var(--a-line)] pb-[env(safe-area-inset-bottom)] lg:hidden"
+        style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}
+      >
         {NAV.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;
@@ -159,14 +162,14 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1 py-2 text-[10px] font-semibold transition ${
+              className={`flex min-w-0 flex-col items-center gap-1 py-2 text-[9px] font-semibold transition ${
                 active ? "text-[var(--a-text)]" : "text-[var(--a-text-3)]"
               }`}
             >
-              <span className={`flex h-8 w-12 items-center justify-center rounded-full transition-all duration-150 ${active ? "bg-accent/60" : ""}`}>
-                <Icon className={`h-[18px] w-[18px] ${active ? "text-[var(--a-text)]" : "text-[var(--a-text-3)]"}`} />
+              <span className={`flex h-7 w-10 items-center justify-center rounded-full transition-all duration-150 ${active ? "bg-accent/60" : ""}`}>
+                <Icon className={`h-[17px] w-[17px] ${active ? "text-[var(--a-text)]" : "text-[var(--a-text-3)]"}`} />
               </span>
-              {item.label}
+              <span className="w-full truncate px-0.5 text-center leading-tight">{item.short ?? item.label}</span>
             </Link>
           );
         })}
