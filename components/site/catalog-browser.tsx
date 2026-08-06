@@ -12,7 +12,6 @@ import { hasJerseyGallery } from "@/lib/data/jersey-media";
 import {
   FLAGSHIP_SLUG,
   PLAYER_FILTER_OPTIONS,
-  getClubOptions,
   matchesPlayerFilter,
   normalizeText,
   productSupportsSize,
@@ -117,7 +116,12 @@ function FilterSection({
 
 export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc }: CatalogBrowserProps) {
   const { t } = useLanguage();
-  const availableClubs = getClubOptions();
+  // Klubovi za filter se grade iz STVARNIH proizvoda (uključujući ručno dodane/custom),
+  // ne iz statičnog kataloga — inače novi klub/repka (npr. Palestina) nema svoj filter/grupu.
+  const availableClubs = useMemo(
+    () => [...new Set(products.map((p) => p.klub).filter((c): c is string => Boolean(c)))],
+    [products]
+  );
   const clubOptions = useMemo(() => {
     return [...availableClubs].sort((left, right) => {
       const leftIndex = clubLabelOrder.indexOf(repairText(left));
