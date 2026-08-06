@@ -296,7 +296,7 @@ export default async function AccountPage() {
             <div className="mb-1 font-heading text-base uppercase tracking-wide text-accent sm:text-lg">🎁 PS5 nagradna igra</div>
             <p className="mb-3 text-[13px] text-white/55">
               {giveawayEntry
-                ? <>U igri si kao <b className="text-white">@{giveawayEntry.handle}</b>. Svaka kupnja ti daje +5 listića i veće šanse.</>
+                ? <>U igri si kao <b className="text-white">@{giveawayEntry.handle}</b>. Svaka kupnja ti daje +5 bodova i veće šanse.</>
                 : <>Zaprati <b className="text-white">@dresify.hr</b> i upiši svoj Instagram — tvoje kupnje se onda automatski broje za osvajanje PS5 + FC 27.</>}
             </p>
             <GiveawayEntryForm initialHandle={giveawayEntry?.handle ?? ""} />

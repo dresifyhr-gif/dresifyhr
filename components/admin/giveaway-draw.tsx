@@ -85,11 +85,11 @@ export function GiveawayDraw({ entries, totalTickets, participants }: { entries:
             <div className="text-[26px] font-bold leading-tight" style={{ color: winner ? "#e8ff3c" : "#ffffff" }}>{display}</div>
             {winner && (
               <div className="mt-2 text-[12px] text-white/55">
-                @{winner.handle} · {winner.registered ? `kupac · ${winner.orders} narudžbi` : "pratitelj"} · {winner.tickets} listića
+                @{winner.handle} · {winner.registered ? `kupac · ${winner.orders} narudžbi` : "pratitelj"} · {winner.tickets} bodova
               </div>
             )}
           </div>
-          <div className="mt-4 text-[11px] text-white/40">{participants} sudionika · {totalTickets} listića u bubnju</div>
+          <div className="mt-4 text-[11px] text-white/40">{participants} sudionika · {totalTickets} bodova u bubnju</div>
         </div>
 
         <button

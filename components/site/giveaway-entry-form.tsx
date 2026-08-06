@@ -40,7 +40,7 @@ export function GiveawayEntryForm({ initialHandle = "" }: { initialHandle?: stri
         </div>
         <div className="text-lg font-bold text-white">U igri si! 🎉</div>
         <p className="text-sm text-white/60">
-          Zabilježili smo <b className="text-accent">@{handle.replace(/^@+/, "")}</b>. Svaka kupnja ti daje +5 listića i veće šanse.
+          Zabilježili smo <b className="text-accent">@{handle.replace(/^@+/, "")}</b>. Svaka kupnja ti daje +5 bodova i veće šanse.
         </p>
       </div>
     );

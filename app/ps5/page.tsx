@@ -105,9 +105,9 @@ export default async function Ps5Page() {
           <h2 className="text-center text-2xl font-black uppercase tracking-tight sm:text-3xl">Kako sudjelovati?</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
-              { n: 1, Icon: UserPlus, title: "Zaprati", desc: <>Zaprati <b className="text-white">@dresify.hr</b> i prijavi se — <b className="text-accent">1 listić</b></> },
-              { n: 2, Icon: ShoppingCart, title: "Kupi dres i dobij", desc: <><b className="text-accent">+5 listića</b> — veća šansa, svaka narudžba +5</> },
-              { n: 3, Icon: Send, title: "Podijeli priču", desc: <>Podijeli na story i označi <b className="text-white">@dresify.hr</b> — dodatni listić</> }
+              { n: 1, Icon: UserPlus, title: "Zaprati", desc: <>Zaprati <b className="text-white">@dresify.hr</b> i prijavi se — <b className="text-accent">1 bod</b></> },
+              { n: 2, Icon: ShoppingCart, title: "Kupi dres i dobij", desc: <><b className="text-accent">+5 bodova</b> — veća šansa, svaka narudžba +5</> },
+              { n: 3, Icon: Send, title: "Podijeli priču", desc: <>Podijeli na story i označi <b className="text-white">@dresify.hr</b> — dodatni bod</> }
             ].map((s) => (
               <div key={s.n} className="rounded-[16px] border border-white/8 bg-[#111] p-6 text-center">
                 <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-bold text-black">{s.n}</div>
@@ -122,7 +122,7 @@ export default async function Ps5Page() {
               Što više se uključiš,<br className="hidden sm:block" /> veće su ti šanse za pobjedu!
             </div>
             <div className="text-right">
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-white/45">Već skuplja listiće</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-white/45">Već skuplja bodove</div>
               <div className="text-3xl font-black text-accent">{buyers.toLocaleString("hr-HR")}</div>
             </div>
           </div>
@@ -167,9 +167,38 @@ export default async function Ps5Page() {
             <Trophy className="h-7 w-7 shrink-0 text-accent" />
             <div>
               <div className="font-bold uppercase">Izvlačenje pobjednika</div>
-              <p className="mt-1 text-sm text-white/60">Izvlačenje uživo, odmah čim dođemo do 10.000 pratitelja.</p>
+              <p className="mt-1 text-sm text-white/60">
+                Čim dođemo do 10.000 pratitelja, <b className="text-white">uživo snimamo nasumično izvlačenje</b> (random picker) i objavljujemo pobjednika na našem Instagram storyju — da svi vide da je pošteno.
+              </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* KAKO FUNKCIONIRA / PRAVILA */}
+      <section className="border-t border-white/5 py-14">
+        <div className="mx-auto max-w-3xl px-5">
+          <h2 className="text-center text-2xl font-black uppercase tracking-tight sm:text-3xl">Kako funkcionira</h2>
+          <div className="mt-6 space-y-3">
+            {[
+              { t: "Skupljaš bodove", d: "Svaki bod je jedna prilika u bubnju. Više bodova = veća šansa za pobjedu, ali svi mogu sudjelovati besplatno." },
+              { t: "Zaprati + prijavi se = 1 bod", d: "Zaprati @dresify.hr i upiši svoj Instagram na ovoj stranici — time ulaziš u igru." },
+              { t: "Kupnja = +5 bodova", d: "Svaka narudžba dresa ti daje dodatnih 5 bodova. Što više naručuješ, to su ti šanse veće." },
+              { t: "Registriraj se za automatsko brojanje", d: "Ako imaš Dresify račun i upišeš Instagram u profil, sve tvoje kupnje se same broje — ne moraš ništa raditi." },
+              { t: "Izvlačenje na 10.000 pratitelja", d: "Kad dosegnemo cilj, snimamo uživo nasumično izvlačenje i objavljujemo tko je pobijedio. Pobjednik osvaja PlayStation 5 + EA SPORTS FC 27." }
+            ].map((r, i) => (
+              <div key={i} className="flex gap-3 rounded-[14px] border border-white/8 bg-[#111] p-4">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-black">{i + 1}</div>
+                <div>
+                  <div className="text-[15px] font-bold text-white">{r.t}</div>
+                  <p className="mt-0.5 text-sm text-white/55">{r.d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-5 text-center text-xs text-white/35">
+            Nagradna igra nije sponzorirana ni povezana s Instagramom. Kupnja nije obavezna za sudjelovanje.
+          </p>
         </div>
       </section>
 
@@ -179,7 +208,7 @@ export default async function Ps5Page() {
           <div>
             <Shield className="mx-auto h-6 w-6 text-accent" />
             <div className="mt-2 text-xs font-bold uppercase tracking-wide text-accent">Pošteno i transparentno</div>
-            <p className="text-xs text-white/45">Svi listići se provjeravaju</p>
+            <p className="text-xs text-white/45">Izvlačenje uživo na snimci</p>
           </div>
           <a href={IG_URL} target="_blank" rel="noopener noreferrer" className="group">
             <Instagram className="mx-auto h-6 w-6 text-accent" />
