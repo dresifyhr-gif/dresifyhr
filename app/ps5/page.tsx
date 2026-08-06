@@ -71,7 +71,13 @@ export default async function Ps5Page() {
               height={1024}
               priority
               sizes="(max-width: 768px) 100vw, 600px"
-              className="h-auto w-full rounded-[16px]"
+              className="ps5-drift h-auto w-full rounded-[16px]"
+            />
+            {/* Pulsirajući lime neon glow preko slike (screen blend → dodaje svjetlo, ne skriva PS5) */}
+            <div
+              aria-hidden
+              className="ps5-neon pointer-events-none absolute inset-0 rounded-[16px]"
+              style={{ background: "radial-gradient(circle at 55% 42%, rgba(232,255,60,0.5), transparent 55%)" }}
             />
           </div>
         </div>

@@ -391,3 +391,18 @@ body::before {
   border-radius: 12px;
   background: rgba(118, 118, 128, 0.06);
 }
+
+/* ── PS5 nagradna igra: suptilne "žive" animacije (jeftine — samo opacity/transform) ── */
+@keyframes ps5-neon-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.96); }
+  50%      { opacity: 0.75; transform: scale(1.05); }
+}
+@keyframes ps5-drift {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-6px) scale(1.012); }
+}
+.ps5-neon { animation: ps5-neon-pulse 3.4s ease-in-out infinite; mix-blend-mode: screen; }
+.ps5-drift { animation: ps5-drift 7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .ps5-neon, .ps5-drift { animation: none; }
+}
