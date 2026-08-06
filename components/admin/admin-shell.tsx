@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Ticket, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Ticket, Sun, Moon, Gift } from "lucide-react";
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
 import { CommandPalette } from "@/components/admin/command-palette";
@@ -14,7 +14,8 @@ const NAV = [
   { href: "/admin/proizvodi", label: "Proizvodi", hint: "Cijena i zaliha", icon: Shirt },
   { href: "/admin/kupci", label: "Kupci", hint: "Tko kupuje", icon: Users },
   { href: "/admin/kodovi", label: "Kodovi", hint: "Popusti", icon: Ticket },
-  { href: "/admin/analitika", label: "Analitika", hint: "Brojke i trendovi", icon: BarChart3 }
+  { href: "/admin/analitika", label: "Analitika", hint: "Brojke i trendovi", icon: BarChart3 },
+  { href: "/admin/nagradna-igra", label: "Nagradna igra", hint: "PS5 prijave", icon: Gift }
 ];
 
 function isActive(pathname: string, href: string) {

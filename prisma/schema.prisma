@@ -317,3 +317,15 @@ model WheelSpin {
 
   @@index([phoneKey])
 }
+
+// Prijava u nagradnu igru (PS5 giveaway) — kupac upiše svoj IG handle na /ps5.
+// handle je normaliziran (bez @, lowercase) i unique da nema duplih prijava.
+model GiveawayEntry {
+  id        String   @id @default(cuid())
+  handle    String   @unique // IG handle bez @, lowercase
+  name      String? // ime ako je prijavljen (Clerk) ili upisano
+  userId    String? // Clerk userId ako je prijavljen (za spoj s narudžbama)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

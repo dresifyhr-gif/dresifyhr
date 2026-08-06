@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Gift, UserPlus, ShoppingCart, Send, Gamepad2, Calendar, Trophy, Shield, Instagram, Heart } from "lucide-react";
 
 import { Ps5Counter } from "@/components/site/ps5-counter";
+import { GiveawayEntryForm } from "@/components/site/giveaway-entry-form";
 import { getFollowerCount } from "@/lib/ig-stats";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata } from "@/lib/seo";
@@ -82,6 +83,12 @@ export default async function Ps5Page() {
           <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">Put do 10.000</div>
           <div className="mt-6 flex justify-center">
             <Ps5Counter current={followers} goal={GOAL} />
+          </div>
+
+          <div className="mx-auto mt-10 max-w-lg">
+            <div className="text-lg font-bold uppercase tracking-tight text-white">Prijavi se u nagradnu igru</div>
+            <p className="mb-4 mt-1 text-sm text-white/55">Zapratio si nas? Upiši svoj Instagram da uđeš u bubanj.</p>
+            <GiveawayEntryForm />
           </div>
         </div>
       </section>
