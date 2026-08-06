@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Animirani brojač pratitelja + kružni progress do cilja (10.000). Broj dolazi sa
-// servera (live Behold); ovdje se samo animira 0 → current kad uđe u ekran.
+// Premium animirani prsten pratitelja: broj broji 0 → current, luk se puni s glow-om,
+// svijetleća točka klizi po vrhu napretka, pulsirajući sjaj iza. Sve GPU-jeftino.
 export function Ps5Counter({ current, goal = 10000 }: { current: number; goal?: number }) {
   const [value, setValue] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -16,13 +16,12 @@ export function Ps5Counter({ current, goal = 10000 }: { current: number; goal?: 
       (entries) => {
         if (entries[0]?.isIntersecting && !started.current) {
           started.current = true;
-          const dur = 1600;
+          const dur = 1800;
           let t0 = 0;
           const step = (ts: number) => {
             if (!t0) t0 = ts;
             const p = Math.min((ts - t0) / dur, 1);
-            const e = 1 - Math.pow(1 - p, 3);
-            setValue(Math.round(current * e));
+            setValue(Math.round(current * (1 - Math.pow(1 - p, 3))));
             if (p < 1) requestAnimationFrame(step);
           };
           requestAnimationFrame(step);
@@ -38,32 +37,60 @@ export function Ps5Counter({ current, goal = 10000 }: { current: number; goal?: 
   const remaining = Math.max(goal - current, 0);
   const R = 82;
   const CIRC = 2 * Math.PI * R;
+  // Kut vrha napretka (počinje na vrhu, ide u smjeru kazaljke) → svijetleća točka.
+  const ang = (-90 + pct * 360) * (Math.PI / 180);
+  const dotX = 98 + R * Math.cos(ang);
+  const dotY = 98 + R * Math.sin(ang);
 
   return (
-    <div ref={ref} className="flex flex-col items-center">
-      <div className="relative h-[196px] w-[196px]">
-        <svg width="196" height="196" viewBox="0 0 196 196" className="-rotate-90">
-          <circle cx="98" cy="98" r={R} fill="none" stroke="#1e1e1e" strokeWidth="12" />
+    <div ref={ref} className="relative flex flex-col items-center">
+      {/* Pulsirajući sjaj iza prstena */}
+      <div
+        aria-hidden
+        className="ps5-neon pointer-events-none absolute left-1/2 top-[98px] h-[240px] w-[240px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(232,255,60,0.5), transparent 65%)" }}
+      />
+
+      <div className="relative h-[220px] w-[220px]">
+        <svg width="220" height="220" viewBox="0 0 196 196" className="h-full w-full">
+          <defs>
+            <linearGradient id="ps5arc" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#c9e800" />
+              <stop offset="100%" stopColor="#e8ff3c" />
+            </linearGradient>
+          </defs>
+          <circle cx="98" cy="98" r={R} fill="none" stroke="#1c1c1c" strokeWidth="10" transform="rotate(-90 98 98)" />
           <circle
             cx="98"
             cy="98"
             r={R}
             fill="none"
-            stroke="#e8ff3c"
-            strokeWidth="12"
+            stroke="url(#ps5arc)"
+            strokeWidth="10"
             strokeLinecap="round"
             strokeDasharray={CIRC}
             strokeDashoffset={CIRC - CIRC * pct}
-            style={{ transition: "stroke-dashoffset 120ms linear" }}
+            transform="rotate(-90 98 98)"
+            style={{ filter: "drop-shadow(0 0 6px rgba(232,255,60,0.85))", transition: "stroke-dashoffset 120ms linear" }}
           />
+          {pct > 0.02 && (
+            <circle cx={dotX} cy={dotY} r="6.5" fill="#f4ff8a" style={{ filter: "drop-shadow(0 0 7px rgba(232,255,60,1))" }} />
+          )}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-4xl font-bold leading-none text-white">{value.toLocaleString("hr-HR")}</div>
-          <div className="mt-1 text-[11px] text-white/50">/ {goal.toLocaleString("hr-HR")} pratitelja</div>
+          <div
+            className="text-[40px] font-black leading-none tracking-tight text-white tabular-nums"
+            style={{ textShadow: "0 0 22px rgba(232,255,60,0.35)" }}
+          >
+            {value.toLocaleString("hr-HR")}
+          </div>
+          <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">pratitelja</div>
+          <div className="text-[10px] text-white/35">cilj {goal.toLocaleString("hr-HR")}</div>
         </div>
       </div>
-      <div className="mt-3 text-sm font-semibold text-accent">
-        fali još {remaining.toLocaleString("hr-HR")} pratitelja
+
+      <div className="mt-4 rounded-full border border-accent/30 bg-accent/[0.08] px-4 py-1.5 text-sm font-bold text-accent">
+        fali još {remaining.toLocaleString("hr-HR")} do PS5 izvlačenja
       </div>
     </div>
   );
