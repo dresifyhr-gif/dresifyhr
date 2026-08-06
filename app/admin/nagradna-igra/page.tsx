@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/admin-shell";
@@ -16,6 +17,12 @@ export default async function GiveawayAdminPage() {
 
   return (
     <AdminShell title="Nagradna igra — prijave" subtitle="Tko se prijavio (upisao Instagram) za PS5 giveaway">
+      <div className="mb-4">
+        <Link href="/admin/izvlacenje" className="inline-flex items-center gap-2 rounded-[12px] bg-accent px-5 py-2.5 text-sm font-bold text-black transition hover:brightness-95">
+          🎰 Izvuci pobjednika
+        </Link>
+      </div>
+
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div className="a-card p-4">
           <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--a-text-3)]">Ukupno prijava</div>

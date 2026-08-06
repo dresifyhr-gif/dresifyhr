@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Instagram, Check } from "lucide-react";
 
-export function GiveawayEntryForm() {
-  const [handle, setHandle] = useState("");
+export function GiveawayEntryForm({ initialHandle = "" }: { initialHandle?: string }) {
+  const [handle, setHandle] = useState(initialHandle);
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [msg, setMsg] = useState("");
 

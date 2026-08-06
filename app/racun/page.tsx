@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getOrderReference } from "@/lib/orders";
 import { getKlubProgress } from "@/lib/klub";
+import { GiveawayEntryForm } from "@/components/site/giveaway-entry-form";
 import { deliverNewsletterSignup } from "@/lib/newsletter";
 import { phoneKey } from "@/lib/utils";
 import { AddressManager } from "@/components/site/address-manager";
@@ -85,6 +86,7 @@ export default async function AccountPage() {
   const pk = phoneKey(orderPhone);
 
   const wishlist = await prisma.wishlistItem.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } });
+  const giveawayEntry = await prisma.giveawayEntry.findFirst({ where: { userId: user.id } });
 
   const [klub, personalCodes] = await Promise.all([
     getKlubProgress(orderPhone),
@@ -287,6 +289,17 @@ export default async function AccountPage() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* PS5 nagradna igra */}
+          <div id="nagradna-igra" className="rounded-2xl border border-accent/30 bg-accent/[0.05] p-4 sm:p-5">
+            <div className="mb-1 font-heading text-base uppercase tracking-wide text-accent sm:text-lg">🎁 PS5 nagradna igra</div>
+            <p className="mb-3 text-[13px] text-white/55">
+              {giveawayEntry
+                ? <>U igri si kao <b className="text-white">@{giveawayEntry.handle}</b>. Svaka kupnja ti daje +5 listića i veće šanse.</>
+                : <>Zaprati <b className="text-white">@dresify.hr</b> i upiši svoj Instagram — tvoje kupnje se onda automatski broje za osvajanje PS5 + FC 27.</>}
+            </p>
+            <GiveawayEntryForm initialHandle={giveawayEntry?.handle ?? ""} />
           </div>
 
           {/* Adrese */}
