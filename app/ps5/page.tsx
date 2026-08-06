@@ -196,7 +196,10 @@ export default async function Ps5Page() {
               </div>
             ))}
           </div>
-          <p className="mt-5 text-center text-xs text-white/35">
+          <div className="mt-5 rounded-[12px] border border-white/8 bg-white/[0.03] px-4 py-3 text-center text-[13px] text-white/55">
+            <b className="text-white/80">Važno:</b> pobjednik <b className="text-white/80">mora pratiti @dresify.hr</b> u trenutku izvlačenja. Ako izvučeni ne prati, dobitak je nevažeći i odmah izvlačimo novog pobjednika.
+          </div>
+          <p className="mt-3 text-center text-xs text-white/35">
             Nagradna igra nije sponzorirana ni povezana s Instagramom. Kupnja nije obavezna za sudjelovanje.
           </p>
         </div>
