@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
 import { prisma } from "@/lib/prisma";
+import { phoneKey } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,15 +23,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "Upiši ispravan Instagram korisnički račun." }, { status: 400 });
   }
 
-  // Ako je prijavljen (Clerk) spoji userId i ime — kasnije se kupnje spajaju po userId.
+  // Ako je prijavljen (Clerk): spoji userId, ime, EMAIL i TELEFON — po njima se spajaju
+  // i STARE kupnje (narudžbe napravljene prije registracije, gost) → vrijede bodovi.
   let userId: string | null = null;
   let name: string | null = typeof body?.name === "string" && body.name.trim() ? body.name.trim() : null;
+  let email: string | null = null;
+  let pk: string | null = null;
   try {
     const a = await auth();
     userId = a.userId ?? null;
-    if (userId && !name) {
+    if (userId) {
       const u = await currentUser();
-      name = [u?.firstName, u?.lastName].filter(Boolean).join(" ") || null;
+      if (!name) name = [u?.firstName, u?.lastName].filter(Boolean).join(" ") || null;
+      email = (u?.primaryEmailAddress?.emailAddress || "").toLowerCase() || null;
+      pk = phoneKey(u?.primaryPhoneNumber?.phoneNumber || "") || null;
     }
   } catch {
     /* gost — bez userId */
@@ -39,8 +45,8 @@ export async function POST(request: Request) {
   try {
     await prisma.giveawayEntry.upsert({
       where: { handle },
-      update: { ...(userId ? { userId } : {}), ...(name ? { name } : {}) },
-      create: { handle, userId, name }
+      update: { ...(userId ? { userId } : {}), ...(name ? { name } : {}), ...(email ? { email } : {}), ...(pk ? { phoneKey: pk } : {}) },
+      create: { handle, userId, name, email, phoneKey: pk }
     });
   } catch {
     return NextResponse.json({ ok: false, message: "Greška. Pokušaj ponovno." }, { status: 500 });

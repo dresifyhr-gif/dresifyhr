@@ -1,6 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
+import { phoneKey } from "@/lib/utils";
 
 // Bodovi: svaka prijava = 1 osnovni bod. Za svaku kupnju (narudžbu) +5 bodova.
 // Kupnje se spajaju na prijavu po Clerk userId (registrirani) ILI po IG handleu
@@ -18,14 +19,22 @@ export function normalizeIgHandle(raw: unknown): string | null {
 
 // Auto-prijava u nagradnu igru iz narudžbe (IG upisan na checkoutu). Best-effort,
 // nikad ne ruši narudžbu. Upsert po handleu → nema duplih prijava.
-export async function autoEnterGiveaway(handle: unknown, name: string | null, userId: string | null): Promise<void> {
+export async function autoEnterGiveaway(
+  handle: unknown,
+  name: string | null,
+  userId: string | null,
+  email?: string | null,
+  phone?: string | null
+): Promise<void> {
   const h = normalizeIgHandle(handle);
   if (!h) return;
+  const em = (email || "").toLowerCase() || null;
+  const pk = phoneKey(phone || "") || null;
   await prisma.giveawayEntry
     .upsert({
       where: { handle: h },
-      update: { ...(userId ? { userId } : {}), ...(name ? { name } : {}) },
-      create: { handle: h, userId, name }
+      update: { ...(userId ? { userId } : {}), ...(name ? { name } : {}), ...(em ? { email: em } : {}), ...(pk ? { phoneKey: pk } : {}) },
+      create: { handle: h, userId, name, email: em, phoneKey: pk }
     })
     .catch(() => null);
 }
@@ -35,25 +44,30 @@ export type DrawEntry = { handle: string; name: string | null; registered: boole
 export async function getDrawPool(): Promise<{ entries: DrawEntry[]; totalTickets: number; participants: number }> {
   const rows = await prisma.giveawayEntry.findMany({ orderBy: { createdAt: "asc" } });
 
-  // Sve narudžbe koje mogu nositi bodove (imaju userId ili igHandle), osim otkazanih.
+  // SVE narudžbe (osim otkazanih) — spajamo ih na prijavu po bilo kojem ključu:
+  // userId (registriran), IG handle (checkout), email ili telefon (STARE kupnje kupca
+  // koji se sad registrirao/prijavio). Tako ranije kupnje vrijede bodove.
   const orders = await prisma.order.findMany({
-    where: { status: { notIn: ["cancelled"] }, OR: [{ userId: { not: null } }, { igHandle: { not: null } }] },
-    select: { userId: true, igHandle: true }
+    where: { status: { notIn: ["cancelled"] } },
+    select: { id: true, userId: true, igHandle: true, email: true, phone: true }
   });
-  const ordersByUser = new Map<string, number>();
-  const ordersByHandle = new Map<string, number>();
-  for (const o of orders) {
-    if (o.userId) ordersByUser.set(o.userId, (ordersByUser.get(o.userId) ?? 0) + 1);
-    const h = normalizeIgHandle(o.igHandle);
-    if (h) ordersByHandle.set(h, (ordersByHandle.get(h) ?? 0) + 1);
-  }
+  const norm = orders.map((o) => ({
+    id: o.id,
+    userId: o.userId,
+    handle: normalizeIgHandle(o.igHandle),
+    email: (o.email || "").toLowerCase() || null,
+    pk: phoneKey(o.phone || "") || null
+  }));
 
   const entries: DrawEntry[] = rows.map((r) => {
-    // Kupnje po userId ILI po handleu; uzmi veći broj da se ista narudžba ne broji dvaput
-    // (registriran kupac koji je i upisao IG na checkoutu → obje mape sadrže tu narudžbu).
-    const byUser = r.userId ? ordersByUser.get(r.userId) ?? 0 : 0;
-    const byHandle = ordersByHandle.get(r.handle) ?? 0;
-    const orderCount = Math.max(byUser, byHandle);
+    // Broj RAZLIČITIH narudžbi koje se poklapaju s ovom prijavom (bilo kojim ključem).
+    const orderCount = norm.filter(
+      (o) =>
+        (r.userId && o.userId === r.userId) ||
+        (o.handle && o.handle === r.handle) ||
+        (r.email && o.email === r.email) ||
+        (r.phoneKey && o.pk === r.phoneKey)
+    ).length;
     return { handle: r.handle, name: r.name, registered: !!r.userId, orders: orderCount, tickets: 1 + POINTS_PER_ORDER * orderCount };
   });
 

@@ -327,6 +327,8 @@ model GiveawayEntry {
   handle    String   @unique // IG handle bez @, lowercase
   name      String? // ime ako je prijavljen (Clerk) ili upisano
   userId    String? // Clerk userId ako je prijavljen (za spoj s narudžbama)
+  email     String? // email prijavljenog (za spoj STARIH kupnji po emailu)
+  phoneKey  String? // normalizirani telefon (za spoj STARIH kupnji po broju)
   createdAt DateTime @default(now())
 
   @@index([createdAt])

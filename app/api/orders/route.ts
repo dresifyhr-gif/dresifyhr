@@ -124,7 +124,7 @@ export async function POST(request: Request) {
     await Promise.allSettled([
       logOrderToSheet(payload!),
       saveOrderToDb(payload!),
-      autoEnterGiveaway(payload!.igHandle, payload!.name, payload!.userId ?? null)
+      autoEnterGiveaway(payload!.igHandle, payload!.name, payload!.userId ?? null, payload!.email, payload!.phone)
     ]);
 
     return NextResponse.json({
