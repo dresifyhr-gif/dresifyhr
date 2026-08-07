@@ -55,6 +55,7 @@ export async function saveOrderToDb(payload: OrderPayload) {
         fulfillment: payload.fulfillment,
         payment: payload.payment,
         userId: payload.userId || null,
+        igHandle: payload.igHandle || null,
         subtotal: payload.subtotal,
         shipping: payload.shipping,
         discount: payload.discount ?? 0,

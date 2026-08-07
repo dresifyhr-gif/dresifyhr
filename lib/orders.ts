@@ -31,6 +31,7 @@ export type OrderPayload = {
   discount?: number;
   promoCode?: string;
   userId?: string | null; // Clerk user id ako je kupac prijavljen (postavlja server)
+  igHandle?: string | null; // Instagram handle upisan na checkoutu (PS5 nagradna igra)
   itemCount: number;
   createdAt: string;
   items?: OrderLineInput[];
@@ -113,6 +114,7 @@ export function parseOrderPayload(body: unknown): { payload?: OrderPayload; erro
     total: parseMoney(source.total),
     discount: parseMoney(source.discount),
     promoCode: normalizeText(source.promoCode),
+    igHandle: normalizeText(source.igHandle) || null,
     itemCount: Math.max(0, Math.trunc(parseMoney(source.itemCount))),
     createdAt: normalizeText(source.createdAt) || new Date().toISOString(),
     items: (Array.isArray(source.items) ? source.items : []).map((raw) => {

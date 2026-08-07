@@ -9,6 +9,7 @@ import { logOrderToSheet } from "@/lib/sheets";
 import { saveOrderToDb } from "@/lib/order-db";
 import { getProductBySlug } from "@/lib/data/product-overrides";
 import { getJerseyBySlug, getJerseySizeOptions } from "@/lib/data/jerseys";
+import { normalizeIgHandle, autoEnterGiveaway } from "@/lib/giveaway";
 
 export const runtime = "nodejs";
 
@@ -76,6 +77,7 @@ export async function POST(request: Request) {
     payload!.promoCode = promoCode;
     payload!.total = Math.max(0, goods - discount) + shipping;
     payload!.userId = signedIn ? userId : null;
+    payload!.igHandle = normalizeIgHandle(payload!.igHandle); // PS5 nagradna igra — auto-prijava
 
     // Odbij narudžbu za rasprodanu veličinu/segment PRIJE slanja obavijesti —
     // da OOS narudžba nikad ne uđe (npr. kupac imao staru stranicu otvorenu).
@@ -119,7 +121,11 @@ export async function POST(request: Request) {
     }
 
     // Log to Google Sheet + mirror to DB (both best-effort — never block/fail the order)
-    await Promise.allSettled([logOrderToSheet(payload!), saveOrderToDb(payload!)]);
+    await Promise.allSettled([
+      logOrderToSheet(payload!),
+      saveOrderToDb(payload!),
+      autoEnterGiveaway(payload!.igHandle, payload!.name, payload!.userId ?? null)
+    ]);
 
     return NextResponse.json({
       ok: true,

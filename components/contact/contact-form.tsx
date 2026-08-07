@@ -37,6 +37,7 @@ type FormState = {
   postalCode: string;
   manualDetails: string;
   note: string;
+  igHandle: string;
 };
 
 
@@ -101,7 +102,8 @@ export function ContactForm() {
     city: "",
     postalCode: "",
     manualDetails: "",
-    note: ""
+    note: "",
+    igHandle: ""
   });
 
   const [loading, setLoading] = useState(false);
@@ -241,6 +243,7 @@ export function ContactForm() {
         fulfillment: form.fulfillment,
         payment: "Pouzeće",
         note: [hasGift ? "🎁 POKLON IZ KVIZA" : "", form.note].filter(Boolean).join(" · ") || undefined,
+        igHandle: form.igHandle || undefined,
         subtotal: orderSubtotal,
         shipping,
         total,
@@ -467,6 +470,27 @@ export function ContactForm() {
               onChange={(e) => set("note", e.target.value)}
               className={inputClass}
             />
+          </div>
+
+          {/* PS5 nagradna igra — neobavezno IG polje; upisom kupac automatski ulazi u igru */}
+          <div className="mt-5 rounded-[10px] border border-accent/30 bg-accent/[0.05] p-4">
+            <label htmlFor="igHandle" className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-accent">
+              🎁 Uđi u PS5 nagradnu igru (neobavezno)
+            </label>
+            <input
+              id="igHandle"
+              type="text"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder="tvoj_instagram"
+              value={form.igHandle}
+              onChange={(e) => set("igHandle", e.target.value)}
+              className={inputClass}
+            />
+            <p className="mt-1.5 text-[11px] text-white/40">
+              Zaprati <b className="text-white/70">@dresify.hr</b> i upiši svoj Instagram — ova narudžba ti odmah donosi <b className="text-accent">+5 bodova</b> za osvajanje PlayStationa 5.
+            </p>
           </div>
         </div>
 

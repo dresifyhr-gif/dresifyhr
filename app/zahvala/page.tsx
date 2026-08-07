@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Instagram } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
+import { GiveawayEntryForm } from "@/components/site/giveaway-entry-form";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
@@ -62,6 +63,26 @@ export default async function ThankYouPage() {
             {t.thankYouPage.cta}
             <ArrowRight className="h-4 w-4" />
           </Link>
+        </div>
+
+        {/* PS5 nagradna igra — zaprati + upiši Instagram da uđeš (kupnja već donosi +5 bodova) */}
+        <div className="mt-6 rounded-[16px] border border-accent/30 bg-accent/[0.05] p-6 text-center sm:p-8">
+          <div className="text-sm font-bold uppercase tracking-[0.14em] text-accent">🎁 Osvoji PS5 + EA SPORTS FC 27</div>
+          <p className="mx-auto mt-2 max-w-xl text-sm text-white/60">
+            Tvoja narudžba ti nosi <b className="text-accent">+5 bodova</b>! Uđi u nagradnu igru u 2 koraka:
+          </p>
+          <div className="mx-auto mt-5 flex max-w-md flex-col gap-3">
+            <a
+              href="https://instagram.com/dresify.hr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-[12px] bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition hover:brightness-95"
+            >
+              <Instagram className="h-5 w-5" /> 1. Zaprati @dresify.hr
+            </a>
+            <div className="text-xs font-semibold uppercase tracking-widest text-white/40">2. Upiši svoj Instagram</div>
+            <GiveawayEntryForm />
+          </div>
         </div>
       </div>
     </section>
