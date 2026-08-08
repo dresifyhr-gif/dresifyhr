@@ -17,10 +17,13 @@ export default async function GiveawayAdminPage() {
 
   return (
     <AdminShell title="Nagradna igra — prijave" subtitle="Tko se prijavio (upisao Instagram) za PS5 giveaway">
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap gap-2">
         <Link href="/admin/izvlacenje" className="inline-flex items-center gap-2 rounded-[12px] bg-accent px-5 py-2.5 text-sm font-bold text-black transition hover:brightness-95">
           🎰 Izvuci pobjednika
         </Link>
+        <a href="/api/admin/giveaway/emails/" className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-5 py-2.5 text-sm font-semibold text-[var(--a-text)] transition hover:bg-[var(--a-card)]">
+          📩 Izvezi emailove kupaca (CSV)
+        </a>
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
