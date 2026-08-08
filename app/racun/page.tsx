@@ -87,6 +87,11 @@ export default async function AccountPage() {
 
   const wishlist = await prisma.wishlistItem.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } });
   const giveawayEntry = await prisma.giveawayEntry.findFirst({ where: { userId: user.id } });
+  // Bodovi za PS5 nagradnu igru: 1 osnovni (kad je prijavljen) + 5 po svakoj kupnji.
+  // Kupnje su narudžbe ovog kupca (spojene po emailu/telefonu), bez otkazanih.
+  const giveawayOrders = orders.filter((o) => o.status !== "cancelled").length;
+  const giveawayPoints = (giveawayEntry ? 1 : 0) + giveawayOrders * 5;
+  const giveawayPotential = 1 + giveawayOrders * 5;
 
   const [klub, personalCodes] = await Promise.all([
     getKlubProgress(orderPhone),
@@ -293,11 +298,27 @@ export default async function AccountPage() {
 
           {/* PS5 nagradna igra */}
           <div id="nagradna-igra" className="rounded-2xl border border-accent/30 bg-accent/[0.05] p-4 sm:p-5">
-            <div className="mb-1 font-heading text-base uppercase tracking-wide text-accent sm:text-lg">🎁 PS5 nagradna igra</div>
+            <div className="mb-3 font-heading text-base uppercase tracking-wide text-accent sm:text-lg">🎁 PS5 nagradna igra</div>
+
+            {/* Bodovi */}
+            <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-accent/25 bg-black/20 px-4 py-3">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-white/45">
+                  {giveawayEntry ? "Tvoji bodovi" : "Bodovi koji te čekaju"}
+                </div>
+                <div className="text-[11px] text-white/40">
+                  {giveawayOrders > 0 ? `${giveawayOrders} kupnji × 5${giveawayEntry ? " + 1 prijava" : ""}` : "upiši Instagram da aktiviraš"}
+                </div>
+              </div>
+              <div className="text-3xl font-black text-accent">
+                🎮 {giveawayEntry ? giveawayPoints : giveawayPotential}
+              </div>
+            </div>
+
             <p className="mb-3 text-[13px] text-white/55">
               {giveawayEntry
-                ? <>U igri si kao <b className="text-white">@{giveawayEntry.handle}</b>. Svaka kupnja ti daje +5 bodova i veće šanse.</>
-                : <>Zaprati <b className="text-white">@dresify.hr</b> i upiši svoj Instagram — tvoje kupnje se onda automatski broje za osvajanje PS5 + FC 27.</>}
+                ? <>U igri si kao <b className="text-white">@{giveawayEntry.handle}</b>. Svaka nova kupnja ti daje <b className="text-accent">+5 bodova</b> i veće šanse za PS5.</>
+                : <>Zaprati <b className="text-white">@dresify.hr</b> i upiši svoj Instagram — <b className="text-accent">{giveawayPotential} bodova</b> te odmah čeka, a svaka nova kupnja donosi +5.</>}
             </p>
             <GiveawayEntryForm initialHandle={giveawayEntry?.handle ?? ""} />
           </div>
