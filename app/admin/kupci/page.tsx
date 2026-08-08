@@ -32,6 +32,15 @@ export default async function CustomersPage() {
   return (
     <AdminShell title="Kupci" subtitle="Najbolji kupci i oni koje treba vratiti">
       <div className="mb-5">
+        <a
+          href="/api/admin/giveaway/emails/"
+          className="inline-flex items-center gap-2 rounded-[12px] bg-accent px-5 py-2.5 text-sm font-bold text-black transition hover:brightness-95"
+        >
+          📩 Izvezi emailove kupaca (CSV)
+        </a>
+        <p className="mt-1.5 text-xs text-[var(--a-text-3)]">Jedinstveni emailovi kupaca (poslano/dostavljeno) — za Brevo kampanju.</p>
+      </div>
+      <div className="mb-5">
         <TestimonialsManager />
       </div>
       <div className="grid gap-5 lg:grid-cols-2">
