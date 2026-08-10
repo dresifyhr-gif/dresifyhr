@@ -2,9 +2,9 @@ import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { SeoLinkGrid } from "@/components/site/seo-link-grid";
 import {
-  getFeaturedCategoryCollections,
-  getFeaturedClubCollections,
-  getFeaturedPlayerCollections
+  getJerseyCategoryCollections,
+  getJerseyClubCollections,
+  getJerseyPlayerCollections
 } from "@/lib/data/seo-collections";
 import { jerseys } from "@/lib/data/jerseys";
 import { getCatalogProducts } from "@/lib/data/product-overrides";
@@ -64,17 +64,17 @@ export default async function JerseysPage() {
           <SeoLinkGrid
             title={t.catalog.byCategory}
             description={t.catalog.byCategoryDesc}
-            collections={await getFeaturedCategoryCollections()}
+            collections={await getJerseyCategoryCollections()}
           />
           <SeoLinkGrid
             title={t.catalog.topClubs}
             description={t.catalog.topClubsDesc}
-            collections={await getFeaturedClubCollections()}
+            collections={await getJerseyClubCollections()}
           />
           <SeoLinkGrid
             title={t.catalog.popularPlayers}
             description={t.catalog.popularPlayersDesc}
-            collections={await getFeaturedPlayerCollections()}
+            collections={await getJerseyPlayerCollections()}
           />
         </div>
       </div>
