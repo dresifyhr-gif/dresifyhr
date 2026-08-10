@@ -85,6 +85,12 @@ function productImages(product: Jersey): string[] {
   return abs.length ? abs : [absoluteUrl(DEFAULT_OG_IMAGE)];
 }
 
+// Glavna (prva) slika proizvoda, apsolutni URL — za og:image na product stranici
+// da social share i Google vide PRAVU sliku proizvoda, a ne generični banner.
+export function productMainImage(product: Jersey): string {
+  return productImages(product)[0];
+}
+
 export function buildProductSchema(product: Jersey, stock: number) {
   return {
     "@context": "https://schema.org",

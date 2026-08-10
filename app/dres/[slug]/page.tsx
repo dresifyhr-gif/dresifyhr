@@ -14,7 +14,7 @@ import {
 } from "@/lib/data/seo-collections";
 import { getJerseyBySlug, getJerseyDescription, getJerseyStock, getRelatedJerseys, jerseys } from "@/lib/data/jerseys";
 import { getProductBySlug } from "@/lib/data/product-overrides";
-import { buildBreadcrumbSchema, buildMetadata, buildProductSchema } from "@/lib/seo";
+import { buildBreadcrumbSchema, buildMetadata, buildProductSchema, productMainImage } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 import { repairText } from "@/lib/utils";
 
@@ -54,6 +54,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     description: isStreetwear
       ? `${klub} ${igrac} streetwear komplet za ${product.price ?? 50}€. Besplatna dostava po cijeloj Hrvatskoj, plaćanje pouzećem.`
       : `${klub} ${igrac} nogometni dres za 20€. Dostava po cijeloj Hrvatskoj za 2-5 dana.`,
+    image: productMainImage(product), // og:image = prava slika proizvoda (ne generični banner)
     path: `/dres/${product.slug}`,
     keywords: isStreetwear
       ? [`${klub} streetwear`.toLowerCase(), `${igrac} komplet`.toLowerCase(), "streetwear hrvatska"]
