@@ -1,5 +1,6 @@
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { CatalogBrowser } from "@/components/site/catalog-browser";
+import { CatalogFaq } from "@/components/site/catalog-faq";
 import { SeoLinkGrid } from "@/components/site/seo-link-grid";
 import {
   getJerseyCategoryCollections,
@@ -29,7 +30,7 @@ export const metadata = buildMetadata({
 });
 
 export default async function JerseysPage() {
-  const { t } = await getServerTranslations();
+  const { t, locale } = await getServerTranslations();
 
   const dresovi = (await getCatalogProducts(jerseys)).filter((j) => j.liga !== "Komplet");
 
@@ -77,6 +78,8 @@ export default async function JerseysPage() {
             collections={await getJerseyPlayerCollections()}
           />
         </div>
+
+        <CatalogFaq locale={locale} />
       </div>
     </section>
   );
