@@ -287,6 +287,10 @@ export function ContactForm() {
       clearCart();
       try { localStorage.removeItem(GIFT_STORAGE_KEY); } catch {}
       try { localStorage.removeItem(PROMO_STORAGE_KEY); } catch {}
+      // Podaci za Google Customer Reviews opt-in na /zahvala (email NE ide u URL).
+      try {
+        sessionStorage.setItem("dresify_gcr", JSON.stringify({ orderId: payload.createdAt, email: form.email }));
+      } catch {}
       router.push("/zahvala");
     } catch {
       setError(t.contactForm.errorNetwork);

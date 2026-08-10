@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2, Instagram } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { GiveawayEntryForm } from "@/components/site/giveaway-entry-form";
+import { GoogleReviewsOptIn } from "@/components/site/google-reviews-optin";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
@@ -85,6 +86,7 @@ export default async function ThankYouPage() {
           </div>
         </div>
       </div>
+      <GoogleReviewsOptIn />
     </section>
   );
 }
