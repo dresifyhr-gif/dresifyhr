@@ -1,4 +1,5 @@
 import { jerseys, isNationalTeam } from "@/lib/data/jerseys";
+import { getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { JERSEY_PRICE_EUR, SITE_NAME, SITE_URL } from "@/lib/site";
 import { repairText } from "@/lib/utils";
@@ -6,8 +7,10 @@ import { repairText } from "@/lib/utils";
 // Google Merchant Center product feed (RSS 2.0 / Google Shopping XML).
 // Add in Merchant Center: Products → Feeds → scheduled fetch:
 // https://dresifyshop.com/api/google-feed
+// Uključuje SVE proizvode (statični katalog + custom dresovi + streetwear iz
+// admina) da katalog nije nepotpun — zato je dinamičan (čita bazu).
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 function xmlEscape(value: string) {
   return value
@@ -18,14 +21,17 @@ function xmlEscape(value: string) {
     .replace(/'/g, "&apos;");
 }
 
-export function GET() {
-  const items = jerseys
+export async function GET() {
+  const [catalog, streetwear] = await Promise.all([getCatalogProducts(jerseys), getStreetwearProducts()]);
+  const allProducts = [...catalog, ...streetwear];
+  const items = allProducts
     .map((product) => {
       const klub = repairText(product.klub);
       const igrac = repairText(product.igrac);
       const liga = repairText(product.liga);
       const price = product.price ?? JERSEY_PRICE_EUR;
-      const image = getJerseyGallery(product.slug)[0]?.src ?? "";
+      const rawImage = product.images?.[0]?.src ?? getJerseyGallery(product.slug)[0]?.src ?? "";
+      const image = rawImage ? (rawImage.startsWith("http") ? rawImage : `${SITE_URL}${rawImage}`) : "";
       const isKomplet = product.liga === "Komplet";
       const adultRange = isNationalTeam(product) ? "S–XXL" : "S–XL";
 
@@ -39,7 +45,7 @@ export function GET() {
       <g:title>${xmlEscape(title)}</g:title>
       <g:description>${xmlEscape(description)}</g:description>
       <g:link>${SITE_URL}/dres/${xmlEscape(product.slug)}/</g:link>
-      <g:image_link>${image ? `${SITE_URL}${xmlEscape(image)}` : ""}</g:image_link>
+      <g:image_link>${xmlEscape(image)}</g:image_link>
       <g:availability>in_stock</g:availability>
       <g:condition>new</g:condition>
       <g:price>${price.toFixed(2)} EUR</g:price>

@@ -1,4 +1,5 @@
 import { jerseys, isNationalTeam } from "@/lib/data/jerseys";
+import { getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { JERSEY_PRICE_EUR, SITE_URL } from "@/lib/site";
 import { repairText } from "@/lib/utils";
@@ -6,8 +7,10 @@ import { repairText } from "@/lib/utils";
 // Meta (Facebook/Instagram) catalog data feed — CSV.
 // Connect in Commerce Manager: Data sources → Add items → Use a data feed →
 // scheduled URL: https://dresifyshop.com/api/facebook-feed
+// Uključuje SVE proizvode (statični + custom + streetwear) da pixel eventi ne
+// budu "unmatched" (id = slug, isto što pixel šalje). Dinamičan (čita bazu).
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 const HEADER = [
   "id",
@@ -26,13 +29,16 @@ function csvCell(value: string) {
   return `"${value.replace(/"/g, '""')}"`;
 }
 
-export function GET() {
-  const rows = jerseys.map((product) => {
+export async function GET() {
+  const [catalog, streetwear] = await Promise.all([getCatalogProducts(jerseys), getStreetwearProducts()]);
+  const allProducts = [...catalog, ...streetwear];
+  const rows = allProducts.map((product) => {
     const klub = repairText(product.klub);
     const igrac = repairText(product.igrac);
     const liga = repairText(product.liga);
     const price = product.price ?? JERSEY_PRICE_EUR;
-    const image = getJerseyGallery(product.slug)[0]?.src ?? "";
+    const rawImage = product.images?.[0]?.src ?? getJerseyGallery(product.slug)[0]?.src ?? "";
+    const image = rawImage ? (rawImage.startsWith("http") ? rawImage : `${SITE_URL}${rawImage}`) : "";
 
     const isKomplet = product.liga === "Komplet";
     const adultRange = isNationalTeam(product) ? "S–XXL" : "S–XL";
@@ -49,7 +55,7 @@ export function GET() {
       "new",
       `${price.toFixed(2)} EUR`,
       `${SITE_URL}/dres/${product.slug}/`,
-      image ? `${SITE_URL}${image}` : "",
+      image,
       "Dresify",
       liga,
     ]
