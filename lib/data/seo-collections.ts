@@ -95,9 +95,9 @@ const categoryDefinitions: CollectionDefinition[] = [
     slug: "reprezentativni-dresovi",
     label: "Reprezentativni dresovi",
     heading: "Reprezentativni nogometni dresovi",
-    title: "Reprezentativni nogometni dresovi — 20€",
+    title: "Reprezentativni dresovi — Hrvatska, Brazil, Argentina",
     description:
-      "Hrvatska, Argentina, Brazil, Francuska i ostale reprezentacije na jednom mjestu uz brzu dostavu i stalno rotiranje modela.",
+      "Dresovi reprezentacija — Hrvatska, Argentina, Brazil, Francuska, Portugal i ostale. Dječje i odrasle veličine, 20€, dostava pouzećem.",
     intro:
       "Reprezentativni dresovi drže najstabilniju potražnju tijekom cijele godine, posebno oko velikih turnira i poklona za djecu. Ova stranica skuplja sve nacionalne timove iz kataloga i olakšava brzo uspoređivanje najtraženijih boja i igrača.",
     filter: (product) => product.liga === "Reprezentacija"
@@ -153,9 +153,9 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "hrvatska",
     label: "Hrvatska",
     heading: "Hrvatska dresovi",
-    title: "Hrvatska dresovi — 20€",
+    title: "Hrvatska dresovi — Modrić, Perišić, Livaković",
     description:
-      "Hrvatska dresovi s Modrićem i drugim traženim varijantama za kupce koji traže domaću reprezentaciju i brzu dostavu po Hrvatskoj.",
+      "Dres Hrvatske reprezentacije — Modrić, Perišić, Livaković i ostali. Dječje i odrasle veličine, 20€, brza dostava po cijeloj Hrvatskoj.",
     intro:
       "Hrvatska je jedna od najvažnijih SEO i prodajnih kategorija za lokalnu publiku. Zato smo na ovu stranicu izdvojili sve dostupne domaće modele koji se najčešće traže za djecu, poklon i osobnu narudžbu.",
     filter: klubIs("Hrvatska")
@@ -419,9 +419,9 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "ronaldo",
     label: "Ronaldo dresovi",
     heading: "Ronaldo dresovi",
-    title: "Ronaldo dresovi — 20€",
+    title: "Ronaldo dresovi — Al-Nassr, Real, United, Portugal",
     description:
-      "Ronaldo dresovi iz Reala, Manchester Uniteda, Portugala i Al-Nassra za djecu i odrasle.",
+      "Ronaldo dres iz Al-Nassra, Reala, Manchester Uniteda i Portugala — dječje i odrasle veličine, 20€, dostava pouzećem 2–5 dana.",
     intro:
       "Kupci koji traže Ronaldo dres gotovo uvijek žele usporediti više klubova i reprezentaciju prije odluke. Ova landing stranica zato skuplja njegove najpoznatije varijante i skraćuje put do kupnje.",
     filter: playerNameIncludes("ronaldo")
@@ -441,9 +441,9 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "yamal",
     label: "Yamal dresovi",
     heading: "Yamal dresovi",
-    title: "Yamal dresovi — 20€",
+    title: "Yamal dresovi — FC Barcelona i Španjolska",
     description:
-      "Yamal dresovi FC Barcelone u domaćim, šarenim i posebnim varijantama za kupce koji traže najaktualnije modele sezone.",
+      "Lamine Yamal dres — FC Barcelona i Španjolska, domaće, šarene i posebne varijante. Dječje i odrasle veličine, 20€, dostava 2–5 dana.",
     intro:
       "Yamal je jedan od najtraženijih novih igrača u katalogu i zato ima svoju zasebnu landing stranicu. Ovdje su skupljeni svi modeli koji dobro prolaze kod djece i mladih kupaca koji žele aktualan dres s jakim vizualom.",
     filter: playerNameIncludes("yamal")

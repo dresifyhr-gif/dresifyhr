@@ -7,9 +7,9 @@ import { getCatalogProducts } from "@/lib/data/product-overrides";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
 export const metadata = buildMetadata({
-  title: "Komplete — Dres + Hlačice + Lopta + Kapa",
+  title: "Dječji nogometni komplet — dres, hlačice, lopta, kapa",
   description:
-    "Nogometni komplete za djecu i odrasle — dres, hlačice, lopta i kapa u jednom paketu za 40€. Barcelona, Real Madrid, Bayern, Hrvatska i više. Dostava pouzećem po cijeloj Hrvatskoj.",
+    "Nogometni komplet za djecu — dres, hlačice, lopta i kapa u jednom paketu za 40€. Barcelona, Real Madrid, Bayern, Hrvatska i više. Dostava pouzećem po cijeloj Hrvatskoj.",
   path: "/kompleti",
   keywords: [
     "komplet dres lopta kapa",
