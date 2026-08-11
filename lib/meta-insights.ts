@@ -63,11 +63,7 @@ function sumPurchase(rows: unknown): number {
   return max;
 }
 
-async function fetchInsightsRaw(): Promise<MetaAdsInsights> {
-  const account = process.env.META_AD_ACCOUNT_ID;
-  const token = process.env.META_ADS_TOKEN || process.env.META_CAPI_TOKEN;
-  if (!account || !token) return EMPTY("no-config");
-
+async function fetchInsightsRaw(account: string, token: string): Promise<MetaAdsInsights> {
   const acct = account.startsWith("act_") ? account : `act_${account}`;
   const fields = ["campaign_id", "campaign_name", "spend", "clicks", "ctr", "cpc", "actions", "action_values"].join(",");
   const url =
@@ -121,4 +117,15 @@ async function fetchInsightsRaw(): Promise<MetaAdsInsights> {
 }
 
 // Keširano 10 min — reklame se ne mijenjaju iz sekunde u sekundu, a API ima kvotu.
-export const getMetaAdsInsights = unstable_cache(fetchInsightsRaw, ["meta-ads-insights"], { revalidate: 600 });
+// Keš je vezan na token (zadnjih 8 znakova) da promjena tokena u Vercelu odmah
+// dobije svjež poziv, a ne stari zakеširani "greška/nije povezano".
+const cachedFetch = unstable_cache(fetchInsightsRaw, ["meta-ads-insights"], { revalidate: 600 });
+
+export async function getMetaAdsInsights(): Promise<MetaAdsInsights> {
+  // Provjera varijabli je IZVAN keša — čim dodaš tokene u Vercel, radi odmah
+  // (prije se "nije povezano" znalo zakеširati na 10 min i nakon dodavanja tokena).
+  const account = process.env.META_AD_ACCOUNT_ID;
+  const token = process.env.META_ADS_TOKEN || process.env.META_CAPI_TOKEN;
+  if (!account || !token) return EMPTY("no-config");
+  return cachedFetch(account, token);
+}
