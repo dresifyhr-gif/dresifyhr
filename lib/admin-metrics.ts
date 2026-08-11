@@ -29,18 +29,28 @@ const itemIsKomplet = (it: ShipItem) =>
 const glsCostFor = (goods: number, items: ShipItem[], threshold: number) =>
   items.some(itemIsKomplet) || goods > threshold ? GLS_SHIP_OVER : GLS_SHIP_UNDER;
 
-// Dobit/gubitak dostave po narudžbi (dodaje se na maržu).
-//  GLS: plaćena → (kupac platio − GLS trošak); besplatna → −GLS trošak; vraćena → −GLS trošak (odlazak).
-//  HP (promjenjivo, legacy): plaćena → 0 (ne znamo točan trošak); besplatna → −deliveryCost; vraćena → −returnCost.
-type ShipOrder = { total: number; shipping: number | null; status?: string; courier?: string | null; createdAt?: Date; items: ShipItem[] };
-function shipPLFor(o: ShipOrder, threshold: number, deliveryCost: number, returnCost: number) {
+// STVARNI trošak/naplata dostave (Igor potvrdio):
+//  HP (staro, prije 28.7.): naplaćeno 7,50 €, nama koštalo ~3 € → marža +4,50.
+//  GLS (web, od 28.7.): naplaćeno 7 €, nama koštalo 5,50 → marža +1,50.
+// Dostava je UVIJEK naplaćena (i ručno unesene) — shipping=0 u bazi znači samo
+// "nije upisano", NE besplatno. Besplatno je samo registriranima uz robu ≥ prag.
+const HP_SHIP_COST = 3; // realan HP trošak (Igor: ~3 €)
+const HP_SHIP_CHARGE = 7.5; // koliko se naplaćivalo u HP doba
+const GLS_SHIP_CHARGE = 7; // web/GLS naplata
+
+// Dobit/gubitak dostave po narudžbi (dodaje se na maržu) = naplaćeno − naš trošak.
+type ShipOrder = { total: number; shipping: number | null; status?: string; courier?: string | null; createdAt?: Date; userId?: string | null; items: ShipItem[] };
+function shipPLFor(o: ShipOrder, threshold: number, _deliveryCost?: number, _returnCost?: number) {
   const goods = o.total - (o.shipping ?? 0);
-  // Stare narudžbe (prije GLS_LOGIC_SINCE) računaju se kao dosad = kao HP (fiksni trošak, bez GLS marže).
   const isHP = o.courier === "hp" || (!!o.createdAt && o.createdAt < GLS_LOGIC_SINCE);
-  const paid = (o.shipping ?? 0) > 0;
-  if (o.status === "returned") return isHP ? -returnCost : -glsCostFor(goods, o.items, threshold);
-  if (isHP) return paid ? 0 : -deliveryCost;
-  return paid ? (o.shipping ?? 0) - glsCostFor(goods, o.items, threshold) : -glsCostFor(goods, o.items, threshold);
+  const cost = isHP ? HP_SHIP_COST : GLS_SHIP_UNDER; // 3 € (HP) / 5,50 € (GLS)
+  // Vraćeno: izgubili smo odlaznu dostavu (naplate nema).
+  if (o.status === "returned") return -cost;
+  // Prava besplatna dostava: samo registriran kupac s robom ≥ prag i dostavom = 0.
+  if (o.userId && goods >= threshold && (o.shipping ?? 0) === 0) return -cost;
+  // Naplaćeno: upisana vrijednost ako postoji, inače standardna naplata (nikad 0).
+  const charged = (o.shipping ?? 0) > 0 ? (o.shipping ?? 0) : isHP ? HP_SHIP_CHARGE : GLS_SHIP_CHARGE;
+  return charged - cost;
 }
 
 export async function getDashboardMetrics() {
@@ -113,7 +123,7 @@ export async function getDashboardMetrics() {
     prisma.customer.findMany({ where: { lastOrderAt: { lt: new Date(now.getTime() - winbackDays * DAY) }, totalOrders: { gt: 0 } }, orderBy: { totalSpent: "desc" }, take: 20 }),
     prisma.order.findMany({ select: { address: true, total: true, shipping: true } }),
     prisma.adSpend.aggregate({ _sum: { amount: true } }),
-    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 500, select: { id: true, createdAt: true, returnedAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true, courier: true, items: { select: { slug: true, klub: true, igrac: true } } } }),
+    prisma.order.findMany({ where: { status: "returned" }, orderBy: { createdAt: "desc" }, take: 500, select: { id: true, createdAt: true, returnedAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true, courier: true, userId: true, items: { select: { slug: true, klub: true, igrac: true } } } }),
     prisma.order.findMany({ where: { status: "cancelled" }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, createdAt: true, customerName: true, phone: true, total: true, shipping: true, itemCount: true } }),
     prisma.order.findMany({ where: { status: { in: ["shipped", "done"] }, shippedBy: null }, orderBy: { createdAt: "desc" }, take: 200, select: { id: true, createdAt: true, customerName: true, total: true } }),
     // Točan ukupan broj vraćenih (lista gore je ograničena na 50) — za trošak povrata.
@@ -125,7 +135,7 @@ export async function getDashboardMetrics() {
     // da se brojke poklapaju s onima na stranici Narudžbe.
     prisma.order.findMany({
       where: { status: { in: ["shipped", "done"] } },
-      select: { total: true, shipping: true, cashCollected: true, courier: true, createdAt: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
+      select: { total: true, shipping: true, cashCollected: true, courier: true, createdAt: true, userId: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
     })
   ]);
   const settlementsP = prisma.settlement.findMany({ orderBy: { settledAt: "desc" }, take: 6 });
@@ -319,7 +329,7 @@ export async function getDashboardMetrics() {
     }),
     prisma.order.findMany({
       where: { status: { in: ["shipped", "done"] }, cashCollected: true, ...collectedSinceFilter },
-      select: { total: true, shipping: true, shippedBy: true, promoCode: true, courier: true, createdAt: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
+      select: { total: true, shipping: true, shippedBy: true, promoCode: true, courier: true, createdAt: true, userId: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
     }),
     profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter }),
     prisma.adSpend.groupBy({ by: ["paidBy"], _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined })
