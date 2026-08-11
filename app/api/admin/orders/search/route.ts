@@ -122,9 +122,11 @@ export async function GET(request: Request) {
   if (cashF === "collected" || cashF === "pending") {
     filtered = filtered.filter((o) => isSent(o.status) && (cashF === "collected" ? o.cashCollected : !o.cashCollected));
   }
-  // Kurir — poslane preko GLS-a ili HP-a. null tretiramo kao GLS (kao i prikaz).
+  // Kurir — poslane (ili VRAĆENE) preko GLS-a ili HP-a. null tretiramo kao GLS.
+  // Vraćene narudžbe su isto bile otpremljene kurirom, pa moraju ući u filter
+  // (inače KURIR=GLS + DOSTAVA=Vraćeno ne bi pokazao ništa).
   if (courierF === "gls" || courierF === "hp") {
-    filtered = filtered.filter((o) => isSent(o.status) && (courierF === "hp" ? o.courier === "hp" : o.courier !== "hp"));
+    filtered = filtered.filter((o) => (isSent(o.status) || o.status === "returned") && (courierF === "hp" ? o.courier === "hp" : o.courier !== "hp"));
   }
   // Status dostave (auto-provjera): dostavljeno / na dostavi / u pripremi.
   // Samo NE-prikupljene — prikupljeno = završeno, ne prati se više dostava.
