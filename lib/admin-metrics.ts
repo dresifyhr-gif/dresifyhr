@@ -23,6 +23,10 @@ const GLS_SHIP_OVER = 5.5;
 // da se već zatvorena/tekuća stara podjela ne mijenja unatrag.
 const GLS_LOGIC_SINCE = new Date("2026-07-28T00:00:00Z");
 
+// Do uvođenja korisničkih računa (Clerk, 3.8.2026) besplatnu dostavu ≥ prag
+// dobivali su SVI kupci; od tog dana samo registrirani. Vidi shipPLFor.
+const FREE_FOR_ALL_BEFORE = new Date("2026-08-03T00:00:00Z");
+
 type ShipItem = { slug?: string | null; klub?: string | null; igrac?: string | null };
 const itemIsKomplet = (it: ShipItem) =>
   /komplet/i.test(it.slug || "") || /komplet/i.test(it.klub || "") || /komplet/i.test(it.igrac || "");
@@ -46,8 +50,12 @@ function shipPLFor(o: ShipOrder, threshold: number, _deliveryCost?: number, _ret
   const cost = isHP ? HP_SHIP_COST : GLS_SHIP_UNDER; // 3 € (HP) / 5,50 € (GLS)
   // Vraćeno: izgubili smo odlaznu dostavu (naplate nema).
   if (o.status === "returned") return -cost;
-  // Prava besplatna dostava: samo registriran kupac s robom ≥ prag i dostavom = 0.
-  if (o.userId && goods >= threshold && (o.shipping ?? 0) === 0) return -cost;
+  // Prava besplatna dostava (roba ≥ prag, dostava = 0):
+  //  - PRIJE 3.8.2026 (dan uvođenja korisničkih računa) davali smo je SVIMA,
+  //    i neregistriranima → tada je shipping=0 uz ≥prag stvarno besplatno.
+  //  - OD 3.8.2026 besplatna je SAMO registriranim kupcima (userId).
+  const freeEligible = !!o.userId || (!!o.createdAt && o.createdAt < FREE_FOR_ALL_BEFORE);
+  if (freeEligible && goods >= threshold && (o.shipping ?? 0) === 0) return -cost;
   // Naplaćeno: upisana vrijednost ako postoji, inače standardna naplata (nikad 0).
   const charged = (o.shipping ?? 0) > 0 ? (o.shipping ?? 0) : isHP ? HP_SHIP_CHARGE : GLS_SHIP_CHARGE;
   return charged - cost;
