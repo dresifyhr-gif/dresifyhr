@@ -65,6 +65,10 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   }, [product.slug, product.klub, product.igrac, product.price]);
 
   const currentSizes = segment === "adult" ? sizeOptions.adults : sizeOptions.kids;
+  // Prikazujemo SAMO dostupne veličine (rasprodane se sakriju). Ako u ovom
+  // segmentu nema nijedne dostupne → "Rasprodano".
+  const segmentOut = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock);
+  const availableSizes = segmentOut ? [] : currentSizes.filter((size) => !sizeOptions.soldOutSizes.includes(size));
   const segmentLabel = segment === "adult" ? t.product.segmentAdult : t.product.segmentKid;
   const productPrice = product.price ?? 20;
   const whatsappMessage = `Pozdrav, želim naručiti: ${repairText(product.klub)} ${repairText(
@@ -138,44 +142,37 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         </div>
       ) : null}
 
-      {currentSizes.length > 0 ? (
+      {currentSizes.length === 0 ? (
+        <p className="mt-8 text-sm font-medium uppercase tracking-[0.24em] text-white/50">Jedna veličina</p>
+      ) : availableSizes.length === 0 ? (
+        <div className="mt-8 rounded-[12px] border border-red-500/30 bg-red-500/[0.06] px-5 py-4 text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.24em] text-red-400">Rasprodano</p>
+          <p className="mt-1 text-xs text-white/40">Trenutno nema veličina na stanju.</p>
+        </div>
+      ) : (
         <div className="mt-8">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/70">{t.product.selectSize}</p>
             <SizeGuide showXXL={sizeOptions.adults.includes("XXL")} />
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
-            {currentSizes.map((size) => {
-              const oos = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock) || sizeOptions.soldOutSizes.includes(size);
-              return (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => !oos && setSelectedSize(size)}
-                  disabled={oos}
-                  aria-pressed={selectedSize === size}
-                  title={oos ? "Nema na stanju" : undefined}
-                  className={`relative h-14 border text-sm font-semibold transition duration-200 ease-out ${
-                    oos
-                      ? "cursor-not-allowed border-white/5 bg-[#0a0a0a] text-white/20"
-                      : selectedSize === size
-                      ? "border-accent bg-accent text-black"
-                      : "border-white/10 bg-[#0a0a0a] text-white hover:border-accent/40"
-                  }`}
-                >
-                  {oos ? (
-                    <span className="flex flex-col items-center leading-tight">
-                      <span>{size}</span>
-                      <span className="text-[9px] uppercase tracking-[0.15em] text-white/30">nema</span>
-                    </span>
-                  ) : size}
-                </button>
-              );
-            })}
+            {availableSizes.map((size) => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => setSelectedSize(size)}
+                aria-pressed={selectedSize === size}
+                className={`relative h-14 border text-sm font-semibold transition duration-200 ease-out ${
+                  selectedSize === size
+                    ? "border-accent bg-accent text-black"
+                    : "border-white/10 bg-[#0a0a0a] text-white hover:border-accent/40"
+                }`}
+              >
+                {size}
+              </button>
+            ))}
           </div>
         </div>
-      ) : (
-        <p className="mt-8 text-sm font-medium uppercase tracking-[0.24em] text-white/50">Jedna veličina</p>
       )}
 
       <button
