@@ -4,9 +4,11 @@ import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { getGaStats } from "@/lib/ga";
+import { getMetaAdsInsights } from "@/lib/meta-insights";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdSpendForm } from "@/components/admin/ad-spend-form";
 import { GaStatsPanel } from "@/components/admin/ga-stats";
+import { MetaAdsPanel } from "@/components/admin/meta-ads-panel";
 import { Panel, eur } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Analitika — Dresify Admin", robots: { index: false, follow: false } };
@@ -15,12 +17,16 @@ export const dynamic = "force-dynamic";
 export default async function AnalyticsPage() {
   if (!(await isAdmin())) redirect("/admin/login/");
 
-  const [m, ga] = await Promise.all([getDashboardMetrics(), getGaStats()]);
+  const [m, ga, ads] = await Promise.all([getDashboardMetrics(), getGaStats(), getMetaAdsInsights()]);
 
   return (
     <AdminShell title="Analitika" subtitle="Što se prodaje, reklame i trendovi">
       <div className="mb-5">
         <GaStatsPanel ga={ga} />
+      </div>
+
+      <div className="mb-5">
+        <MetaAdsPanel ins={ads} />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">

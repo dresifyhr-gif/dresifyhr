@@ -9,8 +9,16 @@ declare global {
   }
 }
 
-export function fbTrack(event: string, params?: FbqParams) {
+export function fbTrack(event: string, params?: FbqParams, eventID?: string) {
   if (typeof window !== "undefined" && typeof window.fbq === "function") {
-    window.fbq("track", event, params);
+    // eventID omogućuje deduplikaciju s server-side CAPI eventom (isti id → Meta broji jednom).
+    if (eventID) window.fbq("track", event, params, { eventID });
+    else window.fbq("track", event, params);
   }
+}
+
+// Pročitaj cookie (npr. _fbc) na klijentu — šaljemo ga serveru za bolji CAPI match.
+export function readCookie(name: string): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  return document.cookie.match(new RegExp(`${name}=([^;]+)`))?.[1];
 }

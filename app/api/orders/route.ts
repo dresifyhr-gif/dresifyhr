@@ -10,8 +10,16 @@ import { saveOrderToDb } from "@/lib/order-db";
 import { getProductBySlug } from "@/lib/data/product-overrides";
 import { getJerseyBySlug, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { normalizeIgHandle, autoEnterGiveaway } from "@/lib/giveaway";
+import { sendCapiPurchase } from "@/lib/meta-capi";
 
 export const runtime = "nodejs";
+
+// Iz Cookie headera izvuče _fbp/_fbc (Meta browser identifikatori) — jako
+// poboljšava povezivanje server-side kupnje s korisnikom (match quality).
+function readFbCookies(cookieHeader: string | null) {
+  const get = (name: string) => cookieHeader?.match(new RegExp(`${name}=([^;]+)`))?.[1];
+  return { fbp: get("_fbp"), fbc: get("_fbc") };
+}
 
 // Serverska provjera dostupnosti pri narudžbi — da rasprodana veličina/segment
 // NE prođe čak i ako je kupac imao staru (keširanu) stranicu otvorenu. Čita ažurno
@@ -120,11 +128,32 @@ export async function POST(request: Request) {
       );
     }
 
+    // Meta CAPI Purchase (server-side) — best-effort. eventId dolazi s klijenta
+    // i dijeli se s browser pikselom radi deduplikacije (Meta broji jednom).
+    const { fbp, fbc } = readFbCookies(request.headers.get("cookie"));
+    const clientIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip");
+    const capiPurchase = sendCapiPurchase({
+      eventId: typeof body.fbEventId === "string" ? body.fbEventId : undefined,
+      eventSourceUrl: request.headers.get("referer") || undefined,
+      email: payload!.email,
+      phone: payload!.phone,
+      value: payload!.total,
+      currency: "EUR",
+      contentIds: payload!.items?.map((it) => it.slug).filter(Boolean),
+      numItems: payload!.itemCount ?? payload!.items?.length,
+      clientIp,
+      userAgent: request.headers.get("user-agent"),
+      fbp,
+      fbc: fbc || (typeof body.fbc === "string" ? body.fbc : undefined)
+    });
+
     // Log to Google Sheet + mirror to DB (both best-effort — never block/fail the order)
     await Promise.allSettled([
       logOrderToSheet(payload!),
       saveOrderToDb(payload!),
-      autoEnterGiveaway(payload!.igHandle, payload!.name, payload!.userId ?? null, payload!.email, payload!.phone)
+      autoEnterGiveaway(payload!.igHandle, payload!.name, payload!.userId ?? null, payload!.email, payload!.phone),
+      capiPurchase
     ]);
 
     return NextResponse.json({

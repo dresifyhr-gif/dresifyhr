@@ -15,7 +15,7 @@ import {
   JERSEY_PRICE_EUR
 } from "@/lib/site";
 import { createCartOrderSummary, formatEuroAmount, repairText } from "@/lib/utils";
-import { fbTrack } from "@/lib/fbpixel";
+import { fbTrack, readCookie } from "@/lib/fbpixel";
 import { computePromoDiscount, GIFT_STORAGE_KEY, type PromoCode } from "@/lib/promo";
 import type { FulfillmentType } from "@/lib/orders";
 
@@ -230,6 +230,9 @@ export function ContactForm() {
     const details = hasCartItems ? autoDetails : form.manualDetails;
 
     try {
+      // Dijeljeni event_id za Purchase (browser piksel + server CAPI) → dedup.
+      const fbEventId =
+        typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `evt_${Date.now()}_${Math.random()}`;
       const payload = {
         name: form.name,
         phone: form.phone,
@@ -260,7 +263,9 @@ export function ContactForm() {
               unitPrice: item.price
             }))
           : undefined,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        fbEventId,
+        fbc: readCookie("_fbc")
       };
 
       const res = await fetch("/api/orders", {
@@ -276,13 +281,17 @@ export function ContactForm() {
         return;
       }
 
-      fbTrack("Purchase", {
-        content_ids: hasCartItems ? items.map((item) => item.slug) : undefined,
-        content_type: "product",
-        value: total,
-        currency: "EUR",
-        num_items: hasCartItems ? itemCount : 1
-      });
+      fbTrack(
+        "Purchase",
+        {
+          content_ids: hasCartItems ? items.map((item) => item.slug) : undefined,
+          content_type: "product",
+          value: total,
+          currency: "EUR",
+          num_items: hasCartItems ? itemCount : 1
+        },
+        fbEventId // isti id kao server CAPI → Meta ne broji duplo
+      );
 
       clearCart();
       try { localStorage.removeItem(GIFT_STORAGE_KEY); } catch {}
