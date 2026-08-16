@@ -74,7 +74,11 @@ async function checkPromo(code: string, subtotal: number): Promise<PromoCheck> {
 
 export function ContactForm() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const shipTrust =
+    locale === "en"
+      ? "Order today → we ship tomorrow. Your tracking number arrives automatically by email."
+      : "Naručiš danas → šaljemo sutra. Broj za praćenje automatski stiže na tvoj email.";
   const { items, subtotal, itemCount, clearCart } = useCart();
 
   const FULFILLMENT_OPTIONS: FulfillmentOption[] = [
@@ -540,6 +544,10 @@ export function ContactForm() {
             </span>
           )}
         </button>
+        <div className="mt-3 flex items-start gap-2 rounded-[8px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2.5 xl:hidden">
+          <Truck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+          <span className="text-xs leading-5 text-white/75">{shipTrust}</span>
+        </div>
       </div>
 
       {/* RIGHT — summary */}
@@ -660,6 +668,11 @@ export function ContactForm() {
               </span>
             )}
           </button>
+
+          <div className="mt-4 flex items-start gap-2 rounded-[8px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2.5">
+            <Truck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+            <span className="text-xs leading-5 text-white/75">{shipTrust}</span>
+          </div>
 
           <p className="mt-4 text-center text-[11px] leading-5 text-white/25">
             {t.contactForm.confirmNote}
