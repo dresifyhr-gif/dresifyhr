@@ -18,15 +18,15 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { t, locale, setLocale } = useLanguage();
 
+  // Gornji izbornik je fokusiran na kupnju. "Početna" izbačena (logo vodi doma),
+  // "Nagradna igra" je već u žutoj PS5 traci ispod, a "O nama" je u footeru —
+  // tako se izbornik ne lomi u dva reda i djeluje prozračnije.
   const NAV_ITEMS = [
-    { href: "/", label: t.nav.home },
     { href: "/dresovi", label: t.nav.jerseys },
     { href: "/kompleti", label: t.nav.sets },
     { href: "/streetwear", label: "Streetwear" },
-    { href: "/ps5", label: "🎮 Nagradna igra" },
     { href: "/blog", label: t.nav.blog },
     { href: "/kontakt", label: t.nav.contact },
-    { href: "/o-nama", label: t.nav.about },
   ];
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`text-sm font-semibold uppercase tracking-[0.3em] transition-all duration-200 ease-out ${
+                  className={`whitespace-nowrap text-sm font-semibold uppercase tracking-[0.3em] transition-all duration-200 ease-out ${
                     isActive ? "text-accent" : "text-white hover:text-accent"
                   }`}
                 >
