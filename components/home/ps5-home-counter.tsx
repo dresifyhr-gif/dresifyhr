@@ -39,19 +39,6 @@ export function Ps5HomeCounter({ current, goal }: { current: number; goal: numbe
       <div className="relative h-5 flex-1">
         {/* Osnovna staza */}
         <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-white/10" />
-        {/* Točkice ISPRED lopte (put kojim ide); mask ih sakriva iza (prijeđeno) */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(circle at center, ${ACCENT} 1.7px, transparent 2.1px)`,
-            backgroundSize: "12px 100%",
-            backgroundPosition: "center",
-            backgroundRepeat: "repeat-x",
-            opacity: 0.4,
-            maskImage: `linear-gradient(to right, transparent ${pct}%, #000 ${pct}%)`,
-            WebkitMaskImage: `linear-gradient(to right, transparent ${pct}%, #000 ${pct}%)`
-          }}
-        />
         {/* Trag napretka (prijeđeni put) — jači, svijetli */}
         <div
           className="absolute top-1/2 left-0 h-[4px] -translate-y-1/2 rounded-full"
