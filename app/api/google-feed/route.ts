@@ -41,7 +41,7 @@ export async function GET() {
         : `Nogometni dres ${klub} ${igrac}. Dostupno za djecu (s hlačicama) i odrasle (${adultRange}). Ušiveno ime i broj. Dostava pouzećem po cijeloj Hrvatskoj.`;
 
       return `    <item>
-      <g:id>${xmlEscape(product.slug)}</g:id>
+      <g:id>${xmlEscape(product.slug.slice(0, 50))}</g:id>
       <g:title>${xmlEscape(title)}</g:title>
       <g:description>${xmlEscape(description)}</g:description>
       <g:link>${SITE_URL}/dres/${xmlEscape(product.slug)}/</g:link>

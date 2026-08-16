@@ -48,7 +48,7 @@ export async function GET() {
       : `Nogometni dres ${klub} ${igrac}. Dostupno za djecu (s hlačicama) i odrasle (${adultRange}). Ušiveno ime i broj. Dostava pouzećem po cijeloj Hrvatskoj.`;
 
     return [
-      product.slug,
+      product.slug.slice(0, 50), // Google/Meta id max 50 znakova (dugi custom slugovi su bili odbijeni)
       title,
       description,
       "in stock",
