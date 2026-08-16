@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Gamepad2 } from "lucide-react";
 
 // Progress bar za PS5 nagradnu igru: nogometna lopta se "kotrlja" prema cilju,
 // iza nje svijetli trag napretka + kratki motion-trail (brzina). Lagano (emoji
@@ -69,11 +70,10 @@ export function Ps5HomeCounter({ current, goal }: { current: number; goal: numbe
         </div>
       </div>
 
-      <span className="shrink-0 text-xs font-semibold tabular-nums text-white/75">
-        <span className="sm:hidden">{Math.round(value).toLocaleString("hr-HR")}</span>
-        <span className="hidden sm:inline">
-          {Math.round(value).toLocaleString("hr-HR")} / {goal.toLocaleString("hr-HR")}
-        </span>
+      {/* Mobitel: PS5 kontroler (nagrada do koje lopta stiže); desktop: broj / cilj */}
+      <Gamepad2 className="h-[18px] w-[18px] shrink-0 text-accent sm:hidden" />
+      <span className="hidden shrink-0 text-xs font-semibold tabular-nums text-white/75 sm:inline">
+        {Math.round(value).toLocaleString("hr-HR")} / {goal.toLocaleString("hr-HR")}
       </span>
 
       <style>{`@keyframes ps5-roll{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
