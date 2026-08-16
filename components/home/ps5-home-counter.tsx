@@ -39,19 +39,32 @@ export function Ps5HomeCounter({ current, goal }: { current: number; goal: numbe
       <div className="relative h-5 flex-1">
         {/* Osnovna staza */}
         <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-white/10" />
-        {/* Trag napretka (prijeđeni put) — svijetli */}
+        {/* Točkice ISPRED lopte (put kojim ide); mask ih sakriva iza (prijeđeno) */}
         <div
-          className="absolute top-1/2 left-0 h-[3px] -translate-y-1/2 rounded-full"
-          style={{ width: `${pct}%`, background: ACCENT, boxShadow: "0 0 10px rgba(232,255,60,0.6)", transition: "width 120ms linear" }}
-        />
-        {/* Motion trail iza lopte (osjećaj brzine) */}
-        <div
-          className="absolute top-1/2 h-[7px] -translate-y-1/2 rounded-full"
+          className="absolute inset-0"
           style={{
-            left: `calc(${pct}% - 24px)`,
-            width: "24px",
-            background: `linear-gradient(to right, transparent, ${ACCENT}cc)`,
-            opacity: 0.6,
+            backgroundImage: `radial-gradient(circle at center, ${ACCENT} 1.7px, transparent 2.1px)`,
+            backgroundSize: "12px 100%",
+            backgroundPosition: "center",
+            backgroundRepeat: "repeat-x",
+            opacity: 0.4,
+            maskImage: `linear-gradient(to right, transparent ${pct}%, #000 ${pct}%)`,
+            WebkitMaskImage: `linear-gradient(to right, transparent ${pct}%, #000 ${pct}%)`
+          }}
+        />
+        {/* Trag napretka (prijeđeni put) — jači, svijetli */}
+        <div
+          className="absolute top-1/2 left-0 h-[4px] -translate-y-1/2 rounded-full"
+          style={{ width: `${pct}%`, background: ACCENT, boxShadow: "0 0 16px rgba(232,255,60,0.9)", transition: "width 120ms linear" }}
+        />
+        {/* Motion trail iza lopte (jači osjećaj brzine) */}
+        <div
+          className="absolute top-1/2 h-[10px] -translate-y-1/2 rounded-full"
+          style={{
+            left: `calc(${pct}% - 34px)`,
+            width: "34px",
+            background: `linear-gradient(to right, transparent, ${ACCENT})`,
+            opacity: 0.85,
             transition: "left 120ms linear"
           }}
         />
