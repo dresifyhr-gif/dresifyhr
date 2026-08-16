@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Truck, Banknote, RotateCcw, MessageCircle, Clock, MapPin } from "lucide-react";
+import { Truck, Banknote, RotateCcw, MessageCircle, Clock, MapPin, Mail } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
@@ -22,7 +22,12 @@ const deliveryItems = [
   {
     icon: Clock,
     title: "Rok isporuke",
-    text: "Paket stiže za 2–5 radnih dana od potvrde narudžbe."
+    text: "Narudžbe potvrđene radnim danom u pravilu šaljemo već sljedeći radni dan. Paket stiže za 2–5 radnih dana od potvrde narudžbe."
+  },
+  {
+    icon: Mail,
+    title: "Praćenje paketa",
+    text: "Čim pošaljemo paket, automatski ti na email stigne broj za praćenje (tracking) i link — pratiš gdje ti je paket u svakom trenutku."
   },
   {
     icon: Banknote,

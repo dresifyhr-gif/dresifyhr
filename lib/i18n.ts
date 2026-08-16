@@ -140,7 +140,7 @@ const hr = {
     cta: "Pronašao si dres?",
     ctaSub: "Naruči odmah — šaljemo sutra.",
     ctaBtn: "POGLEDAJ KATALOG",
-    desc: "Premium football shop s fiksnom cijenom 20€, dostavom po cijeloj Hrvatskoj i novim modelima svaki tjedan.",
+    desc: "Premium nogometni online shop s fiksnom cijenom 20€, dostavom po cijeloj Hrvatskoj i novim modelima svaki tjedan.",
     nav: "Navigacija",
     popular: "Popularno",
     contact: "Kontakt",
