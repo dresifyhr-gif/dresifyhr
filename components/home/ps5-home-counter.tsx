@@ -79,7 +79,11 @@ export function Ps5HomeCounter({ current, goal }: { current: number; goal: numbe
       </div>
 
       <span className="shrink-0 text-xs font-semibold tabular-nums text-white/75">
-        {Math.round(value).toLocaleString("hr-HR")} / {goal.toLocaleString("hr-HR")}
+        {/* Mobitel: samo trenutni broj (uža traka); desktop: puni "x / cilj". */}
+        <span className="sm:hidden">{Math.round(value).toLocaleString("hr-HR")}</span>
+        <span className="hidden sm:inline">
+          {Math.round(value).toLocaleString("hr-HR")} / {goal.toLocaleString("hr-HR")}
+        </span>
       </span>
 
       <style>{`@keyframes ps5-chomp{0%{clip-path:${MOUTH_OPEN}}50%{clip-path:${MOUTH_SHUT}}100%{clip-path:${MOUTH_OPEN}}}`}</style>
