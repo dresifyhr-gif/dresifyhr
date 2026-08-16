@@ -22,6 +22,8 @@ export async function Ps5HomeBanner() {
           <Gift className="h-5 w-5 shrink-0 text-accent" />
           <span className="whitespace-nowrap text-xs font-bold uppercase tracking-wide text-white sm:text-sm">
             Osvoji <span className="text-accent">PS5</span>
+            {/* "+ FC 27" samo na desktopu — na mobitelu je red pretijesan */}
+            <span className="hidden sm:inline"> + FC 27</span>
           </span>
         </div>
 

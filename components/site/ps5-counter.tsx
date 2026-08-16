@@ -73,10 +73,27 @@ export function Ps5Counter({ current, goal = 10000 }: { current: number; goal?: 
             transform="rotate(-90 98 98)"
             style={{ filter: "drop-shadow(0 0 6px rgba(232,255,60,0.85))", transition: "stroke-dashoffset 120ms linear" }}
           />
-          {pct > 0.02 && (
-            <circle cx={dotX} cy={dotY} r="6.5" fill="#f4ff8a" style={{ filter: "drop-shadow(0 0 7px rgba(232,255,60,1))" }} />
-          )}
         </svg>
+        {/* ⚽ Lopta na vrhu napretka — kotrlja se oko prstena do cilja (kao na naslovnoj) */}
+        {pct > 0.02 && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute"
+            style={{
+              left: `${(dotX * 220) / 196}px`,
+              top: `${(dotY * 220) / 196}px`,
+              transform: "translate(-50%, -50%)",
+              fontSize: "22px",
+              lineHeight: 1,
+              filter: "drop-shadow(0 0 8px rgba(232,255,60,0.9))",
+              animation: "ps5-ballspin 0.9s linear infinite",
+              transition: "left 120ms linear, top 120ms linear"
+            }}
+          >
+            ⚽
+          </span>
+        )}
+        <style>{`@keyframes ps5-ballspin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}`}</style>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <div
             className="text-[40px] font-black leading-none tracking-tight text-white tabular-nums"
