@@ -26,7 +26,7 @@ export async function Ps5HomeBanner() {
           </span>
           <Gift className="h-5 w-5 text-accent" />
           <span className="text-sm font-bold uppercase tracking-wide text-white">
-            Osvoji <span className="text-accent">PS5</span> + FC 27
+            Osvoji <span className="text-accent">PS5</span>
           </span>
         </div>
 
