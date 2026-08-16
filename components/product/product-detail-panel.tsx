@@ -24,7 +24,7 @@ type ProductDetailPanelProps = {
 };
 
 export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const sizeOptions = getJerseySizeOptions(product);
   const gallery = product.images ?? getJerseyGallery(product.slug);
   const frontImage = gallery[0]?.src;
@@ -197,6 +197,20 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
       >
         {allSoldOut ? "Trenutno rasprodano" : t.product.addToCart}
       </button>
+
+      {/* Reassurance u trenutku odluke — najveći strah kod pouzeća je "što ako
+          platim pa ne stigne". Zato baš ispod gumba potvrdimo: platiš TEK kad
+          paket stigne. Diže konverziju kod kupaca s reklama (impulzivni). */}
+      {!allSoldOut && (
+        <div className="mt-3 flex items-center justify-center gap-2 rounded-[8px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2.5 text-center">
+          <Truck className="h-4 w-4 shrink-0 text-emerald-400" />
+          <span className="text-xs font-medium text-white/75">
+            {locale === "en"
+              ? "Pay cash on delivery — only when the package arrives at your door."
+              : "Platiš gotovinom tek kad paket stigne na tvoja vrata."}
+          </span>
+        </div>
+      )}
 
       {/* Bez ovoga je kupac klikao rasprodane veličine, ništa se nije događalo i
           mislio je da stranica ne radi — pa je odustao ili naručio bez veličine. */}

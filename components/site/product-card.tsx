@@ -97,7 +97,7 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
                 ? sw ? "bg-orange-500 text-white" : "bg-accent text-black"
                 : product.badge === "novo"
                 ? "bg-[#3b82f6] text-white"
-                : "bg-black/50 backdrop-blur-sm border border-white/25 text-white/90"
+                : "bg-black/70 border border-white/25 text-white/90"
             }`}>
               {product.badge === "bestseller" ? "★ Bestseller" : product.badge === "novo" ? "● Novo" : "Retro"}
             </span>
