@@ -14,7 +14,7 @@ export async function Ps5HomeBanner() {
   return (
     <Link
       href="/ps5"
-      className="group block border-y border-accent/25 bg-gradient-to-r from-accent/[0.04] via-accent/[0.12] to-accent/[0.04] transition hover:via-accent/[0.18]"
+      className="group block border-y border-white/10 bg-white/[0.02] transition hover:bg-white/[0.04]"
     >
       {/* Sve u jednom redu (i mobitel i desktop): naslov · Pac-Man staza · gumb. */}
       <div className="page-shell flex items-center gap-2.5 py-2.5 sm:gap-5 sm:py-3">
