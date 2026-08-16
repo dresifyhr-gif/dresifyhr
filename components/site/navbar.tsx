@@ -23,6 +23,7 @@ export function Navbar() {
     { href: "/dresovi", label: t.nav.jerseys },
     { href: "/kompleti", label: t.nav.sets },
     { href: "/streetwear", label: "Streetwear" },
+    { href: "/ps5", label: "🎮 Nagradna igra" },
     { href: "/blog", label: t.nav.blog },
     { href: "/kontakt", label: t.nav.contact },
     { href: "/o-nama", label: t.nav.about },
