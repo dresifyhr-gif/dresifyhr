@@ -95,7 +95,7 @@ const categoryDefinitions: CollectionDefinition[] = [
     slug: "reprezentativni-dresovi",
     label: "Reprezentativni dresovi",
     heading: "Reprezentativni nogometni dresovi",
-    title: "Reprezentativni dresovi — Hrvatska, Brazil, Argentina",
+    title: "Reprezentativni dresovi od 20€ — Hrvatska, Brazil, Argentina",
     description:
       "Dresovi reprezentacija — Hrvatska, Argentina, Brazil, Francuska, Portugal i ostale. Dječje i odrasle veličine, 20€, dostava pouzećem.",
     intro:
