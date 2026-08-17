@@ -33,7 +33,7 @@ export function StickyAddToCart({ product, selectedSize, segment, segmentLabel, 
 
   const handleAdd = () => {
     if (!selectedSize) return;
-    addItem({ slug: product.slug, klub: repairText(product.klub), igrac: repairText(product.igrac), size: selectedSize, segment, segmentLabel, imageSrc, category: product.category });
+    addItem({ slug: product.slug, klub: repairText(product.klub), igrac: repairText(product.igrac), size: selectedSize, segment, segmentLabel, imageSrc, price: product.price, category: product.category });
   };
 
   return (
