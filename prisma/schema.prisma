@@ -63,6 +63,7 @@ model Order {
   channel      String      @default("web")
   fulfillment  String?
   payment      String?
+  ip           String?     // IP adresa s koje je narudžba poslana (otkrivanje botova/spama)
   userId       String?     // Clerk user id ako je kupac bio prijavljen (registriran) pri narudžbi
 
   subtotal     Float       @default(0)

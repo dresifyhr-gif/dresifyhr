@@ -68,6 +68,7 @@ type Order = {
   customerName: string;
   phone: string;
   email: string;
+  ip: string;
   address: string;
   itemCount: number;
   total: number;
@@ -942,6 +943,20 @@ export function OrdersManager() {
                     {o.email ? (
                       <div className="mt-0.5 break-all text-xs text-[var(--a-text-2)]">
                         ✉️ <a href={`mailto:${o.email}`} className="font-medium text-[var(--a-text-2)] hover:text-[var(--a-text)] hover:underline">{o.email}</a>
+                      </div>
+                    ) : null}
+                    {o.ip ? (
+                      <div className="mt-0.5 text-xs text-[var(--a-text-3)]">
+                        🌐 IP:{" "}
+                        <a
+                          href={`https://ipinfo.io/${encodeURIComponent(o.ip)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono hover:text-[var(--a-text)] hover:underline"
+                          title="Provjeri odakle je IP"
+                        >
+                          {o.ip}
+                        </a>
                       </div>
                     ) : null}
                     <div className="mt-0.5 text-xs text-[var(--a-text-3)]">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-[var(--a-text)]">{eur(o.total)}</span></div>

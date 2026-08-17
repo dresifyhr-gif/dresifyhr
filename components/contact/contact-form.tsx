@@ -111,6 +111,7 @@ export function ContactForm() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [hp, setHp] = useState(""); // honeypot: pravi kupac ostavlja prazno, bot popuni
   const [error, setError] = useState<string | null>(null);
 
   const [promoInput, setPromoInput] = useState("");
@@ -238,6 +239,7 @@ export function ContactForm() {
       const fbEventId =
         typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `evt_${Date.now()}_${Math.random()}`;
       const payload = {
+        website: hp, // honeypot (prazno kod pravih kupaca)
         name: form.name,
         phone: form.phone,
         email: form.email,
@@ -314,6 +316,18 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      {/* Honeypot — skriveno od ljudi (i za oči i za čitače ekrana), botovi ga ipak popune.
+          Ako stigne popunjeno, server tiho odbije narudžbu kao spam. */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        value={hp}
+        onChange={(e) => setHp(e.target.value)}
+        className="absolute left-[-9999px] h-0 w-0 opacity-0"
+      />
       {/* LEFT */}
       <div className="space-y-4">
 

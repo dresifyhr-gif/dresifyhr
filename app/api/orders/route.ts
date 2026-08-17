@@ -50,6 +50,14 @@ async function findUnavailableItems(items: { slug: string; klub: string; igrac: 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    // Honeypot: skriveno polje "website" — pravi kupac ga ne vidi ni ne ispuni,
+    // a botovi automatski popune sva polja. Ako je popunjeno → tiho vrati "uspjeh"
+    // (da bot ne shvati da je blokiran) bez slanja obavijesti i spremanja.
+    if (typeof body.website === "string" && body.website.trim() !== "") {
+      return NextResponse.json({ ok: true });
+    }
+
     const { payload, errors } = parseOrderPayload(body);
 
     if (errors.length) {
@@ -61,6 +69,11 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // IP pošiljatelja (za otkrivanje botova/spama) — sprema se na narudžbu.
+    const clientIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || null;
+    payload!.ip = clientIp;
 
     // ── SIGURNOST NOVCA: server prekalkulira dostavu i popust; NE vjeruje klijentu. ──
     // Pogodnosti (besplatna dostava ≥60€, popusti) vrijede SAMO za prijavljene kupce.
@@ -131,8 +144,6 @@ export async function POST(request: Request) {
     // Meta CAPI Purchase (server-side) — best-effort. eventId dolazi s klijenta
     // i dijeli se s browser pikselom radi deduplikacije (Meta broji jednom).
     const { fbp, fbc } = readFbCookies(request.headers.get("cookie"));
-    const clientIp =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip");
     const capiPurchase = sendCapiPurchase({
       eventId: typeof body.fbEventId === "string" ? body.fbEventId : undefined,
       eventSourceUrl: request.headers.get("referer") || undefined,

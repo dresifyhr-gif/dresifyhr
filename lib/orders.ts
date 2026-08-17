@@ -32,6 +32,7 @@ export type OrderPayload = {
   promoCode?: string;
   userId?: string | null; // Clerk user id ako je kupac prijavljen (postavlja server)
   igHandle?: string | null; // Instagram handle upisan na checkoutu (PS5 nagradna igra)
+  ip?: string | null; // IP s kojeg je narudžba poslana (postavlja server; za otkrivanje botova)
   itemCount: number;
   createdAt: string;
   items?: OrderLineInput[];
