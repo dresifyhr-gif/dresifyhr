@@ -69,6 +69,7 @@ type Order = {
   phone: string;
   email: string;
   ip: string;
+  note: string;
   address: string;
   itemCount: number;
   total: number;
@@ -970,6 +971,11 @@ export function OrdersManager() {
                         ))}
                       </ul>
                     )}
+                    {o.note ? (
+                      <div className="mt-1.5 rounded-[8px] border border-amber-400/40 bg-amber-400/10 px-2.5 py-1.5 text-[13px] font-medium text-amber-700 dark:text-amber-300">
+                        📝 {o.note}
+                      </div>
+                    ) : null}
                     </div>
                   </div>
                   <span className="flex flex-wrap items-center justify-end gap-1.5">
