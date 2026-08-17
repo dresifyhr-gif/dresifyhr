@@ -69,6 +69,7 @@ type Order = {
   phone: string;
   email: string;
   ip: string;
+  ipInfo: string;
   note: string;
   address: string;
   itemCount: number;
@@ -958,6 +959,7 @@ export function OrdersManager() {
                         >
                           {o.ip}
                         </a>
+                        {o.ipInfo ? <span className="text-[var(--a-text-2)]"> · {o.ipInfo}</span> : null}
                       </div>
                     ) : null}
                     <div className="mt-0.5 text-xs text-[var(--a-text-3)]">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-[var(--a-text)]">{eur(o.total)}</span></div>

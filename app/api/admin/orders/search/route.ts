@@ -5,6 +5,7 @@ import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { formatCroatianName, phoneKey, repairText } from "@/lib/utils";
+import { lookupIps } from "@/lib/ip-geo";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -233,6 +234,13 @@ export async function GET(request: Request) {
     }
   }
 
+  // Obogati IP-ove država + provajder (IPinfo) — da se botovi vide na prvi pogled.
+  const geos = await lookupIps(slice.map((o) => o.ip));
+  const ipInfoFor = (ip: string | null) => {
+    const g = ip ? geos.get(ip) : undefined;
+    return g ? `${g.flag} ${g.country}${g.org ? " · " + g.org : ""}` : "";
+  };
+
   return NextResponse.json({
     ok: true,
     page,
@@ -251,6 +259,7 @@ export async function GET(request: Request) {
       phone: o.phone || "",
       email: o.email || "",
       ip: o.ip || "",
+      ipInfo: ipInfoFor(o.ip),
       note: repairText(o.note || ""),
       address: repairText(o.address || ""),
       itemCount: o.itemCount,
