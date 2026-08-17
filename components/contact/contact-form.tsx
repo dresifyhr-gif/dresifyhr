@@ -33,6 +33,7 @@ type FormState = {
   email: string;
   fulfillment: FulfillmentType;
   street: string;
+  houseNumber: string;
   city: string;
   postalCode: string;
   manualDetails: string;
@@ -103,6 +104,7 @@ export function ContactForm() {
     email: "",
     fulfillment: "delivery",
     street: "",
+    houseNumber: "",
     city: "",
     postalCode: "",
     manualDetails: "",
@@ -243,7 +245,7 @@ export function ContactForm() {
         name: form.name,
         phone: form.phone,
         email: form.email,
-        street: needsAddress ? form.street : undefined,
+        street: needsAddress ? `${form.street} ${form.houseNumber}`.trim() : undefined,
         city: needsAddress ? form.city : undefined,
         postalCode: needsAddress ? form.postalCode : undefined,
         details,
@@ -440,20 +442,37 @@ export function ContactForm() {
 
           {needsAddress && (
             <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_150px]">
-              <div className="sm:col-span-2">
-                <label htmlFor="street" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
-                  {t.contactForm.street}
-                </label>
-                <input
-                  id="street"
-                  type="text"
-                  autoComplete="street-address"
-                  required
-                  placeholder="Ilica 1"
-                  value={form.street}
-                  onChange={(e) => set("street", e.target.value)}
-                  className={inputClass}
-                />
+              <div className="flex gap-3 sm:col-span-2">
+                <div className="flex-1">
+                  <label htmlFor="street" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
+                    {t.contactForm.street}
+                  </label>
+                  <input
+                    id="street"
+                    type="text"
+                    autoComplete="address-line1"
+                    required
+                    placeholder="Ilica"
+                    value={form.street}
+                    onChange={(e) => set("street", e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="w-28 shrink-0">
+                  <label htmlFor="houseNumber" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
+                    {t.contactForm.houseNumber}
+                  </label>
+                  <input
+                    id="houseNumber"
+                    type="text"
+                    autoComplete="address-line2"
+                    required
+                    placeholder="12b"
+                    value={form.houseNumber}
+                    onChange={(e) => set("houseNumber", e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
               </div>
               <div>
                 <label htmlFor="city" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
@@ -683,7 +702,7 @@ export function ContactForm() {
             )}
           </button>
 
-          <div className="mt-4 flex items-start gap-2 rounded-[8px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2.5">
+          <div className="mt-4 hidden items-start gap-2 rounded-[8px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2.5 xl:flex">
             <Truck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
             <span className="text-xs leading-5 text-white/75">{shipTrust}</span>
           </div>
