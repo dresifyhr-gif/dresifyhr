@@ -272,13 +272,16 @@ export function getJerseySizeOptions(product: Jersey) {
 
 export function productSupportsSize(product: Jersey, size: string) {
   const options = getJerseySizeOptions(product);
+  // Filter po veličini pokazuje samo ono što STVARNO imamo na stanju u toj
+  // veličini — pa izbaci rasprodane veličine i rasprodane segmente (djeca/odrasli).
+  if (options.soldOutSizes.includes(size)) return false;
 
   if ((adultSizes as readonly string[]).includes(size)) {
-    return options.adults.includes(size as (typeof adultSizes)[number]);
+    return !options.adultsOutOfStock && options.adults.includes(size as (typeof adultSizes)[number]);
   }
 
   if ((kidSizes as readonly string[]).includes(size)) {
-    return options.kids.includes(size as (typeof kidSizes)[number]);
+    return !options.kidsOutOfStock && options.kids.includes(size as (typeof kidSizes)[number]);
   }
 
   return false;
