@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { ArrowRight, Loader2, Truck } from "lucide-react";
 
@@ -125,8 +125,49 @@ export function ContactForm() {
   const [klub, setKlub] = useState<{ inCycle: number; target: number; remaining: number; hasReward: boolean } | null>(null);
 
   // Pogodnosti (besplatna dostava, popusti, kodovi) SAMO za prijavljene kupce.
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const signedIn = isSignedIn === true;
+
+  // Prijavljenom kupcu automatski ispuni podatke iz profila (ime/email/telefon) i
+  // zadanu spremljenu adresu — da ne upisuje sve iznova. Ne pregazi ono što je već
+  // sam upisao (prefill samo prazna polja). Radi jednom kad se učita korisnik.
+  const prefilled = useRef(false);
+  useEffect(() => {
+    if (!signedIn || !user || prefilled.current) return;
+    prefilled.current = true;
+
+    const email = user.primaryEmailAddress?.emailAddress || "";
+    const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
+    const clerkPhone = user.primaryPhoneNumber?.phoneNumber || "";
+    setForm((f) => ({
+      ...f,
+      name: f.name || fullName,
+      email: f.email || email,
+      phone: f.phone || clerkPhone
+    }));
+
+    // Zadana spremljena adresa (prva je isDefault) → ulica/kućni broj/grad/pošta.
+    fetch("/api/account/addresses")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const a = d?.addresses?.[0];
+        if (!a) return;
+        // Spremljena adresa ima spojenu ulicu ("Ilica 12b") → razdvoji broj na kraju.
+        const m = String(a.street || "").match(/^(.*?)[\s,]*([0-9]+\s*[a-zA-Z]?)\s*$/);
+        const street = m ? m[1].trim() : String(a.street || "").trim();
+        const houseNumber = m ? m[2].replace(/\s+/g, "") : "";
+        setForm((f) => ({
+          ...f,
+          name: f.name || a.name || "",
+          phone: f.phone || a.phone || "",
+          street: f.street || street,
+          houseNumber: f.houseNumber || houseNumber,
+          city: f.city || a.city || "",
+          postalCode: f.postalCode || a.postalCode || ""
+        }));
+      })
+      .catch(() => {});
+  }, [signedIn, user]);
 
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
