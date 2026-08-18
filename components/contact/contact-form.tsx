@@ -169,6 +169,29 @@ export function ContactForm() {
       .catch(() => {});
   }, [signedIn, user]);
 
+  // Guest "zapamti podatke": za NEprijavljene ispuni iz browsera (localStorage).
+  const [remember, setRemember] = useState(true);
+  const guestPrefilled = useRef(false);
+  useEffect(() => {
+    if (isSignedIn !== false || guestPrefilled.current) return; // samo potvrđeni gosti
+    guestPrefilled.current = true;
+    try {
+      const raw = localStorage.getItem("dresify_guest_details");
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      setForm((f) => ({
+        ...f,
+        name: f.name || d.name || "",
+        phone: f.phone || d.phone || "",
+        email: f.email || d.email || "",
+        street: f.street || d.street || "",
+        houseNumber: f.houseNumber || d.houseNumber || "",
+        city: f.city || d.city || "",
+        postalCode: f.postalCode || d.postalCode || ""
+      }));
+    } catch {}
+  }, [isSignedIn]);
+
   const needsAddress = form.fulfillment === "delivery";
   const selectedOption = FULFILLMENT_OPTIONS.find((o) => o.id === form.fulfillment)!;
   const orderSubtotal = hasCartItems ? subtotal : JERSEY_PRICE_EUR;
@@ -345,6 +368,20 @@ export function ContactForm() {
       clearCart();
       try { localStorage.removeItem(GIFT_STORAGE_KEY); } catch {}
       try { localStorage.removeItem(PROMO_STORAGE_KEY); } catch {}
+      // Guest "zapamti podatke" — spremi/očisti u browseru za sljedeću narudžbu.
+      try {
+        if (remember) {
+          localStorage.setItem(
+            "dresify_guest_details",
+            JSON.stringify({
+              name: form.name, phone: form.phone, email: form.email,
+              street: form.street, houseNumber: form.houseNumber, city: form.city, postalCode: form.postalCode
+            })
+          );
+        } else {
+          localStorage.removeItem("dresify_guest_details");
+        }
+      } catch {}
       // Podaci za Google Customer Reviews opt-in na /zahvala (email NE ide u URL).
       try {
         sessionStorage.setItem("dresify_gcr", JSON.stringify({ orderId: payload.createdAt, email: form.email }));
@@ -562,6 +599,21 @@ export function ContactForm() {
               className={inputClass}
             />
           </div>
+
+          {/* Guest "zapamti podatke" — samo za neprijavljene (prijavljeni imaju profil). */}
+          {isSignedIn === false && (
+            <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-[8px] border border-white/10 bg-white/[0.02] px-3 py-2.5">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-accent"
+              />
+              <span className="text-xs leading-5 text-white/60">
+                <span className="font-semibold text-white/80">Zapamti moje podatke</span> na ovom uređaju za bržu sljedeću narudžbu. Ostaju samo u tvom pregledniku.
+              </span>
+            </label>
+          )}
 
           {/* PS5 nagradna igra — neobavezno IG polje; upisom kupac automatski ulazi u igru */}
           <div className="mt-5 rounded-[10px] border border-accent/30 bg-accent/[0.05] p-4">
