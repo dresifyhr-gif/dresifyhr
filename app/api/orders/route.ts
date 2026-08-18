@@ -11,6 +11,7 @@ import { getProductBySlug } from "@/lib/data/product-overrides";
 import { getJerseyBySlug, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { normalizeIgHandle, autoEnterGiveaway } from "@/lib/giveaway";
 import { sendCapiPurchase } from "@/lib/meta-capi";
+import { decrementSizeStock } from "@/lib/stock";
 
 export const runtime = "nodejs";
 
@@ -164,7 +165,8 @@ export async function POST(request: Request) {
       logOrderToSheet(payload!),
       saveOrderToDb(payload!),
       autoEnterGiveaway(payload!.igHandle, payload!.name, payload!.userId ?? null, payload!.email, payload!.phone),
-      capiPurchase
+      capiPurchase,
+      decrementSizeStock(payload!.items)
     ]);
 
     return NextResponse.json({
