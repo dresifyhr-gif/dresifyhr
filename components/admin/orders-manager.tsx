@@ -686,7 +686,7 @@ export function OrdersManager() {
           onClick={checkDeliveries}
           disabled={glsChecking}
           title="Provjeri kod kurira (GLS + HP) koje su pošiljke dostavljene i označi ih (može potrajati par sekundi)"
-          className="rounded-[10px] border border-sky-300 bg-sky-50 px-3 py-1.5 text-[12px] font-semibold text-sky-700 transition hover:bg-sky-100 disabled:opacity-50"
+          className="whitespace-nowrap rounded-[10px] border border-sky-300 bg-sky-50 px-3 py-1.5 text-[12px] font-semibold text-sky-700 transition-colors hover:bg-sky-100 disabled:opacity-50"
         >
           {glsChecking ? "⏳ Provjeravam…" : "🚚 Provjeri dostave"}
         </button>
