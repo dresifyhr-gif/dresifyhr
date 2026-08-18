@@ -22,13 +22,19 @@ type Custom = {
   description: string | null;
   images: string[];
   hidden: boolean;
+  sizeStock?: Record<string, number>;
 };
 
 
 // Veličine: sastavi "Odrasli" / "Djeca" dio (getJerseySizeOptions gleda ove ključne riječi u vel).
 const buildVel = (adults: boolean, kids: boolean) =>
   [kids ? "Djeca: 104-176" : "", adults ? "Odrasli: S-XXL" : ""].filter(Boolean).join(" · ") || "Odrasli: S-XXL";
-const empty = { id: "", category: "dres", klub: "", igrac: "", liga: "Reprezentacija", price: "20", retro: false, adults: true, kids: true, badge: "", description: "", images: [] as string[] };
+const empty = { id: "", category: "dres", klub: "", igrac: "", liga: "Reprezentacija", price: "20", retro: false, adults: true, kids: true, badge: "", description: "", images: [] as string[], sizeStock: {} as Record<string, string> };
+
+// Veličine za unos količine (po segmentu). Prazno polje = ne pratim (nepoznato).
+const FORM_ADULT = ["S", "M", "L", "XL", "XXL"];
+const FORM_KIDS = ["104", "116", "128", "140", "152", "164", "176"];
+const FORM_STREET = ["XS", "S", "M", "L"];
 
 export function CustomProducts() {
   const LIGE = useLeagues();
@@ -135,7 +141,7 @@ export function CustomProducts() {
 
   function edit(p: Custom) {
     const vel = p.vel || "Djeca: 104-176 · Odrasli: S-XXL";
-    setF({ id: p.id, category: p.category || "dres", klub: p.klub, igrac: p.igrac, liga: p.liga, price: String(p.price), retro: p.retro, adults: vel.includes("Odrasli"), kids: vel.includes("Djeca"), badge: p.badge || "", description: p.description || "", images: p.images });
+    setF({ id: p.id, category: p.category || "dres", klub: p.klub, igrac: p.igrac, liga: p.liga, price: String(p.price), retro: p.retro, adults: vel.includes("Odrasli"), kids: vel.includes("Djeca"), badge: p.badge || "", description: p.description || "", images: p.images, sizeStock: Object.fromEntries(Object.entries(p.sizeStock || {}).map(([k, v]) => [k, String(v)])) });
     setOpen(true);
   }
 
@@ -145,7 +151,17 @@ export function CustomProducts() {
     await fetch("/api/admin/custom-products/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...f, price: Number(f.price.replace(",", ".")) || 20, vel: buildVel(f.adults, f.kids) })
+      body: JSON.stringify({
+        ...f,
+        price: Number(f.price.replace(",", ".")) || 20,
+        vel: buildVel(f.adults, f.kids),
+        // Samo upisane veličine (prazno = ne pratim/nepoznato).
+        sizeStock: Object.fromEntries(
+          Object.entries(f.sizeStock)
+            .filter(([, v]) => String(v).trim() !== "")
+            .map(([k, v]) => [k, Number(v)])
+        )
+      })
     }).catch(() => {});
     setSaving(false);
     setF({ ...empty });
@@ -276,6 +292,37 @@ export function CustomProducts() {
               </>
             )}
           </div>
+
+          {/* Količina po veličini (opcionalno). Prazno = ne pratim zalihu te veličine.
+              Broj se automatski smanjuje nakon narudžbe; 0 = rasprodano (crveno). */}
+          {(() => {
+            const sizes =
+              f.category === "streetwear" ? FORM_STREET : [...(f.adults ? FORM_ADULT : []), ...(f.kids ? FORM_KIDS : [])];
+            if (!sizes.length) return null;
+            return (
+              <div>
+                <p className="mb-1.5 text-[11px] text-[var(--a-text-3)]">
+                  Količina po veličini <span className="opacity-70">(ostavi prazno ako ne pratiš)</span>
+                </p>
+                <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+                  {sizes.map((s) => (
+                    <label key={s} className="flex flex-col gap-0.5">
+                      <span className="text-[10px] text-[var(--a-text-3)]">{s}</span>
+                      <input
+                        type="number"
+                        min={0}
+                        inputMode="numeric"
+                        value={f.sizeStock[s] ?? ""}
+                        onChange={(e) => setF({ ...f, sizeStock: { ...f.sizeStock, [s]: e.target.value } })}
+                        placeholder="—"
+                        className="a-input w-full px-2 py-1 text-sm"
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="flex items-center gap-4 text-xs text-[var(--a-text-2)]">
             {f.category === "dres" && (
