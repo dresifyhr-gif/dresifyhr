@@ -100,7 +100,7 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
                   loop
                   playsInline
                   draggable={false}
-                  className="pointer-events-none h-full w-full select-none object-contain"
+                  className="pointer-events-none h-full w-full select-none object-cover"
                 />
               ) : (
                 <Image

@@ -5,7 +5,7 @@ import { unstable_cache } from "next/cache";
 // Broj Instagram pratitelja dolazi iz istog Behold feeda koji već koristimo za widget
 // (components/home/instagram-section.tsx). Behold JSON vraća polje `followersCount`.
 const BEHOLD_FEED = "https://feeds.behold.so/Mr4iBO03Jb1m1NL5S20x";
-const FALLBACK = 2291; // zadnja poznata vrijednost ako Behold ne odgovori
+const FALLBACK = 2505; // zadnja poznata vrijednost ako Behold ne odgovori (Behold pauziran zbog overage 18.8.)
 
 const fetchFollowers = unstable_cache(
   async (): Promise<number> => {
