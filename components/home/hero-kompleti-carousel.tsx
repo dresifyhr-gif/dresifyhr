@@ -42,11 +42,11 @@ const SWIPE_THRESHOLD = 45;
 export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }) {
   const SLIDES: Slide[] = [
     VIDEO_SLIDE,
-    ...KOMPLET_SLIDES,
     PS5_SLIDE,
     ...(mysteryImage
       ? [{ key: "mystery", alt: "Mystery Box — nasumičan dres, iznenađenje", src: mysteryImage, href: "/dres/dresify-mystery-3-pack", cta: "Naruči Mystery Box →" } as Slide]
-      : [])
+      : []),
+    ...KOMPLET_SLIDES
   ];
   const [index, setIndex] = useState(0);
   const pausedRef = useRef(false);
