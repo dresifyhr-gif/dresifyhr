@@ -386,21 +386,20 @@ function TrackingRow({ id, initial, courier }: { id: string; initial: string; co
   const trackUrl = isHp ? TRACK_URL.hp : TRACK_URL.gls;
   const trackLabel = isHp ? "Prati na Pošti" : "Prati na GLS-u";
   const [val, setVal] = useState(initial);
+  const [baseline, setBaseline] = useState(initial); // zadnje spremljeno stanje
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const isSaved = val.trim() === baseline.trim() && baseline.trim() !== "";
 
   async function save() {
     if (saving) return;
     setSaving(true);
-    setSaved(false);
     await fetch(`/api/admin/orders/${id}/tracking/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tracking: val })
     }).catch(() => {});
+    setBaseline(val); // nakon spremanja gumb ostane "✓ Spremljeno" i onemogućen
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
   }
 
   return (
@@ -414,10 +413,14 @@ function TrackingRow({ id, initial, courier }: { id: string; initial: string; co
       <button
         type="button"
         onClick={save}
-        disabled={saving || val === initial}
-        className="rounded-[10px] border border-[var(--a-line)] px-2.5 py-1 text-[11px] font-medium text-[var(--a-text-2)] transition hover:bg-[var(--a-surface-2)] disabled:opacity-40"
+        disabled={saving || isSaved || val.trim() === baseline.trim()}
+        className={`rounded-[10px] border px-2.5 py-1 text-[11px] font-medium transition disabled:cursor-default ${
+          isSaved
+            ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+            : "border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)] disabled:opacity-40"
+        }`}
       >
-        {saving ? "…" : saved ? "✓ spremljeno" : "Spremi"}
+        {saving ? "Spremam…" : isSaved ? "✓ Spremljeno" : "Spremi"}
       </button>
       {val.trim() && (
         <a
