@@ -5,7 +5,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 
-type Slide = { key: string; alt: string; src: string; href: string; cta: string };
+type Slide = { key: string; alt: string; src?: string; video?: string; poster?: string; href: string; cta: string };
+
+// Video promo — prvi slide u rotaciji.
+const VIDEO_SLIDE: Slide = {
+  key: "video",
+  alt: "Dresify — nogometni dresovi",
+  video: "/hero/promo.mp4",
+  poster: "/hero/promo-poster.jpg",
+  href: "/dresovi",
+  cta: "Pogledaj dresove →"
+};
 
 const KOMPLET_SLIDES: Slide[] = [
   { key: "hrvatska-modric-komplet", alt: "Hrvatska Modrić komplet — dres, hlačice, lopta i kapa" },
@@ -31,6 +41,7 @@ const SWIPE_THRESHOLD = 45;
 
 export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }) {
   const SLIDES: Slide[] = [
+    VIDEO_SLIDE,
     ...KOMPLET_SLIDES,
     PS5_SLIDE,
     ...(mysteryImage
@@ -80,15 +91,28 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
               exit={{ opacity: 0, x: -24 }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
             >
-              <Image
-                src={active.src}
-                alt={active.alt}
-                fill
-                priority
-                sizes="540px"
-                draggable={false}
-                className="pointer-events-none object-contain select-none"
-              />
+              {active.video ? (
+                <video
+                  src={active.video}
+                  poster={active.poster}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  draggable={false}
+                  className="pointer-events-none h-full w-full select-none object-contain"
+                />
+              ) : (
+                <Image
+                  src={active.src as string}
+                  alt={active.alt}
+                  fill
+                  priority
+                  sizes="540px"
+                  draggable={false}
+                  className="pointer-events-none object-contain select-none"
+                />
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
