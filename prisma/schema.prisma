@@ -261,6 +261,7 @@ model Settings {
   // Brend / kontakt (vidljivo na shopu)
   whatsappNumber      String?  // samo znamenke, npr. 385976047510
   instagramHandle     String?  // npr. dresify.hr (bez @)
+  igFollowers         Int?     // ručno upisan broj IG pratitelja (za PS5 giveaway brojač)
   // Operativa
   leagues             String?  // JSON niz liga za forme proizvoda
   notifyEmail         Boolean? // šalji obavijest o narudžbi na email

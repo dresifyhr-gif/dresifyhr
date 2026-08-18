@@ -73,7 +73,8 @@ export async function POST(request: Request) {
     businessName: strOrNull(b?.businessName),
     contactPhone: strOrNull(b?.contactPhone),
     contactEmail: strOrNull(b?.contactEmail),
-    monthlyGoal: numOrNull(b?.monthlyGoal)
+    monthlyGoal: numOrNull(b?.monthlyGoal),
+    igFollowers: numOrNull(b?.igFollowers)
   };
 
   await prisma.settings.upsert({

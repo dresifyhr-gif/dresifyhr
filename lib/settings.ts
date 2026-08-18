@@ -38,6 +38,7 @@ export type ShopSettings = {
   businessName: string;
   whatsappNumber: string;
   instagramHandle: string;
+  igFollowers: number;
   leagues: string[];
   notifyEmail: boolean;
   notifyTelegram: boolean;
@@ -86,6 +87,7 @@ const DEFAULTS: ShopSettings = {
   businessName: SITE_NAME,
   whatsappNumber: WHATSAPP_NUMBER,
   instagramHandle: INSTAGRAM_HANDLE.replace(/^@/, ""),
+  igFollowers: 0,
   leagues: DEFAULT_LEAGUES,
   notifyEmail: true,
   notifyTelegram: true,
@@ -164,6 +166,7 @@ export async function getSettings(): Promise<ShopSettings> {
     businessName: str(r.businessName, DEFAULTS.businessName),
     whatsappNumber: str(r.whatsappNumber, DEFAULTS.whatsappNumber).replace(/\D/g, ""),
     instagramHandle: str(r.instagramHandle, DEFAULTS.instagramHandle).replace(/^@/, ""),
+    igFollowers: Math.max(0, Math.round(num(r.igFollowers, 0))),
     leagues: parseLeagues(r.leagues) ?? DEFAULTS.leagues,
     notifyEmail: bool(r.notifyEmail, DEFAULTS.notifyEmail),
     notifyTelegram: bool(r.notifyTelegram, DEFAULTS.notifyTelegram),

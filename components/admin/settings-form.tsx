@@ -20,6 +20,7 @@ type Settings = {
   contactEmail: string;
   whatsappNumber: string;
   instagramHandle: string;
+  igFollowers: number;
   leagues: string[];
   notifyEmail: boolean;
   notifyTelegram: boolean;
@@ -109,7 +110,7 @@ export function SettingsForm() {
         igorName: s.senders.igor.name, igorAddress: s.senders.igor.address, igorCity: s.senders.igor.city,
         ivicaName: s.senders.ivica.name, ivicaAddress: s.senders.ivica.address, ivicaCity: s.senders.ivica.city,
         iban: s.iban, businessName: s.businessName, contactPhone: s.contactPhone, contactEmail: s.contactEmail,
-        whatsappNumber: s.whatsappNumber, instagramHandle: s.instagramHandle, leagues: s.leagues,
+        whatsappNumber: s.whatsappNumber, instagramHandle: s.instagramHandle, igFollowers: s.igFollowers, leagues: s.leagues,
         notifyEmail: s.notifyEmail, notifyTelegram: s.notifyTelegram, notifyWhatsapp: s.notifyWhatsapp,
         announcementActive: s.announcementActive, announcementText: s.announcementText,
         heroTitle: s.heroTitle, heroSubtitle: s.heroSubtitle,
@@ -300,6 +301,11 @@ export function SettingsForm() {
           <div>
             <span className={label}>Instagram (bez @)</span>
             <input value={s.instagramHandle} onChange={setStr("instagramHandle")} placeholder="dresify.hr" className={inp} />
+          </div>
+          <div>
+            <span className={label}>IG pratitelji (za PS5 brojač)</span>
+            <input value={s.igFollowers || ""} onChange={setNum("igFollowers")} inputMode="numeric" placeholder="2505" className={inp} />
+            <p className="mt-1 text-[11px] text-[var(--a-text-3)]">Ručno upiši trenutni broj pratitelja — prikazuje se u PS5 nagradnoj igri. 0/prazno = ne koristi se.</p>
           </div>
         </div>
       </Card>

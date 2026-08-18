@@ -1,6 +1,7 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
+import { getSettings } from "@/lib/settings";
 
 // Broj Instagram pratitelja preko službenog Meta Instagram Graph API-ja (besplatno,
 // veliki limiti — za razliku od Beholda koji je puknuo na overage). Treba u Vercel:
@@ -31,5 +32,9 @@ const fetchFollowers = unstable_cache(
 );
 
 export async function getFollowerCount(): Promise<number> {
+  // Ručno upisan broj u Postavkama ima prednost (Gazda sam ažurira). Ako nije
+  // postavljen (0), pokušaj Instagram Graph API, pa fallback.
+  const { igFollowers } = await getSettings();
+  if (igFollowers && igFollowers > 0) return igFollowers;
   return fetchFollowers();
 }
