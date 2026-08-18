@@ -59,11 +59,13 @@ export default async function HomePage() {
   const dresovi = (await getCatalogProducts(jerseys)).filter((j) => j.liga !== "Komplet");
   const streetwear = await getStreetwearProducts();
   const testimonials = await getVisibleTestimonials();
+  // Mystery box slika za hero rotaciju (ako je proizvod dodan i ima sliku).
+  const mysteryImage = dresovi.find((p) => p.slug?.includes("mystery"))?.images?.[0]?.src;
 
   return (
     <>
       <Ps5HomeBanner />
-      <HeroSection />
+      <HeroSection mysteryImage={mysteryImage} />
       {show("trust") && <TrustStrip />}
       {show("streetwear") && streetwear.length > 0 && (
         <StreetwearBanner

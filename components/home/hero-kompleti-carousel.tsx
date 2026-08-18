@@ -5,21 +5,38 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 
-const SLIDES = [
-  { slug: "hrvatska-modric-komplet", alt: "Hrvatska Modrić komplet — dres, hlačice, lopta i kapa" },
-  { slug: "barcelona-yamal-komplet", alt: "Barcelona Yamal komplet — dres, hlačice, lopta i kapa" },
-  { slug: "real-mbappe-komplet", alt: "Real Madrid Mbappé komplet — dres, hlačice, lopta i kapa" },
-  { slug: "milan-modric-komplet", alt: "AC Milan Modrić komplet — dres, hlačice, lopta i kapa" },
-  { slug: "bayern-kane-komplet", alt: "Bayern Kane komplet — dres, hlačice, lopta i kapa" },
-  { slug: "intermiami-messi-komplet", alt: "Inter Miami Messi komplet — dres, hlačice, lopta i kapa" },
-  { slug: "njemacka-wirtz-komplet", alt: "Njemačka Wirtz komplet — dres, hlačice, lopta i kapa" },
-  { slug: "portugal-ronaldo-komplet", alt: "Portugal Ronaldo komplet — dres, hlačice, lopta i kapa" },
-];
+type Slide = { key: string; alt: string; src: string; href: string; cta: string };
+
+const KOMPLET_SLIDES: Slide[] = [
+  { key: "hrvatska-modric-komplet", alt: "Hrvatska Modrić komplet — dres, hlačice, lopta i kapa" },
+  { key: "barcelona-yamal-komplet", alt: "Barcelona Yamal komplet — dres, hlačice, lopta i kapa" },
+  { key: "real-mbappe-komplet", alt: "Real Madrid Mbappé komplet — dres, hlačice, lopta i kapa" },
+  { key: "milan-modric-komplet", alt: "AC Milan Modrić komplet — dres, hlačice, lopta i kapa" },
+  { key: "bayern-kane-komplet", alt: "Bayern Kane komplet — dres, hlačice, lopta i kapa" },
+  { key: "intermiami-messi-komplet", alt: "Inter Miami Messi komplet — dres, hlačice, lopta i kapa" },
+  { key: "njemacka-wirtz-komplet", alt: "Njemačka Wirtz komplet — dres, hlačice, lopta i kapa" },
+  { key: "portugal-ronaldo-komplet", alt: "Portugal Ronaldo komplet — dres, hlačice, lopta i kapa" },
+].map((s) => ({ ...s, src: `/dresovi/${s.key}/komplet.png`, href: "/kompleti", cta: "Pogledaj komplete →" }));
+
+const PS5_SLIDE: Slide = {
+  key: "ps5",
+  alt: "Osvoji PS5 + EA SPORTS FC 27 — Dresify nagradna igra",
+  src: "/ps5/hero.png",
+  href: "/ps5",
+  cta: "Sudjeluj u nagradnoj igri →"
+};
 
 const INTERVAL_MS = 4000;
 const SWIPE_THRESHOLD = 45;
 
-export function HeroKompletiCarousel() {
+export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }) {
+  const SLIDES: Slide[] = [
+    ...KOMPLET_SLIDES,
+    PS5_SLIDE,
+    ...(mysteryImage
+      ? [{ key: "mystery", alt: "Mystery Box — nasumičan dres, iznenađenje", src: mysteryImage, href: "/dres/dresify-mystery-3-pack", cta: "Naruči Mystery Box →" } as Slide]
+      : [])
+  ];
   const [index, setIndex] = useState(0);
   const pausedRef = useRef(false);
 
@@ -48,7 +65,7 @@ export function HeroKompletiCarousel() {
         <div className="relative aspect-square">
           <AnimatePresence mode="wait">
             <motion.div
-              key={active.slug}
+              key={active.key}
               className="absolute inset-0 cursor-grab active:cursor-grabbing"
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
@@ -64,7 +81,7 @@ export function HeroKompletiCarousel() {
               transition={{ duration: 0.35, ease: "easeInOut" }}
             >
               <Image
-                src={`/dresovi/${active.slug}/komplet.png`}
+                src={active.src}
                 alt={active.alt}
                 fill
                 priority
@@ -81,7 +98,7 @@ export function HeroKompletiCarousel() {
       <div className="mt-3 flex justify-center gap-2">
         {SLIDES.map((slide, i) => (
           <button
-            key={slide.slug}
+            key={slide.key}
             type="button"
             aria-label={`Komplet ${i + 1}`}
             onClick={() => { pausedRef.current = true; setIndex(i); }}
@@ -93,10 +110,10 @@ export function HeroKompletiCarousel() {
       </div>
 
       <Link
-        href="/kompleti"
+        href={active.href}
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-[8px] border border-accent/40 bg-accent/10 py-2.5 text-sm font-semibold uppercase tracking-[0.16em] text-accent transition hover:bg-accent hover:text-black"
       >
-        Pogledaj komplete →
+        {active.cta}
       </Link>
     </div>
   );

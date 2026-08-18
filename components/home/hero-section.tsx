@@ -14,7 +14,7 @@ const TICKER_ITEMS = [
   "Neymar", "Yamal", "Griezmann", "Musiala", "Raphinha", "Kvaratskhelia",
 ];
 
-export function HeroSection() {
+export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
   // Naslov/podnaslov iz Postavki; prazno = zadani tekst iz prijevoda.
   const { heroTitle, heroSubtitle } = useShopSettings();
   const customTitleLines = heroTitle ? heroTitle.split("\n").map((l) => l.trim()).filter(Boolean) : null;
@@ -120,7 +120,7 @@ export function HeroSection() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.12, ease: "easeOut" }}
           >
-            <HeroKompletiCarousel />
+            <HeroKompletiCarousel mysteryImage={mysteryImage} />
           </motion.div>
         </div>
 
