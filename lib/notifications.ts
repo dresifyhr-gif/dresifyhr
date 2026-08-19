@@ -2,7 +2,7 @@ import "server-only";
 
 import nodemailer from "nodemailer";
 
-import { CONTACT_EMAIL, WHATSAPP_NUMBER } from "@/lib/site";
+import { CONTACT_EMAIL, WHATSAPP_NUMBER, GOOGLE_REVIEW_URL } from "@/lib/site";
 import { getSettings } from "@/lib/settings";
 import {
   type OrderPayload,
@@ -150,6 +150,10 @@ export async function sendShippedTrackingEmail(o: {
             <div style="font-size:24px;font-weight:800;letter-spacing:2px;margin-top:4px;">${o.tracking}</div>
           </div>
           <a href="${trackUrl}" style="display:inline-block;background:#E8FF3C;color:#000;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:8px;">📦 Prati paket</a>
+          <div style="margin:22px 0 0;padding:16px;background:#F5F5F5;border-radius:10px;">
+            <p style="font-size:14px;color:#333;margin:0 0 10px;">⭐ Kad ti paket stigne i budeš zadovoljan — ostavi nam recenziju na Googleu, znači nam puno!</p>
+            <a href="${GOOGLE_REVIEW_URL}" style="display:inline-block;background:#111;color:#fff;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:8px;font-size:13px;">⭐ Ocijeni nas na Googleu</a>
+          </div>
           <p style="font-size:13px;color:#888;margin:20px 0 0;">Hvala na povjerenju! — Dresify</p>
         </div>
       </div>`;

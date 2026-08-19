@@ -5,6 +5,7 @@ import { ArrowRight, CheckCircle2, Instagram } from "lucide-react";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { GiveawayEntryForm } from "@/components/site/giveaway-entry-form";
 import { GoogleReviewsOptIn } from "@/components/site/google-reviews-optin";
+import { GOOGLE_REVIEW_URL } from "@/lib/site";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
@@ -65,6 +66,19 @@ export default async function ThankYouPage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+
+        {/* Google recenzija — zamoli kupca da ocijeni (gradi povjerenje + zvjezdice u Googleu) */}
+        <a
+          href={GOOGLE_REVIEW_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 flex items-center justify-center gap-3 rounded-[16px] border border-white/10 bg-white/[0.03] px-6 py-5 text-center transition hover:border-accent/40 hover:bg-white/[0.05]"
+        >
+          <span className="text-2xl">⭐</span>
+          <span className="text-sm text-white/80 sm:text-base">
+            <b className="text-white">Zadovoljan kupnjom?</b> Ostavi recenziju na Googleu — pomažeš drugima i nama! →
+          </span>
+        </a>
 
         {/* PS5 nagradna igra — zaprati + upiši Instagram da uđeš (kupnja već donosi +5 bodova) */}
         <div className="mt-6 rounded-[16px] border border-accent/30 bg-accent/[0.05] p-6 text-center sm:p-8">

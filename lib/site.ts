@@ -6,6 +6,8 @@ export const WHATSAPP_NUMBER = "385976047510";
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 export const INSTAGRAM_HANDLE = "@dresify.hr";
 export const INSTAGRAM_URL = "https://instagram.com/dresify.hr";
+// Google recenzije (Business Profile) — kupci ostave ocjenu na Googleu.
+export const GOOGLE_REVIEW_URL = "https://g.page/r/CYyFuSQaXA_MEBM/review";
 export const CONTACT_PHONE_DISPLAY = "+385 97 604 7510";
 export const CONTACT_EMAIL = "dresify.hr@gmail.com";
 export const CURRENCY_LABEL = "20\u20ac";
