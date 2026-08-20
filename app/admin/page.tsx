@@ -101,7 +101,12 @@ export default async function AdminOverview() {
     <AdminShell title="Pregled" subtitle="Sve najvažnije na jednom mjestu">
       {/* Greeting */}
       <div className="mb-5">
-        <h2 className="text-2xl font-bold tracking-tight text-[var(--a-text)]">{greeting()}, {me?.username || "Gazda"} 👋</h2>
+        <h2
+          className="text-[26px] font-bold tracking-tight text-[var(--a-text)]"
+          style={{ fontFamily: "var(--font-barlow), sans-serif", letterSpacing: "-0.01em" }}
+        >
+          {greeting()}, {me?.username || "Gazda"} 👋
+        </h2>
         <p className="text-sm text-[var(--a-text-2)]">
           {new Date().toLocaleDateString("hr-HR", { timeZone: "Europe/Zagreb", weekday: "long", day: "numeric", month: "long", year: "numeric" })}
         </p>
