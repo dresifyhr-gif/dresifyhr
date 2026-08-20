@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAction } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { markCashCollectedInSheet } from "@/lib/sheets";
 import { issueKlubRewardIfEarned } from "@/lib/klub";
@@ -8,9 +8,9 @@ import { issueKlubRewardIfEarned } from "@/lib/klub";
 export const runtime = "nodejs";
 
 // Pouzeće: označi da su novci prikupljeni (poštar predao) — ili poništi.
-// Prikupio = tko je poslao (shippedBy). Zrcali se u Google Sheet (best-effort).
+// Novac → samo vlasnik. Prikupio = tko je poslao (shippedBy). Zrcali se u Google Sheet.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await requireAction("owner"))) return NextResponse.json({ ok: false, message: "Naplatu radi samo vlasnik." }, { status: 403 });
 
   const { id } = await params;
   const body = await request.json().catch(() => ({}));

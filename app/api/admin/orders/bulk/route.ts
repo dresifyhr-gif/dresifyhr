@@ -19,6 +19,11 @@ export async function POST(request: Request) {
   const action = String(body?.action || "");
   const by = body?.by === "ivica" ? "ivica" : body?.by === "igor" ? "igor" : null;
 
+  // Naplata pouzeća (collect) = novac → samo vlasnik. Slanje/assign ostaje osoblju.
+  if (action === "collect" && me?.role !== "OWNER") {
+    return NextResponse.json({ ok: false, message: "Naplatu radi samo vlasnik." }, { status: 403 });
+  }
+
   if (!ids.length) return NextResponse.json({ ok: false, message: "Ništa nije označeno" }, { status: 400 });
 
   const orders = await prisma.order.findMany({

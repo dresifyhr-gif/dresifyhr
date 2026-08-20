@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getAdminUser, isAdmin } from "@/lib/admin-auth";
+import { isAdmin, requireAction } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -77,8 +77,8 @@ export async function GET() {
 
 // Spremi zapis isplate (poziva se nakon što se narudžbe označe naplaćenima).
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
-  const me = await getAdminUser();
+  const me = await requireAction("owner"); // GLS isplata (novac) = samo vlasnik
+  if (!me) return NextResponse.json({ ok: false }, { status: 403 });
   const body = await request.json().catch(() => ({}));
   const amount = Number(body?.amount) || 0;
   const matchedTotal = Number(body?.matchedTotal) || 0;
