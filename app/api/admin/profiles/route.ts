@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic"; // uvijek svježe iz baze (bez build-time keša)
 
 // Javna lista profila SAMO za login-kartice: username + slika. Bez uloga/hasheva.
 // Ako nema nijednog profila → login pada na staru zajedničku lozinku (bootstrap).
