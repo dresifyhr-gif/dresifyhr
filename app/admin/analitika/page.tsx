@@ -42,6 +42,7 @@ export default async function AnalyticsPage() {
           )}
         </Panel>
 
+        <div id="reklame" className="scroll-mt-24" />
         <Panel title="Reklame — isplativost">
           <div className="grid grid-cols-3 gap-3">
             <div>

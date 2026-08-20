@@ -285,6 +285,18 @@ export default async function AdminOverview() {
       {/* Partner split */}
       <div className="mt-5">
         <Panel title="Podjela Igor / Ivica (50 / 50, samo poslano)">
+          {/* Brzi pristup isplatama — sve na jednom mjestu (poravnanje je niže). */}
+          <div className="mb-4 flex flex-wrap gap-2">
+            <a href="/admin/gls-isplata" className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-4 py-2 text-[13px] font-semibold text-[var(--a-text)] transition hover:bg-[var(--a-card)]">
+              💶 GLS isplata
+            </a>
+            <a href="/admin/analitika#reklame" className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-4 py-2 text-[13px] font-semibold text-[var(--a-text)] transition hover:bg-[var(--a-card)]">
+              📣 Reklame
+            </a>
+            <a href="#poravnanje" className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-4 py-2 text-[13px] font-semibold text-[var(--a-text)] transition hover:bg-[var(--a-card)]">
+              🤝 Poravnanje
+            </a>
+          </div>
           {/* Trajna evidencija — čista zarada od početka, NE resetira se poravnanjem */}
           <div className="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] p-4">
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600">
@@ -380,7 +392,7 @@ export default async function AdminOverview() {
               <span className="text-[var(--a-text)]">svakom {eur(m.split.adsSpend / 2)}</span>
             </div>
           )}
-          <div className="mt-4 flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-[var(--a-line)] bg-[var(--a-surface-2)] p-4 text-center">
+          <div id="poravnanje" className="mt-4 flex scroll-mt-24 flex-col items-center gap-3 rounded-xl border-2 border-dashed border-[var(--a-line)] bg-[var(--a-surface-2)] p-4 text-center">
             {m.split.settleFrom == null ? (
               <div className="text-sm font-semibold text-[var(--a-text-2)]">Sve je izjednačeno — nitko nikom ne duguje ✅</div>
             ) : (

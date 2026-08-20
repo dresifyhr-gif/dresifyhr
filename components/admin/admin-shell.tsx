@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Ticket, Sun, Moon, Gift } from "lucide-react";
+import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Ticket, Sun, Moon } from "lucide-react";
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
 import { CommandPalette } from "@/components/admin/command-palette";
@@ -13,15 +13,17 @@ const NAV = [
   { href: "/admin/narudzbe", label: "Narudžbe", hint: "Traži i mijenjaj", icon: Package },
   { href: "/admin/proizvodi", label: "Proizvodi", hint: "Cijena i zaliha", icon: Shirt },
   { href: "/admin/kupci", label: "Kupci", hint: "Tko kupuje", icon: Users },
-  { href: "/admin/kodovi", label: "Kodovi", hint: "Popusti", icon: Ticket },
-  { href: "/admin/analitika", label: "Analitika", hint: "Brojke i trendovi", icon: BarChart3 },
-  { href: "/admin/nagradna-igra", label: "Nagradna igra", short: "Igra", hint: "PS5 prijave", icon: Gift }
+  { href: "/admin/kodovi", label: "Akcije", hint: "Kodovi i nagradna igra", icon: Ticket },
+  { href: "/admin/analitika", label: "Analitika", hint: "Brojke i trendovi", icon: BarChart3 }
 ];
 
 function isActive(pathname: string, href: string) {
   // trailingSlash: true → putanja je "/admin/", pa uspoređujemo bez završne crte.
   const p = pathname.replace(/\/+$/, "") || "/admin";
-  return href === "/admin" ? p === "/admin" : p.startsWith(href);
+  if (href === "/admin") return p === "/admin";
+  // "Akcije" (/admin/kodovi) pokriva i nagradnu igru + izvlačenje.
+  if (href === "/admin/kodovi") return p.startsWith("/admin/kodovi") || p.startsWith("/admin/nagradna-igra") || p.startsWith("/admin/izvlacenje");
+  return p.startsWith(href);
 }
 
 function Brand() {
@@ -181,7 +183,7 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
               <span className={`flex h-7 w-10 items-center justify-center rounded-full transition-all duration-150 ${active ? "bg-accent/60" : ""}`}>
                 <Icon className={`h-[17px] w-[17px] ${active ? "text-[var(--a-text)]" : "text-[var(--a-text-3)]"}`} />
               </span>
-              <span className="w-full truncate px-0.5 text-center leading-tight">{item.short ?? item.label}</span>
+              <span className="w-full truncate px-0.5 text-center leading-tight">{item.label}</span>
             </Link>
           );
         })}

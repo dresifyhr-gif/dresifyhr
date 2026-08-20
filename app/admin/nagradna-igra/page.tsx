@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/admin-shell";
+import { AkcijeTabs } from "@/components/admin/akcije-tabs";
 import { isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
@@ -16,7 +17,8 @@ export default async function GiveawayAdminPage() {
   const registered = entries.filter((e) => e.userId).length;
 
   return (
-    <AdminShell title="Nagradna igra — prijave" subtitle="Tko se prijavio (upisao Instagram) za PS5 giveaway">
+    <AdminShell title="Akcije" subtitle="Nagradna igra — tko se prijavio (Instagram) za PS5 giveaway">
+      <AkcijeTabs />
       <div className="mb-4 flex flex-wrap gap-2">
         <Link href="/admin/izvlacenje" className="inline-flex items-center gap-2 rounded-[12px] bg-accent px-5 py-2.5 text-sm font-bold text-black transition hover:brightness-95">
           🎰 Izvuci pobjednika
