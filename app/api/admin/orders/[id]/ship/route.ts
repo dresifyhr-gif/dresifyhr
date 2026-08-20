@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { getAdminUser, isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { markOrderShippedInSheet } from "@/lib/sheets";
 
@@ -10,6 +10,7 @@ export const runtime = "nodejs";
 // checkmark into the Google Sheet so Ivica/wife see the same state.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  const me = await getAdminUser(); // tko je prijavljen (audit)
 
   const { id } = await params;
   const body = await request.json().catch(() => ({}));
@@ -26,9 +27,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   await prisma.order.update({
     where: { id },
+    // shippedBy = NOVAC (ostaje kako je bilo). shippedByUser = AUDIT (tko je stisnuo pošalji).
     data: shipped
-      ? { status: "shipped", shippedBy: by, shippedAt: new Date(), courier }
-      : { status: "new", shippedBy: null, shippedAt: null, courier: null, cancelReason: null }
+      ? { status: "shipped", shippedBy: by, shippedByUser: me?.username ?? null, shippedAt: new Date(), courier }
+      : { status: "new", shippedBy: null, shippedByUser: null, shippedAt: null, courier: null, cancelReason: null }
   });
 
   // Best-effort: never block the admin action on the Sheet call.

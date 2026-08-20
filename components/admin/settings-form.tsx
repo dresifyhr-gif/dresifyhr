@@ -56,6 +56,16 @@ const SECTIONS: [string, string][] = [
 const inp = "a-input w-full px-3 py-2 text-sm";
 const label = "a-label mb-1 block";
 
+// Kategorije postavki — svaki tab pokazuje samo svoj dio (čišće, brže).
+const TABS: [string, string][] = [
+  ["novac", "💰 Cijene i novac"],
+  ["posiljke", "📦 Pošiljke"],
+  ["naslovnica", "📣 Naslovnica"],
+  ["akcije", "🎁 Akcije"],
+  ["brend", "📸 Brend / IG"],
+  ["obavijesti", "🔔 Obavijesti"]
+];
+
 function Card({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="a-card p-4 sm:p-5">
@@ -72,6 +82,7 @@ export function SettingsForm() {
   const [s, setS] = useState<Settings | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [tab, setTab] = useState("novac");
 
   useEffect(() => {
     fetch("/api/admin/settings/")
@@ -127,7 +138,22 @@ export function SettingsForm() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      <nav className="flex gap-1.5 overflow-x-auto rounded-[14px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-1.5">
+        {TABS.map(([key, lab]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setTab(key)}
+            className={`whitespace-nowrap rounded-[10px] px-3.5 py-2 text-[13px] font-semibold transition ${tab === key ? "bg-[var(--a-card)] text-[var(--a-text)] shadow-sm" : "text-[var(--a-text-3)] hover:text-[var(--a-text)]"}`}
+          >
+            {lab}
+          </button>
+        ))}
+      </nav>
+
+      {tab === "novac" && (
+      <div className="space-y-4">
       <Card title="Nabavne cijene" hint="Utječu na profit i poravnanje. Prodaja: dres 20€, komplet 40€, streetwear 50€.">
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
@@ -179,7 +205,11 @@ export function SettingsForm() {
           </div>
         </div>
       </Card>
+      </div>
+      )}
 
+      {tab === "posiljke" && (
+      <div className="space-y-4">
       <Card title="Pošiljatelji (naljepnice)" hint="Ime i adresa koji se ispisuju na naljepnici — Igor ili Ivica.">
         <div className="grid gap-4 sm:grid-cols-2">
           {(["igor", "ivica"] as const).map((who) => (
@@ -201,7 +231,11 @@ export function SettingsForm() {
           <div><span className={label}>Kontakt email</span><input value={s.contactEmail} onChange={setStr("contactEmail")} className={inp} /></div>
         </div>
       </Card>
+      </div>
+      )}
 
+      {tab === "naslovnica" && (
+      <div className="space-y-4">
       <Card title="Traka obavijesti" hint="Žuta traka na vrhu shopa. Prazan tekst = zadane poruke koje se izmjenjuju.">
         <label className="mb-3 flex cursor-pointer items-center gap-2 text-[14px] text-[var(--a-text)]">
           <input type="checkbox" checked={s.announcementActive} onChange={(e) => setS((cur) => (cur ? { ...cur, announcementActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />
@@ -247,7 +281,11 @@ export function SettingsForm() {
           })}
         </div>
       </Card>
+      </div>
+      )}
 
+      {tab === "akcije" && (
+      <div className="space-y-4">
       <Card title="🎡 Kolo sreće" hint="Stranica /kolo. Jedna vrtnja po broju mobitela, plus nova za svaku narudžbu od 60 €. Dok je isključeno, stranica ne postoji.">
         <label className="flex cursor-pointer items-center gap-2 text-[14px] text-[var(--a-text)]">
           <input type="checkbox" checked={s.koloActive} onChange={(e) => setS((cur) => (cur ? { ...cur, koloActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />
@@ -291,7 +329,11 @@ export function SettingsForm() {
           </div>
         </div>
       </Card>
+      </div>
+      )}
 
+      {tab === "brend" && (
+      <div className="space-y-4">
       <Card title="Brend i kontakt" hint="Mijenja linkove na shopu (WhatsApp gumb, Instagram sekcija, kontakt).">
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -319,7 +361,11 @@ export function SettingsForm() {
         />
         <p className="mt-1 text-[11px] text-[var(--a-text-3)]">Prazni redovi se zanemaruju. Ako ostaviš prazno, koriste se zadane lige.</p>
       </Card>
+      </div>
+      )}
 
+      {tab === "obavijesti" && (
+      <div className="space-y-4">
       <Card title="Obavijesti o narudžbi" hint="Koje kanale koristimo kad padne nova narudžba.">
         <div className="space-y-2">
           {([
@@ -340,6 +386,8 @@ export function SettingsForm() {
         </div>
         <p className="mt-2 text-[11px] text-[var(--a-text-3)]">Kanal radi samo ako je i postavljen na serveru. Ovdje ga možeš privremeno ugasiti.</p>
       </Card>
+      </div>
+      )}
 
       <div className="sticky bottom-4 flex items-center gap-3">
         <button type="button" onClick={save} disabled={saving} className="a-btn a-btn-primary px-5 py-2.5 text-sm disabled:opacity-50">

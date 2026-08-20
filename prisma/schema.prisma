@@ -14,8 +14,8 @@ datasource db {
 // Spremljene adrese kupca (Clerk userId) — za brži checkout u "Moj Dresify".
 model CustomerAddress {
   id         String   @id @default(cuid())
-  userId     String   // Clerk user id
-  label      String?  // "Kuća", "Posao"…
+  userId     String // Clerk user id
+  label      String? // "Kuća", "Posao"…
   name       String
   phone      String?
   street     String
@@ -51,49 +51,50 @@ model WishlistItem {
 }
 
 model Order {
-  id           String      @id @default(cuid())
-  reference    String?     // e.g. DRS-260629-0909
-  createdAt    DateTime    @default(now())
+  id        String   @id @default(cuid())
+  reference String? // e.g. DRS-260629-0909
+  createdAt DateTime @default(now())
 
   customerName String
   phone        String?
   email        String?
   address      String?
 
-  channel      String      @default("web")
-  fulfillment  String?
-  payment      String?
-  ip           String?     // IP adresa s koje je narudžba poslana (otkrivanje botova/spama)
-  userId       String?     // Clerk user id ako je kupac bio prijavljen (registriran) pri narudžbi
+  channel     String  @default("web")
+  fulfillment String?
+  payment     String?
+  ip          String? // IP adresa s koje je narudžba poslana (otkrivanje botova/spama)
+  userId      String? // Clerk user id ako je kupac bio prijavljen (registriran) pri narudžbi
 
-  subtotal     Float       @default(0)
-  shipping     Float       @default(0)
-  discount     Float       @default(0)
-  total        Float       @default(0)
-  promoCode    String?
-  note         String?
-  itemCount    Int         @default(0)
+  subtotal  Float   @default(0)
+  shipping  Float   @default(0)
+  discount  Float   @default(0)
+  total     Float   @default(0)
+  promoCode String?
+  note      String?
+  itemCount Int     @default(0)
 
-  status       String      @default("new") // new | shipped | done | returned | cancelled
-  cancelReason String?     // zašto je otkazano (npr. "nemam veličinu", "predugo čekanje")
-  shippedBy    String?     // "igor" | "ivica" — tko je fizički poslao (za obračun)
-  shippedAt    DateTime?
-  courier      String?     // "gls" | "hp" — preko kojeg kurira je poslano (prazno = GLS, čest slučaj)
-  tracking     String?     // broj pošiljke / tracking
-  pin          String?     // GLS paketomat PIN (auto-uvoz iz paket.hr maila)
-  paketId      String?     // paket.hr "ID narudžbe" — za dedupe kod uvoza PIN-a
-  shippedEmailAt DateTime? // kad je kupcu poslan "poslano + tracking" mail (da se ne šalje dvaput)
-  deliveredAt  DateTime?   // kad je GLS označio pošiljku dostavljenom (auto-provjera tracking stranice)
-  returnedAt   DateTime?   // kad je Gazda označio pošiljku VRAĆENOM (za poravnanje po datumu povrata, ne kreiranja)
-  igHandle     String?     // Instagram handle upisan na checkoutu → auto-prijava u PS5 nagradnu igru
-  deliveryStatus String?   // GLS status: "prep" (u pripremi) | "transit" (na dostavi) | "delivered" (dostavljeno)
-  apologySent  Boolean     @default(false) // označeno da je isprika poslana (miče iz win-back liste)
+  status          String    @default("new") // new | shipped | done | returned | cancelled
+  cancelReason    String? // zašto je otkazano (npr. "nemam veličinu", "predugo čekanje")
+  shippedBy       String? // "igor" | "ivica" — vodi OBRAČUN NOVCA (na čiji račun sjeda pouzeće). NE mijenjati radi audita — sad uvijek "ivica".
+  shippedByUser   String? // AUDIT: username admin-profila koji je fizički poslao (Igor/Ivica/Nina/Ana). Odvojeno od novca.
+  shippedAt       DateTime?
+  courier         String? // "gls" | "hp" — preko kojeg kurira je poslano (prazno = GLS, čest slučaj)
+  tracking        String? // broj pošiljke / tracking
+  pin             String? // GLS paketomat PIN (auto-uvoz iz paket.hr maila)
+  paketId         String? // paket.hr "ID narudžbe" — za dedupe kod uvoza PIN-a
+  shippedEmailAt  DateTime? // kad je kupcu poslan "poslano + tracking" mail (da se ne šalje dvaput)
+  deliveredAt     DateTime? // kad je GLS označio pošiljku dostavljenom (auto-provjera tracking stranice)
+  returnedAt      DateTime? // kad je Gazda označio pošiljku VRAĆENOM (za poravnanje po datumu povrata, ne kreiranja)
+  igHandle        String? // Instagram handle upisan na checkoutu → auto-prijava u PS5 nagradnu igru
+  deliveryStatus  String? // GLS status: "prep" (u pripremi) | "transit" (na dostavi) | "delivered" (dostavljeno)
+  apologySent     Boolean   @default(false) // označeno da je isprika poslana (miče iz win-back liste)
   cashCollected   Boolean   @default(false) // pouzeće: novci prikupljeni (poštar predao). Prikupio = shippedBy.
   cashCollectedAt DateTime?
 
-  items        OrderItem[]
-  customer     Customer?   @relation(fields: [customerId], references: [id])
-  customerId   String?
+  items      OrderItem[]
+  customer   Customer?   @relation(fields: [customerId], references: [id])
+  customerId String?
 
   @@index([createdAt])
   @@index([status])
@@ -101,9 +102,9 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId   String
+  id      String @id @default(cuid())
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String
 
   slug      String?
   klub      String?
@@ -118,18 +119,18 @@ model OrderItem {
 }
 
 model Customer {
-  id           String   @id @default(cuid())
-  phone        String?  @unique
-  email        String?
-  name         String?
-  address      String?
+  id      String  @id @default(cuid())
+  phone   String? @unique
+  email   String?
+  name    String?
+  address String?
 
   firstOrderAt DateTime @default(now())
   lastOrderAt  DateTime @default(now())
   totalOrders  Int      @default(0)
   totalSpent   Float    @default(0)
 
-  orders       Order[]
+  orders Order[]
 }
 
 // Product cost (nabavna cijena) for margin/profit; mirrors the catalog by slug.
@@ -225,7 +226,7 @@ model AdSpend {
   date      DateTime @default(now())
   amount    Float
   note      String?
-  paidBy    String?  // "igor" | "ivica" — tko je platio oglas (null = legacy, tretira se kao Igor)
+  paidBy    String? // "igor" | "ivica" — tko je platio oglas (null = legacy, tretira se kao Igor)
   createdAt DateTime @default(now())
 
   @@index([date])
@@ -234,59 +235,59 @@ model AdSpend {
 // Postavke shopa — jedan redak (id="singleton"). Uređuje se u adminu (Postavke),
 // pa se cijene/adrese mijenjaju bez diranja koda. Prazno/null = koristi default iz lib/site.ts.
 model Settings {
-  id                  String   @id @default("singleton")
+  id                 String   @id @default("singleton")
   // Dostava i naplata
-  shippingPrice       Float?   // ukupna cijena dostave kupcu (npr. 7)
-  freeShipThreshold   Float?   // roba ≥ ovoga = besplatna dostava (npr. 60)
+  shippingPrice      Float? // ukupna cijena dostave kupcu (npr. 7)
+  freeShipThreshold  Float? // roba ≥ ovoga = besplatna dostava (npr. 60)
   // Nabava (za profit/poravnanje)
-  costDres            Float?   // nabavna cijena dresa (npr. 6)
-  costKomplet         Float?   // nabavna cijena kompleta (npr. 18)
-  costStreetwear      Float?   // nabavna cijena streetwear kompleta (prodaja 50 €)
+  costDres           Float? // nabavna cijena dresa (npr. 6)
+  costKomplet        Float? // nabavna cijena kompleta (npr. 18)
+  costStreetwear     Float? // nabavna cijena streetwear kompleta (prodaja 50 €)
   // Poslovna pravila (samo admin/obračun — ne diraju blagajnu)
-  deliveryCost        Float?   // koliko NAS košta besplatna dostava (skida se s marže)
-  returnCost          Float?   // koliko NAS košta vraćena pošiljka
-  igorSharePct        Float?   // Igorov udio u marži u % (50 = pola-pola)
-  winbackDays         Int?     // koliko dana bez kupnje = "vrati kupca"
-  riskMinFailed       Int?     // od koliko odbijanja kupac postaje "rizičan"
+  deliveryCost       Float? // koliko NAS košta besplatna dostava (skida se s marže)
+  returnCost         Float? // koliko NAS košta vraćena pošiljka
+  igorSharePct       Float? // Igorov udio u marži u % (50 = pola-pola)
+  winbackDays        Int? // koliko dana bez kupnje = "vrati kupca"
+  riskMinFailed      Int? // od koliko odbijanja kupac postaje "rizičan"
   // Pošiljatelji (naljepnice)
-  igorName            String?
-  igorAddress         String?
-  igorCity            String?
-  ivicaName           String?
-  ivicaAddress        String?
-  ivicaCity           String?
+  igorName           String?
+  igorAddress        String?
+  igorCity           String?
+  ivicaName          String?
+  ivicaAddress       String?
+  ivicaCity          String?
   // Posao (naljepnice / budući računi)
-  iban                String?
-  businessName        String?
+  iban               String?
+  businessName       String?
   // Brend / kontakt (vidljivo na shopu)
-  whatsappNumber      String?  // samo znamenke, npr. 385976047510
-  instagramHandle     String?  // npr. dresify.hr (bez @)
-  igFollowers         Int?     // ručno upisan broj IG pratitelja (za PS5 giveaway brojač)
+  whatsappNumber     String? // samo znamenke, npr. 385976047510
+  instagramHandle    String? // npr. dresify.hr (bez @)
+  igFollowers        Int? // ručno upisan broj IG pratitelja (za PS5 giveaway brojač)
   // Operativa
-  leagues             String?  // JSON niz liga za forme proizvoda
-  notifyEmail         Boolean? // šalji obavijest o narudžbi na email
-  notifyTelegram      Boolean?
-  notifyWhatsapp      Boolean?
+  leagues            String? // JSON niz liga za forme proizvoda
+  notifyEmail        Boolean? // šalji obavijest o narudžbi na email
+  notifyTelegram     Boolean?
+  notifyWhatsapp     Boolean?
   // Izgled shopa
-  announcementActive  Boolean? // traka obavijesti na vrhu
-  announcementText    String?  // prazno = zadane poruke iz prijevoda
-  heroTitle           String?  // prazno = zadani naslov
-  heroSubtitle        String?
-  hiddenSections      String?  // JSON niz ključeva sekcija koje se NE prikazuju
-  accentColor         String?  // npr. #e8ff3c
+  announcementActive Boolean? // traka obavijesti na vrhu
+  announcementText   String? // prazno = zadane poruke iz prijevoda
+  heroTitle          String? // prazno = zadani naslov
+  heroSubtitle       String?
+  hiddenSections     String? // JSON niz ključeva sekcija koje se NE prikazuju
+  accentColor        String? // npr. #e8ff3c
   // Kolo sreće (/kolo)
-  koloActive          Boolean? // uključeno kolo sreće
+  koloActive         Boolean? // uključeno kolo sreće
   // Dresify Klub (vjernost po telefonu)
-  klubActive          Boolean? // uključen program vjernosti
-  klubTarget          Int?     // koliko PREUZETIH narudžbi do nagrade (npr. 3)
-  klubRewardKind      String?  // "percent" | "freeship" (gratis dres = percent 100 na 1 dres → koristimo fiksni popust)
-  klubRewardValue     Float?   // postotak ili iznos popusta
-  klubRewardLabel     String?  // opis nagrade koji vidi kupac
-  contactPhone        String?
-  contactEmail        String?
+  klubActive         Boolean? // uključen program vjernosti
+  klubTarget         Int? // koliko PREUZETIH narudžbi do nagrade (npr. 3)
+  klubRewardKind     String? // "percent" | "freeship" (gratis dres = percent 100 na 1 dres → koristimo fiksni popust)
+  klubRewardValue    Float? // postotak ili iznos popusta
+  klubRewardLabel    String? // opis nagrade koji vidi kupac
+  contactPhone       String?
+  contactEmail       String?
   // Ciljevi (progress na Pregledu)
-  monthlyGoal         Float?   // mjesečni cilj prometa u € (npr. 15000)
-  updatedAt           DateTime @updatedAt
+  monthlyGoal        Float? // mjesečni cilj prometa u € (npr. 15000)
+  updatedAt          DateTime @updatedAt
 }
 
 // Popust-kodovi — uređuju se u adminu (prije su bili zakucani u lib/promo.ts).
@@ -334,4 +335,21 @@ model GiveawayEntry {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+// Admin profili (interni tim) — zamjenjuju jednu zajedničku ADMIN_PASSWORD.
+// Nije za kupce (to je Clerk). Obiteljski posao: svatko se prijavi na svoje ime
+// pa se zna TKO je što napravio (audit na narudžbama preko shippedByUser).
+// Uloge: OWNER = sve (Igor). PARTNER = narudžbe+proizvodi + reklama + poravnanje (Ivica).
+// STAFF = narudžbe+proizvodi (Nina, Ana). Svi VIDE sve; razlikuju se samo u pisanju.
+model AdminUser {
+  id        String    @id @default(cuid())
+  username  String    @unique // prijavno ime (npr. "Igor", "Ivica")
+  pinHash   String // hash lozinke/PIN-a (nikad čisti tekst)
+  role      String    @default("STAFF") // OWNER | PARTNER | STAFF
+  avatar    String? // slika profila: emoji ili URL uploadane slike (za karticu na loginu)
+  active    Boolean   @default(true) // deaktivacija bez brisanja
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { getAdminUser, isAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { markOrderShippedInSheet, markCashCollectedInSheet } from "@/lib/sheets";
 import { issueKlubRewardIfEarned } from "@/lib/klub";
@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 // action: "ship" (+by igor/ivica) | "collect" | "assign" (+by)
 export async function POST(request: Request) {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  const me = await getAdminUser(); // audit: tko je pokrenuo skupnu akciju
 
   const body = await request.json().catch(() => ({}));
   const ids: string[] = Array.isArray(body?.ids) ? body.ids.filter((x: unknown) => typeof x === "string") : [];
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
   // DB izmjena odjednom (instant) — bez čekanja na Google Sheet mirror po narudžbi.
   const now = new Date();
   if (action === "ship") {
-    await prisma.order.updateMany({ where: { id: { in: ids } }, data: { status: "shipped", shippedBy: by, shippedAt: now, courier: "gls" } });
+    await prisma.order.updateMany({ where: { id: { in: ids } }, data: { status: "shipped", shippedBy: by, shippedByUser: me?.username ?? null, shippedAt: now, courier: "gls" } });
   } else if (action === "assign") {
     await prisma.order.updateMany({ where: { id: { in: ids } }, data: { shippedBy: by } });
   } else if (action === "collect") {

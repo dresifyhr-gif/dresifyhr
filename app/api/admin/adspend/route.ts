@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isAdmin, requireAction } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -16,7 +16,7 @@ export async function GET() {
 
 // Ispravak unosa (npr. krivo označen platilac). { id, paidBy }
 export async function PATCH(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await requireAction("adspend"))) return NextResponse.json({ ok: false, message: "Nemaš ovlast za reklamu." }, { status: 403 });
   const body = await request.json().catch(() => ({}));
   const id = typeof body?.id === "string" ? body.id : null;
   if (!id) return NextResponse.json({ ok: false }, { status: 400 });
@@ -26,7 +26,7 @@ export async function PATCH(request: Request) {
 }
 
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await requireAction("adspend"))) return NextResponse.json({ ok: false, message: "Nemaš ovlast za reklamu." }, { status: 403 });
 
   const body = await request.json().catch(() => ({}));
   const amount = Number(body?.amount);
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 // DELETE ?id=... → briše JEDAN unos (npr. slučajno dodan). Bez id → reset svih
 // oglasa trenutnog razdoblja (od zadnjeg poravnanja), cifra pada na 0.
 export async function DELETE(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await requireAction("adspend"))) return NextResponse.json({ ok: false, message: "Nemaš ovlast za reklamu." }, { status: 403 });
 
   const id = new URL(request.url).searchParams.get("id");
   if (id) {

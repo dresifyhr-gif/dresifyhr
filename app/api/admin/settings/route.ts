@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isAdmin, requireAction } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 
@@ -31,7 +31,7 @@ const strOrNull = (v: unknown) => {
 };
 
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await requireAction("settings"))) return NextResponse.json({ ok: false, message: "Samo vlasnik može mijenjati postavke." }, { status: 403 });
 
   const b = await request.json().catch(() => ({}));
   const data = {
