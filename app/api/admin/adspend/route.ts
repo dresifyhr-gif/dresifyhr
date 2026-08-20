@@ -5,9 +5,16 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-// Popis unosa oglasa TRENUTNOG razdoblja (od zadnjeg poravnanja) — za uređivanje/brisanje.
-export async function GET() {
+// Popis unosa oglasa. Zadano: TRENUTNO razdoblje (od zadnjeg poravnanja) za uređivanje.
+// ?all=1 → cijela POVIJEST svih upisa (kroz sva razdoblja), read-only + ukupno.
+export async function GET(request: Request) {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  const all = new URL(request.url).searchParams.get("all") === "1";
+  if (all) {
+    const rows = await prisma.adSpend.findMany({ orderBy: { date: "desc" }, take: 500, select: { id: true, amount: true, paidBy: true, date: true } });
+    const total = rows.reduce((s, r) => s + (r.amount ?? 0), 0);
+    return NextResponse.json({ ok: true, entries: rows, total });
+  }
   const last = await prisma.settlement.findFirst({ orderBy: { settledAt: "desc" } });
   const where = last ? { date: { gt: last.settledAt } } : {};
   const rows = await prisma.adSpend.findMany({ where, orderBy: { date: "desc" }, take: 100, select: { id: true, amount: true, paidBy: true, date: true } });

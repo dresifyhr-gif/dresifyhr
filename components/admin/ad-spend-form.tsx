@@ -13,6 +13,18 @@ export function AdSpendForm() {
   const [loading, setLoading] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [showHist, setShowHist] = useState(false);
+  const [hist, setHist] = useState<Entry[]>([]);
+  const [histTotal, setHistTotal] = useState(0);
+
+  async function toggleHistory() {
+    const next = !showHist;
+    setShowHist(next);
+    if (next && hist.length === 0) {
+      const d = await fetch("/api/admin/adspend/?all=1").then((r) => r.json()).catch(() => null);
+      if (d?.ok) { setHist(d.entries); setHistTotal(d.total || 0); }
+    }
+  }
 
   const load = useCallback(async () => {
     const d = await fetch("/api/admin/adspend/").then((r) => r.json()).catch(() => null);
@@ -138,14 +150,47 @@ export function AdSpendForm() {
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={reset}
-        disabled={resetting}
-        className="text-[12px] font-medium text-red-500 underline decoration-dotted hover:text-red-600 disabled:opacity-50"
-      >
-        {resetting ? "Resetiram…" : "🗑 Resetiraj SVE oglase (trenutno razdoblje) na 0 €"}
-      </button>
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+        <button
+          type="button"
+          onClick={toggleHistory}
+          className="text-[12px] font-semibold text-[var(--a-text-2)] underline decoration-dotted hover:text-[var(--a-text)]"
+        >
+          {showHist ? "▲ Sakrij povijest reklama" : "📜 Povijest reklama (sve)"}
+        </button>
+        <button
+          type="button"
+          onClick={reset}
+          disabled={resetting}
+          className="text-[12px] font-medium text-red-500 underline decoration-dotted hover:text-red-600 disabled:opacity-50"
+        >
+          {resetting ? "Resetiram…" : "🗑 Resetiraj tekuće na 0 €"}
+        </button>
+      </div>
+
+      {showHist && (
+        <div className="space-y-1.5 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-3">
+          <div className="mb-1 flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--a-text-3)]">Sva potrošnja na reklame</span>
+            <span className="text-[13px] font-bold text-[var(--a-text)]">Ukupno {eur(histTotal)}</span>
+          </div>
+          {hist.length === 0 ? (
+            <div className="text-[12px] text-[var(--a-text-3)]">Nema unosa.</div>
+          ) : (
+            <div className="max-h-64 space-y-1 overflow-y-auto">
+              {hist.map((e) => (
+                <div key={e.id} className="flex items-center justify-between gap-2 text-[13px]">
+                  <span className="text-[var(--a-text-3)]">{new Date(e.date).toLocaleDateString("hr-HR", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-[11px] capitalize text-[var(--a-text-3)]">{e.paidBy || "igor"}</span>
+                    <span className="w-16 text-right font-semibold text-[var(--a-text)]">{eur(e.amount)}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
