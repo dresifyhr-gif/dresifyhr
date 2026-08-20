@@ -12,6 +12,8 @@ export const dynamic = "force-dynamic";
 export default async function SettingsPage() {
   if (!(await isAdmin())) redirect("/admin/login/");
   const user = await getAdminUser();
+  // Postavke su samo za vlasnika — osoblje/partner nema pristup.
+  if (user?.role !== "OWNER") redirect("/admin");
 
   return (
     <AdminShell title="Postavke" subtitle="Cijene i podaci — mijenjaj bez diranja koda">

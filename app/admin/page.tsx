@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { getAdminUser, isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { getCeoInsights } from "@/lib/admin-ceo";
 import { getOldUnshipped, OLD_UNSHIPPED_DAYS } from "@/lib/admin-winback";
@@ -86,6 +86,7 @@ function Highlight({ label, value, sub }: { label: string; value: string; sub?: 
 
 export default async function AdminOverview() {
   if (!(await isAdmin())) redirect("/admin/login/");
+  const me = await getAdminUser();
 
   // Metrike i "stari neposlani" su neovisni → paralelno; CEO insights ovisi o prometu pa ide nakon.
   const [m, oldRows] = await Promise.all([getDashboardMetrics(), getOldUnshipped(30)]);
@@ -100,7 +101,7 @@ export default async function AdminOverview() {
     <AdminShell title="Pregled" subtitle="Sve najvažnije na jednom mjestu">
       {/* Greeting */}
       <div className="mb-5">
-        <h2 className="text-2xl font-bold tracking-tight text-[var(--a-text)]">{greeting()}, Gazda 👋</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-[var(--a-text)]">{greeting()}, {me?.username || "Gazda"} 👋</h2>
         <p className="text-sm text-[var(--a-text-2)]">
           {new Date().toLocaleDateString("hr-HR", { timeZone: "Europe/Zagreb", weekday: "long", day: "numeric", month: "long", year: "numeric" })}
         </p>

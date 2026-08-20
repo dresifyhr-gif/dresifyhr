@@ -40,6 +40,16 @@ function Brand() {
 export function AdminShell({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   const pathname = usePathname();
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [role, setRole] = useState<string | null>(null);
+
+  // Tko je prijavljen — za skrivanje Postavki (samo vlasnik).
+  useEffect(() => {
+    fetch("/api/admin/me/")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setRole(d?.role ?? null))
+      .catch(() => {});
+  }, []);
+  const isOwner = role === "OWNER";
 
   // Učitaj spremljenu (ili sistemsku) temu nakon montiranja — bez hydration mismatcha.
   useEffect(() => {
@@ -119,13 +129,15 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
               >
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
-              <Link
-                href="/admin/postavke"
-                className="a-input flex h-8 w-8 items-center justify-center text-[var(--a-text-3)] transition hover:text-[var(--a-text)]"
-                title="Postavke"
-              >
-                <Settings className="h-4 w-4" />
-              </Link>
+              {isOwner && (
+                <Link
+                  href="/admin/postavke"
+                  className="a-input flex h-8 w-8 items-center justify-center text-[var(--a-text-3)] transition hover:text-[var(--a-text)]"
+                  title="Postavke"
+                >
+                  <Settings className="h-4 w-4" />
+                </Link>
+              )}
               <a
                 href="/api/admin/logout"
                 className="a-input px-3 py-1.5 text-xs font-medium text-[var(--a-text-2)] transition hover:text-[var(--a-text)] lg:hidden"
