@@ -353,3 +353,17 @@ model AdminUser {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
+
+// Povijest GLS isplata — svaki upis iznosa uplate (banka) uz koje su narudžbe
+// označene naplaćenima. Prije nije postojalo; prošlost se rekonstruira iz
+// Order.cashCollectedAt (grupirano po danu). Ubuduće = točan zapis.
+model GlsPayout {
+  id           String   @id @default(cuid())
+  amount       Float    // iznos uplate koji je upisan (s banke)
+  matchedTotal Float    // zbroj označenih narudžbi
+  count        Int      // broj narudžbi u toj isplati
+  byUser       String?  // tko je upisao (admin profil)
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+}

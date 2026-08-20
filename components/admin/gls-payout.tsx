@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 const eur = (n: number) => `${(n ?? 0).toLocaleString("hr-HR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 
 type Row = { id: string; date: string; deliveredAt: string; name: string; amount: number; shippedBy: string | null; tracking: string | null };
+type HistEntry = { id: string; at: string; amount: number | null; matchedTotal: number; count: number; byUser: string | null; exact: boolean };
 
 export function GlsPayout() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -12,6 +13,8 @@ export function GlsPayout() {
   const [amount, setAmount] = useState("");
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
+  const [history, setHistory] = useState<HistEntry[]>([]);
+  const [histTotal, setHistTotal] = useState(0);
 
   async function load() {
     setLoading(true);
@@ -21,7 +24,13 @@ export function GlsPayout() {
     } catch {}
     setLoading(false);
   }
-  useEffect(() => { load(); }, []);
+  async function loadHistory() {
+    try {
+      const r = await fetch("/api/admin/gls-payout/history/").then((x) => x.json());
+      if (r?.ok) { setHistory(r.entries as HistEntry[]); setHistTotal(r.totalPaid || 0); }
+    } catch {}
+  }
+  useEffect(() => { load(); loadHistory(); }, []);
 
   const target = Number(String(amount).replace(",", ".")) || 0;
 
@@ -57,7 +66,15 @@ export function GlsPayout() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "collect", ids: [...sel] })
       }).then((x) => x.json());
-      if (r?.ok) { setSel(new Set()); setAmount(""); await load(); }
+      if (r?.ok) {
+        // Spremi zapis isplate (za povijest) — best-effort, ne blokira glavnu akciju.
+        await fetch("/api/admin/gls-payout/history/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: target, matchedTotal: selTotal, count: selectedRows.length })
+        }).catch(() => {});
+        setSel(new Set()); setAmount(""); await load(); await loadHistory();
+      }
     } catch {}
     setBusy(false);
   }
@@ -162,6 +179,55 @@ export function GlsPayout() {
           })()}
         </div>
       )}
+
+      {/* Povijest isplata */}
+      <div className="a-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-[var(--a-line)] px-4 py-3">
+          <div>
+            <div className="text-[13px] font-bold text-[var(--a-text)]">Povijest isplata</div>
+            <div className="text-[11px] text-[var(--a-text-3)]">Sve što je do sad naplaćeno preko GLS-a</div>
+          </div>
+          <div className="text-right">
+            <div className="text-[11px] text-[var(--a-text-3)]">Ukupno naplaćeno</div>
+            <div className="text-[16px] font-extrabold tabular-nums text-[var(--a-text)]">{eur(histTotal)}</div>
+          </div>
+        </div>
+        {history.length === 0 ? (
+          <div className="px-4 py-6 text-center text-sm text-[var(--a-text-3)]">Još nema zabilježenih isplata.</div>
+        ) : (
+          <div className="divide-y divide-[var(--a-line)]">
+            {history.map((h) => {
+              const d = new Date(h.at);
+              const dateStr = d.toLocaleDateString("hr-HR", { day: "numeric", month: "long", year: "numeric" });
+              const timeStr = d.toLocaleTimeString("hr-HR", { hour: "2-digit", minute: "2-digit" });
+              return (
+                <div key={h.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 text-[13px] font-semibold text-[var(--a-text)]">
+                      <span>{dateStr}</span>
+                      <span className="text-[11px] font-normal text-[var(--a-text-3)]">{timeStr}</span>
+                      {!h.exact && (
+                        <span className="rounded bg-[var(--a-surface-2)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--a-text-3)]" title="Rekonstruirano iz naplaćenih narudžbi — iznos uplate se tada nije bilježio">
+                          ≈ rekonstruirano
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-[var(--a-text-3)]">
+                      {h.count} narudžbi{h.byUser ? ` · upisao ${h.byUser}` : ""}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[14px] font-bold tabular-nums text-[var(--a-text)]">{eur(h.amount ?? h.matchedTotal)}</div>
+                    {h.exact && h.amount != null && Math.abs(h.amount - h.matchedTotal) >= 0.01 && (
+                      <div className="text-[10.5px] tabular-nums text-[var(--a-text-3)]">narudžbe: {eur(h.matchedTotal)}</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

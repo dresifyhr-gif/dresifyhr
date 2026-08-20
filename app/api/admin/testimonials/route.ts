@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isAdmin, requireAction } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -13,7 +13,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await requireAction("settings"))) return NextResponse.json({ ok: false }, { status: 401 });
 
   const b = await request.json().catch(() => ({}));
   const imageUrl = String(b?.imageUrl || "").trim();
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await requireAction("settings"))) return NextResponse.json({ ok: false }, { status: 401 });
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return NextResponse.json({ ok: false }, { status: 400 });
   await prisma.testimonial.delete({ where: { id } }).catch(() => {});

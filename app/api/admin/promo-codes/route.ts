@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isAdmin, requireAction } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -62,7 +62,7 @@ export async function GET() {
 
 // Stvori ili uredi kod.
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await requireAction("settings"))) return NextResponse.json({ ok: false }, { status: 401 });
 
   const b = await request.json().catch(() => ({}));
   const code = norm(b?.code);
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
 
 // Obriši kod (postojeće narudžbe zadržavaju zapisan kod).
 export async function DELETE(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await requireAction("settings"))) return NextResponse.json({ ok: false }, { status: 401 });
 
   const code = norm(new URL(request.url).searchParams.get("code"));
   if (!code) return NextResponse.json({ ok: false }, { status: 400 });
