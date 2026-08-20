@@ -8,6 +8,7 @@ import { getOldUnshipped, OLD_UNSHIPPED_DAYS } from "@/lib/admin-winback";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AssignShipper } from "@/components/admin/assign-shipper";
 import { SettlementButton } from "@/components/admin/settlement-button";
+import { AdSpendForm } from "@/components/admin/ad-spend-form";
 import { ApologyList } from "@/components/admin/apology-list";
 import { ReturnedList } from "@/components/admin/winback-panels";
 import { Stat, Panel, eur, komLabel, waLink } from "@/components/admin/ui";
@@ -290,7 +291,7 @@ export default async function AdminOverview() {
             <a href="/admin/gls-isplata" className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-4 py-2 text-[13px] font-semibold text-[var(--a-text)] transition hover:bg-[var(--a-card)]">
               💶 GLS isplata
             </a>
-            <a href="/admin/analitika#reklame" className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-4 py-2 text-[13px] font-semibold text-[var(--a-text)] transition hover:bg-[var(--a-card)]">
+            <a href="#reklame-pregled" className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-4 py-2 text-[13px] font-semibold text-[var(--a-text)] transition hover:bg-[var(--a-card)]">
               📣 Reklame
             </a>
             <a href="#poravnanje" className="inline-flex items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-4 py-2 text-[13px] font-semibold text-[var(--a-text)] transition hover:bg-[var(--a-card)]">
@@ -392,6 +393,29 @@ export default async function AdminOverview() {
               <span className="text-[var(--a-text)]">svakom {eur(m.split.adsSpend / 2)}</span>
             </div>
           )}
+          {/* Reklame — upis potrošnje + isplativost (prije na Analitici). Novac → OWNER/PARTNER. */}
+          {(me?.role === "OWNER" || me?.role === "PARTNER") && (
+            <div id="reklame-pregled" className="mt-4 scroll-mt-24 rounded-xl border border-[var(--a-line)] bg-[var(--a-surface-2)] p-4">
+              <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--a-text-3)]">📣 Reklame</div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--a-text-3)]">Potrošeno</div>
+                  <div className="mt-1 text-lg font-bold text-[var(--a-text)]">{eur(m.adSpendTotal)}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--a-text-3)]">ROAS</div>
+                  <div className="mt-1 text-lg font-bold text-[var(--a-text)]">{m.roas != null ? `${m.roas.toFixed(1)}×` : "—"}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--a-text-3)]">Neto profit</div>
+                  <div className={`mt-1 text-lg font-bold ${m.netAfterAds >= 0 ? "text-emerald-600" : "text-red-500"}`}>{eur(m.netAfterAds)}</div>
+                </div>
+              </div>
+              <p className="mt-3 mb-2 text-xs text-[var(--a-text-3)]">Profit nakon oduzetih reklama. ROAS = promet ÷ potrošnja.</p>
+              <AdSpendForm />
+            </div>
+          )}
+
           <div id="poravnanje" className="mt-4 flex scroll-mt-24 flex-col items-center gap-3 rounded-xl border-2 border-dashed border-[var(--a-line)] bg-[var(--a-surface-2)] p-4 text-center">
             {m.split.settleFrom == null ? (
               <div className="text-sm font-semibold text-[var(--a-text-2)]">Sve je izjednačeno — nitko nikom ne duguje ✅</div>

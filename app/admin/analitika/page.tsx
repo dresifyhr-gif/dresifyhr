@@ -4,10 +4,10 @@ import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { getGaStats } from "@/lib/ga";
+import { prisma } from "@/lib/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { AdSpendForm } from "@/components/admin/ad-spend-form";
 import { GaStatsPanel } from "@/components/admin/ga-stats";
-import { Panel, eur } from "@/components/admin/ui";
+import { Panel } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Analitika — Dresify Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -15,7 +15,22 @@ export const dynamic = "force-dynamic";
 export default async function AnalyticsPage() {
   if (!(await isAdmin())) redirect("/admin/login/");
 
-  const [m, ga] = await Promise.all([getDashboardMetrics(), getGaStats()]);
+  const [m, ga, sizeRows] = await Promise.all([
+    getDashboardMetrics(),
+    getGaStats(),
+    // Prodaja po veličinama (samo prodane — bez otkaza/povrata) → za nabavu.
+    prisma.orderItem.groupBy({
+      by: ["size"],
+      _sum: { quantity: true },
+      where: { order: { status: { notIn: ["cancelled", "returned"] } } }
+    })
+  ]);
+
+  const sizes = sizeRows
+    .map((r) => ({ size: r.size || "—", qty: r._sum.quantity ?? 0 }))
+    .filter((r) => r.qty > 0)
+    .sort((a, b) => b.qty - a.qty);
+  const sizeMax = Math.max(1, ...sizes.map((s) => s.qty));
 
   return (
     <AdminShell title="Analitika" subtitle="Što se prodaje, reklame i trendovi">
@@ -42,24 +57,23 @@ export default async function AnalyticsPage() {
           )}
         </Panel>
 
-        <div id="reklame" className="scroll-mt-24" />
-        <Panel title="Reklame — isplativost">
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <div className="text-[11px] uppercase tracking-wider text-[var(--a-text-3)]">Potrošeno</div>
-              <div className="mt-1 text-lg font-bold text-[var(--a-text)]">{eur(m.adSpendTotal)}</div>
-            </div>
-            <div>
-              <div className="text-[11px] uppercase tracking-wider text-[var(--a-text-3)]">ROAS</div>
-              <div className="mt-1 text-lg font-bold text-[var(--a-text)]">{m.roas != null ? `${m.roas.toFixed(1)}×` : "—"}</div>
-            </div>
-            <div>
-              <div className="text-[11px] uppercase tracking-wider text-[var(--a-text-3)]">Neto profit</div>
-              <div className={`mt-1 text-lg font-bold ${m.netAfterAds >= 0 ? "text-emerald-600" : "text-red-500"}`}>{eur(m.netAfterAds)}</div>
-            </div>
-          </div>
-          <p className="mt-3 mb-2 text-xs text-[var(--a-text-3)]">Profit nakon oduzetih reklama. ROAS = promet ÷ potrošnja.</p>
-          <AdSpendForm />
+        <Panel title="Prodaja po veličinama">
+          <p className="mb-3 -mt-2 text-xs text-[var(--a-text-3)]">Koje se veličine najviše prodaju — za nabavu (bez otkaza/povrata).</p>
+          {sizes.length === 0 ? (
+            <div className="text-sm text-[var(--a-text-3)]">Nema podataka još.</div>
+          ) : (
+            <ul className="space-y-2">
+              {sizes.map((s) => (
+                <li key={s.size} className="flex items-center gap-3 text-sm">
+                  <span className="w-14 shrink-0 font-semibold text-[var(--a-text)]">{s.size}</span>
+                  <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-[var(--a-surface-2)]">
+                    <span className="block h-full rounded-full bg-accent" style={{ width: `${(s.qty / sizeMax) * 100}%` }} />
+                  </span>
+                  <span className="w-16 shrink-0 text-right font-semibold text-[var(--a-text)]">{s.qty} kom</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </Panel>
       </div>
 
