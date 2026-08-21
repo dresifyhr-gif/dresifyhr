@@ -53,12 +53,66 @@ export function Navbar() {
         className="sticky z-40 border-b border-white/10 bg-[#0a0a0a]"
         style={{ top: "var(--announcement-offset, 0px)" }}
       >
-        <div className="page-shell flex h-[76px] items-center justify-between gap-4">
+        {/* MOBILE: ☰ + 🔍 lijevo · logo u sredini · račun + košarica desno */}
+        <div className="page-shell grid h-[76px] grid-cols-[1fr_auto_1fr] items-center gap-2 md:hidden">
+          <div className="flex items-center gap-1 justify-self-start">
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen(true)}
+              className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+              aria-label={t.nav.openMenu}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <SearchOverlay />
+          </div>
+
+          <Link href="/" className="justify-self-center font-heading text-[1.85rem] uppercase leading-none text-white">
+            DRES<span className="text-accent">IFY</span>
+          </Link>
+
+          <div className="flex items-center gap-1 justify-self-end">
+            <SignedOut>
+              <Link
+                href="/prijava"
+                className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+                aria-label="Prijava"
+                title="Prijava / Registracija"
+              >
+                <User className="h-5 w-5" />
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link
+                href="/racun"
+                className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+                aria-label="Moj profil"
+                title="Moj Dresify"
+              >
+                <User className="h-5 w-5" />
+              </Link>
+            </SignedIn>
+            <button
+              type="button"
+              onClick={openDrawer}
+              className="relative inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+              aria-label={t.nav.openCart}
+            >
+              <ShoppingBag className="h-5 w-5" />
+              <span className="absolute -right-2 -top-2 min-w-6 rounded-full bg-accent px-1.5 py-1 text-[11px] font-bold leading-none text-black">
+                {itemCount}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* DESKTOP: logo lijevo · navigacija · jezik + pretraga + račun + košarica desno */}
+        <div className="page-shell hidden h-[76px] items-center justify-between gap-4 md:flex">
           <Link href="/" className="font-heading text-[2.15rem] uppercase leading-none text-white">
             DRES<span className="text-accent">IFY</span>
           </Link>
 
-          <nav className="hidden items-center gap-9 md:flex">
+          <nav className="flex items-center gap-9">
             {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -77,7 +131,7 @@ export function Navbar() {
 
           <div className="flex items-center gap-2">
             {/* Language switcher */}
-            <div className="hidden items-center gap-0 md:flex">
+            <div className="flex items-center gap-0">
               {(["hr", "en"] as Locale[]).map((l, i) => (
                 <button
                   key={l}
@@ -127,15 +181,6 @@ export function Navbar() {
               <span className="absolute -right-2 -top-2 min-w-6 rounded-full bg-accent px-1.5 py-1 text-[11px] font-bold leading-none text-black">
                 {itemCount}
               </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsMenuOpen(true)}
-              className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent md:hidden"
-              aria-label={t.nav.openMenu}
-            >
-              <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>
