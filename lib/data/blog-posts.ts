@@ -173,6 +173,90 @@ export const blogPosts: BlogPost[] = [
       "Materijal i kroj su ono što razlikuje komplet koji nosiš stalno od onog koji ostane u ormaru. Traži gušći, mekan pamuk koji drži oblik i ne izgleda tanko nakon par pranja — takav materijal je ugodan na koži i daje onaj 'premium' osjećaj koji se odmah primijeti. Kod kroja pazi da hlačice imaju dobar pad i da majica nije ni prekratka ni prevelika. Naši kompleti su rađeni upravo s tim balansom na umu: udobni za cijeli dan, a dovoljno uredni da izgledaju namjerno, a ne nabacano.",
       "Na kraju, stil biraj prema sebi, ne prema trendu. Ako želiš nešto što ide uz sve i nosi se cijelu godinu, kreni od neutralnih boja. Ako želiš da komad bude glavni na looku, uzmi jaču boju ili grafiku. Svi kompleti idu uz besplatnu dostavu i plaćanje pouzećem po cijeloj Hrvatskoj, a ako ti treba pomoć oko veličine ili odabira, javi se na WhatsApp — predložit ćemo ti model i veličinu koja ima smisla za tebe."
     ]
+  },
+  {
+    slug: "sp-2026-spanjolska-prvak-dresovi",
+    title: "SP 2026 — Španjolska prvak: koji dresovi su sad najtraženiji",
+    description:
+      "Nakon što je Španjolska osvojila Svjetsko prvenstvo 2026., dresovi prvaka i najboljih igrača turnira su najtraženiji. Evo što kupci sada najviše biraju.",
+    publishedAt: "2026-08-05",
+    relatedSlugs: ["spanjolska-yamal-crveni-sp-2026", "argentina-messi-plavi-sp-2026", "barcelona-yamal-domaci"],
+    paragraphs: [
+      "Svjetsko prvenstvo 2026. je iza nas, a naslov prvaka otišao je u Španjolsku. Kao i uvijek nakon velikog turnira, potražnja za dresovima pobjednika naglo raste — svi žele nositi boje ekipe koja je podigla pehar. Španjolski reprezentativni dres, posebno izdanja s imenima nositelja igre, ovih tjedana je među najtraženijim modelima. Ako želiš dres koji nosi priču o osvojenom prvenstvu, sad je pravi trenutak dok su svježe uspomene na finale.",
+      "Uz same prvake, turnir uvijek izbaci i pojedince koji obilježe prvenstvo. Mladi Yamal je jedno od najvećih imena ove Španjolske generacije, pa njegova izdanja odlaze najbrže. No i dresovi ostalih reprezentacija koje su igrale velike utakmice — Argentina, Brazil, Francuska — ostaju popularni jer navijači vežu dres uz konkretne trenutke s turnira. Dobar reprezentativni dres nakon SP-a nije samo odjeća, nego mali komad povijesti nogometa.",
+      "Kod nas su reprezentativni dresovi dostupni i za djecu i za odrasle, s ušivenim imenom i brojem igrača. Ako biraš poklon za malog navijača koji je pratio prvenstvo, dres njegovog favorita s turnira gotovo uvijek pogodi u sridu. Za odrasle, klasična izdanja u glavnim bojama reprezentacije najsigurniji su izbor jer se nose i izvan stadiona, kroz cijelu godinu, bez obzira na rezultat sljedeće sezone.",
+      "Sve reprezentativne dresove šaljemo po cijeloj Hrvatskoj uz plaćanje pouzećem, pa ne plaćaš ništa unaprijed. Ako nisi siguran koji model ili veličinu uzeti, javi nam se na WhatsApp i pomoći ćemo ti oko odabira. Prvenstvo je gotovo, ali pravi dres čuva onaj osjećaj s finala — i izgleda jednako dobro sljedeće sezone kao i danas.",
+    ],
+  },
+  {
+    slug: "kako-prepoznati-kvalitetan-nogometni-dres",
+    title: "Kako prepoznati kvalitetan nogometni dres",
+    description:
+      "Na što paziti pri kupnji nogometnog dresa — materijal, kroj, ušiveni detalji i razlika između jeftine kopije i kvalitetnog dresa koji traje.",
+    publishedAt: "2026-08-08",
+    relatedSlugs: ["hrvatska-modric-2026", "barcelona-yamal-domaci", "real-mbappe-2526"],
+    paragraphs: [
+      "Kad kupuješ nogometni dres online, teško je na prvu procijeniti kvalitetu jer sve fotografije izgledaju dobro. Zato se isplati znati na što obratiti pozornost. Prvo pravilo je materijal — kvalitetan dres izrađen je od prozračne, lagane tkanine koja odvodi znoj i ne lijepi se za tijelo. Takav dres jednako je ugodan i na terenu i u gradu, dok jeftine kopije često koriste tanak, plastičan materijal koji se brzo izliže i gubi boju nakon par pranja.",
+      "Drugi znak kvalitete su detalji: ušiveni (a ne samo tiskani) grbovi, čisti šavovi i uredno postavljeno ime i broj igrača. Kod slabijih dresova brojevi se već nakon nekoliko pranja počnu ljuštiti, a rubovi tkanine se rasparaju. Dobar dres izgleda uredno i iz blizine — kad ga okreneš naopako, šavovi su čisti i ravni. To je razlika koja se ne vidi na fotki, ali se osjeti čim ga uzmeš u ruke.",
+      "Kroj je treća stvar na koju vrijedi paziti. Kvalitetan dres prati moderan sportski kroj — nije ni prevelik ni preuzak, i jednako dobro stoji i navijaču na tribini i djetetu na igralištu. Kod nas su dresovi dostupni u dječjim veličinama od 104 do 176 te u odraslim veličinama S–XXL, pa je lakše pogoditi pravi broj. Ako si između dvije veličine, obično je bolje uzeti veću, pogotovo za djecu koja rastu.",
+      "Naši dresovi rađeni su tako da izdrže i nošenje i pranje, s ušivenim imenom i brojem, a dolaze uz dostavu po cijeloj Hrvatskoj i plaćanje pouzećem. Ako želiš savjet oko konkretnog modela ili veličine, javi nam se na WhatsApp prije narudžbe. Kvalitetan dres je ulaganje koje traje sezonama — i zato se isplati kupiti ga na mjestu kojem možeš vjerovati.",
+    ],
+  },
+  {
+    slug: "dres-kao-poklon-malom-navijacu",
+    title: "Dres kao poklon malom navijaču — vodič za darivanje",
+    description:
+      "Kako odabrati nogometni dres ili komplet kao poklon za dijete — veličina, omiljeni igrač i savjeti da poklon bude pun pogodak.",
+    publishedAt: "2026-08-11",
+    relatedSlugs: ["hrvatska-modric-komplet", "hrvatska-modric-2026", "barcelona-yamal-domaci"],
+    paragraphs: [
+      "Malo koji poklon oduševi dijete kao dres njegovog nogometnog idola. Bez obzira je li riječ o rođendanu, Božiću ili kraju sezone, dres je poklon koji dijete odmah želi obući i pokazati. Ključ dobrog poklona je pogoditi omiljenog igrača ili klub — ako znaš za koga dijete navija, pola posla je gotovo. Ako nisi siguran, reprezentativni dres Hrvatske gotovo je uvijek siguran izbor jer ga vole i mali i veliki navijači.",
+      "Kad je poklon u pitanju, komplet često ostavlja jači dojam od samog dresa. Naš dječji komplet uključuje dres, hlačice, loptu i kapu u jednom paketu po cijeni od 40 €, pa dijete dobije sve što mu treba za igru odmah iz kutije. Lopta s istim motivom kao dres čini poklon puno većim i uzbudljivijim — a tebi olakšava jer ne moraš kupovati dodatke posebno.",
+      "Najveća dilema kod poklona je veličina, jer često kupuješ bez da dijete isprobava. Vodi se visinom, a ne godinama — dječje veličine idu od 104 do 176. Ako je dijete između dvije veličine, uzmi veću: dres koji je malo prostraniji nosit će se dulje i ugodniji je za trčanje. Ako želiš biti siguran, pošalji nam visinu djeteta na WhatsApp i predložit ćemo veličinu koja ima smisla.",
+      "Za poklone s rokom — rođendan ili blagdani — javi nam datum na vrijeme pa ćemo se potruditi da paket stigne prije. Dostava ide po cijeloj Hrvatskoj uz plaćanje pouzećem, pa ne plaćaš ništa unaprijed. Dres ili komplet je poklon koji dijete stvarno koristi, a ne odloži u ormar — i zato je gotovo uvijek pun pogodak.",
+    ],
+  },
+  {
+    slug: "barcelona-dresovi-koji-model-odabrati",
+    title: "Barcelona dresovi — koji model odabrati",
+    description:
+      "Vodič kroz najtraženija izdanja Barcelona dresova — domaći, gostujući i modeli novih zvijezda poput Yamala. Kako odabrati pravi za sebe.",
+    publishedAt: "2026-08-14",
+    relatedSlugs: ["barcelona-yamal-domaci", "argentina-messi-retro", "argentina-messi-plavi-sp-2026"],
+    paragraphs: [
+      "Barcelona je jedan od klubova čije dresove navijači traže iz godine u godinu, bez obzira na trenutni rezultat. Prepoznatljive grancate boje — plava i grimizna — spadaju među najljepše u nogometu i odlično stoje i na stadionu i u svakodnevnom stilu. Ako biraš svoj prvi Barcelona dres, domaći model u klasičnim bojama je najsigurniji izbor jer nikad ne izlazi iz mode i uz njega ne možeš pogriješiti.",
+      "Nova era kluba donijela je i nove miljenike navijača. Yamal je postao lice mlade Barcelone, pa njegova izdanja spadaju među najtraženije modele ovog trenutka — savršen izbor za one koji prate klub i žele dres koji nosi svjež, mladenački karakter. Uz njega, gostujući i treći dresovi svake sezone donose drukčije kombinacije boja za one koji vole nešto što se ne viđa na svakom koraku.",
+      "Za navijače s dužim stažem, tu su i retro i legendarna izdanja koja podsjećaju na velike generacije kluba. Takav dres ne prati samo trenutnu sezonu nego nosi priču — i često najbolje stoji upravo zato što je prepoznatljiv. Kod odabira vodi se onime što tebi budi reakciju čim ga vidiš; takav dres ćeš stvarno nositi. Svi modeli dostupni su za djecu i odrasle, s ušivenim imenom i brojem.",
+      "Bez obzira koji Barcelona model odabereš, dostava ide po cijeloj Hrvatskoj uz plaćanje pouzećem. Ako nisi siguran oko veličine ili biraš između dva modela, javi nam se na WhatsApp i pomoći ćemo ti. Dobar klupski dres je komad koji nosiš godinama — i zato se isplati odabrati onaj koji ti stvarno leži.",
+    ],
+  },
+  {
+    slug: "real-madrid-dresovi-vodic",
+    title: "Real Madrid dresovi — vodič kroz najtraženija izdanja",
+    description:
+      "Od klasičnog bijelog domaćeg dresa do modela novih zvijezda poput Mbappéa — kako odabrati pravi Real Madrid dres za sebe ili na poklon.",
+    publishedAt: "2026-08-17",
+    relatedSlugs: ["real-mbappe-2526", "hrvatska-modric-2026", "barcelona-yamal-domaci"],
+    paragraphs: [
+      "Real Madrid je klub s najviše osvojenih naslova Lige prvaka, a njegov prepoznatljivi bijeli dres jedan je od najikoničnijih u cijelom nogometu. Upravo zato je domaći bijeli model uvijek najsigurniji izbor — bezvremenski je, odlično stoji i uz njega ne možeš pogriješiti bez obzira na sezonu. Ako biraš svoj prvi Real dres, počni od klasika u bijelom; to je model koji nikad ne izlazi iz mode.",
+      "Dolaskom Mbappéa klub je dobio jednu od najvećih svjetskih zvijezda, pa su njegova izdanja među najtraženijim modelima ovog trenutka. Za navijače koji prate Ligu prvaka, dres s njegovim imenom logičan je izbor. Uz to, gostujući dresovi Reala svake sezone donose drukčije, često tamnije kombinacije koje odlično izgledaju i izvan stadiona — dobra opcija za one koji žele nešto manje očito od bijelog.",
+      "Za nas u Hrvatskoj Real ima i posebnu notu zbog Luke Modrića, koji je godinama bio srce momčadi i osvajao najveće naslove u dresu s bijelim boama. Zato mnogi navijači vežu Real upravo uz njega. Bilo da biraš aktualni model zvijezde ili dres koji nosi uspomenu na velike godine kluba, svi su dostupni za djecu i odrasle, s ušivenim imenom i brojem igrača.",
+      "Sve Real Madrid dresove šaljemo po cijeloj Hrvatskoj uz plaćanje pouzećem, pa ne plaćaš ništa unaprijed. Ako biraš između modela ili nisi siguran oko veličine, javi nam se na WhatsApp i rado ćemo pomoći. Kvalitetan klupski dres je ulaganje koje traje sezonama — odaberi onaj koji ti budi pravi osjećaj čim ga vidiš.",
+    ],
+  },
+  {
+    slug: "dresovi-hrvatske-reprezentacije-kockasti-ponos",
+    title: "Dresovi hrvatske reprezentacije — kockasti ponos",
+    description:
+      "Zašto je kockasti dres Hrvatske poseban, koja izdanja navijači najviše traže i kako odabrati pravi model za sebe ili malog navijača.",
+    publishedAt: "2026-08-20",
+    relatedSlugs: ["hrvatska-modric-2026", "hrvatska-livakovic", "hrvatska-modric-komplet"],
+    paragraphs: [
+      "Malo koji dres na svijetu je prepoznatljiv kao hrvatski kockasti. Crveno-bijele kocke nisu samo dizajn — one su simbol identiteta koji svaki navijač nosi s ponosom, od velikih turnira do dvorišta i igrališta. Upravo zato je reprezentativni dres Hrvatske jedan od najtraženijih modela kod nas cijele godine, a ne samo kad reprezentacija igra. Kockasti dres je komad koji spaja generacije navijača.",
+      "Kroz godine Hrvatska je imala nekoliko generacija koje su obilježile svjetski nogomet, a imena poput Modrića postala su sinonim za srce i borbenost naše reprezentacije. Dres s njegovim imenom i brojem jedan je od najpopularnijih izbora, jednako kod odraslih navijača i kod djece koja u njemu vide uzor. Uz nositelje igre, popularni su i dresovi vratara i drugih reprezentativaca koji su vezani uz konkretne velike utakmice.",
+      "Za najmlađe navijače kockasti komplet je poseban favorit — dres, hlačice, lopta i kapa u jednom paketu čine da se dijete osjeća kao pravi reprezentativac. Kod veličina vrijedi isto pravilo: vodi se visinom djeteta (dječje veličine 104–176), a ako je između dvije, uzmi veću. Za odrasle, klasični kockasti dres u glavnim bojama nosi se i izvan stadiona, kroz cijelu godinu.",
+      "Sve dresove hrvatske reprezentacije šaljemo po cijeloj Hrvatskoj uz plaćanje pouzećem, s ušivenim imenom i brojem igrača. Ako biraš model ili nisi siguran oko veličine, javi nam se na WhatsApp i pomoći ćemo ti oko odabira. Kockasti dres nije samo dres — to je način da pokažeš za koga navijaš, i zato ga vrijedi imati u ormaru.",
+    ],
   }
 ];
 
