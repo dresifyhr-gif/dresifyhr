@@ -67,7 +67,7 @@ export function Navbar() {
             <SearchOverlay />
           </div>
 
-          <Link href="/" className="justify-self-center font-heading text-[1.85rem] uppercase leading-none text-white">
+          <Link href="/" className="justify-self-center font-heading text-[2.2rem] uppercase leading-none text-white">
             DRES<span className="text-accent">IFY</span>
           </Link>
 
