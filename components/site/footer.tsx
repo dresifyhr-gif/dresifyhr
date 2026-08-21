@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Instagram, MessageCircle, Mail } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, INSTAGRAM_HANDLE, NAV_LINKS } from "@/lib/site";
@@ -15,6 +16,10 @@ const seoFooterLinks = [
 
 export function Footer() {
   const { t } = useLanguage();
+  const pathname = usePathname();
+
+  // Na korisničkom računu footer se skriva — profil je "app-like", bez footera.
+  if (pathname?.startsWith("/racun")) return null;
 
   return (
     <footer className="border-t border-white/10 bg-[#0a0a0a]">

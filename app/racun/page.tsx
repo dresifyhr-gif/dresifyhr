@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getOrderReference } from "@/lib/orders";
 import { getKlubProgress } from "@/lib/klub";
+import { getSettings } from "@/lib/settings";
 import { GiveawayEntryForm } from "@/components/site/giveaway-entry-form";
 import { deliverNewsletterSignup } from "@/lib/newsletter";
 import { phoneKey } from "@/lib/utils";
@@ -86,6 +87,8 @@ export default async function AccountPage() {
   const pk = phoneKey(orderPhone);
 
   const wishlist = await prisma.wishlistItem.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } });
+  const shopSettings = await getSettings();
+  const koloActive = !!shopSettings.koloActive;
   const giveawayEntry = await prisma.giveawayEntry.findFirst({ where: { userId: user.id } });
   // Bodovi za PS5 nagradnu igru: 1 osnovni (kad je prijavljen) + 5 po svakoj kupnji.
   // Kupnje su narudžbe ovog kupca (spojene po emailu/telefonu), bez otkazanih.
@@ -189,33 +192,6 @@ export default async function AccountPage() {
             <Stat label="Kuponi" value={String(personalCodes.length)} sub="aktivni" />
           </div>
 
-          {/* XP panel */}
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-violet-600/25 via-fuchsia-600/10 to-transparent p-4 sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-2xl">{tier.emoji}</div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">Dresify XP · Razina {tierIdx + 1}</div>
-                  <div className="text-xl font-bold">{tier.name}</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-bold tabular-nums">{xp} XP</div>
-                {next && <div className="text-[11px] text-white/50">do {next.name}: {next.min - xp} XP</div>}
-              </div>
-            </div>
-            <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-gradient-to-r from-violet-400 to-fuchsia-400 transition-all" style={{ width: `${tierPct}%` }} />
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {TIERS.map((tr, i) => (
-                <span key={tr.name} className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${i === tierIdx ? "bg-white/20 text-white" : "bg-white/5 text-white/40"}`}>
-                  {tr.emoji} {tr.name}
-                </span>
-              ))}
-            </div>
-          </div>
-
           {/* Aktivna pošiljka */}
           {active && (
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
@@ -269,30 +245,43 @@ export default async function AccountPage() {
               )}
             </div>
 
-            {/* Kuponi */}
-            <div id="kuponi" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
-              <div className="mb-2 font-heading text-base uppercase tracking-wide sm:mb-3 sm:text-lg">Moji kuponi</div>
-              {personalCodes.length === 0 ? (
-                <div className="py-3 text-center text-[13px] text-white/50">
-                  Još nemaš osobnih kupona.
-                  <br />
-                  <span className="text-white/30">Kroz Dresify Klub i Kolo sreće zaslužuješ popuste.</span>
+            {/* Adrese */}
+            <div id="adrese" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
+              <div className="mb-2 font-heading text-base uppercase tracking-wide sm:mb-3 sm:text-lg">Moje adrese</div>
+              <AddressManager />
+            </div>
+          </div>
+
+          {/* 🎮 IGRE I NAGRADE — gamificirana zona (ispod narudžbi i adresa) */}
+          <div className="flex items-center gap-3 pt-2">
+            <span className="font-heading text-lg uppercase tracking-wide text-white/80 sm:text-xl">🎮 Igre i nagrade</span>
+            <span className="h-px flex-1 bg-white/10" />
+          </div>
+
+          {/* XP panel */}
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-violet-600/25 via-fuchsia-600/10 to-transparent p-4 sm:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-2xl">{tier.emoji}</div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">Dresify XP · Razina {tierIdx + 1}</div>
+                  <div className="text-xl font-bold">{tier.name}</div>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {personalCodes.map((c) => (
-                    <div key={c.code} className="flex items-center justify-between rounded-xl border border-dashed border-accent/40 bg-accent/5 px-3 py-2.5">
-                      <div>
-                        <div className="text-base font-bold text-accent">
-                          {c.kind === "freeship" ? "GRATIS DOSTAVA" : c.value > 0 ? `${c.value}% POPUSTA` : (c.label || "🎁 NAGRADA")}
-                        </div>
-                        <div className="text-[11px] text-white/40">{c.value > 0 || c.kind === "freeship" ? (c.label || "Osobni kupon") : "Klub nagrada · stiže uz narudžbu"}{c.minSubtotal ? ` · min ${eur(c.minSubtotal)}` : ""}</div>
-                      </div>
-                      <code className="rounded bg-black/40 px-2 py-1 text-xs font-bold tracking-wider text-white">{c.code}</code>
-                    </div>
-                  ))}
-                </div>
-              )}
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold tabular-nums">{xp} XP</div>
+                {next && <div className="text-[11px] text-white/50">do {next.name}: {next.min - xp} XP</div>}
+              </div>
+            </div>
+            <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+              <div className="h-full rounded-full bg-gradient-to-r from-violet-400 to-fuchsia-400 transition-all" style={{ width: `${tierPct}%` }} />
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {TIERS.map((tr, i) => (
+                <span key={tr.name} className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${i === tierIdx ? "bg-white/20 text-white" : "bg-white/5 text-white/40"}`}>
+                  {tr.emoji} {tr.name}
+                </span>
+              ))}
             </div>
           </div>
 
@@ -323,10 +312,44 @@ export default async function AccountPage() {
             <GiveawayEntryForm initialHandle={giveawayEntry?.handle ?? ""} />
           </div>
 
-          {/* Adrese */}
-          <div id="adrese" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
-            <div className="mb-2 font-heading text-base uppercase tracking-wide sm:mb-3 sm:text-lg">Moje adrese</div>
-            <AddressManager />
+          {/* Kolo sreće */}
+          {koloActive && (
+            <a href="/kolo" id="kolo" className="block rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/10 to-transparent p-4 transition hover:border-accent/60 sm:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="font-heading text-base uppercase tracking-wide text-accent sm:text-lg">🎡 Kolo sreće</div>
+                  <p className="mt-1 text-[13px] text-white/55">Zavrti kolo i osvoji popust ili gratis dostavu — jedna vrtnja po broju, plus nova za svaku narudžbu od 60 €.</p>
+                </div>
+                <span className="shrink-0 text-3xl">🎡</span>
+              </div>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent">Zavrti sada →</span>
+            </a>
+          )}
+
+          {/* Kuponi */}
+          <div id="kuponi" className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
+            <div className="mb-2 font-heading text-base uppercase tracking-wide sm:mb-3 sm:text-lg">Moji kuponi</div>
+            {personalCodes.length === 0 ? (
+              <div className="py-3 text-center text-[13px] text-white/50">
+                Još nemaš osobnih kupona.
+                <br />
+                <span className="text-white/30">Kroz Dresify Klub i Kolo sreće zaslužuješ popuste.</span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {personalCodes.map((c) => (
+                  <div key={c.code} className="flex items-center justify-between rounded-xl border border-dashed border-accent/40 bg-accent/5 px-3 py-2.5">
+                    <div>
+                      <div className="text-base font-bold text-accent">
+                        {c.kind === "freeship" ? "GRATIS DOSTAVA" : c.value > 0 ? `${c.value}% POPUSTA` : (c.label || "🎁 NAGRADA")}
+                      </div>
+                      <div className="text-[11px] text-white/40">{c.value > 0 || c.kind === "freeship" ? (c.label || "Osobni kupon") : "Klub nagrada · stiže uz narudžbu"}{c.minSubtotal ? ` · min ${eur(c.minSubtotal)}` : ""}</div>
+                    </div>
+                    <code className="rounded bg-black/40 px-2 py-1 text-xs font-bold tracking-wider text-white">{c.code}</code>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Omiljeni proizvodi */}

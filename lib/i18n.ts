@@ -78,12 +78,14 @@ const hr = {
   },
 
   hero: {
-    badge: "Novi katalog · 100+ dresova",
-    line1: "DRESOVI.",
+    badge: "100+ nogometnih dresova · Klubovi & reprezentacije",
+    line1: "NOGOMETNI DRESOVI.",
     line2: "KLUBOVI & REPREZENTACIJE.",
     line3: "ZA DJECU I ODRASLE.",
     subtitle: "Dostava po cijeloj Hrvatskoj • Plaćanje pouzećem",
     cta: "POGLEDAJ DRESOVE",
+    seoTitle: "Nogometni dresovi za djecu i odrasle",
+    seoText: "Dresify je mjesto za ljubitelje nogometa i nogometne dresove. Istraži dresove najpoznatijih klubova i reprezentacija, pronađi svoj omiljeni model i upotpuni svoju kolekciju — dječji i za odrasle, klupski i reprezentativni, uz brzu dostavu i plaćanje pouzećem.",
     stats: { jerseys: "dresova", price: "fiksna cijena", delivery: "dana dostava" },
     trust: {
       delivery: "Dostava 2–5 dana",
@@ -349,12 +351,14 @@ const en: typeof hr = {
   },
 
   hero: {
-    badge: "New catalog · 100+ jerseys",
-    line1: "JERSEYS.",
+    badge: "100+ football jerseys · Clubs & national teams",
+    line1: "FOOTBALL JERSEYS.",
     line2: "CLUBS & NATIONAL TEAMS.",
     line3: "FOR KIDS & ADULTS.",
     subtitle: "Delivery across Croatia • Cash on delivery",
     cta: "BROWSE JERSEYS",
+    seoTitle: "Football jerseys for kids and adults",
+    seoText: "Dresify is the place for football fans and football jerseys. Explore jerseys of the most famous clubs and national teams, find your favourite and complete your collection — for kids and adults, club and national, with fast delivery and cash on delivery.",
     stats: { jerseys: "jerseys", price: "fixed price", delivery: "day delivery" },
     trust: {
       delivery: "Delivery 2–5 days",
