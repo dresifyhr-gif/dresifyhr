@@ -59,10 +59,10 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setIsMenuOpen(true)}
-              className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+              className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
               aria-label={t.nav.openMenu}
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-[18px] w-[18px]" />
             </button>
             <SearchOverlay />
           </div>
@@ -75,30 +75,30 @@ export function Navbar() {
             <SignedOut>
               <Link
                 href="/prijava"
-                className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
                 aria-label="Prijava"
                 title="Prijava / Registracija"
               >
-                <User className="h-5 w-5" />
+                <User className="h-[18px] w-[18px]" />
               </Link>
             </SignedOut>
             <SignedIn>
               <Link
                 href="/racun"
-                className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
                 aria-label="Moj profil"
                 title="Moj Dresify"
               >
-                <User className="h-5 w-5" />
+                <User className="h-[18px] w-[18px]" />
               </Link>
             </SignedIn>
             <button
               type="button"
               onClick={openDrawer}
-              className="relative inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+              className="relative inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
               aria-label={t.nav.openCart}
             >
-              <ShoppingBag className="h-5 w-5" />
+              <ShoppingBag className="h-[18px] w-[18px]" />
               <span className="absolute -right-2 -top-2 min-w-6 rounded-full bg-accent px-1.5 py-1 text-[11px] font-bold leading-none text-black">
                 {itemCount}
               </span>
@@ -153,31 +153,31 @@ export function Navbar() {
             <SignedOut>
               <Link
                 href="/prijava"
-                className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
                 aria-label="Prijava"
                 title="Prijava / Registracija"
               >
-                <User className="h-5 w-5" />
+                <User className="h-[18px] w-[18px]" />
               </Link>
             </SignedOut>
             <SignedIn>
               <Link
                 href="/racun"
-                className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
                 aria-label="Moj profil"
                 title="Moj Dresify"
               >
-                <User className="h-5 w-5" />
+                <User className="h-[18px] w-[18px]" />
               </Link>
             </SignedIn>
 
             <button
               type="button"
               onClick={openDrawer}
-              className="relative inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+              className="relative inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
               aria-label={t.nav.openCart}
             >
-              <ShoppingBag className="h-5 w-5" />
+              <ShoppingBag className="h-[18px] w-[18px]" />
               <span className="absolute -right-2 -top-2 min-w-6 rounded-full bg-accent px-1.5 py-1 text-[11px] font-bold leading-none text-black">
                 {itemCount}
               </span>
@@ -205,7 +205,7 @@ export function Navbar() {
                   className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white"
                   aria-label={t.nav.closeMenu}
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-[18px] w-[18px]" />
                 </button>
               </div>
 

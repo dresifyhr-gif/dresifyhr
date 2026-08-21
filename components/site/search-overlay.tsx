@@ -75,10 +75,10 @@ export function SearchOverlay() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white transition-all duration-200 ease-out hover:border-accent hover:text-accent"
+        className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
         aria-label={locale === "en" ? "Search" : "Traži"}
       >
-        <Search className="h-5 w-5" />
+        <Search className="h-[18px] w-[18px]" />
       </button>
 
       <AnimatePresence>
