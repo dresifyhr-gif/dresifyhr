@@ -83,7 +83,7 @@ export function Footer() {
               </Link>
             ))}
             <Link href="/dostava-i-povrat" className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
-              Dostava i povrat
+              Dostava i zamjena
             </Link>
             <Link href="/pravila-privatnosti" className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
               Pravila privatnosti

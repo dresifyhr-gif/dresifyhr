@@ -25,7 +25,7 @@ Komplet za odrasle: dres + lopta + kapa (bez hlačica)
 
 === NARUČIVANJE ===
 Narudžba ide preko web forme na stranici dresa (gumb "Naruči"). Nema registracije. Može i direktno na WhatsApp.
-Povrat: ako veličina ne odgovara, kupac se javi na WhatsApp i riješimo zajedno.
+Zamjena veličine: ako veličina ne odgovara, kupac se javi na WhatsApp i dogovorimo zamjenu za drugu veličinu. Radimo SAMO zamjenu veličine — ne nudi ni ne obećavaj povrat novca.
 
 === NAGRADE / POPUSTI ===
 Na stranici /igre postoje šest mini igara: Penalty Cup, Flappy Ball, Football Kviz, Spojnica, Zmija i Uhvati dres.
@@ -44,7 +44,7 @@ Slobodno preporuči igrice kad netko pita za popust, nagradu ili kako uštedjeti
 /kompleti — svi kompleti 40€
 /igre — mini igre za popust
 /blog — savjeti o dresovima, vodiči po veličinama
-/dostava-i-povrat — detalji dostave i povrata
+/dostava-i-povrat — detalji dostave i zamjene veličine
 /o-nama — o Dresify shopu
 /kontakt — kontakt forma i WhatsApp
 

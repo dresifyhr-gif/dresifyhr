@@ -7,9 +7,9 @@ import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { getSettings } from "@/lib/settings";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Dostava i povrat",
+  title: "Dostava i zamjena",
   description:
-    "Sve o dostavi i povratu: GLS dostava 2–5 radnih dana, plaćanje pouzećem, besplatna dostava preko 60 €, jednostavna zamjena i povrat.",
+    "Sve o dostavi i zamjeni veličine: GLS dostava 2–5 radnih dana, plaćanje pouzećem, besplatna dostava preko 60 €, jednostavna zamjena veličine.",
   path: "/dostava-i-povrat"
 });
 
@@ -45,7 +45,7 @@ export default async function DeliveryReturnsPage() {
   const whatsappUrl = `https://wa.me/${(await getSettings()).whatsappNumber}`;
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Početna", path: "/" },
-    { name: "Dostava i povrat", path: "/dostava-i-povrat" }
+    { name: "Dostava i zamjena", path: "/dostava-i-povrat" }
   ]);
 
   return (
@@ -59,12 +59,12 @@ export default async function DeliveryReturnsPage() {
         <Breadcrumbs
           items={[
             { label: "Početna", href: "/" },
-            { label: "Dostava i povrat" }
+            { label: "Dostava i zamjena" }
           ]}
         />
 
         <h1 className="mt-6 font-heading text-[clamp(2.6rem,7vw,4.4rem)] uppercase leading-[0.95] tracking-[0.04em] text-white">
-          Dostava i povrat
+          Dostava i zamjena
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-white/60">
           Brza dostava po cijeloj Hrvatskoj, plaćanje pri preuzimanju i jednostavna zamjena ako veličina ne odgovara.
@@ -88,13 +88,13 @@ export default async function DeliveryReturnsPage() {
           <div className="inline-flex h-11 w-11 items-center justify-center rounded-[8px] border border-white/10 bg-accent/10 text-accent">
             <RotateCcw className="h-5 w-5" />
           </div>
-          <h2 className="mt-4 font-heading text-2xl uppercase tracking-[0.04em] text-white">Povrat i zamjena</h2>
+          <h2 className="mt-4 font-heading text-2xl uppercase tracking-[0.04em] text-white">Zamjena veličine</h2>
           <ul className="mt-4 space-y-3 text-sm leading-6 text-white/65">
             <li>
               <span className="font-semibold text-white">Ne odgovara veličina?</span> Javi nam se i dogovorimo zamjenu za drugu veličinu — bez komplikacija.
             </li>
             <li>
-              <span className="font-semibold text-white">Rok:</span> za zamjenu ili povrat javi nam se unutar 14 dana od primitka paketa.
+              <span className="font-semibold text-white">Rok:</span> za zamjenu veličine javi nam se unutar 14 dana od primitka paketa.
             </li>
             <li>
               <span className="font-semibold text-white">Uvjet:</span> dres mora biti nenošen i neoštećen, u originalnom stanju.

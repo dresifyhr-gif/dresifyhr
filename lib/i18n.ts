@@ -70,7 +70,7 @@ const hr = {
     benefits: {
       delivery: "Dostava 2–5 dana",
       response: "Odgovor u sat vremena",
-      returns: "Jednostavan povrat",
+      returns: "Jednostavna zamjena",
       orderToday: "Naruči danas — šaljemo sutra",
     },
     segmentAdult: "Dres",
@@ -90,7 +90,7 @@ const hr = {
     trust: {
       delivery: "Dostava 2–5 dana",
       response: "Odgovor u sat vremena",
-      returns: "Jednostavan povrat",
+      returns: "Jednostavna zamjena",
       newWeekly: "Novo svaki tjedan",
     },
   },
@@ -155,7 +155,7 @@ const hr = {
   trust: {
     delivery: "Dostava po cijeloj HR (2-5 dana)",
     response: "Odgovaramo u roku sat vremena",
-    returns: "Jednostavan povrat",
+    returns: "Jednostavna zamjena",
     newWeekly: "Novo svaki tjedan",
   },
 
@@ -343,7 +343,7 @@ const en: typeof hr = {
     benefits: {
       delivery: "Delivery 2–5 days",
       response: "Reply within the hour",
-      returns: "Easy returns",
+      returns: "Easy size exchange",
       orderToday: "Order today — ships tomorrow",
     },
     segmentAdult: "Jersey",
@@ -363,7 +363,7 @@ const en: typeof hr = {
     trust: {
       delivery: "Delivery 2–5 days",
       response: "Reply within the hour",
-      returns: "Easy returns",
+      returns: "Easy size exchange",
       newWeekly: "New every week",
     },
   },
@@ -424,7 +424,7 @@ const en: typeof hr = {
   trust: {
     delivery: "Delivery across HR (2-5 days)",
     response: "We reply within the hour",
-    returns: "Easy returns",
+    returns: "Easy size exchange",
     newWeekly: "New every week",
   },
 

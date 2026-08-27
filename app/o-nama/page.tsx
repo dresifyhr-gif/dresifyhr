@@ -36,8 +36,8 @@ const values = [
   },
   {
     Icon: Shield,
-    title: "Jednostavan povrat",
-    desc: "Nije ti odgovarala veličina? Bez problema — javi nam se i riješimo to zajedno."
+    title: "Jednostavna zamjena",
+    desc: "Nije ti odgovarala veličina? Bez problema — javi nam se i dogovorimo zamjenu za drugu."
   }
 ];
 

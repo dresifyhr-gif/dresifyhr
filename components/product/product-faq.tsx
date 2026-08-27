@@ -56,8 +56,8 @@ export function ProductFaq({ product, locale = "hr" }: { product: Jersey; locale
           a: "Plaćaš pouzećem (gotovinom) pri preuzimanju paketa od dostavljača — ništa ne plaćaš unaprijed."
         },
         {
-          q: "Mogu li vratiti ili zamijeniti dres?",
-          a: "Da. Ako veličina ne odgovara ili nisi zadovoljan, javi nam se na WhatsApp i dogovorimo zamjenu ili povrat."
+          q: "Mogu li zamijeniti dres za drugu veličinu?",
+          a: "Da. Ako ti veličina ne odgovara, javi nam se na WhatsApp i dogovorimo zamjenu za odgovarajuću veličinu."
         },
         {
           q: `Je li ${klub} ${igrac} dres kvalitetan?`,

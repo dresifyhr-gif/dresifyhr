@@ -24,8 +24,8 @@ const FAQ_HR = [
     a: "Na svakom proizvodu klikni 'Vodič za veličine' za tablicu s mjerama (dječje 116–176 po visini, odrasle S–XXL po grudima). Ako si između dvije veličine, uzmi veću — ili nam pošalji visinu na WhatsApp i predložit ćemo.",
   },
   {
-    q: "Mogu li vratiti ili zamijeniti dres?",
-    a: "Da, povrat i zamjena su jednostavni. Ako veličina ne odgovara ili nisi zadovoljan, javi nam se na WhatsApp i dogovorimo zamjenu ili povrat.",
+    q: "Mogu li zamijeniti dres za drugu veličinu?",
+    a: "Da, zamjena veličine je jednostavna. Ako ti veličina ne odgovara, javi nam se na WhatsApp i dogovorimo zamjenu za odgovarajuću.",
   },
   {
     q: "Jesu li dresovi kvalitetni?",

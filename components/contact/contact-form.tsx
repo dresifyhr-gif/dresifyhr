@@ -298,6 +298,16 @@ export function ContactForm() {
     setError(null);
     setLoading(true);
 
+    // Zasad dostavljamo samo u Hrvatsku — blokiraj očito stranu narudžbu (strani pozivni broj).
+    // Lokalni brojevi (091…, 0…) i +385 prolaze; +421, +386 i sl. se zaustave.
+    const phoneNorm = form.phone.replace(/[\s\-()./]/g, "");
+    const foreignPhone = /^(\+|00)/.test(phoneNorm) && !/^(\+385|00385)/.test(phoneNorm);
+    if (needsAddress && foreignPhone) {
+      setError("Zasad dostavljamo samo unutar Hrvatske. Za narudžbu upiši hrvatski broj (npr. 091 234 5678).");
+      setLoading(false);
+      return;
+    }
+
     const details = hasCartItems ? autoDetails : form.manualDetails;
 
     try {
@@ -520,6 +530,9 @@ export function ContactForm() {
 
           {needsAddress && (
             <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_150px]">
+              <div className="sm:col-span-2 flex items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/50">
+                🇭🇷 Zasad dostavljamo samo unutar Hrvatske.
+              </div>
               <div className="flex gap-3 sm:col-span-2">
                 <div className="flex-1">
                   <label htmlFor="street" className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-white/40">
