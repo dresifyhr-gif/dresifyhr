@@ -13,7 +13,8 @@ import {
   INSTAGRAM_HANDLE,
   COST_DRES_EUR,
   COST_KOMPLET_EUR,
-  COST_STREETWEAR_EUR
+  COST_STREETWEAR_EUR,
+  COST_LONGSLEEVE_EUR
 } from "@/lib/site";
 
 // Efektivne postavke shopa: DB vrijednost ako postoji, inače default iz koda.
@@ -24,6 +25,7 @@ export type ShopSettings = {
   costDres: number;
   costKomplet: number;
   costStreetwear: number;
+  costLongSleeve: number;
   // Poslovna pravila (admin/obračun)
   deliveryCost: number;
   returnCost: number;
@@ -74,6 +76,7 @@ const DEFAULTS: ShopSettings = {
   costDres: COST_DRES_EUR,
   costKomplet: COST_KOMPLET_EUR,
   costStreetwear: COST_STREETWEAR_EUR,
+  costLongSleeve: COST_LONGSLEEVE_EUR,
   deliveryCost: 5,   // trošak besplatne dostave koji snosimo mi
   returnCost: 0,     // povrat trenutno ne plaćamo
   igorSharePct: 50,  // pola-pola
@@ -145,6 +148,7 @@ export async function getSettings(): Promise<ShopSettings> {
     costDres: num(r.costDres, DEFAULTS.costDres),
     costKomplet: num(r.costKomplet, DEFAULTS.costKomplet),
     costStreetwear: num(r.costStreetwear, DEFAULTS.costStreetwear),
+    costLongSleeve: num(r.costLongSleeve, DEFAULTS.costLongSleeve),
     deliveryCost: num(r.deliveryCost, DEFAULTS.deliveryCost),
     returnCost: num(r.returnCost, DEFAULTS.returnCost),
     igorSharePct: num(r.igorSharePct, DEFAULTS.igorSharePct),

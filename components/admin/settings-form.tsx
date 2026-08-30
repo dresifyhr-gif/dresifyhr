@@ -8,6 +8,7 @@ type Settings = {
   costDres: number;
   costKomplet: number;
   costStreetwear: number;
+  costLongSleeve: number;
   deliveryCost: number;
   returnCost: number;
   igorSharePct: number;
@@ -113,6 +114,7 @@ export function SettingsForm() {
         costDres: s.costDres,
         costKomplet: s.costKomplet,
         costStreetwear: s.costStreetwear,
+        costLongSleeve: s.costLongSleeve,
         deliveryCost: s.deliveryCost,
         returnCost: s.returnCost,
         igorSharePct: s.igorSharePct,
@@ -154,8 +156,8 @@ export function SettingsForm() {
 
       {tab === "novac" && (
       <div className="space-y-4">
-      <Card title="Nabavne cijene" hint="Utječu na profit i poravnanje. Prodaja: dres 20€, komplet 40€, streetwear 50€.">
-        <div className="grid gap-3 sm:grid-cols-3">
+      <Card title="Nabavne cijene" hint="Utječu na profit i poravnanje. Prodaja: dres 20€, komplet 40€, streetwear 50€, dugi rukav 35€.">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <span className={label}>Nabava dresa (€)</span>
             <input value={s.costDres} onChange={setNum("costDres")} inputMode="decimal" className={inp} />
@@ -167,6 +169,10 @@ export function SettingsForm() {
           <div>
             <span className={label}>Nabava streetweara (€)</span>
             <input value={s.costStreetwear} onChange={setNum("costStreetwear")} inputMode="decimal" className={inp} />
+          </div>
+          <div>
+            <span className={label}>Nabava dugog rukava (€)</span>
+            <input value={s.costLongSleeve} onChange={setNum("costLongSleeve")} inputMode="decimal" className={inp} />
           </div>
         </div>
       </Card>

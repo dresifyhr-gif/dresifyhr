@@ -102,6 +102,11 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
               {product.badge === "bestseller" ? "★ Bestseller" : product.badge === "novo" ? "● Novo" : "Retro"}
             </span>
           )}
+          {product.category === "dugi-rukav" && (
+            <span className="absolute bottom-2.5 left-2.5 z-20 rounded-[6px] bg-sky-600 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white">
+              🧥 Dugi rukav
+            </span>
+          )}
         </div>
 
         <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-3 sm:px-4 sm:pb-4 sm:pt-3.5">

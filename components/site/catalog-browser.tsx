@@ -27,7 +27,7 @@ type CatalogBrowserProps = {
   headingDesc?: string;
 };
 
-type FilterSectionKey = "liga" | "klub" | "igrac" | "velicina" | "retro";
+type FilterSectionKey = "liga" | "klub" | "igrac" | "velicina" | "retro" | "dugirukav";
 
 const leagueOptions = [
   "La Liga",
@@ -149,6 +149,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [retroOnly, setRetroOnly] = useState(false);
+  const [longSleeveOnly, setLongSleeveOnly] = useState(false);
   const [clubSearch, setClubSearch] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -178,7 +179,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
     klub: true,
     igrac: true,
     velicina: true,
-    retro: true
+    retro: true,
+    dugirukav: true
   });
 
   const filteredClubOptions = useMemo(() => {
@@ -210,6 +212,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           !selectedSizes.length ||
           selectedSizes.some((size) => productSupportsSize(product, size));
         const matchesRetro = !retroOnly || product.retro;
+        const matchesLong = !longSleeveOnly || product.category === "dugi-rukav";
 
         return (
           matchesSearch &&
@@ -217,7 +220,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           matchesClub &&
           matchesPlayer &&
           matchesSize &&
-          matchesRetro
+          matchesRetro &&
+          matchesLong
         );
       })
       .sort((left, right) => {
@@ -252,6 +256,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
   }, [
     products,
     retroOnly,
+    longSleeveOnly,
     search,
     selectedClubs,
     selectedLeagues,
@@ -274,7 +279,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
     selectedClubs.length > 0 ||
     selectedPlayers.length > 0 ||
     selectedSizes.length > 0 ||
-    retroOnly;
+    retroOnly ||
+    longSleeveOnly;
 
   const clearAllFilters = () => {
     setSearch("");
@@ -283,6 +289,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
     setSelectedPlayers([]);
     setSelectedSizes([]);
     setRetroOnly(false);
+    setLongSleeveOnly(false);
     setClubSearch("");
   };
 
@@ -487,6 +494,36 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
             <span
               className={`absolute top-0.5 h-5 w-5 rounded-full bg-black transition ${
                 retroOnly ? "left-[22px]" : "left-0.5"
+              }`}
+            />
+          </span>
+        </button>
+      </FilterSection>
+
+      <FilterSection
+        title="Dugi rukav"
+        count={longSleeveOnly ? 1 : 0}
+        isOpen={openSections.dugirukav}
+        onToggle={() => toggleSection("dugirukav")}
+      >
+        <button
+          type="button"
+          onClick={() => setLongSleeveOnly((current) => !current)}
+          className={`flex w-full items-center justify-between rounded-[8px] border px-4 py-4 transition duration-200 ease-out ${
+            longSleeveOnly
+              ? "border-sky-500 bg-sky-500/10"
+              : "border-white/10 bg-[#111111] hover:border-sky-500"
+          }`}
+        >
+          <span className="text-sm font-medium text-white">🧥 Samo dugi rukav</span>
+          <span
+            className={`relative inline-flex h-6 w-11 rounded-full transition ${
+              longSleeveOnly ? "bg-sky-500" : "bg-white/20"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-black transition ${
+                longSleeveOnly ? "left-[22px]" : "left-0.5"
               }`}
             />
           </span>

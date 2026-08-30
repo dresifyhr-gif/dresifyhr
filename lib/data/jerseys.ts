@@ -119,6 +119,9 @@ export const adultSizes = ["S", "M", "L", "XL", "XXL"] as const;
 export const kidSizes = ["104", "116", "128", "140", "152", "164", "176"] as const;
 // Streetwear ide u vlastitom rasponu XS–L (bez dječjih).
 export const streetwearSizes = ["XS", "S", "M", "L"] as const;
+// Dugi rukav — vlastiti raspon 152–L (youth 152-176 + odrasli S-L), bez 104-140 i bez XL/XXL.
+export const longSleeveKidSizes = ["152", "164", "176"] as const;
+export const longSleeveAdultSizes = ["S", "M", "L"] as const;
 
 // National-team kits go up to XXL; club kits only up to XL (we don't stock club XXL).
 const NATIONAL_TEAMS = new Set(["Hrvatska", "Argentina", "Brazil", "Portugal", "Francuska", "Njemačka", "BiH"]);
@@ -250,16 +253,25 @@ export function isNationalTeam(product: Jersey) {
 export function getJerseySizeOptions(product: Jersey) {
   // Streetwear: fiksni raspon XS–L, bez dječjih.
   const isStreetwear = product.category === "streetwear";
-  const hasKids = !isStreetwear && product.vel.includes("Djeca");
-  const hasAdults = isStreetwear || product.vel.includes("Odrasli");
+  // Dugi rukav: fiksni raspon 152–L (youth 152-176 + odrasli S-L), neovisno o `vel`.
+  const isLongSleeve = product.category === "dugi-rukav";
+  const hasKids = isLongSleeve ? true : !isStreetwear && product.vel.includes("Djeca");
+  const hasAdults = isLongSleeve ? true : isStreetwear || product.vel.includes("Odrasli");
   // Clubs don't carry XXL — only national teams do.
-  const adultRange = isStreetwear ? streetwearSizes : isNationalTeam(product) ? adultSizes : adultSizesNoXXL;
+  const adultRange = isStreetwear
+    ? streetwearSizes
+    : isLongSleeve
+      ? longSleeveAdultSizes
+      : isNationalTeam(product)
+        ? adultSizes
+        : adultSizesNoXXL;
+  const kidRange = isLongSleeve ? longSleeveKidSizes : kidSizes;
 
   return {
     hasKids,
     hasAdults,
     adults: hasAdults ? [...adultRange] : [],
-    kids: hasKids ? [...kidSizes] : [],
+    kids: hasKids ? [...kidRange] : [],
     adultsOutOfStock: product.outOfStock === "adults" || product.outOfStock === "all",
     kidsOutOfStock: product.outOfStock === "kids" || product.outOfStock === "all",
     // Rasprodane veličine = ručno označene + one koje imaju 0 kom po veličini.

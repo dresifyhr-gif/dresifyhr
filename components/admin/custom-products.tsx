@@ -35,6 +35,10 @@ const empty = { id: "", category: "dres", klub: "", igrac: "", liga: "Reprezenta
 const FORM_ADULT = ["S", "M", "L", "XL", "XXL"];
 const FORM_KIDS = ["104", "116", "128", "140", "152", "164", "176"];
 const FORM_STREET = ["XS", "S", "M", "L"];
+// Dugi rukav — fiksni raspon 152–L (youth 152-176 + odrasli S-L).
+const FORM_LONGSLEEVE = ["152", "164", "176", "S", "M", "L"];
+// Zadana cijena po kategoriji (streetwear 50 €, dugi rukav 35 €, obični dres 20 €).
+const defaultPriceFor = (cat: string) => (cat === "streetwear" ? "50" : cat === "dugi-rukav" ? "35" : "20");
 
 export function CustomProducts() {
   const LIGE = useLeagues();
@@ -65,7 +69,8 @@ export function CustomProducts() {
       if (d?.ok) {
         setF((prev) => ({
           ...prev,
-          category: d.category || prev.category,
+          // Dugi rukav ne diramo — AI sa slike prepozna "dres", ne smije pregaziti izbor.
+          category: prev.category === "dugi-rukav" ? "dugi-rukav" : d.category || prev.category,
           klub: d.klub || prev.klub,
           igrac: d.igrac || prev.igrac,
           liga: LIGE.includes(d.liga) ? d.liga : prev.liga,
@@ -154,7 +159,7 @@ export function CustomProducts() {
       body: JSON.stringify({
         ...f,
         price: Number(f.price.replace(",", ".")) || 20,
-        vel: buildVel(f.adults, f.kids),
+        vel: f.category === "dugi-rukav" ? "Djeca: 152-176 · Odrasli: S-L" : buildVel(f.adults, f.kids),
         // Samo upisane veličine (prazno = ne pratim/nepoznato).
         sizeStock: Object.fromEntries(
           Object.entries(f.sizeStock)
@@ -219,19 +224,20 @@ export function CustomProducts() {
             <span className="text-xs font-semibold text-[var(--a-text-2)]">Što dodaješ?</span>
             {[
               { v: "dres", label: "👕 Dres" },
+              { v: "dugi-rukav", label: "🧥 Dugi rukav" },
               { v: "streetwear", label: "🔥 Streetwear" }
             ].map((c) => (
               <button
                 key={c.v}
                 type="button"
-                onClick={() => setF({ ...f, category: c.v, price: c.v === "streetwear" && (f.price === "20" || !f.price) ? "50" : c.v === "dres" && f.price === "50" ? "20" : f.price })}
-                className={`rounded-[10px] px-3 py-1.5 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : "bg-[var(--a-text)] text-[var(--a-card)]") : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
+                onClick={() => setF((prev) => ({ ...prev, category: c.v, price: (!prev.price || ["20", "35", "50"].includes(prev.price)) ? defaultPriceFor(c.v) : prev.price }))}
+                className={`rounded-[10px] px-3 py-1.5 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : c.v === "dugi-rukav" ? "bg-sky-600 text-white" : "bg-[var(--a-text)] text-[var(--a-card)]") : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
               >
                 {c.label}
               </button>
             ))}
           </div>
-          {f.category === "dres" && (
+          {f.category !== "streetwear" && (
             <div className="rounded-[12px] border border-slate-900/10 bg-slate-900/5 p-3">
               <div className="mb-1.5 text-xs font-semibold text-[var(--a-text)]">🪄 AI popuni — upiši naziv, ostalo složi AI</div>
               <div className="flex gap-2">
@@ -257,7 +263,7 @@ export function CustomProducts() {
             <label className="text-xs font-medium text-[var(--a-text-2)]">{f.category === "streetwear" ? "Model / naziv" : "Igrač / naziv"}
               <input value={f.igrac} onChange={(e) => setF({ ...f, igrac: e.target.value })} placeholder={f.category === "streetwear" ? "npr. Cortez — bijele" : "npr. Modrić nr10 — 2026"} className="mt-1 w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-2 text-sm text-[var(--a-text)] outline-none focus:border-slate-400" />
             </label>
-            {f.category === "dres" && (
+            {f.category !== "streetwear" && (
               <label className="text-xs font-medium text-[var(--a-text-2)]">Liga
                 <select value={f.liga} onChange={(e) => setF({ ...f, liga: e.target.value })} className="mt-1 w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-2 text-sm text-[var(--a-text)] outline-none focus:border-slate-400">
                   {LIGE.map((l) => <option key={l} value={l}>{l}</option>)}
@@ -284,6 +290,8 @@ export function CustomProducts() {
             <span className="font-medium text-[var(--a-text-2)]">Veličine:</span>
             {f.category === "streetwear" ? (
               <span className="rounded-[10px] bg-orange-50 px-3 py-1 font-semibold text-orange-600">XS · S · M · L (streetwear)</span>
+            ) : f.category === "dugi-rukav" ? (
+              <span className="rounded-[10px] bg-sky-50 px-3 py-1 font-semibold text-sky-600">152 · 164 · 176 · S · M · L (dugi rukav)</span>
             ) : (
               <>
                 <button type="button" onClick={() => setF({ ...f, adults: !f.adults })} className={`rounded-[10px] px-3 py-1 font-semibold transition ${f.adults ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] text-[var(--a-text-3)] hover:bg-[var(--a-surface-2)]"}`}>Odrasli S–XXL</button>
@@ -297,7 +305,7 @@ export function CustomProducts() {
               Broj se automatski smanjuje nakon narudžbe; 0 = rasprodano (crveno). */}
           {(() => {
             const sizes =
-              f.category === "streetwear" ? FORM_STREET : [...(f.adults ? FORM_ADULT : []), ...(f.kids ? FORM_KIDS : [])];
+              f.category === "streetwear" ? FORM_STREET : f.category === "dugi-rukav" ? FORM_LONGSLEEVE : [...(f.adults ? FORM_ADULT : []), ...(f.kids ? FORM_KIDS : [])];
             if (!sizes.length) return null;
             return (
               <div>
@@ -325,7 +333,7 @@ export function CustomProducts() {
           })()}
 
           <div className="flex items-center gap-4 text-xs text-[var(--a-text-2)]">
-            {f.category === "dres" && (
+            {f.category !== "streetwear" && (
               <label className="flex items-center gap-1.5"><input type="checkbox" checked={f.retro} onChange={(e) => setF({ ...f, retro: e.target.checked })} /> Retro</label>
             )}
             <label className="flex items-center gap-1.5">Badge:
