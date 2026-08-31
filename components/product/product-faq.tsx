@@ -11,6 +11,7 @@ export function ProductFaq({ product, locale = "hr" }: { product: Jersey; locale
   const igrac = repairText(product.igrac);
   const adultRange = isNationalTeam(product) ? "S–XXL" : "S–XL";
   const isKomplet = product.liga === "Komplet";
+  const isLongSleeve = product.category === "dugi-rukav";
   const en = locale === "en";
 
   const heading = en ? "Frequently asked questions" : "Česta pitanja";
@@ -21,6 +22,8 @@ export function ProductFaq({ product, locale = "hr" }: { product: Jersey; locale
           q: `What sizes does the ${klub} ${igrac} come in?`,
           a: isKomplet
             ? `The kit is available in kids' sizes 104–176 and adult sizes ${adultRange}, and includes jersey, shorts, ball and cap.`
+            : isLongSleeve
+            ? `Available in sizes 152, 164, 176 (youth) and S, M, L (adults). Long-sleeve jersey only — no shorts.`
             : `Available in kids' sizes 104–176 (jersey + shorts) and adult sizes ${adultRange} (jersey only).`
         },
         {
@@ -45,6 +48,8 @@ export function ProductFaq({ product, locale = "hr" }: { product: Jersey; locale
           q: `Koje veličine ima ${klub} ${igrac}?`,
           a: isKomplet
             ? `Komplet je dostupan u dječjim veličinama 104–176 i odraslim veličinama ${adultRange}, a uključuje dres, hlačice, loptu i kapu.`
+            : isLongSleeve
+            ? `Dostupan je u veličinama 152, 164, 176 (djeca) i S, M, L (odrasli). Samo dres dugih rukava, bez hlačica.`
             : `Dostupan je u dječjim veličinama 104–176 (dres + hlačice) i odraslim veličinama ${adultRange} (samo dres).`
         },
         {

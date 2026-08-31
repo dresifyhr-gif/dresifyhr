@@ -360,17 +360,23 @@ export function getJerseyDescription(product: Jersey, locale: "hr" | "en" = "hr"
   const klub = repairText(product.klub);
   const igrac = repairText(product.igrac);
   const isKomplet = product.liga === "Komplet";
+  // Dugi rukav = samo gornji dio (bez hlačica), veličine 152–176 + S–L.
+  const isLongSleeve = product.category === "dugi-rukav";
   const adultRangeEN = isNationalTeam(product) ? "S–XXL" : "S–XL";
 
   if (locale === "en") {
     const introEN = isKomplet
       ? `The ${klub} kit featuring ${igrac} comes as a complete set — jersey, shorts, ball and cap. A perfect gift for young fans: everything needed to play, straight out of the box.`
+      : isLongSleeve
+      ? `${klub} long-sleeve jersey with the stitched name and number of ${igrac}, in a heavier premium fabric for colder days. Top only — no shorts.`
       : `${klub} jersey with the stitched name and number of ${igrac}, faithful to the original look. The fabric is light and breathable, comfortable both on the pitch and in the city.`;
     const contextEN = product.retro
       ? `A retro model that brings back an iconic look — a piece that carries history and a recognisable silhouette.`
       : `This model follows the current look and is one of the most sought-after in our range.`;
     const sizesEN = isKomplet
       ? `Available in kids' sizes 104–176 and adult sizes ${adultRangeEN}; each kit includes jersey, shorts, ball and cap.`
+      : isLongSleeve
+      ? `Available in sizes 152, 164, 176 (youth) and S, M, L (adults). Long-sleeve jersey only — no shorts.`
       : `Available in kids' sizes 104–176 (jersey + shorts) and adult sizes ${adultRangeEN} (jersey only).`;
     const deliveryEN =
       "Dispatched within 2–5 business days. Not sure about the size? Send us your height on WhatsApp and we'll suggest the right one.";
@@ -381,6 +387,8 @@ export function getJerseyDescription(product: Jersey, locale: "hr" | "en" = "hr"
 
   const intro = isKomplet
     ? `${klub} komplet s motivom igrača ${igrac} dolazi kao zaokružen paket — dres, hlačice, lopta i kapa. Idealan poklon za male navijače jer dijete dobije sve potrebno za igru odmah iz kutije.`
+    : isLongSleeve
+    ? `${klub} dres dugih rukava s ušivenim imenom i brojem igrača ${igrac}, u boljem i debljem materijalu za hladnije dane. Samo gornji dio — bez hlačica.`
     : `${klub} dres s ušivenim imenom i brojem igrača ${igrac}, vjeran originalnom izgledu. Materijal je lagan i prozračan, ugodan za nošenje i na terenu i u gradu.`;
 
   const context = product.retro
@@ -390,6 +398,8 @@ export function getJerseyDescription(product: Jersey, locale: "hr" | "en" = "hr"
   const adultRange = isNationalTeam(product) ? "S–XXL" : "S–XL";
   const sizes = isKomplet
     ? `Dostupno u dječjim (104–176) i odraslim (${adultRange}) veličinama; svaki komplet uključuje dres, hlačice, loptu i kapu.`
+    : isLongSleeve
+    ? `Dostupno u veličinama 152, 164, 176 (djeca) te S, M, L (odrasli). Samo dres dugih rukava, bez hlačica.`
     : `Dostupno u dječjim veličinama 104–176 (dres + hlačice) te odraslim veličinama ${adultRange} (dres).`;
 
   const delivery =

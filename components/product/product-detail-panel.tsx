@@ -69,7 +69,9 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   // segmentu nema nijedne dostupne → "Rasprodano".
   const segmentOut = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock);
   const availableSizes = segmentOut ? [] : currentSizes.filter((size) => !sizeOptions.soldOutSizes.includes(size));
-  const segmentLabel = segment === "adult" ? t.product.segmentAdult : t.product.segmentKid;
+  // Dugi rukav = samo gornji dio (bez hlačica) — i dječje veličine pišu samo "Dres".
+  const isLongSleeve = product.category === "dugi-rukav";
+  const segmentLabel = segment === "adult" || isLongSleeve ? t.product.segmentAdult : t.product.segmentKid;
   const productPrice = product.price ?? 20;
   const whatsappMessage = `Pozdrav, želim naručiti: ${repairText(product.klub)} ${repairText(
     product.igrac
@@ -137,7 +139,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
             }`}
           >
             <p className="text-xs uppercase tracking-[0.3em] text-white/45">{t.product.kids}</p>
-            <p className="mt-3 text-2xl uppercase leading-none text-white">{t.product.jerseyAndShorts}</p>
+            <p className="mt-3 text-2xl uppercase leading-none text-white">{isLongSleeve ? t.product.jersey : t.product.jerseyAndShorts}</p>
           </button>
         </div>
       ) : null}
