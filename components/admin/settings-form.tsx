@@ -156,7 +156,7 @@ export function SettingsForm() {
 
       {tab === "novac" && (
       <div className="space-y-4">
-      <Card title="Nabavne cijene" hint="Utječu na profit i poravnanje. Prodaja: dres 20€, komplet 40€, streetwear 50€, dugi rukav 35€.">
+      <Card title="Nabavne cijene" hint="Utječu na profit i poravnanje. Prodaja: dres 20€, komplet 40€, streetwear 50€, dugi rukav 30€.">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <span className={label}>Nabava dresa (€)</span>

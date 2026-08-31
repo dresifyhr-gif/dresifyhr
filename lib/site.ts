@@ -20,7 +20,7 @@ export const COST_DRES_EUR = 6;
 export const COST_KOMPLET_EUR = 18;
 // Streetwear komplet (prodaja 50 €) — privremena zadana vrijednost, postavi pravu u Postavkama.
 export const COST_STREETWEAR_EUR = 25;
-// Dugi rukav (prodaja 35 €) — bolji materijal, nabava 10 € → profit 25 € po komadu.
+// Dugi rukav (prodaja 30 €) — bolji materijal, nabava 10 € → profit 20 € po komadu.
 export const COST_LONGSLEEVE_EUR = 10;
 
 export const META_PIXEL_ID = "1621563625577336";

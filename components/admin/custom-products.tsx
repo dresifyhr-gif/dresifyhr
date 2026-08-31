@@ -37,8 +37,8 @@ const FORM_KIDS = ["104", "116", "128", "140", "152", "164", "176"];
 const FORM_STREET = ["XS", "S", "M", "L"];
 // Dugi rukav — fiksni raspon 152–L (youth 152-176 + odrasli S-L).
 const FORM_LONGSLEEVE = ["152", "164", "176", "S", "M", "L"];
-// Zadana cijena po kategoriji (streetwear 50 €, dugi rukav 35 €, obični dres 20 €).
-const defaultPriceFor = (cat: string) => (cat === "streetwear" ? "50" : cat === "dugi-rukav" ? "35" : "20");
+// Zadana cijena po kategoriji (streetwear 50 €, dugi rukav 30 €, obični dres 20 €).
+const defaultPriceFor = (cat: string) => (cat === "streetwear" ? "50" : cat === "dugi-rukav" ? "30" : "20");
 
 export function CustomProducts() {
   const LIGE = useLeagues();
@@ -230,7 +230,7 @@ export function CustomProducts() {
               <button
                 key={c.v}
                 type="button"
-                onClick={() => setF((prev) => ({ ...prev, category: c.v, price: (!prev.price || ["20", "35", "50"].includes(prev.price)) ? defaultPriceFor(c.v) : prev.price }))}
+                onClick={() => setF((prev) => ({ ...prev, category: c.v, price: (!prev.price || ["20", "30", "50"].includes(prev.price)) ? defaultPriceFor(c.v) : prev.price }))}
                 className={`rounded-[10px] px-3 py-1.5 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : c.v === "dugi-rukav" ? "bg-sky-600 text-white" : "bg-[var(--a-text)] text-[var(--a-card)]") : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
               >
                 {c.label}
