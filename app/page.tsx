@@ -11,7 +11,7 @@ import { ReviewsSection } from "@/components/home/reviews-section";
 import { StreetwearBanner } from "@/components/home/streetwear-banner";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { jerseys } from "@/lib/data/jerseys";
-import { getFeaturedProducts, getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
+import { getFeaturedProducts, getCatalogProducts, getStreetwearProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { getVisibleTestimonials } from "@/lib/testimonials";
 import { getSettings } from "@/lib/settings";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
@@ -58,6 +58,7 @@ export default async function HomePage() {
 
   const dresovi = (await getCatalogProducts(jerseys)).filter((j) => j.liga !== "Komplet");
   const streetwear = await getStreetwearProducts();
+  const trenirke = await getTrenirkaProducts();
   const testimonials = await getVisibleTestimonials();
   // Mystery box slika za hero rotaciju (ako je proizvod dodan i ima sliku).
   const mysteryImage = dresovi.find((p) => p.slug?.includes("mystery"))?.images?.[0]?.src;
@@ -79,6 +80,7 @@ export default async function HomePage() {
           <HomeCatalogTabs
             dresovi={dresovi}
             streetwear={streetwear}
+            trenirke={trenirke}
             headingLabel={t.home.catalogKicker}
             headingTitle={t.home.catalogTitle}
             headingDesc={t.home.catalogDesc}

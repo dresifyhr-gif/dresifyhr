@@ -41,6 +41,7 @@ export async function POST(request: Request) {
     costKomplet: numOrNull(b?.costKomplet),
     costStreetwear: numOrNull(b?.costStreetwear),
     costLongSleeve: numOrNull(b?.costLongSleeve),
+    costTrenirka: numOrNull(b?.costTrenirka),
     deliveryCost: numOrNull(b?.deliveryCost),
     returnCost: numOrNull(b?.returnCost),
     igorSharePct: numOrNull(b?.igorSharePct),

@@ -22,6 +22,8 @@ export const COST_KOMPLET_EUR = 18;
 export const COST_STREETWEAR_EUR = 25;
 // Dugi rukav (prodaja 30 €) — bolji materijal, nabava 10 € → profit 20 € po komadu.
 export const COST_LONGSLEEVE_EUR = 10;
+// Trenirka (komplet jakna + hlače, prodaja 35 €) — nabava 16 € → profit 19 € po komadu.
+export const COST_TRENIRKA_EUR = 16;
 
 export const META_PIXEL_ID = "1621563625577336";
 export const HOME_DELIVERY_PRICE_EUR = 6;

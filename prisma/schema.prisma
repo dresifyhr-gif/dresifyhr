@@ -244,6 +244,7 @@ model Settings {
   costKomplet        Float? // nabavna cijena kompleta (npr. 18)
   costStreetwear     Float? // nabavna cijena streetwear kompleta (prodaja 50 €)
   costLongSleeve     Float? // nabavna cijena dresa dugih rukava (prodaja 30 €)
+  costTrenirka       Float? // nabavna cijena trenirke jakna+hlače (prodaja 35 €)
   // Poslovna pravila (samo admin/obračun — ne diraju blagajnu)
   deliveryCost       Float? // koliko NAS košta besplatna dostava (skida se s marže)
   returnCost         Float? // koliko NAS košta vraćena pošiljka

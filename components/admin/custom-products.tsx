@@ -37,8 +37,10 @@ const FORM_KIDS = ["104", "116", "128", "140", "152", "164", "176"];
 const FORM_STREET = ["XS", "S", "M", "L"];
 // Dugi rukav — fiksni raspon 152–L (youth 152-176 + odrasli S-L).
 const FORM_LONGSLEEVE = ["152", "164", "176", "S", "M", "L"];
-// Zadana cijena po kategoriji (streetwear 50 €, dugi rukav 30 €, obični dres 20 €).
-const defaultPriceFor = (cat: string) => (cat === "streetwear" ? "50" : cat === "dugi-rukav" ? "30" : "20");
+// Trenirka (jakna + hlače) — spojene EU + XS. Upiši količinu samo za veličine koje ta trenirka ima.
+const FORM_TRENIRKA = ["110/116", "128/134", "158/164", "170/176", "XS"];
+// Zadana cijena po kategoriji (streetwear 50 €, trenirka 35 €, dugi rukav 30 €, obični dres 20 €).
+const defaultPriceFor = (cat: string) => (cat === "streetwear" ? "50" : cat === "trenirka" ? "35" : cat === "dugi-rukav" ? "30" : "20");
 
 export function CustomProducts() {
   const LIGE = useLeagues();
@@ -69,8 +71,8 @@ export function CustomProducts() {
       if (d?.ok) {
         setF((prev) => ({
           ...prev,
-          // Dugi rukav ne diramo — AI sa slike prepozna "dres", ne smije pregaziti izbor.
-          category: prev.category === "dugi-rukav" ? "dugi-rukav" : d.category || prev.category,
+          // Dugi rukav / trenirku ne diramo — AI sa slike prepozna "dres", ne smije pregaziti izbor.
+          category: prev.category === "dugi-rukav" || prev.category === "trenirka" ? prev.category : d.category || prev.category,
           klub: d.klub || prev.klub,
           igrac: d.igrac || prev.igrac,
           liga: LIGE.includes(d.liga) ? d.liga : prev.liga,
@@ -159,7 +161,7 @@ export function CustomProducts() {
       body: JSON.stringify({
         ...f,
         price: Number(f.price.replace(",", ".")) || 20,
-        vel: f.category === "dugi-rukav" ? "Djeca: 152-176 · Odrasli: S-L" : buildVel(f.adults, f.kids),
+        vel: f.category === "dugi-rukav" ? "Djeca: 152-176 · Odrasli: S-L" : f.category === "trenirka" ? "Trenirka (jakna + hlače)" : buildVel(f.adults, f.kids),
         // Samo upisane veličine (prazno = ne pratim/nepoznato).
         sizeStock: Object.fromEntries(
           Object.entries(f.sizeStock)
@@ -225,13 +227,14 @@ export function CustomProducts() {
             {[
               { v: "dres", label: "👕 Dres" },
               { v: "dugi-rukav", label: "🧥 Dugi rukav" },
+              { v: "trenirka", label: "🏃 Trenirka" },
               { v: "streetwear", label: "🔥 Streetwear" }
             ].map((c) => (
               <button
                 key={c.v}
                 type="button"
-                onClick={() => setF((prev) => ({ ...prev, category: c.v, price: (!prev.price || ["20", "30", "50"].includes(prev.price)) ? defaultPriceFor(c.v) : prev.price }))}
-                className={`rounded-[10px] px-3 py-1.5 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : c.v === "dugi-rukav" ? "bg-sky-600 text-white" : "bg-[var(--a-text)] text-[var(--a-card)]") : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
+                onClick={() => setF((prev) => ({ ...prev, category: c.v, price: (!prev.price || ["20", "30", "35", "50"].includes(prev.price)) ? defaultPriceFor(c.v) : prev.price }))}
+                className={`rounded-[10px] px-3 py-1.5 text-xs font-semibold transition ${f.category === c.v ? (c.v === "streetwear" ? "bg-orange-500 text-white" : c.v === "dugi-rukav" ? "bg-sky-600 text-white" : c.v === "trenirka" ? "bg-teal-600 text-white" : "bg-[var(--a-text)] text-[var(--a-card)]") : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
               >
                 {c.label}
               </button>
@@ -292,6 +295,8 @@ export function CustomProducts() {
               <span className="rounded-[10px] bg-orange-50 px-3 py-1 font-semibold text-orange-600">XS · S · M · L (streetwear)</span>
             ) : f.category === "dugi-rukav" ? (
               <span className="rounded-[10px] bg-sky-50 px-3 py-1 font-semibold text-sky-600">152 · 164 · 176 · S · M · L (dugi rukav)</span>
+            ) : f.category === "trenirka" ? (
+              <span className="rounded-[10px] bg-teal-50 px-3 py-1 font-semibold text-teal-600">110/116 · 128/134 · 158/164 · 170/176 · XS — upiši samo što imaš</span>
             ) : (
               <>
                 <button type="button" onClick={() => setF({ ...f, adults: !f.adults })} className={`rounded-[10px] px-3 py-1 font-semibold transition ${f.adults ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] text-[var(--a-text-3)] hover:bg-[var(--a-surface-2)]"}`}>Odrasli S–XXL</button>
@@ -305,7 +310,7 @@ export function CustomProducts() {
               Broj se automatski smanjuje nakon narudžbe; 0 = rasprodano (crveno). */}
           {(() => {
             const sizes =
-              f.category === "streetwear" ? FORM_STREET : f.category === "dugi-rukav" ? FORM_LONGSLEEVE : [...(f.adults ? FORM_ADULT : []), ...(f.kids ? FORM_KIDS : [])];
+              f.category === "streetwear" ? FORM_STREET : f.category === "dugi-rukav" ? FORM_LONGSLEEVE : f.category === "trenirka" ? FORM_TRENIRKA : [...(f.adults ? FORM_ADULT : []), ...(f.kids ? FORM_KIDS : [])];
             if (!sizes.length) return null;
             return (
               <div>

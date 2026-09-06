@@ -42,7 +42,7 @@ async function getLastModMap(): Promise<Map<string, Date>> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticRoutes = ["", "/dresovi", "/streetwear", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/pravila-privatnosti", "/igre", "/igra", "/flappy", "/gadaj"];
+  const staticRoutes = ["", "/dresovi", "/streetwear", "/trenirke", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/pravila-privatnosti", "/igre", "/igra", "/flappy", "/gadaj"];
   const categoryRoutes = (await getJerseyCategoryCollections()).map((collection) => collection.path);
   const clubRoutes = (await getJerseyClubCollections()).map((collection) => collection.path);
   const playerRoutes = (await getJerseyPlayerCollections()).map((collection) => collection.path);

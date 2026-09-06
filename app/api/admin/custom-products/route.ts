@@ -47,7 +47,7 @@ export async function POST(request: Request) {
   // Osnovna polja kojima gospodari gornja forma. Zaliha/stanje (stock, sizeStock,
   // outOfStock, soldOutSizes, hidden) drži lista "Proizvodi" — ne diramo ih pri uređivanju.
   const coreData = {
-    category: b?.category === "streetwear" ? "streetwear" : b?.category === "dugi-rukav" ? "dugi-rukav" : "dres",
+    category: b?.category === "streetwear" ? "streetwear" : b?.category === "dugi-rukav" ? "dugi-rukav" : b?.category === "trenirka" ? "trenirka" : "dres",
     klub,
     igrac,
     vel: typeof b?.vel === "string" && b.vel.trim() ? b.vel.trim() : "Djeca: 104-176 · Odrasli: S-XXL",

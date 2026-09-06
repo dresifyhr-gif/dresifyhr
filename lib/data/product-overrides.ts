@@ -161,10 +161,13 @@ export function customToJersey(c: CustomRow): Jersey {
   };
 }
 
-// Custom DRESOVI za katalog (bez streetweara).
+// Custom DRESOVI za katalog (bez streetweara i trenirki — one imaju svoje stranice).
 async function getCustomJerseys(): Promise<Jersey[]> {
   const rows = await fetchCustomRows();
-  return rows.map(customToJersey).filter((j) => (j.category ?? "dres") !== "streetwear");
+  return rows.map(customToJersey).filter((j) => {
+    const cat = j.category ?? "dres";
+    return cat !== "streetwear" && cat !== "trenirka";
+  });
 }
 
 // Streetwear proizvodi (zasebna stranica /streetwear). fetchCustomRows je već
@@ -172,6 +175,12 @@ async function getCustomJerseys(): Promise<Jersey[]> {
 export async function getStreetwearProducts(): Promise<Jersey[]> {
   const rows = await fetchCustomRows();
   return rows.filter((c) => (c.category ?? "dres") === "streetwear").map(customToJersey);
+}
+
+// Trenirke (kompleti: jakna + hlače) — zasebna stranica /trenirke.
+export async function getTrenirkaProducts(): Promise<Jersey[]> {
+  const rows = await fetchCustomRows();
+  return rows.filter((c) => (c.category ?? "dres") === "trenirka").map(customToJersey);
 }
 
 // Deterministička ocjena 4.5–5.0 + plauzibilan broj recenzija iz sluga.

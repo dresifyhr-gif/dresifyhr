@@ -122,6 +122,9 @@ export const streetwearSizes = ["XS", "S", "M", "L"] as const;
 // Dugi rukav — vlastiti raspon 152–L (youth 152-176 + odrasli S-L), bez 104-140 i bez XL/XXL.
 export const longSleeveKidSizes = ["152", "164", "176"] as const;
 export const longSleeveAdultSizes = ["S", "M", "L"] as const;
+// Trenirka (komplet: jakna + hlače) — spojene EU veličine + XS. Po trenirci se
+// prikazuju SAMO one za koje je upisana zaliha (npr. Brazil ima i 110/116, ostale kreću od 128/134).
+export const trenirkaSizes = ["110/116", "128/134", "158/164", "170/176", "XS"] as const;
 
 // National-team kits go up to XXL; club kits only up to XL (we don't stock club XXL).
 const NATIONAL_TEAMS = new Set(["Hrvatska", "Argentina", "Brazil", "Portugal", "Francuska", "Njemačka", "BiH"]);
@@ -255,16 +258,25 @@ export function getJerseySizeOptions(product: Jersey) {
   const isStreetwear = product.category === "streetwear";
   // Dugi rukav: fiksni raspon 152–L (youth 152-176 + odrasli S-L), neovisno o `vel`.
   const isLongSleeve = product.category === "dugi-rukav";
-  const hasKids = isLongSleeve ? true : !isStreetwear && product.vel.includes("Djeca");
-  const hasAdults = isLongSleeve ? true : isStreetwear || product.vel.includes("Odrasli");
+  // Trenirka: jedan ravni popis (bez odrasli/djeca), veličine SAMO one s upisanom
+  // zalihom (ili puni popis ako zaliha nije upisana). Zadržava kanonski redoslijed.
+  const isTrenirka = product.category === "trenirka";
+  const trenirkaEntered = product.sizeStock ? Object.keys(product.sizeStock) : [];
+  const trenirkaList = trenirkaEntered.length
+    ? trenirkaSizes.filter((s) => trenirkaEntered.includes(s))
+    : [...trenirkaSizes];
+  const hasKids = isTrenirka ? false : isLongSleeve ? true : !isStreetwear && product.vel.includes("Djeca");
+  const hasAdults = isTrenirka ? true : isLongSleeve ? true : isStreetwear || product.vel.includes("Odrasli");
   // Clubs don't carry XXL — only national teams do.
   const adultRange = isStreetwear
     ? streetwearSizes
-    : isLongSleeve
-      ? longSleeveAdultSizes
-      : isNationalTeam(product)
-        ? adultSizes
-        : adultSizesNoXXL;
+    : isTrenirka
+      ? trenirkaList
+      : isLongSleeve
+        ? longSleeveAdultSizes
+        : isNationalTeam(product)
+          ? adultSizes
+          : adultSizesNoXXL;
   const kidRange = isLongSleeve ? longSleeveKidSizes : kidSizes;
 
   return {
@@ -362,11 +374,15 @@ export function getJerseyDescription(product: Jersey, locale: "hr" | "en" = "hr"
   const isKomplet = product.liga === "Komplet";
   // Dugi rukav = samo gornji dio (bez hlačica), veličine 152–176 + S–L.
   const isLongSleeve = product.category === "dugi-rukav";
+  // Trenirka = kompletni set jakna + hlače.
+  const isTrenirka = product.category === "trenirka";
   const adultRangeEN = isNationalTeam(product) ? "S–XXL" : "S–XL";
 
   if (locale === "en") {
     const introEN = isKomplet
       ? `The ${klub} kit featuring ${igrac} comes as a complete set — jersey, shorts, ball and cap. A perfect gift for young fans: everything needed to play, straight out of the box.`
+      : isTrenirka
+      ? `${klub} tracksuit — a complete set: jacket (top) and pants (bottom) in matching design. Warm and comfortable, perfect for training and everyday wear.`
       : isLongSleeve
       ? `${klub} long-sleeve jersey with the stitched name and number of ${igrac}, in a heavier premium fabric for colder days. Top only — no shorts.`
       : `${klub} jersey with the stitched name and number of ${igrac}, faithful to the original look. The fabric is light and breathable, comfortable both on the pitch and in the city.`;
@@ -375,6 +391,8 @@ export function getJerseyDescription(product: Jersey, locale: "hr" | "en" = "hr"
       : `This model follows the current look and is one of the most sought-after in our range.`;
     const sizesEN = isKomplet
       ? `Available in kids' sizes 104–176 and adult sizes ${adultRangeEN}; each kit includes jersey, shorts, ball and cap.`
+      : isTrenirka
+      ? `Complete tracksuit — jacket + pants. Pick your size on the product page; not sure? Send us the height on WhatsApp and we'll help.`
       : isLongSleeve
       ? `Available in sizes 152, 164, 176 (youth) and S, M, L (adults). Long-sleeve jersey only — no shorts.`
       : `Available in kids' sizes 104–176 (jersey + shorts) and adult sizes ${adultRangeEN} (jersey only).`;
@@ -387,6 +405,8 @@ export function getJerseyDescription(product: Jersey, locale: "hr" | "en" = "hr"
 
   const intro = isKomplet
     ? `${klub} komplet s motivom igrača ${igrac} dolazi kao zaokružen paket — dres, hlačice, lopta i kapa. Idealan poklon za male navijače jer dijete dobije sve potrebno za igru odmah iz kutije.`
+    : isTrenirka
+    ? `${klub} trenirka — kompletni set: jakna (gornji dio) i hlače (donji dio) u istom dizajnu. Topla i udobna, savršena za trening i svaki dan.`
     : isLongSleeve
     ? `${klub} dres dugih rukava s ušivenim imenom i brojem igrača ${igrac}, u boljem i debljem materijalu za hladnije dane. Samo gornji dio — bez hlačica.`
     : `${klub} dres s ušivenim imenom i brojem igrača ${igrac}, vjeran originalnom izgledu. Materijal je lagan i prozračan, ugodan za nošenje i na terenu i u gradu.`;
@@ -398,6 +418,8 @@ export function getJerseyDescription(product: Jersey, locale: "hr" | "en" = "hr"
   const adultRange = isNationalTeam(product) ? "S–XXL" : "S–XL";
   const sizes = isKomplet
     ? `Dostupno u dječjim (104–176) i odraslim (${adultRange}) veličinama; svaki komplet uključuje dres, hlačice, loptu i kapu.`
+    : isTrenirka
+    ? `Kompletna trenirka — jakna + hlače. Dostupne veličine odaberi na stranici; nisi siguran/na za veličinu? Pošalji nam visinu na WhatsApp i pomoći ćemo.`
     : isLongSleeve
     ? `Dostupno u veličinama 152, 164, 176 (djeca) te S, M, L (odrasli). Samo dres dugih rukava, bez hlačica.`
     : `Dostupno u dječjim veličinama 104–176 (dres + hlačice) te odraslim veličinama ${adultRange} (dres).`;
