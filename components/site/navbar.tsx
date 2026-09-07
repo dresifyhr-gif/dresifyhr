@@ -26,7 +26,6 @@ export function Navbar() {
     { href: "/kompleti", label: t.nav.sets },
     { href: "/trenirke", label: "Trenirke" },
     { href: "/streetwear", label: "Streetwear" },
-    { href: "/blog", label: t.nav.blog },
     { href: "/kontakt", label: t.nav.contact },
   ];
 

@@ -13,8 +13,13 @@ import { type Jersey, getJerseyStock, getStockTone, getJerseySizeOptions } from 
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { formatPrice, repairText } from "@/lib/utils";
 
-export function ProductCard({ product, priority = false, theme = "jersey" }: { product: Jersey; priority?: boolean; theme?: "jersey" | "streetwear" }) {
+export function ProductCard({ product, priority = false, theme = "jersey" }: { product: Jersey; priority?: boolean; theme?: "jersey" | "streetwear" | "trenirka" }) {
   const sw = theme === "streetwear"; // streetwear = svijetla kartica, narančasti akcenti
+  const tr = theme === "trenirka";   // trenirka = svijetla kartica, tirkizni akcenti
+  const light = sw || tr;            // svijetla (bijela) kartica — bijeli donji dio kao streetwear
+  const acText = sw ? "text-orange-500" : tr ? "text-teal-600" : "text-accent";
+  const acBg = sw ? "bg-orange-500" : tr ? "bg-teal-600" : "bg-accent";
+  const acBgHover = sw ? "hover:bg-orange-600" : tr ? "hover:bg-teal-700" : "hover:bg-[#f0ff71]";
   const stock = getJerseyStock(product);
   const sizeOptions = getJerseySizeOptions(product);
   const { addItem } = useCart();
@@ -85,7 +90,7 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
     >
       <Link
         href={`/dres/${product.slug}`}
-        className={`group relative flex h-full flex-col overflow-hidden rounded-[14px] border transition-all duration-200 ease-out ${sw ? "border-slate-200 bg-white shadow-sm hover:border-orange-400" : "border-white/10 bg-[#111111] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] hover:border-accent"}`}
+        className={`group relative flex h-full flex-col overflow-hidden rounded-[14px] border transition-all duration-200 ease-out ${light ? `border-slate-200 bg-white shadow-sm ${tr ? "hover:border-teal-400" : "hover:border-orange-400"}` : "border-white/10 bg-[#111111] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] hover:border-accent"}`}
       >
 
         <div className="relative">
@@ -94,7 +99,7 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
           {(product.badge || product.retro) && (
             <span className={`absolute left-2.5 top-2.5 z-20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] ${
               product.badge === "bestseller"
-                ? sw ? "bg-orange-500 text-white" : "bg-accent text-black"
+                ? light ? `${acBg} text-white` : "bg-accent text-black"
                 : product.badge === "novo"
                 ? "bg-[#3b82f6] text-white"
                 : "bg-black/70 border border-white/25 text-white/90"
@@ -117,13 +122,13 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
         <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-3 sm:px-4 sm:pb-4 sm:pt-3.5">
           {/* Name & league */}
           <div>
-            <p className={`hidden text-[11px] uppercase tracking-[0.26em] sm:block ${sw ? "text-orange-500/70" : "text-white/40"}`}>
-              {sw ? "Streetwear" : repairText(product.liga)}
+            <p className={`hidden text-[11px] uppercase tracking-[0.26em] sm:block ${sw ? "text-orange-500/70" : tr ? "text-teal-600/70" : "text-white/40"}`}>
+              {sw ? "Streetwear" : tr ? "Trenirka" : repairText(product.liga)}
             </p>
-            <h3 className={`text-[0.85rem] font-semibold uppercase leading-tight sm:mt-2 sm:text-[1.1rem] ${sw ? "text-slate-900" : "text-white"}`}>
+            <h3 className={`text-[0.85rem] font-semibold uppercase leading-tight sm:mt-2 sm:text-[1.1rem] ${light ? "text-slate-900" : "text-white"}`}>
               {repairText(product.klub)}
             </h3>
-            <p className={`mt-0.5 text-[11px] leading-4 sm:mt-1 sm:text-[13px] sm:leading-5 ${sw ? "text-slate-500" : "text-white/50"}`}>
+            <p className={`mt-0.5 text-[11px] leading-4 sm:mt-1 sm:text-[13px] sm:leading-5 ${light ? "text-slate-500" : "text-white/50"}`}>
               {repairText(product.igrac)}
             </p>
             {product.rating && (
@@ -134,17 +139,17 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
           </div>
 
           {/* Price & stock */}
-          <div className={`mt-2 flex items-center justify-between gap-2 border-t pt-2 sm:mt-3 sm:pt-3 ${sw ? "border-slate-200" : "border-white/8"}`}>
-            <p className={`font-heading text-[1.4rem] uppercase leading-none tracking-[0.03em] sm:text-[1.75rem] ${sw ? "text-orange-500" : "text-accent"}`}>
+          <div className={`mt-2 flex items-center justify-between gap-2 border-t pt-2 sm:mt-3 sm:pt-3 ${light ? "border-slate-200" : "border-white/8"}`}>
+            <p className={`font-heading text-[1.4rem] uppercase leading-none tracking-[0.03em] sm:text-[1.75rem] ${acText}`}>
               {formatPrice(product.price)}
             </p>
-            <p className={`hidden text-[12px] font-medium sm:block ${sw ? "text-slate-400" : getStockTone(stock)}`}>Ostalo: {stock} kom</p>
+            <p className={`hidden text-[12px] font-medium sm:block ${light ? "text-slate-400" : getStockTone(stock)}`}>Ostalo: {stock} kom</p>
             {/* Mobile cart button */}
             <button
               type="button"
               onClick={handleMobileToggle}
               className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[6px] transition-all duration-200 md:hidden ${
-                isOpen ? (sw ? "bg-slate-100 text-slate-600" : "bg-white/10 text-white") : (sw ? "bg-orange-500 text-white" : "bg-accent text-black")
+                isOpen ? (light ? "bg-slate-100 text-slate-600" : "bg-white/10 text-white") : (light ? `${acBg} text-white` : "bg-accent text-black")
               }`}
             >
               {isOpen ? <X className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
@@ -173,8 +178,8 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
                           onClick={(e) => handleSegmentClick(e, seg)}
                           className={`flex-1 rounded-[4px] border py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] transition-all duration-150 ${
                             segment === seg
-                              ? sw ? "border-orange-500 bg-orange-50 text-orange-600" : "border-accent bg-accent/10 text-accent"
-                              : sw ? "border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600" : "border-white/10 text-white/40 hover:border-white/25 hover:text-white/60"
+                              ? light ? (tr ? "border-teal-500 bg-teal-50 text-teal-700" : "border-orange-500 bg-orange-50 text-orange-600") : "border-accent bg-accent/10 text-accent"
+                              : light ? "border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600" : "border-white/10 text-white/40 hover:border-white/25 hover:text-white/60"
                           }`}
                         >
                           {seg === "adult" ? "Odrasli" : "Djeca"}
@@ -196,10 +201,10 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
                           title={oos ? "Nema na stanju" : undefined}
                           className={`min-w-[40px] rounded-[4px] border px-2 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-all duration-150 ${
                             oos
-                              ? sw ? "cursor-not-allowed border-slate-100 text-slate-300 line-through" : "cursor-not-allowed border-white/5 text-white/20"
+                              ? light ? "cursor-not-allowed border-slate-100 text-slate-300 line-through" : "cursor-not-allowed border-white/5 text-white/20"
                               : selectedSize === size
-                              ? sw ? "border-orange-500 bg-orange-500 text-white" : "border-accent bg-accent text-black"
-                              : sw ? "border-slate-200 text-slate-600 hover:border-orange-400 hover:text-slate-900" : "border-white/15 text-white/60 hover:border-accent/50 hover:text-white"
+                              ? light ? `border-transparent ${acBg} text-white` : "border-accent bg-accent text-black"
+                              : light ? `border-slate-200 text-slate-600 ${tr ? "hover:border-teal-400" : "hover:border-orange-400"} hover:text-slate-900` : "border-white/15 text-white/60 hover:border-accent/50 hover:text-white"
                           }`}
                         >
                           {size}
@@ -213,7 +218,7 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
                     type="button"
                     onClick={handleAddToCart}
                     disabled={!selectedSize}
-                    className={`flex w-full items-center justify-center gap-2 rounded-[4px] py-2.5 font-heading text-[11px] uppercase tracking-[0.14em] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${sw ? "bg-orange-500 text-white hover:bg-orange-600" : "bg-accent text-black hover:bg-[#f0ff71]"}`}
+                    className={`flex w-full items-center justify-center gap-2 rounded-[4px] py-2.5 font-heading text-[11px] uppercase tracking-[0.14em] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${light ? `${acBg} text-white ${acBgHover}` : "bg-accent text-black hover:bg-[#f0ff71]"}`}
                   >
                     <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
                     <span className="pl-[0.14em]">DODAJ U KOŠARICU</span>

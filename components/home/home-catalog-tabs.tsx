@@ -98,7 +98,7 @@ export function HomeCatalogTabs({
           </div>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {trenirke.map((product) => (
-              <ProductCard key={product.slug} product={product} />
+              <ProductCard key={product.slug} product={product} theme="trenirka" />
             ))}
           </div>
         </div>

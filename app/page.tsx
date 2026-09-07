@@ -1,4 +1,3 @@
-import { BlogPreviewSection } from "@/components/home/blog-preview-section";
 import { FaqSection } from "@/components/home/faq-section";
 import { FeaturedSection } from "@/components/home/featured-section";
 import { GamesCta } from "@/components/home/games-cta";
@@ -94,7 +93,6 @@ export default async function HomePage() {
       {show("reviews") && <ReviewsSection />}
       {show("instagram") && <InstagramSection />}
       {show("faq") && <FaqSection />}
-      {show("blog") && <BlogPreviewSection />}
       {show("newsletter") && <NewsletterSection />}
     </>
   );
