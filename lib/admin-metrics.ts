@@ -360,7 +360,7 @@ export async function getDashboardMetrics() {
     profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter }),
     prisma.adSpend.groupBy({ by: ["paidBy"], _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined })
   ]);
-  const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, sentStreet: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, collectedStreet: 0, pending: 0, pendingDresovi: 0, pendingKompleti: 0, pendingStreet: 0, pendingLong: 0, pendingTren: 0, pendingMargin: 0 });
+  const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, sentStreet: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, collectedStreet: 0, collectedLong: 0, collectedTren: 0, pending: 0, pendingDresovi: 0, pendingKompleti: 0, pendingStreet: 0, pendingLong: 0, pendingTren: 0, pendingMargin: 0 });
   const cashSplit: Record<"igor" | "ivica", ReturnType<typeof mkCash>> = { igor: mkCash(), ivica: mkCash() };
   let freeDeliveries = 0; // prikupljene narudžbe s besplatnom dostavom (mi platili dostavu ~5€)
   for (const o of cashOrders) {
@@ -386,10 +386,13 @@ export async function getDashboardMetrics() {
     if (!who) continue;
     const amt = o.total - (o.shipping ?? 0);
     let d = 0, k = 0;
-    let s = 0;
-    for (const it of o.items) { const q = it.quantity || 1; if (it.slug && streetwearSlugs.has(it.slug)) s += q; else if (isKomplet(it)) k += q; else d += q; }
+    let s = 0, l = 0, tr = 0;
+    // Dugi rukav i trenirka ulaze u 'd' (za prikaz "dresovi") ALI se i posebno broje,
+    // da im collectedCost prizna pravu nabavu (10€/16€), kao lifeCost i pendingMargin.
+    for (const it of o.items) { const q = it.quantity || 1; if (it.slug && streetwearSlugs.has(it.slug)) s += q; else if (isKomplet(it)) k += q; else { d += q; if (it.slug && longSleeveSlugs.has(it.slug)) l += q; else if (it.slug && trenirkaSlugs.has(it.slug)) tr += q; } }
     const b = cashSplit[who];
     b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k; b.collectedStreet += s;
+    b.collectedLong += l; b.collectedTren += tr;
     // Besplatna dostava = roba ≥ 60€ ILI osvojeno na igrici ILI streetwear → mi platili ~5€ pošti.
     const isFreeShip = amt >= 60 || Boolean(o.promoCode && o.promoCode.trim()) || o.items.some((it) => it.slug && streetwearSlugs.has(it.slug));
     if (isFreeShip) freeDeliveries++;
@@ -446,7 +449,13 @@ export async function getDashboardMetrics() {
   const collectedDresovi = cashSplit.igor.collectedDresovi + cashSplit.ivica.collectedDresovi;
   const collectedKompleti = cashSplit.igor.collectedKompleti + cashSplit.ivica.collectedKompleti;
   const collectedStreet = cashSplit.igor.collectedStreet + cashSplit.ivica.collectedStreet;
-  const collectedCost = collectedDresovi * costDres + collectedKompleti * costKomplet + collectedStreet * costStreetwear; // Ivici nazad
+  const collectedLong = cashSplit.igor.collectedLong + cashSplit.ivica.collectedLong;
+  const collectedTren = cashSplit.igor.collectedTren + cashSplit.ivica.collectedTren;
+  // Nabava koja se PRVO vraća Ivici. Dugi rukav i trenirka su unutar collectedDresovi
+  // (osnovnih 6€), pa im ovdje dodajemo samo deltu do prave nabave (10€ / 16€) —
+  // isti obrazac kao lifeCost i pendingMargin (prije se ovdje NIJE primjenjivao → Ivica zakinuta).
+  const collectedCost = collectedDresovi * costDres + collectedKompleti * costKomplet + collectedStreet * costStreetwear
+    + collectedLong * (costLongSleeve - costDres) + collectedTren * (costTrenirka - costDres); // Ivici nazad
   // Saldo dostave (GLS marža + / besplatne dostave −) i povrati (−) ulaze u maržu
   // prije podjele, pa ih oboje snose pola-pola.
   const collectedMargin = totalCollected - collectedCost + shipPLCollected + shipPLReturnedSettle;
