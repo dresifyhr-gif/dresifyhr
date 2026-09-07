@@ -400,7 +400,7 @@ export function SettingsForm() {
       </div>
       )}
 
-      <div className="sticky bottom-4 flex items-center gap-3">
+      <div className="sticky bottom-24 z-10 flex items-center gap-3 lg:bottom-4">
         <button type="button" onClick={save} disabled={saving} className="a-btn a-btn-primary px-5 py-2.5 text-sm disabled:opacity-50">
           {saving ? "Spremam…" : "Spremi postavke"}
         </button>

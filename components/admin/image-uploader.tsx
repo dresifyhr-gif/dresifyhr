@@ -68,10 +68,10 @@ export function ImageUploader({ value, onChange, slug }: { value: string[]; onCh
             <div key={url} className="group relative aspect-square overflow-hidden rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)]">
               <Image src={url} alt="" fill sizes="120px" className="object-cover" />
               {i === 0 && <span className="absolute left-1 top-1 rounded bg-slate-900/80 px-1 py-0.5 text-[9px] font-semibold text-white">glavna</span>}
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/50 px-1 py-0.5 opacity-0 transition group-hover:opacity-100">
-                <button type="button" onClick={() => move(i, -1)} className="text-white text-[11px]">◀</button>
-                <button type="button" onClick={() => onChange(value.filter((_, k) => k !== i))} className="text-white text-[11px]">✕</button>
-                <button type="button" onClick={() => move(i, 1)} className="text-white text-[11px]">▶</button>
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/50 px-1 py-0.5 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
+                <button type="button" onClick={() => move(i, -1)} className="flex h-9 w-9 items-center justify-center text-white text-[14px]">◀</button>
+                <button type="button" onClick={() => onChange(value.filter((_, k) => k !== i))} className="flex h-9 w-9 items-center justify-center text-white text-[14px]">✕</button>
+                <button type="button" onClick={() => move(i, 1)} className="flex h-9 w-9 items-center justify-center text-white text-[14px]">▶</button>
               </div>
             </div>
           ))}

@@ -222,8 +222,8 @@ export function CustomProducts() {
 
       {open && (
         <div className="mt-4 space-y-3 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-4">
-          <div className="flex items-center gap-2 rounded-[12px] border border-orange-200 bg-orange-50/50 p-2.5">
-            <span className="text-xs font-semibold text-[var(--a-text-2)]">Što dodaješ?</span>
+          <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-orange-200 bg-orange-50/50 p-2.5">
+            <span className="basis-full text-xs font-semibold text-[var(--a-text-2)] sm:basis-auto">Što dodaješ?</span>
             {[
               { v: "dres", label: "👕 Dres" },
               { v: "dugi-rukav", label: "🧥 Dugi rukav" },

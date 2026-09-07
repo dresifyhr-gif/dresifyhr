@@ -17,7 +17,7 @@ export function AdminAiDock() {
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Dresify AI"
-          className="fixed bottom-20 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 shadow-lg shadow-slate-900/20 transition hover:bg-slate-800 lg:bottom-6 lg:right-6"
+          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 shadow-lg shadow-slate-900/20 transition hover:bg-slate-800 lg:bottom-6 lg:right-6"
         >
           <Image src="/dresify-robot.png" alt="Dresify AI" width={40} height={40} className="h-9 w-9 object-contain" />
         </button>

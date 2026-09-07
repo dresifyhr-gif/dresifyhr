@@ -125,7 +125,7 @@ function ItemsEditor({ orderId, items, onSaved }: { orderId: string; items: Orde
           <input value={r.igrac} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, igrac: e.target.value } : x)))} placeholder="Igrač / model" className="a-input min-w-[120px] flex-1 px-2 py-1 text-[12px]" />
           <input value={r.size} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, size: e.target.value } : x)))} placeholder="Vel." className="a-input w-14 px-2 py-1 text-[12px]" />
           <input value={r.unitPrice} onChange={(e) => setRows((rs) => rs.map((x, k) => (k === i ? { ...x, unitPrice: e.target.value } : x)))} inputMode="decimal" className="a-input w-14 px-2 py-1 text-[12px]" />
-          <button type="button" onClick={() => setRows((rs) => rs.filter((_, k) => k !== i))} className="a-btn-sm a-btn-danger px-2 py-1 text-[11px]">✕</button>
+          <button type="button" onClick={() => setRows((rs) => rs.filter((_, k) => k !== i))} className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">✕</button>
         </div>
       ))}
       <div className="flex flex-wrap items-center gap-2">
@@ -233,10 +233,10 @@ function NewOrderForm({ onCreated }: { onCreated: () => void }) {
             <input value={r.igrac} onChange={(e) => setRow(i, { igrac: e.target.value })} placeholder="Igrač / model" className={`min-w-[120px] flex-1 ${inp}`} />
             <input value={r.size} onChange={(e) => setRow(i, { size: e.target.value })} placeholder="Vel." className={`w-16 ${inp}`} />
             <input value={r.unitPrice} onChange={(e) => setRow(i, { unitPrice: e.target.value.replace(/[^0-9.,]/g, "") })} inputMode="decimal" placeholder="€" className={`w-16 ${inp}`} />
-            <button type="button" onClick={() => setRows((rs) => rs.filter((_, k) => k !== i))} disabled={rows.length === 1} className="a-btn-sm a-btn-danger px-2 py-1 text-[11px]">✕</button>
+            <button type="button" onClick={() => setRows((rs) => rs.filter((_, k) => k !== i))} disabled={rows.length === 1} className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">✕</button>
           </div>
         ))}
-        <button type="button" onClick={() => setRows((rs) => [...rs, { klub: "", igrac: "", size: "", unitPrice: "20" }])} className="a-btn-sm px-2 py-1 text-[11px]">+ Dodaj artikl</button>
+        <button type="button" onClick={() => setRows((rs) => [...rs, { klub: "", igrac: "", size: "", unitPrice: "20" }])} className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">+ Dodaj artikl</button>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
@@ -815,15 +815,15 @@ export function OrdersManager() {
 
       {/* Skupne akcije — pojave se kad je nešto označeno */}
       {selected.size > 0 && (
-        <div className="sticky top-2 z-10 mb-3 flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-text)] px-3 py-2 text-[var(--a-card)] shadow-lg">
+        <div className="sticky top-[100px] z-30 mb-3 flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-text)] px-3 py-2 text-[var(--a-card)] shadow-lg lg:top-4">
           <span className="text-sm font-semibold">{selected.size} označeno</span>
-          <span className="text-white/40">·</span>
-          <span className="text-xs text-white/70">Označi poslano:</span>
+          <span className="text-[var(--a-card)]/40">·</span>
+          <span className="text-xs text-[var(--a-card)]/70">Označi poslano:</span>
           <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "igor")} className="rounded-[10px] bg-[var(--a-card)]/10 px-2.5 py-1 text-xs font-semibold hover:bg-[var(--a-card)]/20 disabled:opacity-50">📦 Igor</button>
           <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "ivica")} className="rounded-[10px] bg-[var(--a-card)]/10 px-2.5 py-1 text-xs font-semibold hover:bg-[var(--a-card)]/20 disabled:opacity-50">📦 Ivica</button>
-          <span className="text-white/40">·</span>
+          <span className="text-[var(--a-card)]/40">·</span>
           <button type="button" disabled={bulkBusy} onClick={() => bulk("collect")} className="a-btn-sm a-btn-ok px-2.5 py-1 text-xs">💰 Naplaćeno</button>
-          <button type="button" onClick={() => setSelected(new Set())} className="ml-auto rounded-[10px] px-2 py-1 text-xs text-white/60 hover:text-white">Odznači</button>
+          <button type="button" onClick={() => setSelected(new Set())} className="ml-auto rounded-[10px] px-2 py-1 text-xs text-[var(--a-card)]/60 hover:text-[var(--a-card)]">Odznači</button>
         </div>
       )}
 
@@ -973,7 +973,7 @@ export function OrdersManager() {
                         href={waLink(o.phone)!}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="a-btn-sm a-btn-ok px-2 py-1 text-[11px]"
+                        className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]"
                       >
                         💬 WhatsApp
                       </a>
@@ -984,39 +984,39 @@ export function OrdersManager() {
                       target="_blank"
                       rel="noopener noreferrer"
                       title="GLS naljepnica: ime kupca + logo + QR na Instagram (adresu radi GLS)"
-                      className="a-btn-sm px-2 py-1 text-[11px]"
+                      className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]"
                     >
                       🚚 GLS
                     </a>
                   </span>
                 </div>
 
-                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                <div className="mt-2.5 flex flex-wrap gap-2">
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "igor" })}
-                    className="a-btn-sm a-btn-ok px-2 py-1 text-[11px]">✓ Igor poslao</button>
+                    className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">✓ Igor poslao</button>
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "ivica" })}
-                    className="a-btn-sm px-2 py-1 text-[11px]">✓ Ivica poslao</button>
+                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✓ Ivica poslao</button>
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
-                    className="a-btn-sm a-btn-danger px-2 py-1 text-[11px]">↩ Vraćeno</button>
+                    className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">↩ Vraćeno</button>
                   <button type="button" disabled={isBusy} onClick={() => setCancelling((c) => (c === o.id ? null : o.id))}
-                    className="a-btn-sm px-2 py-1 text-[11px]">✕ Otkazano</button>
+                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✕ Otkazano</button>
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
-                    className="a-btn-sm px-2 py-1 text-[11px]">↺ Vrati u nove</button>
+                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">↺ Vrati u nove</button>
                   {(o.status === "shipped" || o.status === "done") && (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
                       title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}
-                      className={`rounded-[10px] px-2 py-1 text-[11px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-[var(--a-good)] text-[var(--a-card)] hover:opacity-90" : "border border-[var(--a-warn)]/40 bg-[var(--a-warn-bg)] text-[var(--a-warn)] hover:opacity-90"}`}>
+                      className={`rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-[var(--a-good)] text-[var(--a-card)] hover:opacity-90" : "border border-[var(--a-warn)]/40 bg-[var(--a-warn-bg)] text-[var(--a-warn)] hover:opacity-90"}`}>
                       {o.cashCollected ? "💰 Prikupljeno ✓" : "💰 Prikupljeno?"}
                     </button>
                   )}
                   <button type="button" onClick={() => setEditing((e) => (e === o.id ? null : o.id))}
-                    className="a-btn-sm px-2 py-1 text-[11px]">✏️ Uredi artikle</button>
+                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✏️ Uredi artikle</button>
                   <button type="button" onClick={() => setEditingContact((e) => (e === o.id ? null : o.id))}
-                    className="a-btn-sm px-2 py-1 text-[11px]">✏️ Uredi adresu</button>
+                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✏️ Uredi adresu</button>
                   {o.address && (
                     <button type="button" onClick={() => setGlsOpen((e) => (e === o.id ? null : o.id))}
                       title="Podaci primatelja složeni za GLS formu — kopiraj bez prepisivanja"
-                      className="a-btn-sm px-2 py-1 text-[11px]">📋 {glsOpen === o.id ? "Sakrij formu" : "Forma"}</button>
+                      className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">📋 {glsOpen === o.id ? "Sakrij formu" : "Forma"}</button>
                   )}
                 </div>
 
