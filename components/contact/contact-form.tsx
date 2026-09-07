@@ -716,7 +716,12 @@ export function ContactForm() {
 
           <div className="mt-5 space-y-2.5 border-t border-white/8 pt-5 text-sm">
             <div className="flex items-center justify-between text-white/50">
-              <span>{t.contactForm.items}</span>
+              <span>
+                {t.contactForm.items}
+                {!hasCartItems && (
+                  <span className="text-white/30"> · {locale === "en" ? "1 jersey" : "1 dres"}</span>
+                )}
+              </span>
               <span>{formatEuroAmount(hasCartItems ? subtotal : JERSEY_PRICE_EUR)}</span>
             </div>
             <div className="flex items-center justify-between text-white/50">
@@ -789,7 +794,14 @@ export function ContactForm() {
             </div>
 
             <div className="flex items-center justify-between border-t border-white/8 pt-3">
-              <span className="font-heading text-lg uppercase tracking-wide text-white">{t.contactForm.total}</span>
+              <span className="font-heading text-lg uppercase tracking-wide text-white">
+                {t.contactForm.total}
+                {!hasCartItems && (
+                  <span className="ml-2 text-[11px] font-normal normal-case tracking-normal text-white/40">
+                    {locale === "en" ? "· estimate for 1 jersey" : "· procjena za 1 dres"}
+                  </span>
+                )}
+              </span>
               <span className="font-heading text-2xl text-accent">{formatEuroAmount(total)}</span>
             </div>
           </div>

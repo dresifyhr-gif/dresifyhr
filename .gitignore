@@ -21,3 +21,6 @@ tsconfig.tsbuildinfo
 
 # Local git worktrees
 .claude/worktrees/
+
+# clerk configuration (can include secrets)
+/.clerk/

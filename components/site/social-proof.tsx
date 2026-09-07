@@ -28,6 +28,7 @@ export function SocialProof() {
 
   useEffect(() => {
     let alive = true;
+    const activeTimers = timers.current;
 
     const pump = () => {
       if (dismissedRef.current || showing.current) return;
@@ -75,7 +76,7 @@ export function SocialProof() {
     return () => {
       alive = false;
       clearInterval(poll);
-      timers.current.forEach(clearTimeout);
+      activeTimers.forEach(clearTimeout);
     };
   }, []);
 

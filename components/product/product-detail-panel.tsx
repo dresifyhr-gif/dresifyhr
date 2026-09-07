@@ -38,9 +38,10 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   const defaultSegment: "adult" | "kid" =
     sizeOptions.hasAdults && defaultAdultSize ? "adult" : defaultKidSize ? "kid" : sizeOptions.hasAdults ? "adult" : "kid";
   const [segment, setSegment] = useState<"adult" | "kid">(defaultSegment);
-  const [selectedSize, setSelectedSize] = useState(
-    defaultSegment === "adult" ? defaultAdultSize : defaultKidSize
-  );
+  // Bez predodabira veličine — kupac mora svjesno odabrati (gumb je disabled dok
+  // ne odabere). Auto-odabir najmanje dostupne veličine ('S') vodio je u krive
+  // narudžbe → skupe zamjene (a politika je samo zamjena veličine).
+  const [selectedSize, setSelectedSize] = useState("");
 
   // Kod promjene proizvoda biraj segment u kojem STVARNO ima veličina. Prije je
   // ovdje bilo `hasAdults ? "adult" : "kid"` bez obzira na zalihu, pa je kod
@@ -49,9 +50,8 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   useEffect(() => {
     const nextSegment: "adult" | "kid" =
       sizeOptions.hasAdults && defaultAdultSize ? "adult" : defaultKidSize ? "kid" : sizeOptions.hasAdults ? "adult" : "kid";
-    const nextSize = nextSegment === "adult" ? defaultAdultSize : defaultKidSize;
     setSegment(nextSegment);
-    setSelectedSize(nextSize); // i kad je prazno — da se ne vuče veličina prethodnog proizvoda
+    setSelectedSize(""); // bez predodabira — kupac bira svjesno; ne vuče se ni veličina prethodnog proizvoda
   }, [product.slug, sizeOptions.hasAdults, defaultAdultSize, defaultKidSize]);
 
   useEffect(() => {
@@ -85,10 +85,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
 
   const handleSegmentChange = (nextSegment: "adult" | "kid") => {
     setSegment(nextSegment);
-    const nextSize = nextSegment === "adult" ? defaultAdultSize : defaultKidSize;
-    if (nextSize) {
-      setSelectedSize(nextSize);
-    }
+    setSelectedSize(""); // promjena Odrasli/Djeca — očisti odabir, veličine se razlikuju
   };
 
   return (

@@ -42,7 +42,7 @@ async function getLastModMap(): Promise<Map<string, Date>> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticRoutes = ["", "/dresovi", "/streetwear", "/trenirke", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/pravila-privatnosti", "/igre", "/igra", "/flappy", "/gadaj"];
+  const staticRoutes = ["", "/dresovi", "/kompleti", "/streetwear", "/trenirke", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/pravila-privatnosti", "/igre", "/igra", "/flappy", "/gadaj"];
   const categoryRoutes = (await getJerseyCategoryCollections()).map((collection) => collection.path);
   const clubRoutes = (await getJerseyClubCollections()).map((collection) => collection.path);
   const playerRoutes = (await getJerseyPlayerCollections()).map((collection) => collection.path);
@@ -86,6 +86,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: absoluteUrl(`/blog/${post.slug}`),
       changeFrequency: "monthly" as const,
       priority: 0.62
-    }))
+    })),
+    // PS5 nagradna igra — landing kampanje. Živa je, ali dosad izostavljena iz
+    // sitemapa; niži prioritet jer je promotivna, ne katalog.
+    {
+      url: absoluteUrl("/ps5"),
+      changeFrequency: "weekly" as const,
+      priority: 0.5
+    }
   ];
 }

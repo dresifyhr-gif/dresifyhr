@@ -3,6 +3,11 @@ const nextConfig = {
   trailingSlash: true,
   images: {
     formats: ["image/avif", "image/webp"],
+    // Suženi srcSet: dresovi/kompleti se nikad ne prikazuju veći od ~1920px, a
+    // zadani Next raspon išao je do 2048/3840 → svaka <img> je nosila 16 varijanti
+    // (kartice od 112px do 3840w) i naduvavao HTML. Dovoljno za HR mobilnu publiku.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [64, 128, 256, 384],
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" }
     ]

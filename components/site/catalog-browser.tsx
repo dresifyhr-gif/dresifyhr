@@ -29,6 +29,8 @@ type CatalogBrowserProps = {
 
 type FilterSectionKey = "liga" | "klub" | "igrac" | "velicina" | "retro" | "dugirukav";
 
+type SortOption = "recommended" | "price-asc" | "price-desc" | "name";
+
 const leagueOptions = [
   "La Liga",
   "Premier Liga",
@@ -115,7 +117,7 @@ function FilterSection({
 }
 
 export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc }: CatalogBrowserProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   // Klubovi za filter se grade iz STVARNIH proizvoda (uključujući ručno dodane/custom),
   // ne iz statičnog kataloga — inače novi klub/repka (npr. Palestina) nema svoj filter/grupu.
   const availableClubs = useMemo(
@@ -150,6 +152,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [retroOnly, setRetroOnly] = useState(false);
   const [longSleeveOnly, setLongSleeveOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("recommended");
   const [clubSearch, setClubSearch] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -225,33 +228,49 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
         );
       })
       .sort((left, right) => {
-        // Flagship product is always first
-        if (left.slug === FLAGSHIP_SLUG) return -1;
-        if (right.slug === FLAGSHIP_SLUG) return 1;
+        const recommended = () => {
+          // Flagship product is always first
+          if (left.slug === FLAGSHIP_SLUG) return -1;
+          if (right.slug === FLAGSHIP_SLUG) return 1;
 
-        // Croatian national team jerseys always second
-        const leftHR = left.klub === "Hrvatska";
-        const rightHR = right.klub === "Hrvatska";
-        if (leftHR !== rightHR) return leftHR ? -1 : 1;
+          // Croatian national team jerseys always second
+          const leftHR = left.klub === "Hrvatska";
+          const rightHR = right.klub === "Hrvatska";
+          if (leftHR !== rightHR) return leftHR ? -1 : 1;
 
-        // Grupiranje po IGRAČU ima prednost: svi dresovi istog kluba i igrača
-        // moraju biti jedan do drugog, bez obzira ima li dres fotografiju ili
-        // ne (npr. svih 7 Yamala zajedno, i onaj bez slike). Zato prvo klub…
-        const byClub = repairText(left.klub).localeCompare(repairText(right.klub), "hr");
-        if (byClub !== 0) return byClub;
+          // Grupiranje po IGRAČU ima prednost: svi dresovi istog kluba i igrača
+          // moraju biti jedan do drugog, bez obzira ima li dres fotografiju ili
+          // ne (npr. svih 7 Yamala zajedno, i onaj bez slike). Zato prvo klub…
+          const byClub = repairText(left.klub).localeCompare(repairText(right.klub), "hr");
+          if (byClub !== 0) return byClub;
 
-        // …pa igrač.
-        const byPlayer = repairText(left.igrac).localeCompare(repairText(right.igrac), "hr");
-        if (byPlayer !== 0) return byPlayer;
+          // …pa igrač.
+          const byPlayer = repairText(left.igrac).localeCompare(repairText(right.igrac), "hr");
+          if (byPlayer !== 0) return byPlayer;
 
-        // Tek unutar istog igrača: varijanta s fotografijom ide ispred one bez
-        // (slike su i u bazi za custom dresove, ne samo u statičkoj galeriji).
-        const leftHasImage = (left.images?.length ?? 0) > 0 || hasJerseyGallery(left.slug);
-        const rightHasImage = (right.images?.length ?? 0) > 0 || hasJerseyGallery(right.slug);
-        if (leftHasImage !== rightHasImage) return leftHasImage ? -1 : 1;
+          // Tek unutar istog igrača: varijanta s fotografijom ide ispred one bez
+          // (slike su i u bazi za custom dresove, ne samo u statičkoj galeriji).
+          const leftHasImage = (left.images?.length ?? 0) > 0 || hasJerseyGallery(left.slug);
+          const rightHasImage = (right.images?.length ?? 0) > 0 || hasJerseyGallery(right.slug);
+          if (leftHasImage !== rightHasImage) return leftHasImage ? -1 : 1;
 
-        // Stabilan konačni redoslijed varijanti istog igrača.
-        return left.slug.localeCompare(right.slug);
+          // Stabilan konačni redoslijed varijanti istog igrača.
+          return left.slug.localeCompare(right.slug);
+        };
+
+        // Korisnički odabran sort; kurirani red ("recommended") je ujedno
+        // tiebreaker da grupiranje po klubu/igraču ostane smisleno.
+        if (sortBy === "price-asc" || sortBy === "price-desc") {
+          const diff = (left.price ?? 20) - (right.price ?? 20);
+          if (diff !== 0) return sortBy === "price-asc" ? diff : -diff;
+          return recommended();
+        }
+        if (sortBy === "name") {
+          const byName = repairText(left.klub).localeCompare(repairText(right.klub), "hr");
+          if (byName !== 0) return byName;
+          return recommended();
+        }
+        return recommended();
       });
   }, [
     products,
@@ -261,7 +280,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
     selectedClubs,
     selectedLeagues,
     selectedPlayers,
-    selectedSizes
+    selectedSizes,
+    sortBy
   ]);
 
   const activeTags = [
@@ -570,8 +590,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
         </aside>
 
         <div className="min-w-0">
-          <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
-            <div ref={searchWrapperRef} className="relative w-full">
+          <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center">
+            <div ref={searchWrapperRef} className="relative w-full sm:flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/35" />
               <input
                 value={search}
@@ -624,19 +644,36 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
               </AnimatePresence>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setMobileFiltersOpen(true)}
-              className="inline-flex h-[52px] w-full items-center justify-center gap-3 rounded-[8px] border border-accent bg-transparent px-5 text-sm font-semibold uppercase tracking-[0.24em] text-accent transition duration-200 ease-out hover:bg-accent/10 sm:h-14 lg:hidden"
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-              {t.catalog.filtersMobile}
-              {activeFilterCount ? (
-                <span className="rounded-[4px] bg-accent px-2 py-1 text-[11px] font-bold text-black">
-                  {activeFilterCount}
-                </span>
-              ) : null}
-            </button>
+            <div className="flex gap-3">
+              <div className="relative flex-1 sm:flex-none">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  aria-label={locale === "en" ? "Sort" : "Sortiraj"}
+                  className="h-[52px] w-full cursor-pointer appearance-none rounded-[8px] border border-white/10 bg-black pl-4 pr-10 text-sm text-white outline-none transition duration-200 ease-out focus:border-accent sm:h-14 sm:w-auto"
+                >
+                  <option value="recommended">{locale === "en" ? "Recommended" : "Preporučeno"}</option>
+                  <option value="price-asc">{locale === "en" ? "Price: low → high" : "Cijena: niža → viša"}</option>
+                  <option value="price-desc">{locale === "en" ? "Price: high → low" : "Cijena: viša → niža"}</option>
+                  <option value="name">{locale === "en" ? "Name: A–Z" : "Naziv: A–Z"}</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(true)}
+                className="inline-flex h-[52px] flex-1 items-center justify-center gap-3 rounded-[8px] border border-accent bg-transparent px-5 text-sm font-semibold uppercase tracking-[0.24em] text-accent transition duration-200 ease-out hover:bg-accent/10 sm:h-14 lg:hidden"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                {t.catalog.filtersMobile}
+                {activeFilterCount ? (
+                  <span className="rounded-[4px] bg-accent px-2 py-1 text-[11px] font-bold text-black">
+                    {activeFilterCount}
+                  </span>
+                ) : null}
+              </button>
+            </div>
           </div>
 
           {activeTags.length ? (

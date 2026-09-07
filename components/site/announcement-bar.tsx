@@ -21,7 +21,10 @@ export function AnnouncementBar() {
   const { t } = useLanguage();
   // Traka se pali/gasi i tekst se mijenja u Postavkama (prazan tekst = zadane poruke).
   const { announcementActive, announcementText } = useShopSettings();
-  const messages = announcementText ? [announcementText] : t.announcement;
+  const messages = useMemo(
+    () => (announcementText ? [announcementText] : t.announcement),
+    [announcementText, t.announcement]
+  );
   const [isVisible, setIsVisible] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
 
@@ -51,7 +54,7 @@ export function AnnouncementBar() {
     }, 4000);
 
     return () => window.clearInterval(interval);
-  }, [isVisible]);
+  }, [isVisible, messages.length]);
 
   const currentMessage = useMemo(() => messages[messageIndex % messages.length], [messageIndex, messages]);
 

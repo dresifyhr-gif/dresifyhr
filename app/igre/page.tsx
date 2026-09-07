@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Crosshair, Disc3, Footprints, Goal, HelpCircle, Layers, PackageOpen, Volleyball, Worm } from "lucide-react";
 
 import { buildMetadata } from "@/lib/seo";
+import { getSettings } from "@/lib/settings";
 
 export const metadata: Metadata = buildMetadata({
   title: "DRESIFY mini igre — igraj i osvoji nagradu",
@@ -55,12 +56,6 @@ const games = [
     Icon: Footprints
   },
   {
-    href: "/kolo",
-    title: "Kolo sreće",
-    desc: "Jedna vrtnja po broju mobitela — a svaka narudžba od 60 € donosi novu. Glavna nagrada: gratis dres.",
-    Icon: Disc3
-  },
-  {
     href: "/gadaj",
     title: "Snajper",
     desc: "Gađaj dresove na trakama u 40 sekundi. 25 = 10% popusta, 40 = −15%, 60 = −20%.",
@@ -68,7 +63,19 @@ const games = [
   }
 ];
 
-export default function IgrePage() {
+// Kolo sreće se pali u Postavkama (koloActive). Karticu prikazujemo SAMO kad je
+// upaljeno — inače /kolo vraća 404 (feature je ugašen) pa ne želimo mrtav link.
+const koloGame = {
+  href: "/kolo",
+  title: "Kolo sreće",
+  desc: "Zavrti kolo sreće i osvoji popust, besplatnu dostavu ili gratis dres.",
+  Icon: Disc3
+};
+
+export default async function IgrePage() {
+  const { koloActive } = await getSettings();
+  const visibleGames = koloActive ? [...games, koloGame] : games;
+
   return (
     <section className="section-pad">
       <div className="page-shell max-w-4xl">
@@ -78,12 +85,12 @@ export default function IgrePage() {
             Igraj i osvoji nagradu
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">
-            Pobijedi i osvoji popust ili poklon iznenađenja uz narudžbu. Odaberi svoju igru — ili zavrti kolo sreće.
+            Pobijedi i osvoji popust ili poklon iznenađenja uz narudžbu. Odaberi svoju igru.
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {games.map((g) => (
+          {visibleGames.map((g) => (
             <Link
               key={g.href}
               href={g.href}

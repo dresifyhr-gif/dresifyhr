@@ -39,6 +39,7 @@ export default async function BlogPage() {
         />
 
         <SectionHeading
+          as="h1"
           kicker={t.blog.kicker}
           title={t.blog.listingTitle}
           description={t.blog.listingDesc}

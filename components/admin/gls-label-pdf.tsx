@@ -53,6 +53,7 @@ export function GlsLabelDoc({ recipientName, reference, qrDataUrl, instagramHand
       <Page size={PAGE} style={s.page}>
         <View style={s.box}>
           <View style={s.brandRow}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image renderira u PDF (ne HTML), nema alt */}
             <Image style={s.logo} src={absoluteUrl("/dresify-robot.png")} />
             <Text style={s.brand}>DRESIFY</Text>
           </View>
@@ -68,6 +69,7 @@ export function GlsLabelDoc({ recipientName, reference, qrDataUrl, instagramHand
           <Text style={s.thanksSub}>Nadamo se da ćeš uživati u dresu.</Text>
 
           <View style={s.igBox}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image renderira u PDF (ne HTML), nema alt */}
             <Image style={s.qr} src={qrDataUrl} />
             <Text style={s.igHandle}>{instagramHandle}</Text>
             <Text style={s.igHint}>Skeniraj i zaprati nas</Text>
