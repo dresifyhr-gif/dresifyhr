@@ -950,7 +950,7 @@ export function OrdersManager() {
                     ) : null}
                     <div className="mt-0.5 text-xs text-[var(--a-text-3)]">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-[var(--a-text)]">{eur(o.total)}</span></div>
                     {o.items.length > 0 && (
-                      <ul className="mt-1.5 space-y-0.5">
+                      <ul className="mt-2 space-y-1 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-2.5">
                         {o.items.map((it, idx) => (
                           <li key={idx} className="text-[13px] text-[var(--a-text)]">
                             📦 {it.quantity > 1 ? `${it.quantity}× ` : ""}<span className="font-medium">{it.label}</span>
@@ -990,7 +990,7 @@ export function OrdersManager() {
                   </span>
                 </div>
 
-                <div className="mt-2.5 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--a-line)] pt-3">
                   {(o.status === "shipped" || o.status === "done") ? (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                       title="Poslano — klikni da vratiš u nove"
