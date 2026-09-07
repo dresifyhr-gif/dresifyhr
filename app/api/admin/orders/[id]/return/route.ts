@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { adjustCustomerTotals } from "@/lib/order-db";
 import { setOrderStatusInSheet } from "@/lib/sheets";
 
 export const runtime = "nodejs";
@@ -17,7 +18,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const order = await prisma.order.findUnique({
     where: { id },
-    select: { id: true, phone: true, customerName: true, createdAt: true }
+    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true }
   });
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
 
@@ -29,6 +30,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       ? { status: "returned", returnedAt: new Date() }
       : { status: "new", shippedBy: null, shippedAt: null, returnedAt: null }
   });
+
+  // Vraćena narudžba nije uspješna potrošnja → skini je s kupčevih totala (neto roba).
+  // Guard protiv dvostrukog: mijenjaj samo na stvarnom prijelazu u/iz "returned".
+  const netGoods = order.total - (order.shipping ?? 0);
+  if (returned && order.status !== "returned") {
+    await adjustCustomerTotals(order.phone, -netGoods, -1);
+  } else if (!returned && order.status === "returned") {
+    await adjustCustomerTotals(order.phone, netGoods, 1);
+  }
 
   if (returned) {
     await setOrderStatusInSheet({ phone: order.phone, name: order.customerName, createdAt: order.createdAt, note: "VRAĆENO — nije pokupljeno" });

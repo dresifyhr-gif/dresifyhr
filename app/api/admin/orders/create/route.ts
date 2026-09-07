@@ -48,8 +48,8 @@ export async function POST(request: Request) {
     if (phone) {
       const c = await prisma.customer.upsert({
         where: { phone },
-        create: { phone, email: email || null, name, address: address || null, firstOrderAt: createdAt, lastOrderAt: createdAt, totalOrders: 1, totalSpent: total },
-        update: { email: email || undefined, name, address: address || undefined, lastOrderAt: createdAt, totalOrders: { increment: 1 }, totalSpent: { increment: total } }
+        create: { phone, email: email || null, name, address: address || null, firstOrderAt: createdAt, lastOrderAt: createdAt, totalOrders: 1, totalSpent: subtotal },
+        update: { email: email || undefined, name, address: address || undefined, lastOrderAt: createdAt, totalOrders: { increment: 1 }, totalSpent: { increment: subtotal } }
       });
       customerId = c.id;
     }

@@ -60,7 +60,7 @@ export async function GET() {
   const [overrideRows, customRows, soldRows, returnRows] = await Promise.all([
     prisma.productOverride.findMany(),
     prisma.customProduct.findMany({ orderBy: { createdAt: "desc" } }) as unknown as Promise<CustomRow[]>,
-    prisma.orderItem.groupBy({ by: ["slug"], where: { order: { status: { not: "cancelled" } } }, _sum: { quantity: true, unitPrice: true }, _count: true }),
+    prisma.orderItem.groupBy({ by: ["slug"], where: { order: { status: { notIn: ["cancelled", "returned"] } } }, _sum: { quantity: true, unitPrice: true }, _count: true }),
     prisma.orderItem.groupBy({ by: ["slug"], where: { order: { status: "returned" } }, _count: true })
   ]);
 

@@ -3,6 +3,16 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { getOrderReference, type OrderPayload } from "@/lib/orders";
 
+// Uskladi kupčeve totale kad narudžba promijeni "uspješnost" (povrat/otkaz i njihovo
+// poništavanje). deltaSpent je u NETO robi (bez dostave). Best-effort, po telefonu.
+export async function adjustCustomerTotals(phone: string | null | undefined, deltaSpent: number, deltaOrders: number) {
+  const p = phone?.trim();
+  if (!p) return;
+  await prisma.customer
+    .updateMany({ where: { phone: p }, data: { totalSpent: { increment: deltaSpent }, totalOrders: { increment: deltaOrders } } })
+    .catch(() => {});
+}
+
 // Best-effort: mirror each order into Postgres for the admin dashboard + AI.
 // Never throws, never blocks the order flow. No-ops if the DB isn't configured.
 export async function saveOrderToDb(payload: OrderPayload) {
@@ -18,6 +28,8 @@ export async function saveOrderToDb(payload: OrderPayload) {
     // Upsert the customer by phone (the most stable key we have).
     let customerId: string | null = null;
     const phone = payload.phone?.trim();
+    // totalSpent prati NETO robu (bez dostave) — dostava nije potrošnja kupca.
+    const netGoods = payload.total - (payload.shipping ?? 0);
     if (phone) {
       const customer = await prisma.customer.upsert({
         where: { phone },
@@ -29,7 +41,7 @@ export async function saveOrderToDb(payload: OrderPayload) {
           firstOrderAt: createdAt,
           lastOrderAt: createdAt,
           totalOrders: 1,
-          totalSpent: payload.total
+          totalSpent: netGoods
         },
         update: {
           email: payload.email || undefined,
@@ -37,7 +49,7 @@ export async function saveOrderToDb(payload: OrderPayload) {
           address: address || undefined,
           lastOrderAt: createdAt,
           totalOrders: { increment: 1 },
-          totalSpent: { increment: payload.total }
+          totalSpent: { increment: netGoods }
         }
       });
       customerId = customer.id;
