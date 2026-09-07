@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 
 import { formatCroatianPhone, phoneKey } from "@/lib/utils";
 import { waLink } from "@/components/admin/ui";
+import { adminPost } from "@/lib/admin-fetch";
 
 const eur = (n: number) =>
   `${(n ?? 0).toLocaleString("hr-HR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
@@ -102,20 +103,17 @@ function ItemsEditor({ orderId, items, onSaved }: { orderId: string; items: Orde
   async function save() {
     if (saving) return;
     setSaving(true);
-    await fetch(`/api/admin/orders/${orderId}/items/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        items: rows.map((r) => ({
-          ...(r.id.startsWith("new:") ? {} : { id: r.id }),
-          klub: r.klub,
-          igrac: r.igrac,
-          size: r.size,
-          unitPrice: Number(r.unitPrice.replace(",", ".")) || 0
-        }))
-      })
-    }).catch(() => {});
+    const res = await adminPost(`/api/admin/orders/${orderId}/items/`, {
+      items: rows.map((r) => ({
+        ...(r.id.startsWith("new:") ? {} : { id: r.id }),
+        klub: r.klub,
+        igrac: r.igrac,
+        size: r.size,
+        unitPrice: Number(r.unitPrice.replace(",", ".")) || 0
+      }))
+    });
     setSaving(false);
+    if (!res) return; // ne javljaj uspjeh ako izmjena artikala nije prošla
     onSaved();
   }
 
@@ -151,12 +149,9 @@ function ContactEditor({ orderId, initial, onSaved }: { orderId: string; initial
   async function save() {
     if (saving) return;
     setSaving(true);
-    await fetch(`/api/admin/orders/${orderId}/contact/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ customerName: name, phone, address })
-    }).catch(() => {});
+    const res = await adminPost(`/api/admin/orders/${orderId}/contact/`, { customerName: name, phone, address });
     setSaving(false);
+    if (!res) return;
     onSaved();
   }
 
@@ -393,13 +388,10 @@ function TrackingRow({ id, initial, courier }: { id: string; initial: string; co
   async function save() {
     if (saving) return;
     setSaving(true);
-    await fetch(`/api/admin/orders/${id}/tracking/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tracking: val })
-    }).catch(() => {});
-    setBaseline(val); // nakon spremanja gumb ostane "✓ Spremljeno" i onemogućen
+    const res = await adminPost(`/api/admin/orders/${id}/tracking/`, { tracking: val });
     setSaving(false);
+    if (!res) return;
+    setBaseline(val); // nakon spremanja gumb ostane "✓ Spremljeno" i onemogućen
   }
 
   return (
@@ -620,11 +612,7 @@ export function OrdersManager() {
   async function act(id: string, endpoint: string, body: object) {
     if (busy) return;
     setBusy(id);
-    await fetch(`/api/admin/orders/${id}/${endpoint}/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    }).catch(() => {});
+    await adminPost(`/api/admin/orders/${id}/${endpoint}/`, body);
     // refresh current list in place (keeps scroll position, updated statuses)
     await fetchPage(q, 1, false);
     setBusy(null);
@@ -658,11 +646,7 @@ export function OrdersManager() {
     const label = action === "ship" ? `označiti POSLANO${by ? ` (${by})` : ""}` : "označiti NAPLAĆENO";
     if (!window.confirm(`Za ${ids.length} narudžbi: ${label}?`)) return;
     setBulkBusy(true);
-    await fetch("/api/admin/orders/bulk/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids, action, by })
-    }).catch(() => {});
+    await adminPost("/api/admin/orders/bulk/", { ids, action, by });
     setSelected(new Set());
     await fetchPage(q, 1, false);
     setBulkBusy(false);

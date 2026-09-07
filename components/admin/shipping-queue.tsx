@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { adminPost } from "@/lib/admin-fetch";
+
 const eur = (n: number) => `${(n ?? 0).toFixed(2).replace(".", ",")} €`;
 
 export type PendingOrder = {
@@ -23,26 +25,18 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
   async function markShipped(id: string, by: "igor" | "ivica") {
     if (busy) return;
     setBusy(id);
-    await fetch(`/api/admin/orders/${id}/ship/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ shipped: true, by })
-    }).catch(() => {});
+    const res = await adminPost(`/api/admin/orders/${id}/ship/`, { shipped: true, by });
     setBusy(null);
-    router.refresh();
+    if (res) router.refresh();
   }
 
   async function cancelOrder(id: string) {
     if (busy) return;
     if (typeof window !== "undefined" && !window.confirm("Otkazati ovu narudžbu? Neće se poslati.")) return;
     setBusy(id);
-    await fetch(`/api/admin/orders/${id}/cancel/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cancelled: true })
-    }).catch(() => {});
+    const res = await adminPost(`/api/admin/orders/${id}/cancel/`, { cancelled: true });
     setBusy(null);
-    router.refresh();
+    if (res) router.refresh();
   }
 
   async function syncSheet() {

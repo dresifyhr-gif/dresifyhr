@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { adminPost } from "@/lib/admin-fetch";
+
 type Settings = {
   shippingPrice: number;
   freeShipThreshold: number;
@@ -106,10 +108,7 @@ export function SettingsForm() {
     if (!s || saving) return;
     setSaving(true);
     setSaved(false);
-    await fetch("/api/admin/settings/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const res = await adminPost("/api/admin/settings/", {
         shippingPrice: s.shippingPrice,
         freeShipThreshold: s.freeShipThreshold,
         costDres: s.costDres,
@@ -134,9 +133,9 @@ export function SettingsForm() {
         klubActive: s.klubActive, klubTarget: s.klubTarget, klubRewardKind: s.klubRewardKind,
         klubRewardValue: s.klubRewardValue, klubRewardLabel: s.klubRewardLabel,
         monthlyGoal: s.monthlyGoal
-      })
-    }).catch(() => {});
+    });
     setSaving(false);
+    if (!res) return; // adminPost je već javio grešku — ne pokazuj lažni "✓ Spremljeno"
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }

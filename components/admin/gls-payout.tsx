@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { adminPost } from "@/lib/admin-fetch";
+
 const eur = (n: number) => `${(n ?? 0).toLocaleString("hr-HR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 
 type Row = { id: string; date: string; deliveredAt: string; name: string; amount: number; shippedBy: string | null; tracking: string | null };
@@ -61,19 +63,15 @@ export function GlsPayout() {
     if (!selectedRows.length) return;
     setBusy(true);
     try {
-      const r = await fetch("/api/admin/orders/bulk/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "collect", ids: [...sel] })
-      }).then((x) => x.json());
-      if (r?.ok) {
-        // Spremi zapis isplate (za povijest) — best-effort, ne blokira glavnu akciju.
-        await fetch("/api/admin/gls-payout/history/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: target, matchedTotal: selTotal, count: selectedRows.length })
-        }).catch(() => {});
-        setSel(new Set()); setAmount(""); await load(); await loadHistory();
+      const res = await adminPost("/api/admin/orders/bulk/", { action: "collect", ids: [...sel] });
+      if (res) {
+        const r = await res.json().catch(() => ({}));
+        if (r?.ok) {
+          // Zapis isplate za povijest. Ako padne, adminPost JAVI grešku — inače bi se
+          // bankovni iznos tiho izgubio (usporedba GLS-uplata vs narudžbe za taj tjedan).
+          await adminPost("/api/admin/gls-payout/history/", { amount: target, matchedTotal: selTotal, count: selectedRows.length });
+          setSel(new Set()); setAmount(""); await load(); await loadHistory();
+        }
       }
     } catch {}
     setBusy(false);

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLeagues } from "@/components/admin/use-leagues";
 
 import { ImageUploader } from "@/components/admin/image-uploader";
+import { adminPost } from "@/lib/admin-fetch";
 
 
 
@@ -91,12 +92,9 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     if (saving) return;
     setSaving(true);
     setSaved(false);
-    await fetch("/api/admin/products/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: p.slug, klub, igrac, liga, images, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), sizeStock: Object.fromEntries((p.sizeList || []).filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])])), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, featured, description: descToSave })
-    }).catch(() => {});
+    const res = await adminPost("/api/admin/products/", { slug: p.slug, klub, igrac, liga, images, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), sizeStock: Object.fromEntries((p.sizeList || []).filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])])), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, featured, description: descToSave });
     setSaving(false);
+    if (!res) return; // ne pokazuj lažni "✓" ako spremanje nije prošlo
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   }
