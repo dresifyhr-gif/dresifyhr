@@ -92,21 +92,12 @@ export function ShippingQueue({ orders }: { orders: PendingOrder[] }) {
                 </a>
                 <button
                   type="button"
-                  onClick={() => markShipped(o.id, "igor")}
-                  disabled={busy === o.id}
-                  className="rounded-[10px] bg-emerald-500 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
-                  title="Ja (Igor) sam poslao"
-                >
-                  {busy === o.id ? "…" : "✓ Ja"}
-                </button>
-                <button
-                  type="button"
                   onClick={() => markShipped(o.id, "ivica")}
                   disabled={busy === o.id}
-                  className="rounded-[10px] bg-sky-500 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-sky-600 disabled:opacity-50"
-                  title="Ivica je poslao"
+                  className="min-h-[40px] rounded-[10px] bg-emerald-500 px-3 py-2 text-[12px] font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
+                  title="Označi poslano"
                 >
-                  {busy === o.id ? "…" : "✓ Ivica"}
+                  {busy === o.id ? "…" : "📦 Pošalji"}
                 </button>
                 <button
                   type="button"

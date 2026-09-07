@@ -819,8 +819,7 @@ export function OrdersManager() {
           <span className="text-sm font-semibold">{selected.size} označeno</span>
           <span className="text-[var(--a-card)]/40">·</span>
           <span className="text-xs text-[var(--a-card)]/70">Označi poslano:</span>
-          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "igor")} className="rounded-[10px] bg-[var(--a-card)]/10 px-2.5 py-1 text-xs font-semibold hover:bg-[var(--a-card)]/20 disabled:opacity-50">📦 Igor</button>
-          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "ivica")} className="rounded-[10px] bg-[var(--a-card)]/10 px-2.5 py-1 text-xs font-semibold hover:bg-[var(--a-card)]/20 disabled:opacity-50">📦 Ivica</button>
+          <button type="button" disabled={bulkBusy} onClick={() => bulk("ship", "ivica")} className="rounded-[10px] bg-[var(--a-card)]/10 px-2.5 py-1 text-xs font-semibold hover:bg-[var(--a-card)]/20 disabled:opacity-50">📦 Pošalji</button>
           <span className="text-[var(--a-card)]/40">·</span>
           <button type="button" disabled={bulkBusy} onClick={() => bulk("collect")} className="a-btn-sm a-btn-ok px-2.5 py-1 text-xs">💰 Naplaćeno</button>
           <button type="button" onClick={() => setSelected(new Set())} className="ml-auto rounded-[10px] px-2 py-1 text-xs text-[var(--a-card)]/60 hover:text-[var(--a-card)]">Odznači</button>
@@ -992,16 +991,18 @@ export function OrdersManager() {
                 </div>
 
                 <div className="mt-2.5 flex flex-wrap gap-2">
-                  <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "igor" })}
-                    className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">✓ Igor poslao</button>
-                  <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "ivica" })}
-                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✓ Ivica poslao</button>
+                  {(o.status === "shipped" || o.status === "done") ? (
+                    <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
+                      title="Poslano — klikni da vratiš u nove"
+                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">✓ Poslano</button>
+                  ) : (
+                    <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "ivica" })}
+                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">📦 Pošalji</button>
+                  )}
                   <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
                     className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">↩ Vraćeno</button>
                   <button type="button" disabled={isBusy} onClick={() => setCancelling((c) => (c === o.id ? null : o.id))}
                     className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✕ Otkazano</button>
-                  <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
-                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">↺ Vrati u nove</button>
                   {(o.status === "shipped" || o.status === "done") && (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
                       title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}

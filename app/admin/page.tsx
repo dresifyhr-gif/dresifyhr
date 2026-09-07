@@ -6,7 +6,6 @@ import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { getCeoInsights } from "@/lib/admin-ceo";
 import { getOldUnshipped, OLD_UNSHIPPED_DAYS } from "@/lib/admin-winback";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { AssignShipper } from "@/components/admin/assign-shipper";
 import { SettlementButton } from "@/components/admin/settlement-button";
 import { AdSpendForm } from "@/components/admin/ad-spend-form";
 import { ApologyList } from "@/components/admin/apology-list";
@@ -245,22 +244,8 @@ export default async function AdminOverview() {
         </div>
       )}
 
-      {/* Assign shipper for the shipped-but-untagged orders */}
-      {m.unassignedShipped.length > 0 && (
-        <div className="mt-5">
-          <Panel title={`Poslane bez oznake — tko je poslao? (${m.unassignedShipped.length})`}>
-            <p className="mb-3 -mt-2 text-xs text-[var(--a-text-3)]">Ove su poslane, ali nemaju označeno tko — klikni Igor ili Ivica da uđu u podjelu profita.</p>
-            <AssignShipper
-              orders={m.unassignedShipped.map((o) => ({
-                id: o.id,
-                dateLabel: o.createdAt.toLocaleDateString("hr-HR"),
-                customerName: formatCroatianName(o.customerName),
-                total: o.total
-              }))}
-            />
-          </Panel>
-        </div>
-      )}
+      {/* Assign-shipper panel uklonjen: sav novac ide na Ivicin račun (shippedBy uvijek "ivica"),
+          pa razdvajanje pošiljatelja Igor/Ivica više nije potrebno. */}
 
       <SectionHeading>📊 Brojke</SectionHeading>
 
