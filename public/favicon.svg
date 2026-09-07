@@ -1,4 +1,8 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="64" height="64" rx="16" fill="#0A0A0A"/>
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M17 14H34C45.598 14 52 22.06 52 32C52 41.94 45.598 50 34 50H17V14ZM26 22V42H33.5C40.404 42 43 37.2 43 32C43 26.8 40.404 22 33.5 22H26Z" fill="#E8FF3C"/>
+  <rect width="64" height="64" rx="14" fill="#0A0A0A"/>
+  <text x="32" y="34" text-anchor="middle" dominant-baseline="central"
+        font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-weight="900"
+        font-size="30" letter-spacing="-1.5">
+    <tspan fill="#F5F5F5">D</tspan><tspan fill="#E8FF3C">Y</tspan>
+  </text>
 </svg>
