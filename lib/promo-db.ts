@@ -39,7 +39,7 @@ export type PromoLookup =
 
 // Provjera koda za blagajnu: postoji li, je li aktivan, u roku, ispod limita
 // korištenja i je li dosegnut minimalni iznos.
-export async function lookupPromo(input: string, subtotal: number): Promise<PromoLookup> {
+export async function lookupPromo(input: string, subtotal: number, buyerKey?: string): Promise<PromoLookup> {
   const code = norm(input);
   if (!code) return { ok: false, reason: "not_found" };
 
@@ -48,6 +48,12 @@ export async function lookupPromo(input: string, subtotal: number): Promise<Prom
   // Iz baze…
   const row = rows?.find((r) => norm(r.code) === code);
   if (row) {
+    // Osobni kod (KLUB-/kolo- nagrada) vrijedi SAMO vlasniku. Provjeravamo kad je
+    // kupac poznat (buyerKey = phoneKey iz narudžbe). Bez buyerKey (javni /validate,
+    // izračun naljepnice) ne diramo — autoritativna provjera je pri kreiranju narudžbe.
+    if (buyerKey !== undefined && row.personalFor && row.personalFor !== buyerKey) {
+      return { ok: false, reason: "not_found" };
+    }
     const promo: PromoCode = {
       code: norm(row.code),
       kind: row.kind === "freeship" ? "freeship" : row.kind === "amount" ? "amount" : "percent",

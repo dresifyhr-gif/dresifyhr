@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 
 // Iz naziva dresa AI složi klub, igrača, ligu i opis za novi proizvod.
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
   const name = String(body?.name || "").trim();

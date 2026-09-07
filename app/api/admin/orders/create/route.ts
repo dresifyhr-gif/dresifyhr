@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { getOrderReference } from "@/lib/orders";
 
@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 type ItemIn = { klub?: string; igrac?: string; size?: string; unitPrice?: number | string };
 
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
   const name = typeof body?.customerName === "string" ? body.customerName.trim() : "";

@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 
 // Iz brenda + modela AI složi prodajni opis za streetwear proizvod.
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
   const brand = String(body?.brand || "").trim();

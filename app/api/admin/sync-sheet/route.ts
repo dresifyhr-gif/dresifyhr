@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { fetchShippedPhonesFromSheet } from "@/lib/sheets";
 
@@ -13,7 +13,7 @@ const normalize = (p?: string | null) => String(p || "").replace(/\D/g, "");
 // Matches by phone. Also backfills shippedBy on already-shipped orders that had no
 // shipper tagged. Never un-ships.
 export async function POST() {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const rows = await fetchShippedPhonesFromSheet();
   if (rows.length === 0) {

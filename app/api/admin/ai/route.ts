@@ -1,7 +1,7 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { streamText, tool, stepCountIs, jsonSchema } from "ai";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { buildBusinessContext } from "@/lib/admin-ai-context";
 import { getOldUnshipped } from "@/lib/admin-winback";
 import { getOrderReference } from "@/lib/orders";
@@ -21,7 +21,7 @@ const statusHr: Record<string, string> = {
 };
 
 export async function POST(request: Request) {
-  if (!(await isAdmin())) {
+  if (!(await isActiveAdmin())) {
     return new Response("Unauthorized", { status: 401 });
   }
 

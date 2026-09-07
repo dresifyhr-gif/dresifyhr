@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { updateOrderFieldsInSheet } from "@/lib/sheets";
 import { repairText } from "@/lib/utils";
@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 // Edit an order's items: change model (klub/igrac), size, price, or remove items.
 // Items not included in the payload are deleted. Order totals are recomputed.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const { id } = await params;
   const body = await request.json().catch(() => ({}));

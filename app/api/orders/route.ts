@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 
 import { parseOrderPayload } from "@/lib/orders";
 import { lookupPromo } from "@/lib/promo-db";
+import { phoneKey } from "@/lib/utils";
 import { SHIPPING_PRICE_EUR, FREE_SHIPPING_THRESHOLD_EUR } from "@/lib/site";
 import { sendOrderNotifications } from "@/lib/notifications";
 import { logOrderToSheet } from "@/lib/sheets";
@@ -86,7 +87,8 @@ export async function POST(request: Request) {
     let freeship = false;
     let promoCode: string | undefined;
     if (signedIn && payload!.promoCode) {
-      const look = await lookupPromo(payload!.promoCode, goods);
+      // buyerKey veže osobne kodove (KLUB-/kolo-) uz vlasnika — tuđi kod se odbija.
+      const look = await lookupPromo(payload!.promoCode, goods, phoneKey(payload!.phone));
       if (look.ok) {
         promoCode = look.promo.code;
         discount = look.discount;

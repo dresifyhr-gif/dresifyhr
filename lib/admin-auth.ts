@@ -115,6 +115,14 @@ export async function isAdmin(): Promise<boolean> {
   return hasLegacySession(jar);
 }
 
+// isActiveAdmin: kao isAdmin, ali PROVJERAVA da profil postoji i da je AKTIVAN
+// (čita bazu, preko getAdminUser). Za MUTACIJSKE rute — deaktivirani korisnik
+// (active=false) tako stvarno gubi pristup ("ugasi profil" radi), dok jeftini
+// isAdmin (bez baze) ostaje za česta čitanja. Legacy lozinka → sintetički OWNER.
+export async function isActiveAdmin(): Promise<boolean> {
+  return (await getAdminUser()) !== null;
+}
+
 // getAdminUser: TKO je prijavljen + uloga. Čita bazu za profil.
 // Stara lozinka (bootstrap) → sintetički OWNER "Igor" da može posložiti tim.
 export async function getAdminUser(): Promise<AdminSession | null> {

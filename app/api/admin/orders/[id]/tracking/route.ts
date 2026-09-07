@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
 // Saves (or clears) the tracking / shipment number on an order.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const { id } = await params;
   const body = await request.json().catch(() => ({}));

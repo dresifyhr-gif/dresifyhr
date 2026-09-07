@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { updateOrderFieldsInSheet } from "@/lib/sheets";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 
 // Ispravak kontakt-podataka narudžbe (kad kupac krivo napiše slovo u adresi/imenu/broju).
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const { id } = await params;
   const body = await request.json().catch(() => ({}));

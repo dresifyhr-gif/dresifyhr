@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 // Prebacuje kurira na već poslanoj narudžbi (GLS ↔ HP) bez ponovnog slanja.
 // Zove se s male oznake GLS/HP uz poslanu narudžbu.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const { id } = await params;
   const body = await request.json().catch(() => ({}));

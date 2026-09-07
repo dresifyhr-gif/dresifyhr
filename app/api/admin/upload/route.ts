@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { watermark } from "@/lib/watermark";
 
 export const runtime = "nodejs";
@@ -11,7 +11,7 @@ const OK_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 
 // Uploads an image to Vercel Blob (public) and returns its URL.
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json({ ok: false, message: "Blob nije spojen (nema BLOB_READ_WRITE_TOKEN)." }, { status: 500 });
   }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { setOrderStatusInSheet } from "@/lib/sheets";
 
@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 // Marks an order cancelled (customer called it off) so it drops out of the shipping
 // queue and never gets sent. Un-cancelling returns it to "new".
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const { id } = await params;
   const body = await request.json().catch(() => ({}));

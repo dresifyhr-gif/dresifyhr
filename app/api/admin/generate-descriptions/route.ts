@@ -3,7 +3,7 @@ import { generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { revalidateTag } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { jerseys } from "@/lib/data/jerseys";
 import { getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
@@ -69,7 +69,7 @@ STROGO ZABRANJENO:
 JEZIK: besprijekoran hrvatski. Bolje kraće i točno nego dulje i nespretno.`;
 
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
   const batch = Math.min(3, Math.max(1, Number(body?.batch) || 3)); // 3 × ~14 s = ~42 s, sigurno i uz 60 s limit

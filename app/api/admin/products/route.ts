@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { revalidateTag } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isAdmin, isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { jerseys, adultSizes, kidSizes, streetwearSizes, getJerseyDescription, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { JERSEY_PRICE_EUR } from "@/lib/site";
@@ -157,7 +157,7 @@ export async function GET() {
 
 // Saves an override for one product (full desired state for price/stock).
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
   const slug = String(body?.slug || "");

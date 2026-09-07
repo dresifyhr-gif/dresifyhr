@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isAdmin, isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { jerseys } from "@/lib/data/jerseys";
 
@@ -27,7 +27,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const b = await request.json().catch(() => ({}));
   const klub = String(b?.klub || "").trim();
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
   const url = new URL(request.url);
   const id = url.searchParams.get("id");
   if (!id) return NextResponse.json({ ok: false }, { status: 400 });
