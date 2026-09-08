@@ -833,8 +833,13 @@ export function OrdersManager() {
           {orders.map((o) => {
             const st = STATUS[o.status] || { label: o.status, cls: "bg-[var(--a-surface-2)] text-[var(--a-text-2)]" };
             const isBusy = busy === o.id;
+            // Statusna traka u boji (lijevi rub): čeka=amber, poslano=plavo, prikupljeno=zeleno, vraćeno/otkazano=crveno.
+            const stripe = o.status === "returned" || o.status === "cancelled" ? "var(--a-bad)"
+              : o.cashCollected ? "var(--a-good)"
+              : (o.status === "shipped" || o.status === "done") ? "var(--a-info)"
+              : "var(--a-warn)";
             return (
-              <div key={o.id} className={`a-row p-3 ${selected.has(o.id) ? "!border-black/20 !bg-[var(--a-surface-2)]" : ""}`}>
+              <div key={o.id} style={{ borderLeftWidth: "5px", borderLeftColor: stripe }} className={`a-row p-3 ${selected.has(o.id) ? "!border-black/20 !bg-[var(--a-surface-2)]" : ""}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="flex min-w-0 max-w-full items-start gap-2">
                     <input
@@ -977,9 +982,6 @@ export function OrdersManager() {
                     <a href={waLink(o.phone)!} target="_blank" rel="noopener noreferrer"
                       className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">💬 WhatsApp</a>
                   )}
-                  <a href={`/admin/print/${o.id}/gls/`} target="_blank" rel="noopener noreferrer"
-                    title="GLS naljepnica: ime kupca + logo + QR na Instagram (adresu radi GLS)"
-                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">🚚 GLS naljepnica</a>
                   {(o.status === "shipped" || o.status === "done") ? (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                       title="Poslano — klikni da vratiš u nove"
