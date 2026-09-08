@@ -180,7 +180,7 @@ export async function getDashboardMetrics() {
       prisma.orderItem.groupBy({ by: ["slug", "klub", "igrac"], _sum: { quantity: true }, orderBy: { _sum: { quantity: "desc" } }, take: 8, where: { order: notVoid } }),
       prisma.customer.findMany({ orderBy: { totalSpent: "desc" }, take: 8 }),
       prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 12 }),
-      prisma.order.findMany({ where: { createdAt: { gte: new Date(now.getTime() - 13 * DAY) }, ...notVoid }, select: { createdAt: true, total: true, shipping: true } }),
+      prisma.order.findMany({ where: { createdAt: { gte: new Date(now.getTime() - 89 * DAY) }, ...notVoid }, select: { createdAt: true, total: true, shipping: true } }),
       prisma.orderItem.findMany({ distinct: ["slug"], select: { slug: true } }),
       profitFor({ createdAt: { gte: startToday }, ...notVoid }),
       profitFor({ createdAt: { gte: startWeek }, ...notVoid }),
@@ -190,9 +190,9 @@ export async function getDashboardMetrics() {
       profitFor({ status: "new" })
     ]);
 
-  // revenue by day, last 14 days
+  // revenue by day, last 90 days (graf na Pregledu bira raspon: tjedan/mjesec/3mj)
   const byDay: { day: string; total: number }[] = [];
-  for (let i = 13; i >= 0; i--) byDay.push({ day: new Date(now.getTime() - i * DAY).toISOString().slice(0, 10), total: 0 });
+  for (let i = 89; i >= 0; i--) byDay.push({ day: new Date(now.getTime() - i * DAY).toISOString().slice(0, 10), total: 0 });
   const idx = new Map(byDay.map((b, i) => [b.day, i]));
   for (const o of windowOrders) {
     const i = idx.get(o.createdAt.toISOString().slice(0, 10));

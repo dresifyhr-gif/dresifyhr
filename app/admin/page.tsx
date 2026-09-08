@@ -233,7 +233,7 @@ export default async function AdminOverview() {
 
       {/* Graf prometa (na mjestu gdje su prije bili paneli); paneli su premješteni na dno. */}
       <div className="mt-5">
-        <Panel title="Promet — zadnjih 14 dana">
+        <Panel title="Promet">
           <RevenueChart data={m.byDay} />
         </Panel>
       </div>
