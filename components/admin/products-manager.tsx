@@ -52,11 +52,11 @@ const STOCK_OPTIONS = [
 ];
 
 // Kvadratni thumbnail proizvoda; fallback = pločica s inicijalom kluba/brenda.
-function Thumb({ src, alt, klub }: { src: string | null; alt: string; klub: string }) {
+function Thumb({ src, alt, klub, size = "h-14 w-14", radius = "rounded-[10px]" }: { src: string | null; alt: string; klub: string; size?: string; radius?: string }) {
   const [err, setErr] = useState(false);
   if (!src || err) {
     return (
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] text-[15px] font-bold text-[var(--a-text-3)]">
+      <div className={`${size} flex shrink-0 items-center justify-center ${radius} border border-[var(--a-line)] bg-[var(--a-surface-2)] text-[13px] font-bold text-[var(--a-text-3)]`}>
         {klub?.trim()?.[0]?.toUpperCase() || "👕"}
       </div>
     );
@@ -68,7 +68,7 @@ function Thumb({ src, alt, klub }: { src: string | null; alt: string; klub: stri
       alt={alt}
       loading="lazy"
       onError={() => setErr(true)}
-      className="h-14 w-14 shrink-0 rounded-[10px] border border-[var(--a-line)] object-cover"
+      className={`${size} shrink-0 ${radius} border border-[var(--a-line)] object-cover`}
     />
   );
 }
@@ -122,11 +122,12 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     setTimeout(() => setSaved(false), 1500);
   }
 
-  // Bočna traka stanja: skriveno=amber, rasprodano=crveno, u topu=lime, inače bez.
-  const stripe = hidden ? "var(--a-warn)" : oos === "all" ? "var(--a-bad)" : featured ? "var(--a-accent)" : "transparent";
+  // Bočna traka stanja (UVIJEK u boji, kao Narudžbe → okvir je cijeli):
+  // rasprodano=crveno, skriveno=amber, u topu=lime, inače na stanju=zeleno.
+  const stripe = oos === "all" ? "var(--a-bad)" : hidden ? "var(--a-warn)" : featured ? "var(--a-accent)" : "var(--a-good)";
   return (
     <div
-      className="flex flex-col rounded-[12px] border border-[var(--a-line)] p-3 transition-colors hover:border-[var(--a-text-3)]"
+      className="flex min-w-0 flex-col overflow-hidden rounded-[12px] border border-[var(--a-line)] p-3 transition-colors hover:border-[var(--a-text-3)]"
       style={{ borderLeftWidth: "4px", borderLeftColor: stripe }}
     >
       {/* Zaglavlje: slika + naziv/statistika + cijena (uživo) */}
@@ -338,6 +339,7 @@ export function ProductsManager() {
   // svih 120 odjednom značilo ~2000 gumba i preračun stilova od ~375 ms
   // (mjereno) — stranica bi trzala. Ostatak se dodaje na klik.
   const [limit, setLimit] = useState(24);
+  const [focused, setFocused] = useState(false); // prikaz autocomplete dropdowna
 
   // Početni pojam iz URL-a (?q=…) — kad ⌘K paleta skoči na proizvod.
   useEffect(() => {
@@ -370,12 +372,47 @@ export function ProductsManager() {
   return (
     <div>
       <div className="mb-4 flex items-center gap-3">
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Traži proizvod (klub, igrač, liga, streetwear)…"
-          className="flex-1 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-3.5 py-2.5 text-sm text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)] focus:bg-[var(--a-card)]"
-        />
+        <div className="relative flex-1">
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setTimeout(() => setFocused(false), 150)}
+            placeholder="Traži proizvod (klub, igrač, liga, streetwear)…"
+            className="w-full rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-3.5 py-2.5 text-sm text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)] focus:bg-[var(--a-card)]"
+          />
+          {/* Autocomplete: sužava se sa svakim slovom; klik odabere taj proizvod */}
+          {focused && q.trim() !== "" && !loading && filtered.length > 0 && (
+            <ul className="absolute inset-x-0 top-full z-30 mt-1.5 max-h-[22rem] overflow-auto rounded-[12px] border border-[var(--a-line)] bg-[var(--a-card)] py-1 shadow-lg">
+              {filtered.slice(0, 8).map((p) => (
+                <li key={p.slug}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()} // spriječi blur prije klika
+                    onClick={() => {
+                      setQ(`${p.klub} ${p.igrac}`);
+                      setFocused(false);
+                    }}
+                    className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left transition-colors hover:bg-[var(--a-surface-2)]"
+                  >
+                    <Thumb src={p.image} alt="" klub={p.klub} size="h-9 w-9" radius="rounded-md" />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-1.5">
+                        {p.category === "streetwear" && <span className="shrink-0 text-[10px]">🔥</span>}
+                        <span className="truncate text-sm font-medium text-[var(--a-text)]">{p.klub} — {p.igrac}</span>
+                      </span>
+                      <span className="block truncate text-[11px] text-[var(--a-text-3)]">{p.liga}</span>
+                    </span>
+                    <span className="shrink-0 text-[12px] font-semibold text-[var(--a-text-2)]">{eur(p.price)}</span>
+                  </button>
+                </li>
+              ))}
+              {filtered.length > 8 && (
+                <li className="px-3 pt-1 text-[11px] text-[var(--a-text-3)]">+{filtered.length - 8} više — nastavi tipkati da suziš…</li>
+              )}
+            </ul>
+          )}
+        </div>
         <span className="shrink-0 text-xs text-[var(--a-text-3)]">{loading ? "…" : `${filtered.length} proizvoda`}</span>
       </div>
       {loading ? (
@@ -383,7 +420,21 @@ export function ProductsManager() {
       ) : (
         <>
           {/* Pametan grid: mobitel 1 → laptop 2 → široki monitor 3 stupca. */}
-          <div className="grid gap-3 xl:grid-cols-2 2xl:grid-cols-3">
+          <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-[var(--a-text-3)]">
+            <span className="font-bold uppercase tracking-wide">Rub kartice:</span>
+            {[
+              { c: "var(--a-good)", l: "na stanju" },
+              { c: "var(--a-warn)", l: "skriveno" },
+              { c: "var(--a-bad)", l: "rasprodano" },
+              { c: "var(--a-accent)", l: "u topu" }
+            ].map((x) => (
+              <span key={x.l} className="flex items-center gap-1.5">
+                <span className="inline-block h-3 w-1.5 rounded-full" style={{ background: x.c }} />
+                {x.l}
+              </span>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-3 xl:grid-cols-2 2xl:grid-cols-3">
             {visible.map((p) => <ProductRow key={p.slug} p={p} sizes={sizes} />)}
           </div>
           {filtered.length > visible.length && (
