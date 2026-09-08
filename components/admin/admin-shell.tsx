@@ -7,6 +7,7 @@ import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Sett
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
 import { CommandPalette } from "@/components/admin/command-palette";
+import { PwaBoot } from "@/components/admin/pwa-boot";
 
 const NAV = [
   { href: "/admin", label: "Pregled", hint: "Početna", icon: LayoutDashboard },
@@ -163,6 +164,9 @@ export function AdminShell({ title, subtitle, children }: { title: string; subti
 
       {/* Globalno pretraživanje (⌘K) */}
       <CommandPalette />
+
+      {/* PWA: registracija service workera + uživo obavijest (zvuk+toast) na novu narudžbu */}
+      <PwaBoot />
 
       {/* Mobile bottom nav */}
       <nav

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { SettingsForm } from "@/components/admin/settings-form";
 import { TeamManager } from "@/components/admin/team-manager";
+import { PushToggle } from "@/components/admin/push-toggle";
 import { getAdminUser, isAdmin } from "@/lib/admin-auth";
 
 export const metadata: Metadata = { title: "Postavke — Dresify Admin", robots: { index: false, follow: false } };
@@ -17,7 +18,8 @@ export default async function SettingsPage() {
 
   return (
     <AdminShell title="Postavke" subtitle="Cijene i podaci — mijenjaj bez diranja koda">
-      <div className="max-w-3xl">
+      <div className="max-w-3xl space-y-5">
+        <PushToggle />
         <SettingsForm />
         {user?.role === "OWNER" && <TeamManager />}
       </div>

@@ -369,3 +369,20 @@ model GlsPayout {
 
   @@index([createdAt])
 }
+
+// Web Push pretplate — uređaji admina koji su uključili obavijesti (PWA).
+// Svaki uređaj/preglednik = jedan zapis (endpoint jedinstven). Push na novu
+// narudžbu i dnevni sažetak šalje se na sve aktivne pretplate. Istekle (410/404)
+// se čiste pri slanju. Ništa osobno o kupcima — samo endpoint + ključevi.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String // javni ključ pretplate (za enkripciju poruke)
+  auth      String // auth secret pretplate
+  username  String? // admin profil koji je uključio (Igor/Ivica/Nina/Ana)
+  ua        String? // user-agent (za popis uređaja u postavkama)
+  createdAt DateTime @default(now())
+  lastSeen  DateTime @default(now())
+
+  @@index([username])
+}

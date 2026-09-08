@@ -6,6 +6,7 @@ import { lookupPromo } from "@/lib/promo-db";
 import { phoneKey } from "@/lib/utils";
 import { SHIPPING_PRICE_EUR, FREE_SHIPPING_THRESHOLD_EUR } from "@/lib/site";
 import { sendOrderNotifications } from "@/lib/notifications";
+import { sendNewOrderPush } from "@/lib/push";
 import { logOrderToSheet } from "@/lib/sheets";
 import { saveOrderToDb } from "@/lib/order-db";
 import { getProductBySlug } from "@/lib/data/product-overrides";
@@ -168,7 +169,8 @@ export async function POST(request: Request) {
       saveOrderToDb(payload!),
       autoEnterGiveaway(payload!.igHandle, payload!.name, payload!.userId ?? null, payload!.email, payload!.phone),
       capiPurchase,
-      decrementSizeStock(payload!.items)
+      decrementSizeStock(payload!.items),
+      sendNewOrderPush(payload!) // PWA push adminu — best-effort, nikad ne blokira narudžbu
     ]);
 
     return NextResponse.json({
