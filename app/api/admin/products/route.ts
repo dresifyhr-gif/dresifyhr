@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { jerseys, adultSizes, kidSizes, streetwearSizes, getJerseyDescription, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { JERSEY_PRICE_EUR } from "@/lib/site";
 import { customToJersey, type CustomRow } from "@/lib/data/product-overrides";
+import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -94,6 +95,8 @@ export async function GET() {
       igrac: repairText(ov?.igrac || j.igrac),
       liga: ov?.liga || j.liga,
       images: parseImagesArr(ov?.images ?? null),
+      // Thumbnail za admin: override slika ako postoji, inače glavna iz kataloga.
+      image: parseImagesArr(ov?.images ?? null)[0] ?? getJerseyGallery(j.slug)[0]?.src ?? null,
       category: j.category ?? "dres",
       custom: false,
       price: ov?.price != null ? ov.price : j.price ?? JERSEY_PRICE_EUR,
@@ -131,6 +134,7 @@ export async function GET() {
       igrac: repairText(c.igrac),
       liga: streetwear ? "Streetwear" : c.liga,
       images: parseImagesArr(c.images ?? null),
+      image: parseImagesArr(c.images ?? null)[0] ?? null,
       category: c.category ?? "dres",
       custom: true,
       price: c.price,
