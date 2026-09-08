@@ -50,8 +50,10 @@ export function Stat({
 }) {
   const pct = progress ? Math.max(0, Math.min(100, Math.round(progress.pct * 100))) : 0;
   const barColor = progress ? BAR_TONE[progress.tone || "good"] : "";
+  // v3: bočna traka u boji (po tonu; bez tona = brend lime) + lagani hover.
+  const stripe = progress ? BAR_TONE[progress.tone || "good"] : "var(--a-accent)";
   return (
-    <div className="a-card p-4">
+    <div className="a-card p-4 transition duration-150 hover:-translate-y-0.5" style={{ borderLeftWidth: "4px", borderLeftColor: stripe }}>
       <div className="flex items-center justify-between">
         <div className="a-label">{label}</div>
         {change != null && (
