@@ -437,19 +437,18 @@ function FilterGroup({ label, value, onChange, options }: {
   options: { v: string; l: string }[];
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">{label}</span>
-      {options.map((o) => (
-        <button
-          key={o.v}
-          type="button"
-          onClick={() => onChange(o.v)}
-          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${value === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
-        >
-          {o.l}
-        </button>
-      ))}
-    </div>
+    <label className="flex items-center gap-2">
+      <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`h-9 cursor-pointer rounded-[10px] border px-2.5 text-[12px] font-semibold outline-none transition ${value ? "border-transparent bg-[var(--a-text)] text-[var(--a-card)]" : "border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
+      >
+        {options.map((o) => (
+          <option key={o.v} value={o.v}>{o.l}</option>
+        ))}
+      </select>
+    </label>
   );
 }
 
@@ -725,13 +724,14 @@ export function OrdersManager() {
         </div>
         );
       })()}
-      <div className="mb-3 flex flex-wrap gap-1.5">
+      <div className="a-sub mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Status</span>
         {TABS.map((tb) => (
           <button
             key={tb.value}
             type="button"
             onClick={() => setStatus(tb.value)}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${status === tb.value ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${status === tb.value ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
           >
             {tb.label}
           </button>
@@ -833,10 +833,15 @@ export function OrdersManager() {
           {orders.map((o) => {
             const st = STATUS[o.status] || { label: o.status, cls: "bg-[var(--a-surface-2)] text-[var(--a-text-2)]" };
             const isBusy = busy === o.id;
+            // Statusna traka u boji (lijevi rub): čeka=amber, poslano=plavo, prikupljeno=zeleno, vraćeno/otkazano=crveno.
+            const stripe = o.status === "returned" || o.status === "cancelled" ? "var(--a-bad)"
+              : o.cashCollected ? "var(--a-good)"
+              : (o.status === "shipped" || o.status === "done") ? "var(--a-info)"
+              : "var(--a-warn)";
             return (
-              <div key={o.id} className={`a-row p-3 ${selected.has(o.id) ? "!border-black/20 !bg-[var(--a-surface-2)]" : ""}`}>
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="flex min-w-0 max-w-full items-start gap-2">
+              <div key={o.id} style={{ borderLeftWidth: "5px", borderLeftColor: stripe }} className={`a-row flex flex-col p-3 ${selected.has(o.id) ? "!border-black/20 !bg-[var(--a-surface-2)]" : ""}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-1 items-start gap-2">
                     <input
                       type="checkbox"
                       checked={selected.has(o.id)}
@@ -844,7 +849,7 @@ export function OrdersManager() {
                       className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-[#1d1d1f]"
                       title="Označi za skupnu akciju"
                     />
-                    <div className="min-w-0 max-w-full">
+                    <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       {phoneKey(o.phone) ? (
                         <a href={`/admin/kupci/${phoneKey(o.phone)}`} className="font-semibold text-[var(--a-text)] underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500" title="Otvori profil kupca">{o.customerName}</a>
@@ -948,9 +953,9 @@ export function OrdersManager() {
                         {o.ipInfo ? <span className="text-[var(--a-text-2)]"> · {o.ipInfo}</span> : null}
                       </div>
                     ) : null}
-                    <div className="mt-0.5 text-xs text-[var(--a-text-3)]">#{o.reference} · {o.itemCount} kom · <span className="font-semibold text-[var(--a-text)]">{eur(o.total)}</span></div>
+                    <div className="mt-0.5 font-mono text-[11px] text-[var(--a-text-3)]">#{o.reference}</div>
                     {o.items.length > 0 && (
-                      <ul className="mt-1.5 space-y-0.5">
+                      <ul className="mt-2 space-y-1 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-2.5">
                         {o.items.map((it, idx) => (
                           <li key={idx} className="text-[13px] text-[var(--a-text)]">
                             📦 {it.quantity > 1 ? `${it.quantity}× ` : ""}<span className="font-medium">{it.label}</span>
@@ -966,54 +971,50 @@ export function OrdersManager() {
                     ) : null}
                     </div>
                   </div>
-                  <span className="flex flex-wrap items-center justify-end gap-1.5">
-                    {waLink(o.phone) && (
-                      <a
-                        href={waLink(o.phone)!}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]"
-                      >
-                        💬 WhatsApp
-                      </a>
-                    )}
-                    {/* Igor/Ivica PDF naljepnice (za HP) maknute — sve ide preko GLS-a */}
-                    <a
-                      href={`/admin/print/${o.id}/gls/`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="GLS naljepnica: ime kupca + logo + QR na Instagram (adresu radi GLS)"
-                      className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]"
-                    >
-                      🚚 GLS
-                    </a>
-                  </span>
+                  <div className="shrink-0 text-right">
+                    <div className="text-[19px] font-extrabold leading-none tracking-tight text-[var(--a-text)]">{eur(o.total)}</div>
+                    <div className="mt-1 text-[11px] text-[var(--a-text-3)]">{o.itemCount} kom</div>
+                  </div>
                 </div>
 
-                <div className="mt-2.5 flex flex-wrap gap-2">
+                <div className="mt-auto flex flex-wrap gap-2 border-t border-[var(--a-line)] pt-3">
                   {(o.status === "shipped" || o.status === "done") ? (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                       title="Poslano — klikni da vratiš u nove"
                       className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">✓ Poslano</button>
-                  ) : (
+                  ) : (o.status !== "returned" && o.status !== "cancelled") ? (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "ivica" })}
-                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">📦 Pošalji</button>
-                  )}
-                  <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
-                    className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">↩ Vraćeno</button>
-                  <button type="button" disabled={isBusy} onClick={() => setCancelling((c) => (c === o.id ? null : o.id))}
-                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✕ Otkazano</button>
+                      className="rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold bg-[var(--a-good)] text-white transition hover:opacity-90 disabled:opacity-50">📦 Pošalji</button>
+                  ) : null}
                   {(o.status === "shipped" || o.status === "done") && (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
                       title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}
-                      className={`rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-[var(--a-good)] text-[var(--a-card)] hover:opacity-90" : "border border-[var(--a-warn)]/40 bg-[var(--a-warn-bg)] text-[var(--a-warn)] hover:opacity-90"}`}>
+                      className={`rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-[var(--a-good-bg)] text-[var(--a-good)] hover:opacity-90" : "bg-[var(--a-good)] text-white hover:opacity-90"}`}>
                       {o.cashCollected ? "💰 Prikupljeno ✓" : "💰 Prikupljeno?"}
                     </button>
                   )}
-                  <button type="button" onClick={() => setEditing((e) => (e === o.id ? null : o.id))}
-                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✏️ Uredi artikle</button>
-                  <button type="button" onClick={() => setEditingContact((e) => (e === o.id ? null : o.id))}
-                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✏️ Uredi adresu</button>
+                  {waLink(o.phone) && (
+                    <a href={waLink(o.phone)!} target="_blank" rel="noopener noreferrer"
+                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">💬 WhatsApp</a>
+                  )}
+                  {o.status === "returned" ? (
+                    <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: false })}
+                      title="Poništi povrat — vrati narudžbu natrag u aktivne (vraća i kupčevu potrošnju)"
+                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px] font-semibold">↩️ Vrati u narudžbe</button>
+                  ) : o.status === "cancelled" ? (
+                    <button type="button" disabled={isBusy} onClick={() => act(o.id, "cancel", { cancelled: false })}
+                      title="Poništi otkazivanje — vrati narudžbu natrag u aktivne"
+                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px] font-semibold">↩️ Vrati u narudžbe</button>
+                  ) : (
+                    <>
+                      <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
+                        className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">↩ Vraćeno</button>
+                      <button type="button" disabled={isBusy} onClick={() => setCancelling((c) => (c === o.id ? null : o.id))}
+                        className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✕ Otkazano</button>
+                    </>
+                  )}
+                  <button type="button" onClick={() => { const open = editing === o.id || editingContact === o.id; setEditing(open ? null : o.id); setEditingContact(open ? null : o.id); }}
+                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✏️ Uredi</button>
                   {o.address && (
                     <button type="button" onClick={() => setGlsOpen((e) => (e === o.id ? null : o.id))}
                       title="Podaci primatelja složeni za GLS formu — kopiraj bez prepisivanja"

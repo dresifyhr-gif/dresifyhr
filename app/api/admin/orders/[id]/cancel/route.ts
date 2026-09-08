@@ -19,24 +19,32 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const order = await prisma.order.findUnique({
     where: { id },
-    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true }
+    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true, shippedAt: true, deliveredAt: true }
   });
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
 
-  await prisma.order.update({
-    where: { id },
-    data: cancelled
-      ? { status: "cancelled", cancelReason: reason || null }
-      : { status: "new", shippedBy: null, shippedAt: null, cancelReason: null }
-  });
-
-  // Otkazana narudžba nije potrošnja → skini je s kupčevih totala (neto roba).
-  // Guard protiv dvostrukog: mijenjaj samo na stvarnom prijelazu u/iz "cancelled".
+  // Poništavanje otkazivanja vraća status prema stvarnom stanju (čuva slanje/naplatu).
+  const restoreStatus = order.deliveredAt ? "done" : order.shippedAt ? "shipped" : "new";
   const netGoods = order.total - (order.shipping ?? 0);
-  if (cancelled && order.status !== "cancelled") {
-    await adjustCustomerTotals(order.phone, -netGoods, -1);
-  } else if (!cancelled && order.status === "cancelled") {
-    await adjustCustomerTotals(order.phone, netGoods, 1);
+  // Oba terminalna stanja ("returned"/"cancelled") već su skinuta s totala → idempotentno.
+  const alreadyOffTotals = order.status === "returned" || order.status === "cancelled";
+
+  if (cancelled) {
+    const res = await prisma.order.updateMany({
+      where: { id, status: { not: "cancelled" } },
+      data: { status: "cancelled", cancelReason: reason || null }
+    });
+    if (res.count === 1 && !alreadyOffTotals) {
+      await adjustCustomerTotals(order.phone, -netGoods, -1);
+    }
+  } else {
+    const res = await prisma.order.updateMany({
+      where: { id, status: "cancelled" },
+      data: { status: restoreStatus, cancelReason: null }
+    });
+    if (res.count === 1) {
+      await adjustCustomerTotals(order.phone, netGoods, 1);
+    }
   }
 
   if (cancelled) {

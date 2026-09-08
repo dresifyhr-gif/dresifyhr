@@ -11,6 +11,7 @@ import { AdSpendForm } from "@/components/admin/ad-spend-form";
 import { ApologyList } from "@/components/admin/apology-list";
 import { ReturnedList } from "@/components/admin/winback-panels";
 import { Stat, Panel, eur, komLabel, waLink } from "@/components/admin/ui";
+import { PushToggle } from "@/components/admin/push-toggle";
 import { formatCroatianName } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Pregled — Dresify Admin", robots: { index: false, follow: false } };
@@ -110,6 +111,11 @@ export default async function AdminOverview() {
         <p className="text-sm text-[var(--a-text-2)]">
           {new Date().toLocaleDateString("hr-HR", { timeZone: "Europe/Zagreb", weekday: "long", day: "numeric", month: "long", year: "numeric" })}
         </p>
+      </div>
+
+      {/* Push obavijesti — uključi na ovom uređaju (svi profili) */}
+      <div className="mb-5">
+        <PushToggle />
       </div>
 
       {/* Mjesečni cilj prometa — progress + projekcija */}

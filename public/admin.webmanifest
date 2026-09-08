@@ -1,0 +1,24 @@
+{
+  "name": "Dresify Admin",
+  "short_name": "Dresify",
+  "description": "Narudžbe, proizvodi i obavijesti — Dresify admin.",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0b0c",
+  "theme_color": "#0a0a0a",
+  "lang": "hr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Narudžbe", "short_name": "Narudžbe", "url": "/admin/" },
+    { "name": "Proizvodi", "short_name": "Proizvodi", "url": "/admin/proizvodi" },
+    { "name": "Kupci", "short_name": "Kupci", "url": "/admin/kupci" }
+  ]
+}

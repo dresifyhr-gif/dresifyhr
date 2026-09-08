@@ -15,6 +15,7 @@ type Product = {
   igrac: string;
   liga: string;
   images: string[];
+  image: string | null;
   category: string;
   custom: boolean;
   price: number;
@@ -49,6 +50,28 @@ const STOCK_OPTIONS = [
   { value: "kids", label: "Nema dječje" },
   { value: "all", label: "Rasprodano" }
 ];
+
+// Kvadratni thumbnail proizvoda; fallback = pločica s inicijalom kluba/brenda.
+function Thumb({ src, alt, klub }: { src: string | null; alt: string; klub: string }) {
+  const [err, setErr] = useState(false);
+  if (!src || err) {
+    return (
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] text-[15px] font-bold text-[var(--a-text-3)]">
+        {klub?.trim()?.[0]?.toUpperCase() || "👕"}
+      </div>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      onError={() => setErr(true)}
+      className="h-14 w-14 shrink-0 rounded-[10px] border border-[var(--a-line)] object-cover"
+    />
+  );
+}
 
 function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const LIGE = useLeagues();
@@ -99,85 +122,92 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     setTimeout(() => setSaved(false), 1500);
   }
 
+  // Bočna traka stanja: skriveno=amber, rasprodano=crveno, u topu=lime, inače bez.
+  const stripe = hidden ? "var(--a-warn)" : oos === "all" ? "var(--a-bad)" : featured ? "var(--a-accent)" : "transparent";
   return (
-    <div className="rounded-[12px] border border-[var(--a-line)] p-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="min-w-0">
+    <div
+      className="flex flex-col rounded-[12px] border border-[var(--a-line)] p-3 transition-colors hover:border-[var(--a-text-3)]"
+      style={{ borderLeftWidth: "4px", borderLeftColor: stripe }}
+    >
+      {/* Zaglavlje: slika + naziv/statistika + cijena (uživo) */}
+      <div className="flex items-start gap-3">
+        <Thumb src={p.image} alt={`${p.klub} ${p.igrac}`} klub={p.klub} />
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 font-semibold text-[var(--a-text)]">
-            {isStreetwear && <span className="shrink-0 rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-600">🔥 Street</span>}
+            {isStreetwear && <span className="shrink-0 rounded bg-[var(--a-warn-bg)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--a-warn)]">🔥 Street</span>}
             <span className="truncate">{p.klub} — {p.igrac}</span>
           </div>
           <div className="text-[11px] text-[var(--a-text-3)]">{p.liga}{p.overridden && !p.custom ? " · uređeno" : ""}</div>
           <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]">
             <span className="text-[var(--a-text-2)]">📦 {p.sold} prodano</span>
             <span className="text-[var(--a-text-2)]">💶 {eur(p.revenue)} prihod</span>
-            <span className="font-medium text-emerald-600">📈 {eur(p.profit)} profit</span>
-            {p.returns > 0 && <span className="font-medium text-red-500">↩ {p.returns} vraćeno</span>}
+            <span className="font-medium text-[var(--a-good)]">📈 {eur(p.profit)} profit</span>
+            {p.returns > 0 && <span className="font-medium text-[var(--a-bad)]">↩ {p.returns} vraćeno</span>}
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1">
-            <input
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              inputMode="decimal"
-              className="w-16 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-sm text-[var(--a-text)] outline-none focus:border-slate-400 focus:bg-[var(--a-card)]"
-            />
-            <span className="text-xs text-[var(--a-text-3)]">€</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <input
-              value={stock}
-              onChange={(e) => setStock(e.target.value.replace(/[^0-9]/g, ""))}
-              inputMode="numeric"
-              placeholder="auto"
-              title="Količina na stanju (prazno = automatski)"
-              className="w-14 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-sm text-[var(--a-text)] outline-none focus:border-slate-400 focus:bg-[var(--a-card)]"
-            />
-            <span className="text-xs text-[var(--a-text-3)]">kom</span>
-          </div>
-          <select
-            value={oos}
-            onChange={(e) => setOos(e.target.value)}
-            className="rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-sm text-[var(--a-text)] outline-none focus:border-slate-400"
-          >
-            {STOCK_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <select
-            value={badge}
-            onChange={(e) => setBadge(e.target.value)}
-            className="rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-sm text-[var(--a-text)] outline-none focus:border-slate-400"
-          >
-            {BADGE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <button
-            type="button"
-            onClick={() => setHidden((v) => !v)}
-            title={hidden ? "Skriveno sa shopa — klikni da prikažeš" : "Prikazano — klikni da sakriješ"}
-            className={`rounded-[10px] px-2 py-1 text-[11px] font-semibold transition ${hidden ? "bg-amber-500 text-white hover:bg-amber-600" : "border border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
-          >
-            {hidden ? "🙈 Skriveno" : "👁 Vidljivo"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setFeatured((v) => !v)}
-            title={featured ? "Prikazan u 'Najprodavaniji dresovi' na naslovnici — klikni da makneš" : "Klikni da ga staviš u 'Najprodavaniji dresovi' na naslovnici"}
-            className={`shrink-0 rounded-[10px] px-2 py-1 text-[11px] font-semibold transition ${featured ? "bg-orange-500 text-white hover:bg-orange-600" : "border border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
-          >
-            {featured ? "🔥 Najprodavaniji" : "🔥 Dodaj u top"}
-          </button>
-          <button
-            type="button"
-            onClick={save}
-            disabled={saving || !dirty}
-            className="rounded-[10px] bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white transition hover:bg-slate-800 disabled:opacity-40"
-          >
-            {saving ? "…" : saved ? "✓" : "Spremi"}
-          </button>
+        <div className="shrink-0 whitespace-nowrap text-right text-[17px] font-bold tabular-nums text-[var(--a-text)]">
+          {price || "—"} €
         </div>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-1">
+      <div className="my-3 h-px bg-[var(--a-line)]" />
+
+      {/* Kontrole: cijena, zaliha, na stanju, oznaka, vidljivo, u top */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1">
+          <input
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            inputMode="decimal"
+            className="w-16 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-sm text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)] focus:bg-[var(--a-card)]"
+          />
+          <span className="text-xs text-[var(--a-text-3)]">€</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <input
+            value={stock}
+            onChange={(e) => setStock(e.target.value.replace(/[^0-9]/g, ""))}
+            inputMode="numeric"
+            placeholder="auto"
+            title="Količina na stanju (prazno = automatski)"
+            className="w-14 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-sm text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)] focus:bg-[var(--a-card)]"
+          />
+          <span className="text-xs text-[var(--a-text-3)]">kom</span>
+        </div>
+        <select
+          value={oos}
+          onChange={(e) => setOos(e.target.value)}
+          className="rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-sm text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)]"
+        >
+          {STOCK_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+        <select
+          value={badge}
+          onChange={(e) => setBadge(e.target.value)}
+          className="rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-sm text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)]"
+        >
+          {BADGE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+        <button
+          type="button"
+          onClick={() => setHidden((v) => !v)}
+          title={hidden ? "Skriveno sa shopa — klikni da prikažeš" : "Prikazano — klikni da sakriješ"}
+          className={`rounded-[10px] px-2 py-1 text-[11px] font-semibold transition ${hidden ? "bg-[var(--a-warn)] text-white hover:brightness-95" : "border border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
+        >
+          {hidden ? "🙈 Skriveno" : "👁 Vidljivo"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setFeatured((v) => !v)}
+          title={featured ? "Prikazan u 'Najprodavaniji dresovi' na naslovnici — klikni da makneš" : "Klikni da ga staviš u 'Najprodavaniji dresovi' na naslovnici"}
+          className={`shrink-0 rounded-[10px] px-2 py-1 text-[11px] font-semibold transition ${featured ? "bg-[var(--a-accent)] text-black hover:brightness-95" : "border border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
+        >
+          {featured ? "🔥 Najprodavaniji" : "🔥 Dodaj u top"}
+        </button>
+      </div>
+
+      {/* Rasprodane veličine */}
+      <div className="mt-2.5 flex flex-wrap items-center gap-1">
         <span className="mr-1 text-[11px] text-[var(--a-text-3)]">Rasprodane veličine:</span>
         {rowSizes.map((s) => {
           const on = soldSizes.includes(s);
@@ -186,16 +216,20 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
               key={s}
               type="button"
               onClick={() => toggleSize(s)}
-              className={`rounded px-1.5 py-0.5 text-[11px] font-medium transition ${on ? "bg-red-500 text-white" : "border border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
+              className={`rounded px-1.5 py-0.5 text-[11px] font-medium transition ${on ? "bg-[var(--a-bad)] text-white" : "border border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
             >
               {s}
             </button>
           );
         })}
+      </div>
+
+      {/* Podnožje: proširi (slike/opis/količine) + Spremi — zalijepljeno na dno (jednaka visina) */}
+      <div className="mt-auto flex flex-wrap items-center gap-x-1 gap-y-1.5 border-t border-[var(--a-line)] pt-3">
         <button
           type="button"
           onClick={() => setShowEdit((v) => !v)}
-          className="ml-2 rounded px-1.5 py-0.5 text-[11px] font-semibold text-violet-600 underline decoration-dotted hover:text-violet-800"
+          className="rounded px-1.5 py-0.5 text-[11px] font-semibold text-[var(--a-info)] underline decoration-dotted hover:opacity-80"
         >
           {showEdit ? "Sakrij podatke" : "🖼 Naziv i slike"}
           {images.length > 0 ? ` (${images.length})` : ""}
@@ -214,18 +248,26 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             onClick={() => setShowSizes((v) => !v)}
             className="rounded px-1.5 py-0.5 text-[11px] font-medium text-[var(--a-text-2)] underline decoration-dotted hover:text-[var(--a-text)]"
           >
-            {showSizes ? "Sakrij količine" : "📦 Količine po veličini"}
+            {showSizes ? "Sakrij količine" : "📦 Količine"}
             {hasSizeStock ? ` (${sizeStockTotal} kom)` : ""}
           </button>
         )}
+        <button
+          type="button"
+          onClick={save}
+          disabled={saving || !dirty}
+          className="ml-auto rounded-[10px] bg-[var(--a-text)] px-3 py-1.5 text-[11px] font-semibold text-[var(--a-card)] transition hover:opacity-90 disabled:opacity-40"
+        >
+          {saving ? "…" : saved ? "✓ Spremljeno" : "Spremi"}
+        </button>
       </div>
 
       {showEdit && (
-        <div className="mt-2 rounded-[12px] border border-violet-200 bg-violet-50/40 p-2.5">
+        <div className="mt-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-2.5">
           <div className="flex flex-wrap items-center gap-1.5">
-            <input value={klub} onChange={(e) => setKlub(e.target.value)} placeholder="Klub / brend" className="w-36 rounded border border-[var(--a-line)] bg-[var(--a-card)] px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
-            <input value={igrac} onChange={(e) => setIgrac(e.target.value)} placeholder="Igrač / model" className="min-w-[150px] flex-1 rounded border border-[var(--a-line)] bg-[var(--a-card)] px-2 py-1 text-[12px] outline-none focus:border-slate-400" />
-            <select value={liga} onChange={(e) => setLiga(e.target.value)} className="w-32 max-w-full shrink-0 rounded border border-[var(--a-line)] bg-[var(--a-card)] px-2 py-1 text-[12px] outline-none focus:border-slate-400">
+            <input value={klub} onChange={(e) => setKlub(e.target.value)} placeholder="Klub / brend" className="w-36 rounded border border-[var(--a-line)] bg-[var(--a-card)] px-2 py-1 text-[12px] outline-none focus:border-[var(--a-text-3)]" />
+            <input value={igrac} onChange={(e) => setIgrac(e.target.value)} placeholder="Igrač / model" className="min-w-[150px] flex-1 rounded border border-[var(--a-line)] bg-[var(--a-card)] px-2 py-1 text-[12px] outline-none focus:border-[var(--a-text-3)]" />
+            <select value={liga} onChange={(e) => setLiga(e.target.value)} className="w-32 max-w-full shrink-0 rounded border border-[var(--a-line)] bg-[var(--a-card)] px-2 py-1 text-[12px] outline-none focus:border-[var(--a-text-3)]">
               {(LIGE.includes(liga) ? LIGE : [liga, ...LIGE]).map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
@@ -252,7 +294,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
                   onChange={(e) => setSizeStock((cur) => ({ ...cur, [s]: e.target.value.replace(/[^0-9]/g, "") }))}
                   inputMode="numeric"
                   placeholder="–"
-                  className="w-12 rounded border border-[var(--a-line)] bg-[var(--a-card)] px-1.5 py-1 text-center text-[13px] outline-none focus:border-slate-400"
+                  className="w-12 rounded border border-[var(--a-line)] bg-[var(--a-card)] px-1.5 py-1 text-center text-[13px] outline-none focus:border-[var(--a-text-3)]"
                 />
               </label>
             ))}
@@ -269,7 +311,7 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
             rows={6}
-            className="w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-3 py-2 text-[13px] leading-6 text-[var(--a-text)] outline-none focus:border-slate-400 focus:bg-[var(--a-card)]"
+            className="w-full rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-3 py-2 text-[13px] leading-6 text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)] focus:bg-[var(--a-card)]"
           />
           <div className="mt-1 flex items-center gap-2">
             <button
@@ -332,25 +374,28 @@ export function ProductsManager() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Traži proizvod (klub, igrač, liga, streetwear)…"
-          className="flex-1 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-3.5 py-2.5 text-sm text-[var(--a-text)] outline-none focus:border-slate-400 focus:bg-[var(--a-card)]"
+          className="flex-1 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-3.5 py-2.5 text-sm text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)] focus:bg-[var(--a-card)]"
         />
         <span className="shrink-0 text-xs text-[var(--a-text-3)]">{loading ? "…" : `${filtered.length} proizvoda`}</span>
       </div>
       {loading ? (
         <div className="py-8 text-center text-sm text-[var(--a-text-3)]">Učitavam…</div>
       ) : (
-        <div className="space-y-2">
-          {visible.map((p) => <ProductRow key={p.slug} p={p} sizes={sizes} />)}
+        <>
+          {/* Pametan grid: mobitel 1 → laptop 2 → široki monitor 3 stupca. */}
+          <div className="grid gap-3 xl:grid-cols-2 2xl:grid-cols-3">
+            {visible.map((p) => <ProductRow key={p.slug} p={p} sizes={sizes} />)}
+          </div>
           {filtered.length > visible.length && (
             <button
               type="button"
               onClick={() => setLimit((n) => n + 40)}
-              className="a-btn-sm w-full py-2.5 text-[13px]"
+              className="a-btn-sm mt-3 w-full py-2.5 text-[13px]"
             >
               Prikaži još ({filtered.length - visible.length} preostalo)
             </button>
           )}
-        </div>
+        </>
       )}
     </div>
   );
