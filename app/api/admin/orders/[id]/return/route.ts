@@ -25,23 +25,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // Poništavanje povrata vraća status prema STVARNOM stanju (čuva slanje/naplatu),
   // a ne slijepo u "new" — inače bi poslana+naplaćena narudžba ispala iz obračuna.
   const restoreStatus = order.deliveredAt ? "done" : order.shippedAt ? "shipped" : "new";
-
-  await prisma.order.update({
-    where: { id },
-    // returnedAt bilježi KAD je označeno vraćeno → poravnanje računa povrat u ispravno razdoblje
-    // (ne po datumu kreiranja narudžbe). Poništavanje povrata ga očisti i vrati raniji status.
-    data: returned
-      ? { status: "returned", returnedAt: new Date() }
-      : { status: restoreStatus, returnedAt: null }
-  });
-
-  // Vraćena narudžba nije uspješna potrošnja → skini je s kupčevih totala (neto roba).
-  // Guard protiv dvostrukog: mijenjaj samo na stvarnom prijelazu u/iz "returned".
   const netGoods = order.total - (order.shipping ?? 0);
-  if (returned && order.status !== "returned") {
-    await adjustCustomerTotals(order.phone, -netGoods, -1);
-  } else if (!returned && order.status === "returned") {
-    await adjustCustomerTotals(order.phone, netGoods, 1);
+  // Oba terminalna stanja ("returned"/"cancelled") već su skinuta s totala → idempotentno.
+  const alreadyOffTotals = order.status === "returned" || order.status === "cancelled";
+
+  if (returned) {
+    // Atomski uvjetni prijelaz: totale skini SAMO ako je OVAJ poziv stvarno promijenio
+    // red (spriječi dvostruko kod dvoklika / dva admina istovremeno).
+    const res = await prisma.order.updateMany({
+      where: { id, status: { not: "returned" } },
+      data: { status: "returned", returnedAt: new Date() }
+    });
+    if (res.count === 1 && !alreadyOffTotals) {
+      await adjustCustomerTotals(order.phone, -netGoods, -1);
+    }
+  } else {
+    const res = await prisma.order.updateMany({
+      where: { id, status: "returned" },
+      data: { status: restoreStatus, returnedAt: null }
+    });
+    if (res.count === 1) {
+      await adjustCustomerTotals(order.phone, netGoods, 1);
+    }
   }
 
   if (returned) {

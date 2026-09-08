@@ -1,21 +1,33 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { sendPushToAll, pushConfigured } from "@/lib/push";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// UTC trenutak ponoći DANAS po Europe/Zagreb (radi ljeti i zimi, bez hardkodiranja).
+// UTC trenutak ponoći DANAS po Europe/Zagreb — neovisno o TZ poslužitelja i DST-u.
 function zagrebStartOfToday(): Date {
   const now = new Date();
-  const zagreb = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Zagreb" }));
-  const utc = new Date(now.toLocaleString("en-US", { timeZone: "UTC" }));
-  const offsetMs = zagreb.getTime() - utc.getTime(); // +1h zimi, +2h ljeti
-  const wall = new Date(now.getTime() + offsetMs);
-  wall.setHours(0, 0, 0, 0);
-  return new Date(wall.getTime() - offsetMs);
+  // Zagreb kalendarski datum "danas"
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Zagreb",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(now);
+  const y = Number(parts.find((p) => p.type === "year")!.value);
+  const m = Number(parts.find((p) => p.type === "month")!.value);
+  const d = Number(parts.find((p) => p.type === "day")!.value);
+  // Pretpostavi ponoć u UTC, pa korigiraj za stvarni Zagreb offset na TAJ trenutak
+  // (offset u ponoć je nedvojben — DST prijelaz je u 02/03h, ne u ponoć).
+  const guess = Date.UTC(y, m - 1, d, 0, 0, 0);
+  const asUTC = new Date(guess);
+  const zagrebWall = new Date(asUTC.toLocaleString("en-US", { timeZone: "Europe/Zagreb" }));
+  const utcWall = new Date(asUTC.toLocaleString("en-US", { timeZone: "UTC" }));
+  const offsetMs = zagrebWall.getTime() - utcWall.getTime();
+  return new Date(guess - offsetMs);
 }
 
 async function run() {
@@ -51,7 +63,7 @@ export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET?.trim();
   const authHeader = request.headers.get("authorization");
   const fromCron = secret ? authHeader === `Bearer ${secret}` : false;
-  if (!fromCron && !(await isAdmin())) {
+  if (!fromCron && !(await isActiveAdmin())) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   return run();
@@ -59,6 +71,6 @@ export async function GET(request: Request) {
 
 // Ručno okidanje iz admina (gumb "Pošalji sažetak sad").
 export async function POST() {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
   return run();
 }

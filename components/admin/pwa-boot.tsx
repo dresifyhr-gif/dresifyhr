@@ -49,7 +49,7 @@ export function PwaBoot() {
   const [toast, setToast] = useState<{ title: string; body: string; url: string } | null>(null);
   const lastIdRef = useRef<string | null>(null);
   const primedRef = useRef(false); // prvi dohvat samo postavlja baseline (bez alarma)
-  const notifiedRef = useRef<string>(""); // dedupe (poll + push)
+  const notifiedRef = useRef<Set<string>>(new Set()); // dedupe (poll + push) — isti ključ za obje grane
 
   // 1) Registracija service workera (za push + instalaciju)
   useEffect(() => {
@@ -58,8 +58,12 @@ export function PwaBoot() {
   }, []);
 
   function fire(title: string, body: string, url: string, key: string) {
-    if (notifiedRef.current === key) return;
-    notifiedRef.current = key;
+    if (notifiedRef.current.has(key)) return;
+    notifiedRef.current.add(key);
+    // zadrži zadnjih ~20 ključeva (dovoljno za dedupe poll+push, bez rasta u nedogled)
+    if (notifiedRef.current.size > 40) {
+      notifiedRef.current = new Set(Array.from(notifiedRef.current).slice(-20));
+    }
     chime();
     setToast({ title, body, url });
     try {
@@ -98,7 +102,8 @@ export function PwaBoot() {
                 "🛒 Nova narudžba!",
                 `${latest.customerName || "Kupac"} — ${eur(latest.total)} · ${latest.itemCount} kom ${ref}`.trim(),
                 latest.reference ? `/admin/?order=${encodeURIComponent(latest.reference)}` : "/admin/",
-                latest.id
+                // isti ključ kao push tag ("order-<ref>") → nema dvostrukog alarma
+                latest.reference ? `order-${latest.reference}` : latest.id
               );
             }
           }

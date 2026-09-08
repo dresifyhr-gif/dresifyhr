@@ -25,21 +25,26 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   // Poništavanje otkazivanja vraća status prema stvarnom stanju (čuva slanje/naplatu).
   const restoreStatus = order.deliveredAt ? "done" : order.shippedAt ? "shipped" : "new";
-
-  await prisma.order.update({
-    where: { id },
-    data: cancelled
-      ? { status: "cancelled", cancelReason: reason || null }
-      : { status: restoreStatus, cancelReason: null }
-  });
-
-  // Otkazana narudžba nije potrošnja → skini je s kupčevih totala (neto roba).
-  // Guard protiv dvostrukog: mijenjaj samo na stvarnom prijelazu u/iz "cancelled".
   const netGoods = order.total - (order.shipping ?? 0);
-  if (cancelled && order.status !== "cancelled") {
-    await adjustCustomerTotals(order.phone, -netGoods, -1);
-  } else if (!cancelled && order.status === "cancelled") {
-    await adjustCustomerTotals(order.phone, netGoods, 1);
+  // Oba terminalna stanja ("returned"/"cancelled") već su skinuta s totala → idempotentno.
+  const alreadyOffTotals = order.status === "returned" || order.status === "cancelled";
+
+  if (cancelled) {
+    const res = await prisma.order.updateMany({
+      where: { id, status: { not: "cancelled" } },
+      data: { status: "cancelled", cancelReason: reason || null }
+    });
+    if (res.count === 1 && !alreadyOffTotals) {
+      await adjustCustomerTotals(order.phone, -netGoods, -1);
+    }
+  } else {
+    const res = await prisma.order.updateMany({
+      where: { id, status: "cancelled" },
+      data: { status: restoreStatus, cancelReason: null }
+    });
+    if (res.count === 1) {
+      await adjustCustomerTotals(order.phone, netGoods, 1);
+    }
   }
 
   if (cancelled) {

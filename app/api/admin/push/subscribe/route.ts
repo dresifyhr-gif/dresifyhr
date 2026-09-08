@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin, getAdminUser } from "@/lib/admin-auth";
+import { isActiveAdmin, getAdminUser } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { pushConfigured } from "@/lib/push";
 
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 // Spremi (ili osvježi) Web Push pretplatu za trenutni admin uređaj.
 export async function POST(request: Request) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
   const body = await request.json().catch(() => null);
   const sub = body?.subscription;

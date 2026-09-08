@@ -58,7 +58,10 @@ async function sendToSubs(subs: SubRow[], msg: PushMessage) {
         await webpush.sendNotification(
           { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
           payload,
-          { TTL: 3600, urgency: "high" }
+          // timeout: zaglavljen push endpoint ne smije držati order-flow (awaitан je);
+          // 5s pa padne (hvata try/catch). NE prelazimo na fire-and-forget — Vercel
+          // serverless može ne izvršiti posao koji nije awaitан prije odgovora.
+          { TTL: 3600, urgency: "high", timeout: 5000 }
         );
         sent++;
       } catch (e: unknown) {

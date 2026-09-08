@@ -5,6 +5,7 @@ import { isActiveAdmin } from "@/lib/admin-auth";
 import { buildBusinessContext } from "@/lib/admin-ai-context";
 import { getOldUnshipped } from "@/lib/admin-winback";
 import { getOrderReference } from "@/lib/orders";
+import { adjustCustomerTotals } from "@/lib/order-db";
 import { prisma } from "@/lib/prisma";
 import { formatCroatianName } from "@/lib/utils";
 
@@ -116,11 +117,17 @@ ${context}`;
       execute: async ({ orderId }) => {
         const order = await prisma.order.findUnique({
           where: { id: orderId },
-          select: { id: true, customerName: true, total: true, createdAt: true, reference: true, status: true }
+          select: { id: true, phone: true, customerName: true, total: true, shipping: true, createdAt: true, reference: true, status: true }
         });
         if (!order) return { ok: false, error: "Narudžba s tim ID-em ne postoji." };
         if (order.status === "cancelled") return { ok: false, error: "Narudžba je već otkazana." };
         await prisma.order.update({ where: { id: orderId }, data: { status: "cancelled" } });
+        // Otkazana narudžba nije potrošnja → skini je s kupčevih totala (kao HTTP cancel ruta),
+        // inače kasnije "Vrati u narudžbe" napuše totale. Preskoči ako je već bila terminalna.
+        if (order.status !== "returned") {
+          const netGoods = order.total - (order.shipping ?? 0);
+          await adjustCustomerTotals(order.phone, -netGoods, -1);
+        }
         return {
           ok: true,
           ime: formatCroatianName(order.customerName),
