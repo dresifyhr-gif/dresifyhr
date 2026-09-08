@@ -327,6 +327,17 @@ function GlsCopyPanel({ order }: { order: Order }) {
     { label: "Grad", value: grad },
     { label: "Poštanski broj", value: postanski }
   ];
+  // Podaci za paket.hr bookmarklet — ključevi = ID-evi polja na paket.hr formi.
+  const paketData = {
+    first_name: ime,
+    last_name: prezime,
+    email: order.email || "",
+    phone: (localPhone(order.phone) || "").replace(/^0/, ""), // paket.hr traži "9X..." (bez vodeće nule)
+    address: ulica,
+    house_number: broj,
+    city: grad,
+    zip: postanski
+  };
   const [copied, setCopied] = useState<string | null>(null);
 
   async function copy(key: string, val: string) {
@@ -340,14 +351,24 @@ function GlsCopyPanel({ order }: { order: Order }) {
   return (
     <div className="mt-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-3">
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Za GLS formu (klikni za kopiranje)</span>
-        <button
-          type="button"
-          onClick={() => copy("all", fields.filter((f) => f.value).map((f) => `${f.label}: ${f.value}`).join("\n"))}
-          className="rounded-[8px] bg-[var(--a-text)] px-2 py-0.5 text-[10px] font-semibold text-[var(--a-card)] hover:opacity-90"
-        >
-          {copied === "all" ? "✓ kopirano" : "Kopiraj sve"}
-        </button>
+        <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Za paket.hr / GLS formu</span>
+        <div className="flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => copy("paket", JSON.stringify(paketData))}
+            title="Kopiraj podatke pa na paket.hr formi klikni bookmark 'Popuni paket.hr'"
+            className="rounded-[8px] bg-[var(--a-good)] px-2 py-0.5 text-[10px] font-semibold text-white hover:opacity-90"
+          >
+            {copied === "paket" ? "✓ kopirano — klikni bookmark" : "🚀 Za paket.hr"}
+          </button>
+          <button
+            type="button"
+            onClick={() => copy("all", fields.filter((f) => f.value).map((f) => `${f.label}: ${f.value}`).join("\n"))}
+            className="rounded-[8px] bg-[var(--a-text)] px-2 py-0.5 text-[10px] font-semibold text-[var(--a-card)] hover:opacity-90"
+          >
+            {copied === "all" ? "✓ kopirano" : "Kopiraj sve"}
+          </button>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-1.5">
         {fields.map((f) => (
