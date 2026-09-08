@@ -839,7 +839,7 @@ export function OrdersManager() {
               : (o.status === "shipped" || o.status === "done") ? "var(--a-info)"
               : "var(--a-warn)";
             return (
-              <div key={o.id} style={{ borderLeftWidth: "5px", borderLeftColor: stripe }} className={`a-row p-3 ${selected.has(o.id) ? "!border-black/20 !bg-[var(--a-surface-2)]" : ""}`}>
+              <div key={o.id} style={{ borderLeftWidth: "5px", borderLeftColor: stripe }} className={`a-row flex flex-col p-3 ${selected.has(o.id) ? "!border-black/20 !bg-[var(--a-surface-2)]" : ""}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 flex-1 items-start gap-2">
                     <input
@@ -977,7 +977,7 @@ export function OrdersManager() {
                   </div>
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--a-line)] pt-3">
+                <div className="mt-auto flex flex-wrap gap-2 border-t border-[var(--a-line)] pt-3">
                   {(o.status === "shipped" || o.status === "done") ? (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                       title="Poslano — klikni da vratiš u nove"
