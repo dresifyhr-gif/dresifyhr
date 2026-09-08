@@ -989,7 +989,7 @@ export function OrdersManager() {
                   {(o.status === "shipped" || o.status === "done") && (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
                       title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}
-                      className={`rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-[var(--a-good)] text-[var(--a-card)] hover:opacity-90" : "border border-[var(--a-warn)]/40 bg-[var(--a-warn-bg)] text-[var(--a-warn)] hover:opacity-90"}`}>
+                      className={`rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-[var(--a-good-bg)] text-[var(--a-good)] hover:opacity-90" : "bg-[var(--a-good)] text-white hover:opacity-90"}`}>
                       {o.cashCollected ? "💰 Prikupljeno ✓" : "💰 Prikupljeno?"}
                     </button>
                   )}
