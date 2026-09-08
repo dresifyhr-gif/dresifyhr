@@ -315,6 +315,32 @@ function parseAddressForGls(address: string): { ulica: string; broj: string; gra
 
 // Panel s podacima primatelja složenim točno po GLS (paket.hr) formi. Svako
 // polje ima gumb za kopiranje da se ne prepisuje ručno svaki put.
+// Link koji otvara paket.hr formu s podacima narudžbe u #hash-u.
+// Tampermonkey userscript na paket.hr to pročita i sam popuni formu.
+function buildPaketHref(o: Order): string {
+  const { ime, prezime } = splitName(o.customerName);
+  const { ulica, broj, grad, postanski } = parseAddressForGls(o.address);
+  const data = {
+    first_name: ime,
+    last_name: prezime,
+    email: o.email || "",
+    phone: (localPhone(o.phone) || "").replace(/^0/, ""),
+    address: ulica,
+    house_number: broj,
+    city: grad,
+    zip: postanski,
+    cod: o.cod != null ? String(o.cod) : "",
+    ref: o.reference || ""
+  };
+  let b64 = "";
+  try {
+    b64 = window.btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  } catch {
+    b64 = "";
+  }
+  return `https://paket.hr/posalji-paket-pl#dresify=${encodeURIComponent(b64)}`;
+}
+
 function GlsCopyPanel({ order }: { order: Order }) {
   const { ime, prezime } = splitName(order.customerName);
   const { ulica, broj, grad, postanski } = parseAddressForGls(order.address);
@@ -1056,6 +1082,12 @@ export function OrdersManager() {
                   {waLink(o.phone) && (
                     <a href={waLink(o.phone)!} target="_blank" rel="noopener noreferrer"
                       className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">💬 WhatsApp</a>
+                  )}
+                  {o.status !== "returned" && o.status !== "cancelled" && (
+                    <a href={buildPaketHref(o)} target="_blank" rel="noopener noreferrer"
+                      title="Otvori paket.hr s popunjenim podacima (treba Tampermonkey skript)"
+                      className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px] font-semibold"
+                      style={{ background: "var(--a-info-bg)", color: "var(--a-info)" }}>🚚 paket.hr</a>
                   )}
                   {o.status === "returned" ? (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: false })}
