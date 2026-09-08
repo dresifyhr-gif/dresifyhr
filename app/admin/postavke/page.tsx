@@ -20,6 +20,18 @@ export default async function SettingsPage() {
     <AdminShell title="Postavke" subtitle="Cijene i podaci — mijenjaj bez diranja koda">
       <div className="max-w-3xl space-y-5">
         <PushToggle />
+
+        {/* Akcije — premješteno iz glavnog izbornika u Postavke (prečac na stranice) */}
+        <div className="rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-4">
+          <div className="font-semibold text-[var(--a-text)]">🎟️ Akcije</div>
+          <p className="mt-0.5 text-[12px] text-[var(--a-text-2)]">Popust kodovi, Dresify klub, nagradna igra i izvlačenje.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a href="/admin/kodovi" className="a-btn a-btn-sm px-3 py-2 text-[13px]">🎟️ Kodovi i klub</a>
+            <a href="/admin/nagradna-igra" className="a-btn a-btn-sm px-3 py-2 text-[13px]">🎡 Nagradna igra</a>
+            <a href="/admin/izvlacenje" className="a-btn a-btn-sm px-3 py-2 text-[13px]">🎲 Izvlačenje</a>
+          </div>
+        </div>
+
         <SettingsForm />
         {user?.role === "OWNER" && <TeamManager />}
       </div>

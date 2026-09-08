@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Ticket, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Wallet, Sun, Moon } from "lucide-react";
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
 import { CommandPalette } from "@/components/admin/command-palette";
@@ -14,7 +14,7 @@ const NAV = [
   { href: "/admin/narudzbe", label: "Narudžbe", hint: "Traži i mijenjaj", icon: Package },
   { href: "/admin/proizvodi", label: "Proizvodi", hint: "Cijena i zaliha", icon: Shirt },
   { href: "/admin/kupci", label: "Kupci", hint: "Tko kupuje", icon: Users },
-  { href: "/admin/kodovi", label: "Akcije", hint: "Kodovi i nagradna igra", icon: Ticket },
+  { href: "/admin/novci", label: "Novci", hint: "Podjela i poravnanje", icon: Wallet },
   { href: "/admin/analitika", label: "Analitika", hint: "Brojke i trendovi", icon: BarChart3 }
 ];
 
@@ -22,8 +22,6 @@ function isActive(pathname: string, href: string) {
   // trailingSlash: true → putanja je "/admin/", pa uspoređujemo bez završne crte.
   const p = pathname.replace(/\/+$/, "") || "/admin";
   if (href === "/admin") return p === "/admin";
-  // "Akcije" (/admin/kodovi) pokriva i nagradnu igru + izvlačenje.
-  if (href === "/admin/kodovi") return p.startsWith("/admin/kodovi") || p.startsWith("/admin/nagradna-igra") || p.startsWith("/admin/izvlacenje");
   return p.startsWith(href);
 }
 
