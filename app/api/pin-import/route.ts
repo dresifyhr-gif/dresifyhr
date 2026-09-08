@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { sendShippedTrackingEmail } from "@/lib/notifications";
+import { sendShippedTrackingEmail, sendPinTelegram } from "@/lib/notifications";
+import { getOrderReference } from "@/lib/orders";
 import { checkGlsDeliveries } from "@/lib/gls-tracking";
 
 export const runtime = "nodejs";
@@ -132,6 +133,9 @@ export async function POST(request: Request) {
   })[0];
 
   await prisma.order.update({ where: { id: best.id }, data: { pin, ...(paketId ? { paketId } : {}) } });
+
+  // Novi PIN → pošalji na "Dresify pinovi" Telegram bot (ime + prezime + PIN). Best-effort.
+  await sendPinTelegram(best.customerName, pin, getOrderReference(best.createdAt.toISOString())).catch(() => {});
 
   return NextResponse.json({
     ok: true,

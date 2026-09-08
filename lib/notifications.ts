@@ -277,6 +277,25 @@ async function sendTelegram(order: OrderPayload): Promise<ChannelResult> {
   }
 }
 
+// Zaseban Telegram bot SAMO za PIN-ove ("Dresify pinovi"): ime + prezime + PIN.
+// Šalje se kad se PIN uveze iz paket.hr maila. No-op ako env nije postavljen; nikad ne baca.
+export async function sendPinTelegram(customerName: string, pin: string, reference?: string): Promise<{ configured: boolean; sent: boolean }> {
+  const botToken = process.env.TELEGRAM_PINS_BOT_TOKEN?.trim();
+  const chatId = process.env.TELEGRAM_PINS_CHAT_ID?.trim();
+  if (!botToken || !chatId || !pin) return { configured: Boolean(botToken && chatId), sent: false };
+  try {
+    const text = `🔑 <b>${(customerName || "Kupac").trim()}</b>${reference ? ` · ${reference}` : ""}\nPIN: <b>${pin}</b>`;
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" })
+    });
+    return { configured: true, sent: res.ok };
+  } catch {
+    return { configured: true, sent: false };
+  }
+}
+
 async function sendWhatsApp(order: OrderPayload): Promise<ChannelResult> {
   const twilioResult = await sendWhatsAppViaTwilio(order);
 
