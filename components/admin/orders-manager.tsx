@@ -437,19 +437,18 @@ function FilterGroup({ label, value, onChange, options }: {
   options: { v: string; l: string }[];
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">{label}</span>
-      {options.map((o) => (
-        <button
-          key={o.v}
-          type="button"
-          onClick={() => onChange(o.v)}
-          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${value === o.v ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
-        >
-          {o.l}
-        </button>
-      ))}
-    </div>
+    <label className="flex items-center gap-2">
+      <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`h-9 cursor-pointer rounded-[10px] border px-2.5 text-[12px] font-semibold outline-none transition ${value ? "border-transparent bg-[var(--a-text)] text-[var(--a-card)]" : "border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
+      >
+        {options.map((o) => (
+          <option key={o.v} value={o.v}>{o.l}</option>
+        ))}
+      </select>
+    </label>
   );
 }
 
@@ -978,22 +977,14 @@ export function OrdersManager() {
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--a-line)] pt-3">
-                  {waLink(o.phone) && (
-                    <a href={waLink(o.phone)!} target="_blank" rel="noopener noreferrer"
-                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">💬 WhatsApp</a>
-                  )}
                   {(o.status === "shipped" || o.status === "done") ? (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                       title="Poslano — klikni da vratiš u nove"
                       className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">✓ Poslano</button>
                   ) : (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "ivica" })}
-                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">📦 Pošalji</button>
+                      className="rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold bg-[var(--a-good)] text-white transition hover:opacity-90 disabled:opacity-50">📦 Pošalji</button>
                   )}
-                  <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
-                    className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">↩ Vraćeno</button>
-                  <button type="button" disabled={isBusy} onClick={() => setCancelling((c) => (c === o.id ? null : o.id))}
-                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✕ Otkazano</button>
                   {(o.status === "shipped" || o.status === "done") && (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
                       title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}
@@ -1001,10 +992,16 @@ export function OrdersManager() {
                       {o.cashCollected ? "💰 Prikupljeno ✓" : "💰 Prikupljeno?"}
                     </button>
                   )}
-                  <button type="button" onClick={() => setEditing((e) => (e === o.id ? null : o.id))}
-                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✏️ Uredi artikle</button>
-                  <button type="button" onClick={() => setEditingContact((e) => (e === o.id ? null : o.id))}
-                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✏️ Uredi adresu</button>
+                  {waLink(o.phone) && (
+                    <a href={waLink(o.phone)!} target="_blank" rel="noopener noreferrer"
+                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">💬 WhatsApp</a>
+                  )}
+                  <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
+                    className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">↩ Vraćeno</button>
+                  <button type="button" disabled={isBusy} onClick={() => setCancelling((c) => (c === o.id ? null : o.id))}
+                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✕ Otkazano</button>
+                  <button type="button" onClick={() => { const open = editing === o.id || editingContact === o.id; setEditing(open ? null : o.id); setEditingContact(open ? null : o.id); }}
+                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✏️ Uredi</button>
                   {o.address && (
                     <button type="button" onClick={() => setGlsOpen((e) => (e === o.id ? null : o.id))}
                       title="Podaci primatelja složeni za GLS formu — kopiraj bez prepisivanja"
