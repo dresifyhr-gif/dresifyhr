@@ -12,6 +12,7 @@ import { ApologyList } from "@/components/admin/apology-list";
 import { ReturnedList } from "@/components/admin/winback-panels";
 import { Stat, Panel, eur, komLabel, waLink } from "@/components/admin/ui";
 import { PushToggle } from "@/components/admin/push-toggle";
+import { RevenueChart } from "@/components/admin/revenue-chart";
 import { formatCroatianName } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Pregled — Dresify Admin", robots: { index: false, follow: false } };
@@ -228,7 +229,12 @@ export default async function AdminOverview() {
         </Panel>
       </div>
 
-      {/* "Javi se kupcima" + "Vraćeno/Otkazano" premješteni na dno (istaknutije). */}
+      {/* Graf prometa (na mjestu gdje su prije bili paneli); paneli su premješteni na dno. */}
+      <div className="mt-5">
+        <Panel title="Promet — zadnjih 14 dana">
+          <RevenueChart data={m.byDay} />
+        </Panel>
+      </div>
 
       <SectionHeading>📊 Brojke</SectionHeading>
 
