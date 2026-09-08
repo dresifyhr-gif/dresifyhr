@@ -840,8 +840,8 @@ export function OrdersManager() {
               : "var(--a-warn)";
             return (
               <div key={o.id} style={{ borderLeftWidth: "5px", borderLeftColor: stripe }} className={`a-row p-3 ${selected.has(o.id) ? "!border-black/20 !bg-[var(--a-surface-2)]" : ""}`}>
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="flex min-w-0 max-w-full items-start gap-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-1 items-start gap-2">
                     <input
                       type="checkbox"
                       checked={selected.has(o.id)}
@@ -849,7 +849,7 @@ export function OrdersManager() {
                       className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-[#1d1d1f]"
                       title="Označi za skupnu akciju"
                     />
-                    <div className="min-w-0 max-w-full">
+                    <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       {phoneKey(o.phone) ? (
                         <a href={`/admin/kupci/${phoneKey(o.phone)}`} className="font-semibold text-[var(--a-text)] underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500" title="Otvori profil kupca">{o.customerName}</a>
