@@ -982,10 +982,10 @@ export function OrdersManager() {
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                       title="Poslano — klikni da vratiš u nove"
                       className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">✓ Poslano</button>
-                  ) : (
+                  ) : (o.status !== "returned" && o.status !== "cancelled") ? (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "ivica" })}
                       className="rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold bg-[var(--a-good)] text-white transition hover:opacity-90 disabled:opacity-50">📦 Pošalji</button>
-                  )}
+                  ) : null}
                   {(o.status === "shipped" || o.status === "done") && (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
                       title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}
@@ -997,10 +997,22 @@ export function OrdersManager() {
                     <a href={waLink(o.phone)!} target="_blank" rel="noopener noreferrer"
                       className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">💬 WhatsApp</a>
                   )}
-                  <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
-                    className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">↩ Vraćeno</button>
-                  <button type="button" disabled={isBusy} onClick={() => setCancelling((c) => (c === o.id ? null : o.id))}
-                    className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✕ Otkazano</button>
+                  {o.status === "returned" ? (
+                    <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: false })}
+                      title="Poništi povrat — vrati narudžbu natrag u aktivne (vraća i kupčevu potrošnju)"
+                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px] font-semibold">↩️ Vrati u narudžbe</button>
+                  ) : o.status === "cancelled" ? (
+                    <button type="button" disabled={isBusy} onClick={() => act(o.id, "cancel", { cancelled: false })}
+                      title="Poništi otkazivanje — vrati narudžbu natrag u aktivne"
+                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px] font-semibold">↩️ Vrati u narudžbe</button>
+                  ) : (
+                    <>
+                      <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
+                        className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">↩ Vraćeno</button>
+                      <button type="button" disabled={isBusy} onClick={() => setCancelling((c) => (c === o.id ? null : o.id))}
+                        className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✕ Otkazano</button>
+                    </>
+                  )}
                   <button type="button" onClick={() => { const open = editing === o.id || editingContact === o.id; setEditing(open ? null : o.id); setEditingContact(open ? null : o.id); }}
                     className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✏️ Uredi</button>
                   {o.address && (
