@@ -451,13 +451,16 @@ export default async function AdminOverview() {
       {/* Revenue chart */}
       <div className="mt-5">
         <Panel title="Promet — zadnjih 14 dana">
-          <div className="flex h-36 items-end gap-1.5">
+          <div className="flex h-40 items-stretch gap-1.5">
             {m.byDay.map((d) => (
               <div key={d.day} className="group flex flex-1 flex-col items-center gap-1.5" title={`${d.day}: ${eur(d.total)}`}>
-                <div
-                  className="w-full rounded-t bg-slate-800 transition group-hover:bg-emerald-500"
-                  style={{ height: `${(d.total / maxDay) * 100}%`, minHeight: d.total > 0 ? 4 : 0 }}
-                />
+                {/* track s definiranom visinom (flex-1 u fiksnom h-40) → postotak stupca se razriješi */}
+                <div className="flex w-full flex-1 items-end">
+                  <div
+                    className="w-full rounded-t bg-[var(--a-text)] transition-colors group-hover:bg-[var(--a-good)]"
+                    style={{ height: `${maxDay > 0 ? Math.round((d.total / maxDay) * 100) : 0}%`, minHeight: d.total > 0 ? 4 : 0 }}
+                  />
+                </div>
                 <div className="text-[9px] text-[var(--a-text-3)]">{d.day.slice(8)}.{d.day.slice(5, 7)}</div>
               </div>
             ))}

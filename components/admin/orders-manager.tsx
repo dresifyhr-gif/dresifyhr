@@ -86,7 +86,7 @@ type Order = {
   promoCode: string | null;
   cashCollected: boolean;
   risk?: { failed: number; collected: number; priorOrders: number; min?: number };
-  items: { id: string; klub: string; igrac: string; label: string; size: string; quantity: number; unitPrice: number }[];
+  items: { id: string; slug: string | null; image: string | null; klub: string; igrac: string; label: string; size: string; quantity: number; unitPrice: number }[];
 };
 
 type EditItem = { id: string; klub: string; igrac: string; size: string; unitPrice: string };
@@ -511,6 +511,28 @@ function CancelPicker({ onPick, onClose }: { onPick: (reason: string) => void; o
   );
 }
 
+// Mala sličica proizvoda u stavci narudžbe; fallback = pločica s inicijalom.
+function ItemThumb({ src, klub }: { src: string | null; klub: string }) {
+  const [err, setErr] = useState(false);
+  if (!src || err) {
+    return (
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--a-line)] bg-[var(--a-card)] text-[13px] font-bold text-[var(--a-text-3)]">
+        {klub?.trim()?.[0]?.toUpperCase() || "👕"}
+      </span>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      onError={() => setErr(true)}
+      className="h-10 w-10 shrink-0 rounded-md border border-[var(--a-line)] bg-[var(--a-card)] object-cover"
+    />
+  );
+}
+
 export function OrdersManager() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
@@ -524,6 +546,7 @@ export function OrdersManager() {
   const [editingContact, setEditingContact] = useState<string | null>(null);
   const [glsOpen, setGlsOpen] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ image: string; label: string } | null>(null); // povećana slika proizvoda
   const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingDresovi: number; pendingKompleti: number; collectedTotal: number; collectedDresovi: number; collectedKompleti: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorDresovi: number; igorKompleti: number; ivicaDresovi: number; ivicaKompleti: number } | null>(null);
@@ -955,11 +978,24 @@ export function OrdersManager() {
                     ) : null}
                     <div className="mt-0.5 font-mono text-[11px] text-[var(--a-text-3)]">#{o.reference}</div>
                     {o.items.length > 0 && (
-                      <ul className="mt-2 space-y-1 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-2.5">
+                      <ul className="mt-2 space-y-1.5 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-2.5">
                         {o.items.map((it, idx) => (
-                          <li key={idx} className="text-[13px] text-[var(--a-text)]">
-                            📦 {it.quantity > 1 ? `${it.quantity}× ` : ""}<span className="font-medium">{it.label}</span>
-                            {it.size ? <span className="text-[var(--a-text-2)]"> · veličina {it.size}</span> : null}
+                          <li key={idx}>
+                            <button
+                              type="button"
+                              onClick={() => it.image && setLightbox({ image: it.image, label: it.label })}
+                              disabled={!it.image}
+                              title={it.image ? "Klikni za veću sliku" : undefined}
+                              className="flex w-full items-center gap-2.5 rounded-md text-left text-[13px] text-[var(--a-text)] transition-colors enabled:hover:bg-[var(--a-card)] disabled:cursor-default"
+                            >
+                              <ItemThumb src={it.image} klub={it.klub} />
+                              <span className="min-w-0 flex-1">
+                                {it.quantity > 1 ? <span className="font-semibold">{it.quantity}× </span> : null}
+                                <span className="font-medium">{it.label}</span>
+                                {it.size ? <span className="text-[var(--a-text-2)]"> · vel. {it.size}</span> : null}
+                              </span>
+                              {it.image ? <span className="shrink-0 text-[12px] text-[var(--a-text-3)]">🔍</span> : null}
+                            </button>
                           </li>
                         ))}
                       </ul>
@@ -1050,6 +1086,25 @@ export function OrdersManager() {
       <div ref={sentinel} className="h-8" />
       {loading && orders.length > 0 && <div className="py-3 text-center text-xs text-[var(--a-text-3)]">Učitavam još…</div>}
       {page >= pages && orders.length > 0 && <div className="py-3 text-center text-xs text-[#c7c7cc]">— kraj popisa —</div>}
+
+      {/* Lightbox: povećana slika proizvoda (klik na stavku narudžbe) */}
+      {lightbox && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setLightbox(null)}
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4"
+        >
+          <div className="max-w-sm" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={lightbox.image} alt={lightbox.label} className="max-h-[80vh] w-auto rounded-[14px] border border-white/10 object-contain" />
+            <div className="mt-2 text-center text-sm font-semibold text-white">{lightbox.label}</div>
+            <button type="button" onClick={() => setLightbox(null)} className="mt-2 block w-full rounded-[10px] bg-white/15 py-2 text-[13px] font-semibold text-white hover:bg-white/25">
+              Zatvori
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

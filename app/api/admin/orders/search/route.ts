@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { getOrderReference } from "@/lib/orders";
+import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { formatCroatianName, phoneKey, repairText } from "@/lib/utils";
@@ -11,6 +12,16 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 25;
+
+function parseImagesArr(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((u): u is string => typeof u === "string" && !!u) : [];
+  } catch {
+    return [];
+  }
+}
 
 // Strip Croatian diacritics so search is accent-insensitive: "maric" matches "Marić".
 const deaccent = (s: string) =>
@@ -36,12 +47,20 @@ export async function GET(request: Request) {
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
 
   const { riskMinFailed, costDres, costKomplet, costStreetwear } = await getSettings();
-  // Streetwear slugovi imaju svoju nabavu (prodaja 50 €), da se ne broje kao dres.
+  // Custom proizvodi: streetwear slugovi (druga nabava) + mapa slika za thumbnaile.
+  const customRows = await prisma.customProduct.findMany({ select: { slug: true, images: true, category: true } });
   const streetwearSlugs = new Set(
-    (await prisma.customProduct.findMany({ where: { category: "streetwear" }, select: { slug: true } }))
-      .map((p) => p.slug)
-      .filter((s): s is string => !!s)
+    customRows.filter((p) => p.category === "streetwear").map((p) => p.slug).filter((s): s is string => !!s)
   );
+  const customImg = new Map<string, string>();
+  for (const p of customRows) {
+    if (!p.slug) continue;
+    const first = parseImagesArr(p.images ?? null)[0];
+    if (first) customImg.set(p.slug, first);
+  }
+  // Glavna slika stavke: custom uploadana → inače katalog dresa → inače null (fallback pločica).
+  const itemImage = (slug: string | null | undefined): string | null =>
+    slug ? customImg.get(slug) ?? getJerseyGallery(slug)[0]?.src ?? null : null;
   const all = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     select: {
@@ -278,6 +297,8 @@ export async function GET(request: Request) {
       risk: { ...riskFor(o), min: riskMinFailed },
       items: o.items.map((it) => ({
         id: it.id,
+        slug: it.slug || null,
+        image: itemImage(it.slug),
         klub: repairText(it.klub || ""),
         igrac: repairText(it.igrac || ""),
         label: repairText([it.klub, it.igrac].filter(Boolean).join(" — ")),
