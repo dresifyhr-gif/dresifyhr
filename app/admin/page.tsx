@@ -8,10 +8,9 @@ import { getOldUnshipped, OLD_UNSHIPPED_DAYS } from "@/lib/admin-winback";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { ApologyList } from "@/components/admin/apology-list";
 import { ReturnedList } from "@/components/admin/winback-panels";
-import { Stat, Panel, eur, komLabel, waLink } from "@/components/admin/ui";
+import { Stat, Panel, eur, komLabel } from "@/components/admin/ui";
 import { PushToggle } from "@/components/admin/push-toggle";
 import { RevenueChart } from "@/components/admin/revenue-chart";
-import { formatCroatianName } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Pregled — Dresify Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -93,8 +92,6 @@ export default async function AdminOverview() {
   const ceo = await getCeoInsights(m.todayRev);
 
   const bestProduct = m.topItems[0];
-  const topInactive = m.inactive[0];
-  const inactiveWa = topInactive ? waLink(topInactive.phone) : null;
 
   // Koliko akcijskih panela na dnu ima podataka → toliko stupaca (da stanu u jedan red).
   const actionPanels = [oldRows.length > 0, m.returnedCount > 0, m.cancelledCount > 0].filter(Boolean).length;
@@ -184,51 +181,6 @@ export default async function AdminOverview() {
             </>
           );
         })()}
-      </div>
-
-      <SectionHeading>⚡ Za danas</SectionHeading>
-
-      {/* Samo to-do; "Na što trebam paziti" maknut — Gazda to ionako sam prati. */}
-      <div className="grid gap-5">
-        <Panel title="Što danas trebam napraviti">
-          <ul className="space-y-2.5 text-sm">
-            {m.pendingCount > 0 && (
-              <li className="flex items-start gap-2">
-                <span>📦</span>
-                <span className="text-[var(--a-text)]">
-                  Pošalji <b>{m.pendingCount}</b> narudžbi ({eur(m.pendingTotal)}) —{" "}
-                  <a href="/admin/slanje" className="font-semibold text-emerald-600 hover:underline">otvori red za slanje</a>
-                </span>
-              </li>
-            )}
-            {ceo.reorder && (
-              <li className="flex items-start gap-2">
-                <span>🛒</span>
-                <span className="text-[var(--a-text)]">Naruči <b>{ceo.reorder.name}</b> — najbrže se prodaje ({ceo.reorder.qty} kom u 14 dana)</span>
-              </li>
-            )}
-            {topInactive && (
-              <li className="flex items-start gap-2">
-                <span>📞</span>
-                <span className="text-[var(--a-text)]">
-                  Kontaktiraj <b>{topInactive.name ? formatCroatianName(topInactive.name) : topInactive.phone}</b> — nije kupio od {topInactive.lastOrderAt.toLocaleDateString("hr-HR")}
-                  {inactiveWa && (
-                    <> · <a href={inactiveWa} target="_blank" rel="noopener noreferrer" className="font-semibold text-emerald-600 hover:underline">WhatsApp</a></>
-                  )}
-                </span>
-              </li>
-            )}
-            {m.unassignedShipped.length > 0 && (
-              <li className="flex items-start gap-2">
-                <span>✍️</span>
-                <span className="text-[var(--a-text)]">Označi <b>{m.unassignedShipped.length}</b> poslanih narudžbi (tko je poslao) — dolje ↓</span>
-              </li>
-            )}
-            {m.pendingCount === 0 && !ceo.reorder && !topInactive && m.unassignedShipped.length === 0 && (
-              <li className="text-[var(--a-text-3)]">Sve pod kontrolom — nema hitnih zadataka ✅</li>
-            )}
-          </ul>
-        </Panel>
       </div>
 
       {/* Graf prometa (na mjestu gdje su prije bili paneli); paneli su premješteni na dno. */}
