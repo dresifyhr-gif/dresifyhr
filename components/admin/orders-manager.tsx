@@ -1063,7 +1063,7 @@ export function OrdersManager() {
                   </div>
                 </div>
 
-                <div className="order-actions mt-auto grid grid-cols-2 gap-2 border-t border-[var(--a-line)] pt-3 sm:flex sm:flex-wrap">
+                <div className="order-actions mt-auto grid grid-cols-4 gap-1.5 border-t border-[var(--a-line)] pt-3 sm:flex sm:flex-wrap sm:gap-2">
                   {(o.status === "shipped" || o.status === "done") ? (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                       title="Poslano — klikni da vratiš u nove"
@@ -1076,7 +1076,7 @@ export function OrdersManager() {
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
                       title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}
                       className={`rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-[var(--a-good)] text-white hover:opacity-90" : "bg-[var(--a-good-bg)] text-[var(--a-good)] hover:opacity-90"}`}>
-                      {o.cashCollected ? "💰 Prikupljeno ✓" : "💰 Prikupljeno?"}
+                      {o.cashCollected ? "💰 Naplaćeno ✓" : "💰 Naplata?"}
                     </button>
                   )}
                   {waLink(o.phone) && (

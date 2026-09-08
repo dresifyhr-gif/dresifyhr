@@ -374,21 +374,28 @@ body::before {
 .admin-root .a-btn-sm:hover { background: rgba(118, 118, 128, 0.18); }
 .admin-root .a-btn-sm:disabled { opacity: 0.4; }
 
-/* Akcije narudžbe: na mobitelu grid jednakih gumba → centriraj sadržaj svakog. */
+/* Akcije narudžbe: na mobitelu 4-stupčani grid jednakih, centriranih gumba (4 gore / 4 dolje). */
 .admin-root .order-actions > a,
 .admin-root .order-actions > button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
+  gap: 0.2rem;
   text-align: center;
+  line-height: 1.15;
   width: 100%;
+  min-height: 46px;
+  padding: 6px 4px !important;
+  font-size: 11px !important;
 }
 @media (min-width: 640px) {
   /* desktop: flex-wrap → gumbi po sadržaju, ne rastegnuti */
   .admin-root .order-actions > a,
   .admin-root .order-actions > button {
     width: auto;
+    min-height: 40px;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
   }
 }
 
