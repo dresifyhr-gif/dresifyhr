@@ -12,6 +12,7 @@ import { ApologyList } from "@/components/admin/apology-list";
 import { ReturnedList } from "@/components/admin/winback-panels";
 import { Stat, Panel, eur, komLabel, waLink } from "@/components/admin/ui";
 import { PushToggle } from "@/components/admin/push-toggle";
+import { RevenueChart } from "@/components/admin/revenue-chart";
 import { formatCroatianName } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Pregled — Dresify Admin", robots: { index: false, follow: false } };
@@ -92,7 +93,6 @@ export default async function AdminOverview() {
   // Metrike i "stari neposlani" su neovisni → paralelno; CEO insights ovisi o prometu pa ide nakon.
   const [m, oldRows] = await Promise.all([getDashboardMetrics(), getOldUnshipped(30)]);
   const ceo = await getCeoInsights(m.todayRev);
-  const maxDay = Math.max(1, ...m.byDay.map((d) => d.total));
 
   const bestProduct = m.topItems[0];
   const topInactive = m.inactive[0];
@@ -448,23 +448,10 @@ export default async function AdminOverview() {
         </Panel>
       </div>
 
-      {/* Revenue chart */}
+      {/* Revenue chart — interaktivni (klik/tap pokaže iznos), stane na mobitelu */}
       <div className="mt-5">
         <Panel title="Promet — zadnjih 14 dana">
-          <div className="flex h-40 items-stretch gap-1.5">
-            {m.byDay.map((d) => (
-              <div key={d.day} className="group flex flex-1 flex-col items-center gap-1.5" title={`${d.day}: ${eur(d.total)}`}>
-                {/* track s definiranom visinom (flex-1 u fiksnom h-40) → postotak stupca se razriješi */}
-                <div className="flex w-full flex-1 items-end">
-                  <div
-                    className="w-full rounded-t bg-[var(--a-text)] transition-colors group-hover:bg-[var(--a-good)]"
-                    style={{ height: `${maxDay > 0 ? Math.round((d.total / maxDay) * 100) : 0}%`, minHeight: d.total > 0 ? 4 : 0 }}
-                  />
-                </div>
-                <div className="text-[9px] text-[var(--a-text-3)]">{d.day.slice(8)}.{d.day.slice(5, 7)}</div>
-              </div>
-            ))}
-          </div>
+          <RevenueChart data={m.byDay} />
         </Panel>
       </div>
     </AdminShell>
