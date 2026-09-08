@@ -19,15 +19,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const order = await prisma.order.findUnique({
     where: { id },
-    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true }
+    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true, shippedAt: true, deliveredAt: true }
   });
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
+
+  // Poništavanje otkazivanja vraća status prema stvarnom stanju (čuva slanje/naplatu).
+  const restoreStatus = order.deliveredAt ? "done" : order.shippedAt ? "shipped" : "new";
 
   await prisma.order.update({
     where: { id },
     data: cancelled
       ? { status: "cancelled", cancelReason: reason || null }
-      : { status: "new", shippedBy: null, shippedAt: null, cancelReason: null }
+      : { status: restoreStatus, cancelReason: null }
   });
 
   // Otkazana narudžba nije potrošnja → skini je s kupčevih totala (neto roba).

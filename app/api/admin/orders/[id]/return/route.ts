@@ -18,17 +18,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const order = await prisma.order.findUnique({
     where: { id },
-    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true }
+    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true, shippedAt: true, deliveredAt: true }
   });
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
+
+  // Poništavanje povrata vraća status prema STVARNOM stanju (čuva slanje/naplatu),
+  // a ne slijepo u "new" — inače bi poslana+naplaćena narudžba ispala iz obračuna.
+  const restoreStatus = order.deliveredAt ? "done" : order.shippedAt ? "shipped" : "new";
 
   await prisma.order.update({
     where: { id },
     // returnedAt bilježi KAD je označeno vraćeno → poravnanje računa povrat u ispravno razdoblje
-    // (ne po datumu kreiranja narudžbe). Poništavanje povrata ga očisti.
+    // (ne po datumu kreiranja narudžbe). Poništavanje povrata ga očisti i vrati raniji status.
     data: returned
       ? { status: "returned", returnedAt: new Date() }
-      : { status: "new", shippedBy: null, shippedAt: null, returnedAt: null }
+      : { status: restoreStatus, returnedAt: null }
   });
 
   // Vraćena narudžba nije uspješna potrošnja → skini je s kupčevih totala (neto roba).
