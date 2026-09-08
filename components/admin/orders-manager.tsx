@@ -724,13 +724,14 @@ export function OrdersManager() {
         </div>
         );
       })()}
-      <div className="mb-3 flex flex-wrap gap-1.5">
+      <div className="a-sub mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Status</span>
         {TABS.map((tb) => (
           <button
             key={tb.value}
             type="button"
             onClick={() => setStatus(tb.value)}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${status === tb.value ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${status === tb.value ? "bg-[var(--a-text)] text-[var(--a-card)]" : "border border-[var(--a-line)] bg-[var(--a-card)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"}`}
           >
             {tb.label}
           </button>
