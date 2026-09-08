@@ -1013,7 +1013,7 @@ export function OrdersManager() {
                   </div>
                 </div>
 
-                <div className="mt-auto flex flex-wrap gap-2 border-t border-[var(--a-line)] pt-3">
+                <div className="order-actions mt-auto grid grid-cols-2 gap-2 border-t border-[var(--a-line)] pt-3 sm:flex sm:flex-wrap">
                   {(o.status === "shipped" || o.status === "done") ? (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
                       title="Poslano — klikni da vratiš u nove"

@@ -374,6 +374,24 @@ body::before {
 .admin-root .a-btn-sm:hover { background: rgba(118, 118, 128, 0.18); }
 .admin-root .a-btn-sm:disabled { opacity: 0.4; }
 
+/* Akcije narudžbe: na mobitelu grid jednakih gumba → centriraj sadržaj svakog. */
+.admin-root .order-actions > a,
+.admin-root .order-actions > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  text-align: center;
+  width: 100%;
+}
+@media (min-width: 640px) {
+  /* desktop: flex-wrap → gumbi po sadržaju, ne rastegnuti */
+  .admin-root .order-actions > a,
+  .admin-root .order-actions > button {
+    width: auto;
+  }
+}
+
 /* Obojane varijante (potvrda / upozorenje / opasnost) */
 .admin-root .a-btn-ok { background: var(--a-good-bg); color: var(--a-good); }
 .admin-root .a-btn-ok:hover { background: color-mix(in srgb, var(--a-good) 20%, var(--a-card)); }

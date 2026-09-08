@@ -12,7 +12,6 @@ import { ApologyList } from "@/components/admin/apology-list";
 import { ReturnedList } from "@/components/admin/winback-panels";
 import { Stat, Panel, eur, komLabel, waLink } from "@/components/admin/ui";
 import { PushToggle } from "@/components/admin/push-toggle";
-import { RevenueChart } from "@/components/admin/revenue-chart";
 import { formatCroatianName } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Pregled — Dresify Admin", robots: { index: false, follow: false } };
@@ -229,29 +228,7 @@ export default async function AdminOverview() {
         </Panel>
       </div>
 
-      {/* WhatsApp apology (old unsent) + returned + cancelled */}
-      {(oldRows.length > 0 || m.returnedCount > 0 || m.cancelledCount > 0) && (
-        <div className="mt-5 grid gap-5 lg:grid-cols-2">
-          {oldRows.length > 0 && (
-            <Panel title={`Javi se kupcima — stare neposlane (${oldRows.length})`}>
-              <ApologyList rows={oldRows} />
-            </Panel>
-          )}
-          {m.returnedCount > 0 && (
-            <Panel title={`Vraćeno · ${m.returnedCount} · ${m.returnedQty} kom (${eur(m.returnedTotal)})`}>
-              <ReturnedList items={m.returned} />
-            </Panel>
-          )}
-          {m.cancelledCount > 0 && (
-            <Panel title={`Otkazano · ${m.cancelledCount} · ${m.cancelledQty} kom (${eur(m.cancelledTotal)})`}>
-              <ReturnedList items={m.cancelled} />
-            </Panel>
-          )}
-        </div>
-      )}
-
-      {/* Assign-shipper panel uklonjen: sav novac ide na Ivicin račun (shippedBy uvijek "ivica"),
-          pa razdvajanje pošiljatelja Igor/Ivica više nije potrebno. */}
+      {/* "Javi se kupcima" + "Vraćeno/Otkazano" premješteni na dno (istaknutije). */}
 
       <SectionHeading>📊 Brojke</SectionHeading>
 
@@ -448,12 +425,26 @@ export default async function AdminOverview() {
         </Panel>
       </div>
 
-      {/* Revenue chart — interaktivni (klik/tap pokaže iznos), stane na mobitelu */}
-      <div className="mt-5">
-        <Panel title="Promet — zadnjih 14 dana">
-          <RevenueChart data={m.byDay} />
-        </Panel>
-      </div>
+      {/* Akcijski paneli na dnu (istaknutije): javi se kupcima + vraćeno/otkazano */}
+      {(oldRows.length > 0 || m.returnedCount > 0 || m.cancelledCount > 0) && (
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+          {oldRows.length > 0 && (
+            <Panel title={`Javi se kupcima — stare neposlane (${oldRows.length})`}>
+              <ApologyList rows={oldRows} />
+            </Panel>
+          )}
+          {m.returnedCount > 0 && (
+            <Panel title={`Vraćeno · ${m.returnedCount} · ${m.returnedQty} kom (${eur(m.returnedTotal)})`}>
+              <ReturnedList items={m.returned} />
+            </Panel>
+          )}
+          {m.cancelledCount > 0 && (
+            <Panel title={`Otkazano · ${m.cancelledCount} · ${m.cancelledQty} kom (${eur(m.cancelledTotal)})`}>
+              <ReturnedList items={m.cancelled} />
+            </Panel>
+          )}
+        </div>
+      )}
     </AdminShell>
   );
 }
