@@ -75,6 +75,7 @@ type Order = {
   address: string;
   itemCount: number;
   total: number;
+  cod: number; // puni iznos pouzeća (roba + dostava) — za paket.hr
   status: string;
   cancelReason: string | null; // zašto je otkazano
   shippedBy: string | null;
@@ -336,7 +337,9 @@ function GlsCopyPanel({ order }: { order: Order }) {
     address: ulica,
     house_number: broj,
     city: grad,
-    zip: postanski
+    zip: postanski,
+    cod: order.cod != null ? String(order.cod) : "", // iznos pouzeća (roba + dostava)
+    ref: order.reference || "" // poziv na broj / referenca
   };
   const [copied, setCopied] = useState<string | null>(null);
 

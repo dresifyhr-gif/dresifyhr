@@ -283,6 +283,7 @@ export async function GET(request: Request) {
       address: repairText(o.address || ""),
       itemCount: o.itemCount,
       total: o.total - (o.shipping ?? 0),
+      cod: o.total, // puni iznos koji kupac plaća pouzećem (roba + dostava) — za paket.hr
       status: o.status,
       cancelReason: o.cancelReason || null,
       shippedBy: o.shippedBy || null,
