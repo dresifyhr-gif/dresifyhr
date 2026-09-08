@@ -121,10 +121,15 @@ ${context}`;
         });
         if (!order) return { ok: false, error: "Narudžba s tim ID-em ne postoji." };
         if (order.status === "cancelled") return { ok: false, error: "Narudžba je već otkazana." };
-        await prisma.order.update({ where: { id: orderId }, data: { status: "cancelled" } });
-        // Otkazana narudžba nije potrošnja → skini je s kupčevih totala (kao HTTP cancel ruta),
-        // inače kasnije "Vrati u narudžbe" napuše totale. Preskoči ako je već bila terminalna.
-        if (order.status !== "returned") {
+        // Atomski uvjetni prijelaz (kao HTTP cancel ruta) — dva istovremena AI otkaza
+        // istog ID-a ne mogu dvostruko skinuti totale (skida samo poziv koji je stvarno promijenio red).
+        const res = await prisma.order.updateMany({
+          where: { id: orderId, status: { not: "cancelled" } },
+          data: { status: "cancelled" }
+        });
+        // Otkazana narudžba nije potrošnja → skini je s kupčevih totala (inače kasnije
+        // "Vrati u narudžbe" napuše totale). Preskoči ako je već bila terminalna (returned).
+        if (res.count === 1 && order.status !== "returned") {
           const netGoods = order.total - (order.shipping ?? 0);
           await adjustCustomerTotals(order.phone, -netGoods, -1);
         }
