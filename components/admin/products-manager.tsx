@@ -6,6 +6,7 @@ import { useLeagues } from "@/components/admin/use-leagues";
 
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { adminPost } from "@/lib/admin-fetch";
+import { SITE_URL } from "@/lib/site";
 
 
 
@@ -97,6 +98,26 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const [showEdit, setShowEdit] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  // Objava na Instagram (📸) — caption predpopunjen iz podataka proizvoda.
+  const [showIg, setShowIg] = useState(false);
+  const [igCaption, setIgCaption] = useState(() => {
+    const title = `${p.klub} — ${p.igrac}`;
+    const body = (p.description || p.descriptionAuto || "").trim();
+    return [title, body, `💶 ${p.price} € · Besplatna dostava iznad 60 €`, `🛒 ${SITE_URL}/dresovi`, "#dresify #nogomet #dres"].filter(Boolean).join("\n\n");
+  });
+  const [igBusy, setIgBusy] = useState(false);
+  const [igMsg, setIgMsg] = useState<string | null>(null);
+
+  async function publishIg() {
+    if (igBusy) return;
+    setIgBusy(true);
+    setIgMsg(null);
+    const res = await adminPost("/api/admin/instagram/publish/", { slug: p.slug, imageUrl: p.image, caption: igCaption });
+    setIgBusy(false);
+    if (!res) return; // adminPost je već javio grešku (npr. 403 = nisi vlasnik)
+    const d = await res.json().catch(() => ({}));
+    setIgMsg(d?.ok ? "✅ Objavljeno na Instagram!" : d?.message || "Objava nije uspjela.");
+  }
 
   // Ako je opis jednak auto-tekstu, spremamo prazno (vrati na automatski).
   const descToSave = desc.trim() === p.descriptionAuto.trim() ? "" : desc;
@@ -253,6 +274,15 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             {hasSizeStock ? ` (${sizeStockTotal} kom)` : ""}
           </button>
         )}
+        {p.image && (
+          <button
+            type="button"
+            onClick={() => setShowIg((v) => !v)}
+            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-[var(--a-text-2)] underline decoration-dotted hover:text-[var(--a-text)]"
+          >
+            {showIg ? "Sakrij IG" : "📸 Objavi na IG"}
+          </button>
+        )}
         <button
           type="button"
           onClick={save}
@@ -324,6 +354,34 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             </button>
             <span className="text-[11px] text-[var(--a-text-3)]">Svaki novi red = novi odlomak. Ne zaboravi „Spremi” gore.</span>
           </div>
+        </div>
+      )}
+
+      {showIg && (
+        <div className="mt-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-2.5">
+          <div className="flex gap-3">
+            <Thumb src={p.image} alt="" klub={p.klub} size="h-20 w-20" />
+            <textarea
+              value={igCaption}
+              onChange={(e) => setIgCaption(e.target.value)}
+              rows={6}
+              className="min-w-0 flex-1 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-2 text-[13px] leading-6 text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)]"
+            />
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={publishIg}
+              disabled={igBusy}
+              className="rounded-[10px] bg-[var(--a-accent)] px-3 py-1.5 text-[11px] font-bold text-black transition hover:brightness-95 disabled:opacity-50"
+            >
+              {igBusy ? "Objavljujem…" : "📸 Objavi na Instagram"}
+            </button>
+            {igMsg && <span className="text-[12px] text-[var(--a-text-2)]">{igMsg}</span>}
+          </div>
+          <p className="mt-1.5 text-[11px] text-[var(--a-text-3)]">
+            Objavljuje glavnu sliku na Instagram feed. Slika mora biti JPEG. <b>Objava je javna i odmah vidljiva</b> — provjeri opis prije klika.
+          </p>
         </div>
       )}
     </div>

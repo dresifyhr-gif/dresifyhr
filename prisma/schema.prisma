@@ -386,3 +386,22 @@ model PushSubscription {
 
   @@index([username])
 }
+
+// Instagram (Meta Graph API) veza — jedan redak (id="singleton"). Token se NE drži
+// u env-u nego ovdje: Gazda ga zalijepi kroz admin ("Poveži Instagram"), server ga
+// razmijeni u long-lived (60 dana) i auto-osvježava. accessToken je osjetljiv
+// (daje pristup IG računu) pa se sprema šifriran (format "gcm$iv$tag$cipher"); nikad
+// se ne vraća klijentu. IG_BUSINESS_ID/META_APP_ID/META_APP_SECRET/FB_PAGE_ID su u env-u.
+model IgConnection {
+  id              String    @id @default("singleton")
+  accessToken     String // long-lived user token (šifrat "gcm$…"; ili plain kao fallback)
+  igBusinessId    String? // Instagram business account id (default iz IG_BUSINESS_ID)
+  fbPageId        String? // povezana Facebook stranica
+  username        String? // IG korisničko ime (za prikaz/permalink)
+  scopes          String? // dodijeljene dozvole (audit)
+  expiresAt       DateTime? // ~60 dana od zadnje zamjene
+  lastRefreshedAt DateTime?
+  connectedBy     String? // admin profil koji je spojio (audit)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}

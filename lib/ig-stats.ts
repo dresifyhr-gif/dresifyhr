@@ -2,6 +2,7 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 import { getSettings } from "@/lib/settings";
+import { getIgToken } from "@/lib/ig-token";
 
 // Broj Instagram pratitelja preko službenog Meta Instagram Graph API-ja (besplatno,
 // veliki limiti — za razliku od Beholda koji je puknuo na overage). Treba u Vercel:
@@ -13,8 +14,10 @@ const API_VERSION = "v21.0";
 
 const fetchFollowers = unstable_cache(
   async (): Promise<number> => {
-    const igId = process.env.IG_USER_ID;
-    const token = process.env.IG_GRAPH_TOKEN;
+    // Prvo probaj token spojen u adminu ("Poveži Instagram"); fallback na stare env varijable.
+    const conn = await getIgToken();
+    const igId = conn?.igBusinessId || process.env.IG_USER_ID;
+    const token = conn?.token || process.env.IG_GRAPH_TOKEN;
     if (!igId || !token) return FALLBACK;
     try {
       const url = `https://graph.facebook.com/${API_VERSION}/${igId}?fields=followers_count&access_token=${encodeURIComponent(token)}`;
