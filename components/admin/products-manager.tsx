@@ -102,8 +102,18 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const [showIg, setShowIg] = useState(false);
   const [igCaption, setIgCaption] = useState(() => {
     const title = `${p.klub} — ${p.igrac}`;
-    const body = (p.description || p.descriptionAuto || "").trim();
-    return [title, body, `💶 ${p.price} € · Besplatna dostava iznad 60 €`, `🛒 ${SITE_URL}/dresovi`, "#dresify #nogomet #dres"].filter(Boolean).join("\n\n");
+    // Samo RUČNI opis (ako ga je Gazda upisao); auto-opis (materijali/brend) preskačemo — nije za IG.
+    const manual = (p.description || "").trim();
+    const domain = SITE_URL.replace(/^https?:\/\//, "");
+    return [
+      title,
+      manual,
+      `💶 ${p.price} €`,
+      `📲 Registriraj se na ${domain} i uživaj besplatnu dostavu iznad 60 €`,
+      "#dresify #nogomet #dres"
+    ]
+      .filter(Boolean)
+      .join("\n\n");
   });
   const [igBusy, setIgBusy] = useState(false);
   const [igMsg, setIgMsg] = useState<string | null>(null);
