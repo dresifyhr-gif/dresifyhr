@@ -1,25 +1,31 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { getAdminUser, isAdmin } from "@/lib/admin-auth";
 import { getDashboardMetrics } from "@/lib/admin-metrics";
 import { getGaStats } from "@/lib/ga";
+import { getIgStats } from "@/lib/instagram";
 import { prisma } from "@/lib/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { AnalyticsTabs } from "@/components/admin/analytics-tabs";
 import { GaStatsPanel } from "@/components/admin/ga-stats";
-import { Panel } from "@/components/admin/ui";
+import { InstagramConnect } from "@/components/admin/instagram-connect";
+import { InstagramStatsPanel } from "@/components/admin/instagram-stats";
+import { Panel, Stat } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Analitika — Dresify Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
-export default async function AnalyticsPage() {
+export default async function AnalyticsPage({ searchParams }: { searchParams?: { tab?: string } }) {
   if (!(await isAdmin())) redirect("/admin/login/");
+  const user = await getAdminUser();
 
   const NOT_VOID = { notIn: ["cancelled", "returned"] };
-  const [m, ga, sizeRows, clubRows, soldOrders, repeatCust, totalCust, allCount, cancelCount, returnCount, reasonRows] =
+  const [m, ga, ig, sizeRows, clubRows, soldOrders, repeatCust, totalCust, allCount, cancelCount, returnCount, reasonRows] =
     await Promise.all([
       getDashboardMetrics(),
       getGaStats(),
+      getIgStats(),
       // Prodaja po veličinama (samo prodane) → za nabavu.
       prisma.orderItem.groupBy({ by: ["size"], _sum: { quantity: true }, where: { order: { status: NOT_VOID } } }),
       // Prodaja po klubovima/reprezentacijama.
@@ -94,12 +100,22 @@ export default async function AnalyticsPage() {
     .sort((a, b) => b.n - a.n)
     .slice(0, 6);
 
-  return (
-    <AdminShell title="Analitika" subtitle="Što se prodaje, reklame i trendovi">
-      <div className="mb-5">
-        <GaStatsPanel ga={ga} />
-      </div>
+  // Instagram KPI promjene (za strelice).
+  const igFollowersChange =
+    ig.newFollowers7d != null && ig.followers - ig.newFollowers7d > 0
+      ? Math.round((ig.newFollowers7d / (ig.followers - ig.newFollowers7d)) * 100)
+      : null;
+  const igReachChange =
+    ig.reach7d != null && ig.reachPrev7d != null && ig.reachPrev7d > 0
+      ? Math.round(((ig.reach7d - ig.reachPrev7d) / ig.reachPrev7d) * 100)
+      : null;
 
+  const initialTab = (["prodaja", "google", "instagram"] as const).includes(searchParams?.tab as never)
+    ? (searchParams?.tab as "prodaja" | "google" | "instagram")
+    : "prodaja";
+
+  const prodaja = (
+    <>
       <div className="mb-5">
         <Panel title="Trend prometa (30 dana)">
           <p className="mb-3 -mt-2 text-xs text-[var(--a-text-3)]">Dnevni promet bez dostave — vidiš rasteš li i koji su dani najjači.</p>
@@ -117,7 +133,7 @@ export default async function AnalyticsPage() {
         </Panel>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Panel title="Najprodavaniji">
           {m.topItems.length === 0 ? (
             <div className="text-sm text-[var(--a-text-3)]">Nema podataka još.</div>
@@ -125,11 +141,11 @@ export default async function AnalyticsPage() {
             <ul className="space-y-2.5">
               {m.topItems.map((t, i) => (
                 <li key={`${t.slug}-${t.klub}-${t.igrac}`} className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2.5">
-                    <span className="flex h-5 w-5 items-center justify-center rounded bg-[var(--a-surface-2)] text-[10px] font-bold text-[var(--a-text-3)]">{i + 1}</span>
-                    <span className="text-[var(--a-text)]">{t.klub} — {t.igrac}</span>
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[var(--a-surface-2)] text-[10px] font-bold text-[var(--a-text-3)]">{i + 1}</span>
+                    <span className="truncate text-[var(--a-text)]">{t.klub} — {t.igrac}</span>
                   </span>
-                  <span className="font-semibold text-[var(--a-text)]">{t._sum.quantity ?? 0} kom</span>
+                  <span className="ml-2 shrink-0 font-semibold text-[var(--a-text)]">{t._sum.quantity ?? 0} kom</span>
                 </li>
               ))}
             </ul>
@@ -156,7 +172,7 @@ export default async function AnalyticsPage() {
         </Panel>
       </div>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Panel title="Prodaja po klubovima">
           <p className="mb-3 -mt-2 text-xs text-[var(--a-text-3)]">Koje reprezentacije/klubovi nose prodaju (top 12).</p>
           {clubs.length === 0 ? (
@@ -223,7 +239,7 @@ export default async function AnalyticsPage() {
               <ul className="space-y-1 text-sm">
                 {reasons.map((r) => (
                   <li key={r.reason} className="flex items-center justify-between">
-                    <span className="truncate text-[var(--a-text-2)]">{r.reason}</span>
+                    <span className="min-w-0 truncate text-[var(--a-text-2)]">{r.reason}</span>
                     <span className="ml-2 shrink-0 font-semibold text-[var(--a-text)]">{r.n}×</span>
                   </li>
                 ))}
@@ -243,6 +259,37 @@ export default async function AnalyticsPage() {
           </div>
         </Panel>
       </div>
+    </>
+  );
+
+  const instagram = (
+    <>
+      {ig.ok && (
+        <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <Stat
+            label="Pratitelji"
+            value={ig.followers.toLocaleString("hr-HR")}
+            change={igFollowersChange}
+            sub={ig.newFollowers7d != null ? `${ig.newFollowers7d >= 0 ? "+" : ""}${ig.newFollowers7d.toLocaleString("hr-HR")} u 7 dana` : undefined}
+          />
+          <Stat label="Doseg (7 dana)" value={ig.reach7d != null ? ig.reach7d.toLocaleString("hr-HR") : "—"} change={igReachChange} />
+          <Stat label="Novi (7 dana)" value={ig.newFollowers7d != null ? `${ig.newFollowers7d >= 0 ? "+" : ""}${ig.newFollowers7d.toLocaleString("hr-HR")}` : "—"} />
+          <Stat label="Objava ukupno" value={ig.mediaCount != null ? ig.mediaCount.toLocaleString("hr-HR") : "—"} />
+        </div>
+      )}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <InstagramStatsPanel ig={ig} />
+        <InstagramConnect isOwner={user?.role === "OWNER"} />
+      </div>
+      <p className="mt-5 text-[12px] text-[var(--a-text-3)]">
+        Dresove objavljuješ jednim klikom sa stranice <b className="text-[var(--a-text-2)]">Proizvodi</b> — gumb „📸 Objavi na IG&quot; na kartici proizvoda.
+      </p>
+    </>
+  );
+
+  return (
+    <AdminShell title="Analitika" subtitle="Prodaja, Google i Instagram">
+      <AnalyticsTabs initialTab={initialTab} prodaja={prodaja} google={<GaStatsPanel ga={ga} />} instagram={instagram} />
     </AdminShell>
   );
 }
