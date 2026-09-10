@@ -19,12 +19,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const order = await prisma.order.findUnique({
     where: { id },
-    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true, shippedAt: true, deliveredAt: true }
+    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true, shippedAt: true, deliveredAt: true, cashCollected: true }
   });
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
 
-  // Poništavanje otkazivanja vraća status prema stvarnom stanju (čuva slanje/naplatu).
-  const restoreStatus = order.deliveredAt ? "done" : order.shippedAt ? "shipped" : "new";
+  // Poništavanje otkazivanja: naplaćena/dostavljena → vrati na stvarno stanje (čuva
+  // novac u obračunu); inače → "new" (čeka slanje).
+  const restoreStatus = order.deliveredAt ? "done" : order.cashCollected ? "shipped" : "new";
   const netGoods = order.total - (order.shipping ?? 0);
   // Oba terminalna stanja ("returned"/"cancelled") već su skinuta s totala → idempotentno.
   const alreadyOffTotals = order.status === "returned" || order.status === "cancelled";
@@ -38,9 +39,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       await adjustCustomerTotals(order.phone, -netGoods, -1);
     }
   } else {
+    const restoreData =
+      restoreStatus === "new"
+        ? { status: "new", cancelReason: null, shippedAt: null, shippedBy: null }
+        : { status: restoreStatus, cancelReason: null };
     const res = await prisma.order.updateMany({
       where: { id, status: "cancelled" },
-      data: { status: restoreStatus, cancelReason: null }
+      data: restoreData
     });
     if (res.count === 1) {
       await adjustCustomerTotals(order.phone, netGoods, 1);

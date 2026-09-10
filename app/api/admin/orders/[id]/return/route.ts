@@ -18,13 +18,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const order = await prisma.order.findUnique({
     where: { id },
-    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true, shippedAt: true, deliveredAt: true }
+    select: { id: true, phone: true, customerName: true, createdAt: true, status: true, total: true, shipping: true, shippedAt: true, deliveredAt: true, cashCollected: true }
   });
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
 
-  // Poništavanje povrata vraća status prema STVARNOM stanju (čuva slanje/naplatu),
-  // a ne slijepo u "new" — inače bi poslana+naplaćena narudžba ispala iz obračuna.
-  const restoreStatus = order.deliveredAt ? "done" : order.shippedAt ? "shipped" : "new";
+  // Poništavanje povrata: naplaćena/dostavljena → vrati na stvarno stanje (čuva
+  // novac u obračunu); inače → "new" (čeka slanje) da se roba ponovno pošalje.
+  const restoreStatus = order.deliveredAt ? "done" : order.cashCollected ? "shipped" : "new";
   const netGoods = order.total - (order.shipping ?? 0);
   // Oba terminalna stanja ("returned"/"cancelled") već su skinuta s totala → idempotentno.
   const alreadyOffTotals = order.status === "returned" || order.status === "cancelled";
@@ -40,9 +40,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       await adjustCustomerTotals(order.phone, -netGoods, -1);
     }
   } else {
+    // Kad se vraća na "čeka slanje", očisti i datum/izvršitelja slanja da bude
+    // stvarno svježa narudžba za ponovno slanje (status vodi prikaz i obračun).
+    const restoreData =
+      restoreStatus === "new"
+        ? { status: "new", returnedAt: null, shippedAt: null, shippedBy: null }
+        : { status: restoreStatus, returnedAt: null };
     const res = await prisma.order.updateMany({
       where: { id, status: "returned" },
-      data: { status: restoreStatus, returnedAt: null }
+      data: restoreData
     });
     if (res.count === 1) {
       await adjustCustomerTotals(order.phone, netGoods, 1);
