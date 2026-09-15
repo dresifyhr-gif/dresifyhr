@@ -8,6 +8,7 @@ import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Ps5HomeBanner } from "@/components/home/ps5-home-banner";
 import { ReviewsSection } from "@/components/home/reviews-section";
 import { StreetwearBanner } from "@/components/home/streetwear-banner";
+import { TrenirkaBanner } from "@/components/home/trenirka-banner";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { jerseys } from "@/lib/data/jerseys";
 import { getFeaturedProducts, getCatalogProducts, getStreetwearProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
@@ -70,6 +71,11 @@ export default async function HomePage() {
       {show("streetwear") && streetwear.length > 0 && (
         <StreetwearBanner
           images={streetwear.map((p) => p.images?.[0]?.src).filter((s): s is string => !!s).slice(0, 5)}
+        />
+      )}
+      {show("trenirke") && trenirke.length > 0 && (
+        <TrenirkaBanner
+          images={trenirke.map((p) => p.images?.[0]?.src).filter((s): s is string => !!s).slice(0, 5)}
         />
       )}
       {show("featured") && <FeaturedSection products={await getFeaturedProducts(jerseys)} />}
