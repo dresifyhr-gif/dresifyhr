@@ -16,7 +16,7 @@ export function FeaturedSection({ products }: { products: Jersey[] }) {
       <div className="page-shell">
         <div className="mb-6 flex items-center justify-between sm:mb-8">
           <h2 className="font-heading text-2xl uppercase tracking-[0.04em] text-white sm:text-3xl">
-            Najprodavaniji dresovi 🔥
+            Najprodavanije 🔥
           </h2>
           <Link
             href="/dresovi"

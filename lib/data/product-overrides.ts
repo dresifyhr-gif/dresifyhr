@@ -222,7 +222,11 @@ const DEFAULT_FEATURED_SLUGS = [
 // Proizvodi za sekciju "Najprodavaniji dresovi" na naslovnici.
 // Ručno označeni u adminu (featured); ako ih nema, koristi se zadani popis.
 export async function getFeaturedProducts(base: Jersey[], limit = 12): Promise<Jersey[]> {
-  const all = await getCatalogProducts(base);
+  // "U top" (featured) može biti BILO KOJI proizvod — dres, streetwear ILI trenirka.
+  // getCatalogProducts namjerno izostavlja streetwear/trenirke, pa ovdje uzimamo SVE
+  // custom kategorije + katalog, da se svaki "u top" označen proizvod pojavi.
+  const [withOv, customRows, sold] = await Promise.all([withOverrides(base), fetchCustomRows(), getSoldSlugs()]);
+  const all = [...customRows.map(customToJersey), ...withOv].map((j) => withRating(j, sold));
   const picked = all.filter((j) => j.featured);
   if (picked.length) return picked.slice(0, limit);
   const bySlug = new Map(all.map((j) => [j.slug, j]));
