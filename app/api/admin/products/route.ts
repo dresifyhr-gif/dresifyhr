@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 const ALL_SIZES = [...streetwearSizes.filter((s) => !(adultSizes as readonly string[]).includes(s)), ...adultSizes, ...kidSizes];
 
 // Stvarne veličine koje taj proizvod ima (za editor: samo relevantne).
-function sizeListFor(j: { category?: string; vel: string; liga: string; klub: string; outOfStock?: string; soldOutSizes?: string[] }): string[] {
+function sizeListFor(j: { category?: string; vel: string; liga: string; klub: string; outOfStock?: string; soldOutSizes?: string[]; customSizes?: string[] }): string[] {
   const so = getJerseySizeOptions(j as Parameters<typeof getJerseySizeOptions>[0]);
   return [...so.adults, ...so.kids];
 }
@@ -102,7 +102,7 @@ export async function GET() {
       price: ov?.price != null ? ov.price : j.price ?? JERSEY_PRICE_EUR,
       stock: ov?.stock ?? null,
       sizeStock: parseSizeStockObj(ov?.sizeStock ?? null),
-      sizeList: sizeListFor(j),
+      sizeList: sizeListFor({ ...j, customSizes: ov?.sizes ? ov.sizes.split(",").map((s) => s.trim()).filter(Boolean) : undefined } as Parameters<typeof sizeListFor>[0]),
       outOfStock,
       soldOutSizes,
       hidden: ov ? ov.hidden : false,
@@ -140,7 +140,7 @@ export async function GET() {
       price: c.price,
       stock: c.stock ?? null,
       sizeStock: parseSizeStockObj(c.sizeStock ?? null),
-      sizeList: sizeListFor(jersey as unknown as { category?: string; vel: string; liga: string; klub: string }),
+      sizeList: sizeListFor(jersey),
       outOfStock: c.outOfStock ?? "",
       soldOutSizes: c.soldOutSizes ? c.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : [],
       hidden: c.hidden,
@@ -177,6 +177,10 @@ export async function POST(request: Request) {
   // gazilo katalog i rasprodano bi opet ispalo dostupno.
   const outOfStock = oos === "all" || oos === "adults" || oos === "kids" ? oos : "";
   const sizes: string[] = Array.isArray(body?.soldOutSizes) ? body.soldOutSizes.filter((s: unknown) => typeof s === "string") : [];
+  // Ručno uređena lista veličina (prazno/izostavljeno = ne diraj; [] = vrati na zadano).
+  const sizesIn: string[] | undefined = Array.isArray(body?.sizes)
+    ? Array.from(new Set((body.sizes as unknown[]).map((s) => (typeof s === "string" ? s.trim().toUpperCase() : "")).filter((s): s is string => !!s && s.length <= 12))).slice(0, 40)
+    : undefined;
   const hidden = body?.hidden === true;
   const badge = body?.badge === "bestseller" || body?.badge === "novo" ? body.badge : null;
   const featured = body?.featured === true;
@@ -195,7 +199,9 @@ export async function POST(request: Request) {
   // Custom proizvod (dres ili streetwear) → uređujemo CustomProduct redak izravno.
   const custom = (await prisma.customProduct.findUnique({ where: { slug } })) as unknown as CustomRow | null;
   if (custom) {
-    const allowedSizes = new Set(sizeListFor(customToJersey(custom) as unknown as { category?: string; vel: string; liga: string; klub: string }));
+    const existingCustomSizes = custom.sizes ? custom.sizes.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
+    const effectiveSizes = sizesIn !== undefined ? sizesIn : existingCustomSizes;
+    const allowedSizes = new Set(effectiveSizes && effectiveSizes.length ? effectiveSizes : sizeListFor(customToJersey(custom)));
     const sizeStockVal = cleanSizeStock(body?.sizeStock, allowedSizes);
     await prisma.customProduct.update({
       where: { slug },
@@ -210,7 +216,8 @@ export async function POST(request: Request) {
         sizeStock: sizeStockVal,
         outOfStock,
         soldOutSizes: sizes.join(","),
-          hidden,
+        ...(sizesIn !== undefined ? { sizes: sizesIn.length ? sizesIn.join(",") : null } : {}),
+        hidden,
         badge,
         featured,
         description
@@ -224,7 +231,10 @@ export async function POST(request: Request) {
   const jersey = jerseys.find((j) => j.slug === slug);
   if (!jersey) return NextResponse.json({ ok: false, message: "Nepoznat proizvod" }, { status: 400 });
 
-  const allowedSizes = new Set(sizeListFor(jersey));
+  const existingOv = await prisma.productOverride.findUnique({ where: { slug } });
+  const existingOvSizes = existingOv?.sizes ? existingOv.sizes.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
+  const effectiveSizes = sizesIn !== undefined ? sizesIn : existingOvSizes;
+  const allowedSizes = new Set(effectiveSizes && effectiveSizes.length ? effectiveSizes : sizeListFor(jersey));
   const sizeStockVal = cleanSizeStock(body?.sizeStock, allowedSizes);
 
   // Naziv/liga/slike: prazno = ostaje original iz kataloga (ne spremamo isti tekst bez potrebe).
@@ -243,6 +253,7 @@ export async function POST(request: Request) {
     sizeStock: sizeStockVal,
     outOfStock,
     soldOutSizes: sizes.join(","),
+    ...(sizesIn !== undefined ? { sizes: sizesIn.length ? sizesIn.join(",") : null } : {}),
     hidden,
     badge,
     featured,

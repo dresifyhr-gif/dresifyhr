@@ -76,8 +76,11 @@ function Thumb({ src, alt, klub, size = "h-14 w-14", radius = "rounded-[10px]" }
 
 function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const LIGE = useLeagues();
-  // Streetwear/custom prikazuje samo svoje veličine (XS–L); dresovi svoje.
-  const rowSizes = p.sizeList && p.sizeList.length ? p.sizeList : sizes;
+  // Urediva lista veličina ovog proizvoda (dodaj / promijeni / obriši).
+  const [sizeListEdit, setSizeListEdit] = useState<string[]>(p.sizeList && p.sizeList.length ? p.sizeList : []);
+  const [newSize, setNewSize] = useState("");
+  // Za "rasprodane veličine" i količine koristi urediva lista (pa rade i nove veličine).
+  const rowSizes = sizeListEdit.length ? sizeListEdit : sizes;
   const isStreetwear = p.category === "streetwear";
   const [price, setPrice] = useState(String(p.price));
   const [stock, setStock] = useState(p.stock == null ? "" : String(p.stock));
@@ -134,19 +137,27 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
   const stockOrig = p.stock == null ? "" : String(p.stock);
   const sizeStockDirty = (p.sizeList || []).some((s) => (sizeStock[s] || "") !== (p.sizeStock?.[s] != null ? String(p.sizeStock[s]) : ""));
   const imagesDirty = images.join("|") !== (p.images || []).join("|");
-  const dirty = price !== String(p.price) || stock !== stockOrig || sizeStockDirty || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || featured !== p.featured || descToSave !== p.description || klub !== p.klub || igrac !== p.igrac || liga !== p.liga || imagesDirty;
-  const sizeStockTotal = (p.sizeList || []).reduce((sum, s) => sum + (Number(sizeStock[s]) || 0), 0);
-  const hasSizeStock = (p.sizeList || []).some((s) => (sizeStock[s] || "").trim() !== "");
+  const sizesChanged = sizeListEdit.join(",") !== (p.sizeList || []).join(",");
+  const dirty = price !== String(p.price) || stock !== stockOrig || sizeStockDirty || sizesChanged || oos !== p.outOfStock || soldSizes.join(",") !== p.soldOutSizes.join(",") || hidden !== p.hidden || badge !== p.badge || featured !== p.featured || descToSave !== p.description || klub !== p.klub || igrac !== p.igrac || liga !== p.liga || imagesDirty;
+  const sizeStockTotal = rowSizes.reduce((sum, s) => sum + (Number(sizeStock[s]) || 0), 0);
+  const hasSizeStock = rowSizes.some((s) => (sizeStock[s] || "").trim() !== "");
 
   function toggleSize(s: string) {
     setSoldSizes((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s]));
+  }
+
+  function addSize() {
+    const s = newSize.trim().toUpperCase();
+    if (!s) return;
+    setSizeListEdit((cur) => (cur.includes(s) ? cur : [...cur, s]));
+    setNewSize("");
   }
 
   async function save() {
     if (saving) return;
     setSaving(true);
     setSaved(false);
-    const res = await adminPost("/api/admin/products/", { slug: p.slug, klub, igrac, liga, images, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), sizeStock: Object.fromEntries((p.sizeList || []).filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])])), outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, featured, description: descToSave });
+    const res = await adminPost("/api/admin/products/", { slug: p.slug, klub, igrac, liga, images, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), sizeStock: Object.fromEntries(sizeListEdit.filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])])), sizes: sizesChanged ? sizeListEdit : undefined, outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, featured, description: descToSave });
     setSaving(false);
     if (!res) return; // ne pokazuj lažni "✓" ako spremanje nije prošlo
     setSaved(true);
@@ -274,16 +285,14 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
           {showDesc ? "Sakrij opis" : "✏️ Uredi opis"}
           {p.description ? " (uređen)" : ""}
         </button>
-        {p.sizeList && p.sizeList.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setShowSizes((v) => !v)}
-            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-[var(--a-text-2)] underline decoration-dotted hover:text-[var(--a-text)]"
-          >
-            {showSizes ? "Sakrij količine" : "📦 Količine"}
-            {hasSizeStock ? ` (${sizeStockTotal} kom)` : ""}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => setShowSizes((v) => !v)}
+          className="rounded px-1.5 py-0.5 text-[11px] font-medium text-[var(--a-text-2)] underline decoration-dotted hover:text-[var(--a-text)]"
+        >
+          {showSizes ? "Sakrij veličine" : "📦 Veličine"}
+          {hasSizeStock ? ` (${sizeStockTotal} kom)` : ""}
+        </button>
         {p.image && (
           <button
             type="button"
@@ -324,11 +333,11 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
         </div>
       )}
 
-      {showSizes && p.sizeList && p.sizeList.length > 0 && (
+      {showSizes && (
         <div className="mt-2 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-2.5">
-          <div className="flex flex-wrap gap-2">
-            {p.sizeList.map((s) => (
-              <label key={s} className="flex flex-col items-center gap-0.5">
+          <div className="flex flex-wrap items-end gap-2.5">
+            {rowSizes.map((s) => (
+              <div key={s} className="relative flex flex-col items-center gap-0.5">
                 <span className="text-[11px] font-medium text-[var(--a-text-2)]">{s}</span>
                 <input
                   value={sizeStock[s] ?? ""}
@@ -337,11 +346,33 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
                   placeholder="–"
                   className="w-12 rounded border border-[var(--a-line)] bg-[var(--a-card)] px-1.5 py-1 text-center text-[13px] outline-none focus:border-[var(--a-text-3)]"
                 />
-              </label>
+                <button
+                  type="button"
+                  onClick={() => setSizeListEdit((cur) => cur.filter((x) => x !== s))}
+                  title={`Obriši veličinu ${s}`}
+                  className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--a-bad)] text-[11px] font-bold leading-none text-white hover:brightness-110"
+                >
+                  ×
+                </button>
+              </div>
             ))}
+            {/* Dodaj novu veličinu */}
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[11px] font-medium text-[var(--a-text-3)]">nova</span>
+              <div className="flex">
+                <input
+                  value={newSize}
+                  onChange={(e) => setNewSize(e.target.value.toUpperCase().slice(0, 12))}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSize(); } }}
+                  placeholder="npr. 140"
+                  className="w-16 rounded-l border border-[var(--a-line)] bg-[var(--a-card)] px-1.5 py-1 text-center text-[13px] outline-none focus:border-[var(--a-text-3)]"
+                />
+                <button type="button" onClick={addSize} title="Dodaj veličinu" className="rounded-r border border-l-0 border-[var(--a-line)] bg-[var(--a-good)] px-2 text-[15px] font-bold leading-none text-white hover:brightness-110">+</button>
+              </div>
+            </div>
           </div>
           <p className="mt-2 text-[11px] text-[var(--a-text-3)]">
-            Upiši koliko imaš po veličini. <b>0 = rasprodano</b> (kupac ne može naručiti tu veličinu). Prazno = ne pratiš tu veličinu. Ukupno: <b className="text-[var(--a-text-2)]">{sizeStockTotal} kom</b>. Ne zaboravi „Spremi” gore.
+            Dodaj/obriši veličine (× briše, „nova&quot; dodaje — npr. 140) i upiši količinu po veličini. <b>0 = rasprodano</b>. Prazno = ne pratiš zalihu te veličine. Ukupno: <b className="text-[var(--a-text-2)]">{sizeStockTotal} kom</b>. Ne zaboravi „Spremi” gore.
           </p>
         </div>
       )}

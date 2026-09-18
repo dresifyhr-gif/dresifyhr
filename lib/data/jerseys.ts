@@ -15,6 +15,8 @@ export type Jersey = {
   outOfStock?: "adults" | "kids" | "all";
   // Specific sizes that are sold out (e.g. ["XL","XXL"] or kids ["104","116"]).
   soldOutSizes?: string[];
+  // Ručno postavljena lista veličina (admin) — ako postoji, zamjenjuje zadanu po kategoriji.
+  customSizes?: string[];
   // Admin-uređeni opis (paragrafi odvojeni \n); ako postoji, koristi se umjesto auto-opisa.
   descriptionOverride?: string;
   // Slike za custom dresove (dodane iz admina); ako postoje, koriste se umjesto statičke galerije.
@@ -265,6 +267,28 @@ export function getJerseySizeOptions(product: Jersey) {
   const trenirkaList = trenirkaEntered.length
     ? trenirkaSizes.filter((s) => trenirkaEntered.includes(s))
     : [...trenirkaSizes];
+
+  // Ručno postavljene veličine (admin) zamjenjuju zadani raspon. Brojčane (npr. "140")
+  // idu pod "djeca", slovne (S, XL) pod "odrasli"; trenirka/streetwear ostaju ravan popis.
+  if (product.customSizes && product.customSizes.length) {
+    const cs = product.customSizes;
+    const flat = isTrenirka || isStreetwear;
+    const kids = flat ? [] : cs.filter((s) => /\d/.test(s));
+    const adults = flat ? cs : cs.filter((s) => !/\d/.test(s));
+    return {
+      hasKids: kids.length > 0,
+      hasAdults: adults.length > 0,
+      adults,
+      kids,
+      adultsOutOfStock: product.outOfStock === "adults" || product.outOfStock === "all",
+      kidsOutOfStock: product.outOfStock === "kids" || product.outOfStock === "all",
+      soldOutSizes: Array.from(new Set([
+        ...(product.soldOutSizes ?? []),
+        ...(product.sizeStock ? Object.entries(product.sizeStock).filter(([, n]) => (n ?? 0) <= 0).map(([s]) => s) : [])
+      ]))
+    };
+  }
+
   const hasKids = isTrenirka ? false : isLongSleeve ? true : !isStreetwear && product.vel.includes("Djeca");
   const hasAdults = isTrenirka ? true : isLongSleeve ? true : isStreetwear || product.vel.includes("Odrasli");
   // Clubs don't carry XXL — only national teams do.

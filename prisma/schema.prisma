@@ -161,6 +161,7 @@ model ProductOverride {
   sizeStock    String? // JSON količina po veličini, npr. {"S":3,"M":5,"L":0}; 0 = rasprodana veličina
   outOfStock   String? // "all" | "adults" | "kids" (prazno = na stanju)
   soldOutSizes String? // npr. "XL,XXL"
+  sizes        String? // custom lista veličina (CSV, npr. "104,116,140,S,M"); prazno = zadana po kategoriji
   hidden       Boolean  @default(false) // draft/sakriveno — ne prikazuje se na shopu
   badge        String? // "bestseller" | "novo" | "" (prazno = bez)
   featured     Boolean  @default(false) // ručno odabran za "Najprodavaniji dresovi" na naslovnici
@@ -198,6 +199,7 @@ model CustomProduct {
   sizeStock    String? // JSON količina po veličini, npr. {"S":3,"M":5,"L":0}; 0 = rasprodana veličina
   outOfStock   String?
   soldOutSizes String?
+  sizes        String? // custom lista veličina (CSV); prazno = zadana po kategoriji
   description  String?
   images       String   @default("[]") // JSON niz URL-ova slika (redoslijed = galerija)
   hidden       Boolean  @default(false)

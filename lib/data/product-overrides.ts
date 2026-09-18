@@ -43,7 +43,7 @@ const fetchSoldSlugs = unstable_cache(
 
 // Admin-managed overrides (price / stock) merged onto the static catalog. Best-effort:
 // if the DB is unavailable or empty, the shop uses the base catalog unchanged.
-type Override = { slug: string; klub: string | null; igrac: string | null; liga: string | null; images: string | null; price: number | null; stock: number | null; sizeStock: string | null; outOfStock: string | null; soldOutSizes: string | null; hidden: boolean; badge: string | null; description: string | null; featured?: boolean };
+type Override = { slug: string; klub: string | null; igrac: string | null; liga: string | null; images: string | null; price: number | null; stock: number | null; sizeStock: string | null; outOfStock: string | null; soldOutSizes: string | null; sizes: string | null; hidden: boolean; badge: string | null; description: string | null; featured?: boolean };
 
 // JSON niz URL-ova slika iz override-a (prazno = originalne slike iz /public).
 function parseImages(raw: string | null): string[] | undefined {
@@ -101,7 +101,9 @@ function merge(j: Jersey, ov?: Override): Jersey {
     badge,
     featured: ov.featured ?? j.featured,
     descriptionOverride: ov.description || undefined,
-    soldOutSizes: ov.soldOutSizes != null ? (ov.soldOutSizes ? ov.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : []) : j.soldOutSizes
+    soldOutSizes: ov.soldOutSizes != null ? (ov.soldOutSizes ? ov.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : []) : j.soldOutSizes,
+    // Ručno postavljene veličine (prazno = zadana lista po kategoriji).
+    customSizes: ov.sizes != null && ov.sizes.trim() ? ov.sizes.split(",").map((s) => s.trim()).filter(Boolean) : j.customSizes
   };
 }
 
@@ -124,7 +126,7 @@ export async function jerseyWithOverride(j: Jersey | undefined): Promise<Jersey 
 export type CustomRow = {
   id: string; slug: string; category: string; klub: string; igrac: string; liga: string; price: number;
   retro: boolean; vel: string; badge: string | null; stock: number | null; sizeStock: string | null;
-  outOfStock: string | null; soldOutSizes: string | null; description: string | null; images: string; hidden: boolean;
+  outOfStock: string | null; soldOutSizes: string | null; sizes: string | null; description: string | null; images: string; hidden: boolean;
   featured?: boolean;
 };
 
@@ -154,6 +156,7 @@ export function customToJersey(c: CustomRow): Jersey {
     sizeStock: parseSizeStock(c.sizeStock),
     outOfStock,
     soldOutSizes: c.soldOutSizes ? c.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
+    customSizes: c.sizes ? c.sizes.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
     descriptionOverride: c.description || undefined,
     images: urls.map((src) => ({ src, altLabel: `${c.klub} ${c.igrac}` })),
     isCustom: true,
