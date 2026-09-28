@@ -44,7 +44,17 @@ export async function GET(request: Request) {
   const courierF = url.searchParams.get("courier") || ""; // "" | gls | hp  (kurir poslanih)
   const deliveryF = url.searchParams.get("delivery") || ""; // "" | delivered | transit | prep  (GLS status dostave)
   const sort = url.searchParams.get("sort") || ""; // "" (new-first) | old | new
+  const from = (url.searchParams.get("from") || "").trim(); // YYYY-MM-DD (Zagreb dan), prazno = bez donje granice
+  const to = (url.searchParams.get("to") || "").trim(); // YYYY-MM-DD (Zagreb dan), prazno = bez gornje granice
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
+
+  // Period se mjeri po ZAGREBAČKOM danu (DST-sigurno): usporedimo "YYYY-MM-DD" stringove.
+  const zDayFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zagreb", year: "numeric", month: "2-digit", day: "2-digit" });
+  const inPeriod = (d: Date) => {
+    if (!from && !to) return true;
+    const day = zDayFmt.format(d);
+    return (!from || day >= from) && (!to || day <= to);
+  };
 
   const { riskMinFailed, costDres, costKomplet, costStreetwear } = await getSettings();
   // Custom proizvodi: streetwear slugovi (druga nabava) + mapa slika za thumbnaile.
@@ -122,7 +132,18 @@ export async function GET(request: Request) {
     };
   };
 
-  let filtered = all;
+  // Datumski period prvo (lista + brojke poštuju odabrani period).
+  const dateFiltered = from || to ? all.filter((o) => inPeriod(o.createdAt)) : all;
+
+  // Sažetak PERIODA — samo po datumu, neovisno o statusu/pretrazi ("da sve piše").
+  let periodCount = 0, periodPromet = 0, periodShipped = 0;
+  for (const o of dateFiltered) {
+    periodCount++;
+    if (o.status !== "cancelled" && o.status !== "returned") periodPromet += o.total - (o.shipping ?? 0);
+    if (o.status === "shipped" || o.status === "done") periodShipped++;
+  }
+
+  let filtered = dateFiltered;
   if (status === "shipped") filtered = filtered.filter((o) => isSent(o.status));
   else if (status) filtered = filtered.filter((o) => o.status === status);
   if (q) {
@@ -265,6 +286,7 @@ export async function GET(request: Request) {
     page,
     pages,
     total,
+    periodSummary: { count: periodCount, promet: periodPromet, shipped: periodShipped },
     filteredDresovi,
     filteredKompleti,
     cash,

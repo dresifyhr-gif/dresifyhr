@@ -592,6 +592,9 @@ export function OrdersManager() {
   const [deliveryF, setDeliveryF] = useState(""); // "" | delivered | transit | prep
   const [filtersOpen, setFiltersOpen] = useState(false); // mobitel: skrij napredne filtere dok ne zatrebaju
   const [sort, setSort] = useState(""); // "" new-first | new | old
+  const [from, setFrom] = useState(""); // period: YYYY-MM-DD (Zagreb dan); prazno = sve
+  const [to, setTo] = useState("");
+  const [periodSummary, setPeriodSummary] = useState<{ count: number; promet: number; shipped: number } | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [editingContact, setEditingContact] = useState<string | null>(null);
   const [glsOpen, setGlsOpen] = useState<string | null>(null);
@@ -626,13 +629,17 @@ export function OrdersManager() {
   courierRef.current = courierF;
   const deliveryRef = useRef("");
   deliveryRef.current = deliveryF;
+  const fromRef = useRef("");
+  fromRef.current = from;
+  const toRef = useRef("");
+  toRef.current = to;
 
   const fetchPage = useCallback(async (query: string, p: number, append: boolean) => {
     const my = ++reqId.current;
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/admin/orders/search/?q=${encodeURIComponent(query)}&status=${statusRef.current}&shipper=${shipperRef.current}&cash=${cashRef.current}&courier=${courierRef.current}&delivery=${deliveryRef.current}&sort=${sortRef.current}&page=${p}`
+        `/api/admin/orders/search/?q=${encodeURIComponent(query)}&status=${statusRef.current}&shipper=${shipperRef.current}&cash=${cashRef.current}&courier=${courierRef.current}&delivery=${deliveryRef.current}&sort=${sortRef.current}&from=${fromRef.current}&to=${toRef.current}&page=${p}`
       );
       const d = await res.json();
       if (my !== reqId.current) return; // stale response, ignore
@@ -640,6 +647,7 @@ export function OrdersManager() {
         setOrders((prev) => (append ? [...prev, ...d.orders] : d.orders));
         setTotal(d.total);
         setFilteredItems({ dresovi: d.filteredDresovi ?? 0, kompleti: d.filteredKompleti ?? 0 });
+        setPeriodSummary(d.periodSummary ?? null);
         setPages(d.pages);
         setPage(p);
         if (d.cash) setCash(d.cash);
@@ -663,7 +671,18 @@ export function OrdersManager() {
     clearTimeout(debounce.current);
     debounce.current = setTimeout(() => fetchPage(q, 1, false), 300);
     return () => clearTimeout(debounce.current);
-  }, [q, status, shipper, cashF, courierF, deliveryF, sort, fetchPage]);
+  }, [q, status, shipper, cashF, courierF, deliveryF, sort, from, to, fetchPage]);
+
+  // Presetovi perioda (lokalni datum = zagrebački za korisnika u HR).
+  const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const applyPreset = (id: "danas" | "ovaj" | "prosli" | "sve") => {
+    const now = new Date();
+    if (id === "sve") { setFrom(""); setTo(""); return; }
+    if (id === "danas") { const t = ymd(now); setFrom(t); setTo(t); return; }
+    if (id === "ovaj") { setFrom(ymd(new Date(now.getFullYear(), now.getMonth(), 1))); setTo(ymd(now)); return; }
+    setFrom(ymd(new Date(now.getFullYear(), now.getMonth() - 1, 1))); // prošli mjesec
+    setTo(ymd(new Date(now.getFullYear(), now.getMonth(), 0)));
+  };
 
   // infinite scroll
   useEffect(() => {
@@ -797,6 +816,39 @@ export function OrdersManager() {
         </div>
         );
       })()}
+      {/* Period: presetovi + od–do + zbroj (broj narudžbi + promet) za odabrani period */}
+      <div className="a-sub mb-3 flex flex-wrap items-center gap-x-2 gap-y-2 px-3 py-2">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Period</span>
+        {[
+          { id: "danas", l: "Danas" },
+          { id: "ovaj", l: "Ovaj mjesec" },
+          { id: "prosli", l: "Prošli mjesec" },
+          { id: "sve", l: "Sve" }
+        ].map((pr) => (
+          <button
+            key={pr.id}
+            type="button"
+            onClick={() => applyPreset(pr.id as "danas" | "ovaj" | "prosli" | "sve")}
+            className="rounded-full border border-[var(--a-line)] bg-[var(--a-card)] px-3 py-1.5 text-xs font-semibold text-[var(--a-text-2)] transition hover:bg-[var(--a-surface-2)]"
+          >
+            {pr.l}
+          </button>
+        ))}
+        <label className="flex items-center gap-1 text-[11px] text-[var(--a-text-3)]">
+          od
+          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="rounded-[8px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-[12px] text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)]" />
+        </label>
+        <label className="flex items-center gap-1 text-[11px] text-[var(--a-text-3)]">
+          do
+          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="rounded-[8px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-[12px] text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)]" />
+        </label>
+        {(from || to) && periodSummary && (
+          <span className="ml-auto rounded-full bg-[var(--a-good-bg)] px-3 py-1 text-[12px] font-semibold text-[var(--a-good)]">
+            📅 {periodSummary.count} narudžbi · {eur(periodSummary.promet)} prometa
+          </span>
+        )}
+      </div>
+
       <div className="a-sub mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2">
         <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--a-text-3)]">Status</span>
         {TABS.map((tb) => (
