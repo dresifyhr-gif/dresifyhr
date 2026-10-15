@@ -3,43 +3,75 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
+import { dbQuery, withLastGood } from "@/lib/db-guard";
 import { prisma } from "@/lib/prisma";
 import type { Jersey } from "@/lib/data/jerseys";
 
 // ── Keširani DB dohvati ───────────────────────────────────────────────────────
-// Stranice su dinamičke (i18n cookie), pa bi bez ovoga svaki klik gađao bazu više
-// puta. Kešira se u Vercel Data Cache na 60s (admin promjene vidljive unutar minute).
-const REVALIDATE = 60;
+// Stranice su dinamičke (i18n cookie), pa bi bez keša svaki posjet i svaki bot
+// gađao bazu. Prije je keš trajao 60 s — svaki posjet nakon isteka budio je Neon,
+// pa baza nikad nije zaspala i potrošila je mjesečnu kvotu (ispad 15.10.2026.).
+// Svježinu sad daje revalidateTag (admin spremanje i smanjenje zalihe →
+// "products", narudžba → "orders"). TTL je samo sigurnosna mreža ako se signal
+// izgubi (Next 14.2 ga može tiho progutati): 1 h za cijene/vidljivost/zalihe,
+// 6 h za ocjene.
+const PRODUCTS_TTL = 3600;
+const SOLD_TTL = 21600;
 
-const fetchOverrideRows = unstable_cache(
+// VAŽNO: keširane funkcije namjerno NEMAJU try/catch. U Next 14.2 unstable_cache
+// sprema sve što funkcija VRATI — stari `catch { return [] }` je prazan popis
+// spremao preko dobrih podataka, pa su tijekom ispada nestali streetwear i
+// dresovi dodani kroz admin. Kad funkcija BACI grešku, ništa se ne sprema i Next
+// nastavlja služiti zadnji dobar unos. Zamjena za grešku je u withLastGood.
+// Ključevi su "-v2" da se napusti eventualni prazni unos iz vremena ispada.
+const fetchOverrideRowsCached = unstable_cache(
   async () => {
     if (!process.env.DATABASE_URL) return [];
-    try { return await prisma.productOverride.findMany(); } catch { return []; }
+    return dbQuery(() => prisma.productOverride.findMany());
   },
-  ["product-override-rows"],
-  { revalidate: REVALIDATE, tags: ["products"] }
+  ["product-override-rows-v2"],
+  { revalidate: PRODUCTS_TTL, tags: ["products"] }
 );
 
-const fetchCustomRows = unstable_cache(
+const fetchCustomRowsCached = unstable_cache(
   async () => {
     if (!process.env.DATABASE_URL) return [] as CustomRow[];
-    try { return (await prisma.customProduct.findMany({ where: { hidden: false }, orderBy: { createdAt: "desc" } })) as unknown as CustomRow[]; } catch { return [] as CustomRow[]; }
+    return (await dbQuery(() => prisma.customProduct.findMany({ where: { hidden: false }, orderBy: { createdAt: "desc" } }))) as unknown as CustomRow[];
   },
-  ["custom-product-rows"],
-  { revalidate: REVALIDATE, tags: ["products"] }
+  ["custom-product-rows-v2"],
+  { revalidate: PRODUCTS_TTL, tags: ["products"] }
 );
 
-const fetchSoldSlugs = unstable_cache(
+const fetchSoldSlugsCached = unstable_cache(
   async () => {
     if (!process.env.DATABASE_URL) return [] as string[];
-    try {
-      const rows = await prisma.orderItem.findMany({ distinct: ["slug"], select: { slug: true } });
-      return rows.map((r) => r.slug).filter((s): s is string => !!s);
-    } catch { return [] as string[]; }
+    // groupBy: baza vraća samo različite slugove (stotinjak), ne cijeli stupac
+    // svih stavki narudžbi kao `distinct` (koji se razvrstava tek nakon prijenosa).
+    const rows = await dbQuery(() => prisma.orderItem.groupBy({ by: ["slug"] }));
+    return rows.map((r) => r.slug).filter((s): s is string => !!s);
   },
-  ["sold-slugs"],
-  { revalidate: REVALIDATE, tags: ["orders"] }
+  ["sold-slugs-v2"],
+  { revalidate: SOLD_TTL, tags: ["orders"] }
 );
+
+const fetchOverrideRows = () => withLastGood("overrides", [] as Awaited<ReturnType<typeof fetchOverrideRowsCached>>, fetchOverrideRowsCached);
+const fetchCustomRows = () => withLastGood("custom", [] as CustomRow[], fetchCustomRowsCached);
+const fetchSoldSlugs = () => withLastGood("sold", [] as string[], fetchSoldSlugsCached);
+
+// Podaci za sitemap iz ISTOG keša (bez zasebnih upita koji bude bazu).
+// NAMJERNO strogo (baca grešku): ako se sitemap generira dok baza ne radi, Next
+// zadrži prethodni dobar sitemap umjesto da spremi verziju bez custom proizvoda.
+// Datumi iz keša stižu kao tekst (unstable_cache ih serijalizira u JSON) → new Date().
+export async function getSitemapProductData(): Promise<{ customSlugs: string[]; lastMod: Map<string, Date> }> {
+  const [ov, cu] = await Promise.all([fetchOverrideRowsCached(), fetchCustomRowsCached()]);
+  const lastMod = new Map<string, Date>();
+  for (const r of [...ov, ...cu] as { slug: string; updatedAt?: Date | string | null }[]) {
+    if (!r.updatedAt) continue;
+    const d = new Date(r.updatedAt);
+    if (!Number.isNaN(d.getTime())) lastMod.set(r.slug, d);
+  }
+  return { customSlugs: cu.map((r) => r.slug), lastMod };
+}
 
 // Admin-managed overrides (price / stock) merged onto the static catalog. Best-effort:
 // if the DB is unavailable or empty, the shop uses the base catalog unchanged.

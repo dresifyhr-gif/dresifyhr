@@ -4,6 +4,7 @@ import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { updateOrderFieldsInSheet } from "@/lib/sheets";
 import { repairText } from "@/lib/utils";
+import { bustCache } from "@/lib/cache-tags";
 
 export const runtime = "nodejs";
 
@@ -74,5 +75,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     fields: { Artikli: artikli, "Kolicina": itemCount, "Ukupno": subtotal }
   });
 
+  bustCache("orders"); // skočni prozor, prodani dresovi i broj kupaca vide promjenu odmah
   return NextResponse.json({ ok: true });
 }

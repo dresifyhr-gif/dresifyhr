@@ -4,7 +4,7 @@ import { isAdmin } from "@/lib/admin-auth";
 import { getOrderReference } from "@/lib/orders";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { prisma } from "@/lib/prisma";
-import { getSettings } from "@/lib/settings";
+import { getSettingsFresh } from "@/lib/settings";
 import { formatCroatianName, phoneKey, repairText } from "@/lib/utils";
 import { lookupIps } from "@/lib/ip-geo";
 
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
     return (!from || day >= from) && (!to || day <= to);
   };
 
-  const { riskMinFailed, costDres, costKomplet, costStreetwear } = await getSettings();
+  const { riskMinFailed, costDres, costKomplet, costStreetwear } = await getSettingsFresh();
   // Custom proizvodi: streetwear slugovi (druga nabava) + mapa slika za thumbnaile.
   const customRows = await prisma.customProduct.findMany({ select: { slug: true, images: true, category: true } });
   const streetwearSlugs = new Set(

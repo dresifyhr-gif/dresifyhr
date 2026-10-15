@@ -87,14 +87,18 @@ export function SettingsForm() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [tab, setTab] = useState("novac");
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/settings/")
       .then((r) => r.json())
-      .then((d) => { if (d?.ok) setS(d.settings); })
-      .catch(() => {});
+      .then((d) => { if (d?.ok) setS(d.settings); else setLoadError(d?.message || "Postavke se ne mogu učitati."); })
+      .catch(() => setLoadError("Postavke se ne mogu učitati."));
   }, []);
 
+  // Bez forme kad učitavanje ne uspije — inače bi spremanje upisalo zadane
+  // vrijednosti preko pravih (IBAN, nabava…).
+  if (loadError) return <div className="rounded-[12px] border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">⚠️ {loadError} Spremanje je onemogućeno da se ne pregaze prave vrijednosti — pokušaj kasnije.</div>;
   if (!s) return <div className="text-sm text-[var(--a-text-3)]">Učitavam postavke…</div>;
 
   const setNum = (k: keyof Settings) => (e: React.ChangeEvent<HTMLInputElement>) =>

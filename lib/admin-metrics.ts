@@ -2,12 +2,12 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import { jerseys } from "@/lib/data/jerseys";
-import { getSettings } from "@/lib/settings";
+import { getSettingsFresh } from "@/lib/settings";
 import { phoneKey } from "@/lib/utils";
 
 const DAY = 86_400_000;
-// Nabavne cijene (dres/komplet) dolaze iz Postavki — vidi getSettings().
-// Trošak vraćene pošiljke i besplatne dostave dolaze iz Postavki (getSettings).
+// Nabavne cijene (dres/komplet) dolaze iz Postavki — svježe iz baze (getSettingsFresh).
+// Trošak vraćene pošiljke i besplatne dostave dolaze iz Postavki (getSettingsFresh).
 // Komplet se prepoznaje po slugu/nazivu koji sadrži "komplet".
 const kompletItemWhere = {
   OR: [{ slug: { contains: "komplet" } }, { igrac: { contains: "komplet", mode: "insensitive" as const } }]
@@ -64,7 +64,7 @@ function shipPLFor(o: ShipOrder, threshold: number, _deliveryCost?: number, _ret
 export async function getDashboardMetrics() {
   const now = new Date();
   // Nabavne cijene iz Postavki (fallback na zadane) — utječu na profit i poravnanje.
-  const { costDres, costKomplet, costStreetwear, costLongSleeve, costTrenirka, deliveryCost, returnCost, freeShipThreshold, igorSharePct, winbackDays, riskMinFailed, monthlyGoal } = await getSettings();
+  const { costDres, costKomplet, costStreetwear, costLongSleeve, costTrenirka, deliveryCost, returnCost, freeShipThreshold, igorSharePct, winbackDays, riskMinFailed, monthlyGoal } = await getSettingsFresh();
   // Početak današnjeg dana po Europe/Zagreb (Vercel radi u UTC-u) kao UTC instant —
   // inače bi "promet danas" u ranim satima gledao krivi (UTC) dan.
   const zp = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zagreb", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
@@ -181,7 +181,7 @@ export async function getDashboardMetrics() {
       prisma.customer.findMany({ orderBy: { totalSpent: "desc" }, take: 8 }),
       prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 12 }),
       prisma.order.findMany({ where: { createdAt: { gte: new Date(now.getTime() - 89 * DAY) }, ...notVoid }, select: { createdAt: true, total: true, shipping: true } }),
-      prisma.orderItem.findMany({ distinct: ["slug"], select: { slug: true } }),
+      prisma.orderItem.groupBy({ by: ["slug"] }) /* različiti slugovi iz baze, ne cijeli stupac */,
       profitFor({ createdAt: { gte: startToday }, ...notVoid }),
       profitFor({ createdAt: { gte: startWeek }, ...notVoid }),
       profitFor({ createdAt: { gte: startMonth }, ...notVoid }),

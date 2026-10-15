@@ -1,5 +1,6 @@
 import "server-only";
 
+import { bustCache } from "@/lib/cache-tags";
 import { prisma } from "@/lib/prisma";
 
 // Auto-smanjivanje zalihe po veličini nakon narudžbe — SAMO za veličine koje
@@ -21,6 +22,7 @@ type OrderedItem = { slug?: string | null; size?: string | null; quantity?: numb
 export async function decrementSizeStock(items: OrderedItem[] | undefined | null): Promise<void> {
   if (!process.env.DATABASE_URL || !items?.length) return;
 
+  let changed = false;
   for (const it of items) {
     const slug = (it.slug || "").trim();
     const size = (it.size || "").trim();
@@ -35,6 +37,7 @@ export async function decrementSizeStock(items: OrderedItem[] | undefined | null
         if (typeof s[size] === "number") {
           s[size] = Math.max(0, s[size] - qty);
           await prisma.customProduct.update({ where: { slug }, data: { sizeStock: JSON.stringify(s) } });
+          changed = true;
         }
         continue;
       }
@@ -46,10 +49,14 @@ export async function decrementSizeStock(items: OrderedItem[] | undefined | null
         if (typeof s[size] === "number") {
           s[size] = Math.max(0, s[size] - qty);
           await prisma.productOverride.update({ where: { slug }, data: { sizeStock: JSON.stringify(s) } });
+          changed = true;
         }
       }
     } catch (e) {
       console.error("[stock] decrement failed", slug, size, e);
     }
   }
+  // Trgovina drži zalihe u kešu do 1 h — bez ovoga bi rasprodana veličina još
+  // izgledala dostupnom (i provjera na blagajni bi je propustila).
+  if (changed) bustCache("products");
 }

@@ -7,47 +7,25 @@ import {
   getJerseyPlayerCollections
 } from "@/lib/data/seo-collections";
 import { jerseys } from "@/lib/data/jerseys";
-import { prisma } from "@/lib/prisma";
+import { getSitemapProductData } from "@/lib/data/product-overrides";
 import { absoluteUrl } from "@/lib/utils";
 
-// Slugovi custom proizvoda (streetwear + eventualni custom dresovi) iz baze.
-// Best-effort: ako baza nije dostupna, sitemap koristi samo statički katalog.
-async function getCustomSlugs(): Promise<string[]> {
-  try {
-    if (!process.env.DATABASE_URL) return [];
-    const rows = await prisma.customProduct.findMany({ where: { hidden: false }, select: { slug: true } });
-    return rows.map((r) => r.slug);
-  } catch {
-    return [];
-  }
-}
+// Custom proizvodi i datumi zadnje promjene (productOverride/customProduct
+// updatedAt) dolaze iz ISTOG keša kao trgovina — bez zasebnih upita koji bude
+// bazu. Kad se promijeni opis/cijena, Google to vidi u sitemapu i brže ponovno
+// posjeti stranicu; koristi se STVARNI datum iz baze, ne "danas".
+// getSitemapProductData je strog: ako baza ne radi, Next zadrži prethodni dobar
+// sitemap umjesto da spremi verziju bez custom proizvoda.
 
-// Datum zadnje promjene po slugu (iz productOverride/customProduct updatedAt).
-// Kad se promijeni opis/cijena, Google to vidi u sitemapu i brže ponovno posjeti
-// stranicu — pomaže onima "Discovered – currently not indexed". Iskreno: koristi
-// STVARNI datum iz baze, ne "danas", pa Google signalu vjeruje.
-async function getLastModMap(): Promise<Map<string, Date>> {
-  const map = new Map<string, Date>();
-  try {
-    if (!process.env.DATABASE_URL) return map;
-    const [ov, cu] = await Promise.all([
-      prisma.productOverride.findMany({ select: { slug: true, updatedAt: true } }),
-      prisma.customProduct.findMany({ select: { slug: true, updatedAt: true } })
-    ]);
-    for (const r of [...ov, ...cu]) if (r.updatedAt) map.set(r.slug, r.updatedAt);
-  } catch {
-    /* best-effort */
-  }
-  return map;
-}
+// Najviše 1 h (inače bi sitemap naslijedio TTL keša).
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = ["", "/dresovi", "/kompleti", "/streetwear", "/trenirke", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/pravila-privatnosti", "/igre", "/igra", "/flappy", "/gadaj"];
   const categoryRoutes = (await getJerseyCategoryCollections()).map((collection) => collection.path);
   const clubRoutes = (await getJerseyClubCollections()).map((collection) => collection.path);
   const playerRoutes = (await getJerseyPlayerCollections()).map((collection) => collection.path);
-  const customSlugs = await getCustomSlugs();
-  const lastMod = await getLastModMap();
+  const { customSlugs, lastMod } = await getSitemapProductData();
 
   return [
     ...staticRoutes.map((route) => ({

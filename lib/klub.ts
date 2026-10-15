@@ -1,9 +1,8 @@
 import "server-only";
 
-import { revalidateTag } from "next/cache";
-
+import { bustCache } from "@/lib/cache-tags";
 import { prisma } from "@/lib/prisma";
-import { getSettings } from "@/lib/settings";
+import { getSettings, getSettingsFresh } from "@/lib/settings";
 import { phoneKey } from "@/lib/utils";
 
 // ── Dresify Klub ─────────────────────────────────────────────────────────────
@@ -91,7 +90,7 @@ export async function getKlubProgress(phone: string | null | undefined): Promise
 // Izda nagradu ako je kupac zaslužio više nego što mu je izdano.
 // Vraća novi kod ili null. Siguran za višekratno pozivanje (idempotentan po pragu).
 export async function issueKlubRewardIfEarned(phone: string | null | undefined): Promise<string | null> {
-  const s = await getSettings();
+  const s = await getSettingsFresh();
   if (!s.klubActive) return null;
 
   const key = phoneKey(phone);
@@ -122,7 +121,7 @@ export async function issueKlubRewardIfEarned(phone: string | null | undefined):
       note: `Klub nagrada (${p.earned}. krug)`
     }
   });
-  revalidateTag("promo-codes");
+  bustCache("promo-codes"); // nikad ne baca — zove se i tijekom rendera profila kupca
 
   return code;
 }

@@ -68,7 +68,8 @@ export async function GET() {
   return new Response(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Cache-Control": "public, max-age=3600",
+      // s-maxage: CDN drži feed 1 h, pa Merchant/Meta dohvati ne pokreću funkciju svaki put.
+      "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
     },
   });
 }

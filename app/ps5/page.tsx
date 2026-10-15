@@ -5,6 +5,9 @@ import { Gift, UserPlus, ShoppingCart, Send, Gamepad2, Calendar, Trophy, Shield,
 import { Ps5Counter } from "@/components/site/ps5-counter";
 import { GiveawayEntryForm } from "@/components/site/giveaway-entry-form";
 import { getFollowerCount } from "@/lib/ig-stats";
+import { unstable_cache } from "next/cache";
+
+import { dbQuery, withLastGood } from "@/lib/db-guard";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata } from "@/lib/seo";
 
@@ -20,13 +23,14 @@ export const dynamic = "force-dynamic";
 const IG_URL = "https://instagram.com/dresify.hr";
 const GOAL = 10000;
 
-async function getBuyerCount(): Promise<number> {
-  try {
-    return await prisma.customer.count({ where: { totalOrders: { gt: 0 } } });
-  } catch {
-    return 0;
-  }
-}
+// Broj kupaca za brojač — keširano (prije upit na SVAKI posjet /ps5, uključujući
+// botove). Nova narudžba zove bustCache("orders"), pa se broj osvježi odmah.
+const fetchBuyerCount = unstable_cache(
+  async () => dbQuery(() => prisma.customer.count({ where: { totalOrders: { gt: 0 } } })),
+  ["ps5-buyers-v1"],
+  { revalidate: 21600, tags: ["orders"] }
+);
+const getBuyerCount = () => withLastGood("ps5-buyers", 0, fetchBuyerCount);
 
 export default async function Ps5Page() {
   const [followers, buyers] = await Promise.all([getFollowerCount(), getBuyerCount()]);

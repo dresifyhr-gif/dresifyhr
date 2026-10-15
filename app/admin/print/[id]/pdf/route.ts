@@ -6,7 +6,7 @@ import { isAdmin } from "@/lib/admin-auth";
 import { codAmount, getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
 import { promoGrantsFreeShipping } from "@/lib/promo-db";
-import { getSettings } from "@/lib/settings";
+import { getSettingsFresh } from "@/lib/settings";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAdmin())) return new NextResponse("Unauthorized", { status: 401 });
 
-  const SENDERS = (await getSettings()).senders;
+  const SENDERS = (await getSettingsFresh()).senders;
   const { id } = await params;
   const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
   if (!order) return new NextResponse("Not found", { status: 404 });

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { getOrderReference } from "@/lib/orders";
+import { bustCache } from "@/lib/cache-tags";
 
 export const runtime = "nodejs";
 
@@ -76,6 +77,7 @@ export async function POST(request: Request) {
       }
     });
 
+    bustCache("orders"); // skočni prozor, prodani dresovi i broj kupaca vide promjenu odmah
     return NextResponse.json({ ok: true, id: order.id, reference });
   } catch (error) {
     console.error("[admin] Failed to create manual order", error);

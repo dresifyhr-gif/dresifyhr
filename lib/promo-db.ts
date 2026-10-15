@@ -2,25 +2,27 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 
+import { dbQuery, withLastGood } from "@/lib/db-guard";
 import { prisma } from "@/lib/prisma";
 import { PROMO_CODES, computePromoDiscount, type PromoCode } from "@/lib/promo";
 
 // Popust-kodovi iz baze (uređuju se u adminu). Ako baza nije dostupna ili je
 // prazna, pada natrag na zakucanu listu iz lib/promo.ts — blagajna nikad ne
 // ostaje bez kodova zbog problema s bazom.
-const fetchActiveCodes = unstable_cache(
+//
+// Keš 1 h (prije 60 s, što je budilo Neon — ispad kvote 15.10.2026.); admin
+// spremanje i nove nagrade (Klub, kolo) zovu bustCache("promo-codes"). Bez
+// try/catch unutra — greška se ne sprema u keš (vidi lib/db-guard.ts).
+const fetchActiveCodesCached = unstable_cache(
   async () => {
     if (!process.env.DATABASE_URL) return null;
-    try {
-      const rows = await prisma.promoCode.findMany({ where: { active: true } });
-      return rows.length ? rows : null;
-    } catch {
-      return null;
-    }
+    const rows = await dbQuery(() => prisma.promoCode.findMany({ where: { active: true } }));
+    return rows.length ? rows : null;
   },
-  ["promo-codes-active"],
-  { revalidate: 60, tags: ["promo-codes"] }
+  ["promo-codes-active-v2"],
+  { revalidate: 3600, tags: ["promo-codes"] }
 );
+const fetchActiveCodes = () => withLastGood("promo", null, fetchActiveCodesCached);
 
 const norm = (s: string) => String(s || "").trim().toUpperCase();
 
@@ -46,7 +48,15 @@ export async function lookupPromo(input: string, subtotal: number, buyerKey?: st
   const rows = await fetchActiveCodes();
 
   // Iz baze…
-  const row = rows?.find((r) => norm(r.code) === code);
+  let row = rows?.find((r) => norm(r.code) === code);
+  // Sigurnosna mreža: kod kojeg nema u kešu (npr. upravo osvojen KLUB-/KOLO- kod,
+  // a signal za osvježavanje se izgubio) provjeri jednom izravno u bazi.
+  if (!row && rows) {
+    row =
+      (await dbQuery(() => prisma.promoCode.findFirst({ where: { code: { equals: code, mode: "insensitive" }, active: true } })).catch(
+        () => null
+      )) ?? undefined;
+  }
   if (row) {
     // Osobni kod (KLUB-/kolo- nagrada) vrijedi SAMO vlasniku. Provjeravamo kad je
     // kupac poznat (buyerKey = phoneKey iz narudžbe). Bez buyerKey (javni /validate,
@@ -61,7 +71,9 @@ export async function lookupPromo(input: string, subtotal: number, buyerKey?: st
       minSubtotal: row.minSubtotal,
       label: row.label || ""
     };
-    if (row.expiresAt && row.expiresAt.getTime() < Date.now()) return { ok: false, reason: "expired", promo };
+    // new Date(): iz keša datum stiže kao tekst (unstable_cache ga serijalizira u JSON)
+    // pa bi row.expiresAt.getTime() puknuo i blagajna bi odbila kod.
+    if (row.expiresAt && new Date(row.expiresAt).getTime() < Date.now()) return { ok: false, reason: "expired", promo };
     if (row.maxUses != null && (await usedCount(promo.code)) >= row.maxUses) return { ok: false, reason: "used_up", promo };
     if (subtotal < promo.minSubtotal) return { ok: false, reason: "min_not_met", promo };
     return { ok: true, promo, discount: computePromoDiscount(promo, subtotal) };

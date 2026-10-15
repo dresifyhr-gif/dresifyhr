@@ -1,5 +1,6 @@
 import "server-only";
 
+import { bustCache } from "@/lib/cache-tags";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { FREE_SHIPPING_THRESHOLD_EUR } from "@/lib/site";
@@ -132,6 +133,7 @@ export async function spin(phone: string | null | undefined): Promise<SpinResult
         note: "Kolo sreće"
       }
     });
+    bustCache("promo-codes"); // osvojen kod odmah vrijedi na blagajni (keš do 1 h)
     code = c;
   }
 

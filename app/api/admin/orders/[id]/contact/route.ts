@@ -4,6 +4,7 @@ import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { updateOrderFieldsInSheet } from "@/lib/sheets";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
+import { bustCache } from "@/lib/cache-tags";
 
 export const runtime = "nodejs";
 
@@ -33,5 +34,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (data.address !== undefined) sheetFields["Adresa"] = data.address ? repairText(data.address) : "";
   await updateOrderFieldsInSheet({ phone: order.phone, name: order.customerName, createdAt: order.createdAt, fields: sheetFields });
 
+  bustCache("orders"); // skočni prozor, prodani dresovi i broj kupaca vide promjenu odmah
   return NextResponse.json({ ok: true });
 }

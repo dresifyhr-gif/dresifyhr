@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { isAdmin, requireAction } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { bustCache } from "@/lib/cache-tags";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,9 +30,11 @@ export async function POST(request: Request) {
 
   if (typeof b?.id === "string" && b.id) {
     await prisma.testimonial.update({ where: { id: b.id }, data });
+    bustCache("testimonials"); // naslovnica drži recenzije u kešu (6 h)
     return NextResponse.json({ ok: true, id: b.id });
   }
   const created = await prisma.testimonial.create({ data });
+  bustCache("testimonials");
   return NextResponse.json({ ok: true, id: created.id });
 }
 
@@ -40,5 +43,6 @@ export async function DELETE(request: Request) {
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return NextResponse.json({ ok: false }, { status: 400 });
   await prisma.testimonial.delete({ where: { id } }).catch(() => {});
+  bustCache("testimonials");
   return NextResponse.json({ ok: true });
 }

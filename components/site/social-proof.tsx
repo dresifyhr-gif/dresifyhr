@@ -12,6 +12,11 @@ type ProofItem = {
 
 const keyOf = (i: ProofItem) => `${i.name}|${i.city}|${i.product}`;
 
+// Anketa samo dok je tab vidljiv i ne češće od ovoga. Server ionako drži
+// odgovor u kešu; ovo samo štedi pozive iz zaboravljenih tabova.
+const POLL_MS = 180_000;
+const MIN_REFETCH_MS = 60_000;
+
 // Social proof: shows a toast ONLY when a genuinely fresh order lands (last ~20 min)
 // while the shopper is on the site — polls the API and shows each new order once.
 // Anonymized server-side (first name + city + product).
@@ -25,6 +30,8 @@ export function SocialProof() {
   const showing = useRef(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const dismissedRef = useRef(false);
+  const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const lastFetchRef = useRef(0);
 
   useEffect(() => {
     let alive = true;
@@ -51,6 +58,8 @@ export function SocialProof() {
     };
 
     const fetchFresh = async () => {
+      if (dismissedRef.current) return;
+      lastFetchRef.current = Date.now();
       try {
         const res = await fetch("/api/social-proof/");
         if (!res.ok) return;
@@ -71,11 +80,19 @@ export function SocialProof() {
     };
 
     fetchFresh();
-    const poll = setInterval(fetchFresh, 90_000);
+    // Tab u pozadini ne pita server; povratkom na tab osvježi (najviše 1× u minuti).
+    pollRef.current = setInterval(() => {
+      if (document.visibilityState === "visible") fetchFresh();
+    }, POLL_MS);
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && Date.now() - lastFetchRef.current > MIN_REFETCH_MS) fetchFresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
 
     return () => {
       alive = false;
-      clearInterval(poll);
+      clearInterval(pollRef.current);
+      document.removeEventListener("visibilitychange", onVisible);
       activeTimers.forEach(clearTimeout);
     };
   }, []);
@@ -105,6 +122,7 @@ export function SocialProof() {
           type="button"
           onClick={() => {
             dismissedRef.current = true;
+            clearInterval(pollRef.current); // zatvoreno → nema više anketa
             setDismissed(true);
           }}
           aria-label="Zatvori"

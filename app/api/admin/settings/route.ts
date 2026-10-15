@@ -1,17 +1,22 @@
 import { NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 
 import { isAdmin, requireAction } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
-import { getSettings } from "@/lib/settings";
+import { getSettingsStrict } from "@/lib/settings";
+import { bustCache } from "@/lib/cache-tags";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Trenutačne efektivne postavke (DB ili zadane) za prikaz u adminu.
+// Postavke za formu u adminu — izravno iz baze (bez keša) i STROGO: ako baza ne
+// radi, 503 umjesto zadanih vrijednosti (forma bi ih inače spremila preko pravih).
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
-  return NextResponse.json({ ok: true, settings: await getSettings() });
+  try {
+    return NextResponse.json({ ok: true, settings: await getSettingsStrict() });
+  } catch {
+    return NextResponse.json({ ok: false, message: "Baza trenutno nije dostupna — postavke se ne mogu učitati." }, { status: 503 });
+  }
 }
 
 const numOrNull = (v: unknown) => {
@@ -85,8 +90,8 @@ export async function POST(request: Request) {
     update: data
   });
 
-  // Osvježi keširane postavke (getSettings ima tag "settings").
-  revalidateTag("settings");
+  // Javne stranice drže postavke u kešu (do 1 h) — javi im promjenu odmah.
+  bustCache("settings");
 
   return NextResponse.json({ ok: true });
 }

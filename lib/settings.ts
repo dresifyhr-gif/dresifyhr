@@ -2,6 +2,7 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 
+import { dbQuery, withLastGood } from "@/lib/db-guard";
 import { prisma } from "@/lib/prisma";
 import {
   SHIPPING_PRICE_EUR,
@@ -119,17 +120,20 @@ const bool = (v: boolean | null | undefined, d: boolean) => (typeof v === "boole
 const num = (v: number | null | undefined, d: number) => (v != null && Number.isFinite(v) ? v : d);
 const str = (v: string | null | undefined, d: string) => (v != null && v.trim() ? v : d);
 
-const fetchSettingsRow = unstable_cache(
+// Postavke čita i JAVNA trgovina (layout na svakoj stranici: obavijest, kolo,
+// klub, sekcije…), pa ostaju keširane: 1 h kao sigurnosna mreža, a spremanje u
+// adminu zove bustCache("settings") pa se promjena vidi odmah. Prije je TTL bio
+// 60 s i budio je Neon na svaki posjet nakon isteka (ispad kvote 15.10.2026.).
+// Bez try/catch unutra — greška se ne sprema u keš (vidi lib/db-guard.ts).
+const readSettingsRow = () => prisma.settings.findUnique({ where: { id: "singleton" } });
+
+const fetchSettingsRowCached = unstable_cache(
   async () => {
     if (!process.env.DATABASE_URL) return null;
-    try {
-      return await prisma.settings.findUnique({ where: { id: "singleton" } });
-    } catch {
-      return null;
-    }
+    return dbQuery(readSettingsRow);
   },
-  ["shop-settings-row"],
-  { revalidate: 60, tags: ["settings"] }
+  ["shop-settings-row-v2"],
+  { revalidate: 3600, tags: ["settings"] }
 );
 
 // Lige su spremljene kao JSON niz; prazno/neispravno = zadane.
@@ -142,8 +146,26 @@ function parseLeagues(raw: string | null): string[] | undefined {
   } catch { return undefined; }
 }
 
+// Javne stranice: keširano; ako baza ne radi, zadnje dobro ili zadane vrijednosti.
 export async function getSettings(): Promise<ShopSettings> {
-  const r = await fetchSettingsRow();
+  return toSettings(await withLastGood("settings", null, fetchSettingsRowCached));
+}
+
+// Admin i novac (profit, Novci, poravnanje, naljepnice): uvijek svježe iz baze,
+// nikad iz keša — izgubljeni signal ne smije ostaviti staru nabavu ili IBAN.
+export async function getSettingsFresh(): Promise<ShopSettings> {
+  if (!process.env.DATABASE_URL) return DEFAULTS;
+  return toSettings(await withLastGood("settings-fresh", null, readSettingsRow));
+}
+
+// Forma Postavki: NE smije tiho vratiti zadane vrijednosti (admin bi ih
+// spremanjem upisao preko pravih — IBAN, nabava…). Greška se propušta dalje.
+export async function getSettingsStrict(): Promise<ShopSettings> {
+  if (!process.env.DATABASE_URL) return DEFAULTS;
+  return toSettings(await readSettingsRow());
+}
+
+function toSettings(r: Awaited<ReturnType<typeof readSettingsRow>>): ShopSettings {
   if (!r) return DEFAULTS;
   return {
     shippingPrice: num(r.shippingPrice, DEFAULTS.shippingPrice),

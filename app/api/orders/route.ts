@@ -14,6 +14,7 @@ import { getJerseyBySlug, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { normalizeIgHandle, autoEnterGiveaway } from "@/lib/giveaway";
 import { sendCapiPurchase } from "@/lib/meta-capi";
 import { decrementSizeStock } from "@/lib/stock";
+import { bustCache } from "@/lib/cache-tags";
 
 export const runtime = "nodejs";
 
@@ -164,7 +165,7 @@ export async function POST(request: Request) {
     });
 
     // Log to Google Sheet + mirror to DB (both best-effort — never block/fail the order)
-    await Promise.allSettled([
+    const [, dbResult] = await Promise.allSettled([
       logOrderToSheet(payload!),
       saveOrderToDb(payload!),
       autoEnterGiveaway(payload!.igHandle, payload!.name, payload!.userId ?? null, payload!.email, payload!.phone),
@@ -172,6 +173,11 @@ export async function POST(request: Request) {
       decrementSizeStock(payload!.items),
       sendNewOrderPush(payload!) // PWA push adminu — best-effort, nikad ne blokira narudžbu
     ]);
+    // Javi kešu trgovine da postoji nova narudžba (skočni prozor "upravo je
+    // naručio", prodani dresovi, broj kupaca na /ps5) — samo ako je stvarno
+    // upisana u bazu. bustCache nikad ne baca, pa ne može srušiti narudžbu.
+    // (Zalihe javlja decrementSizeStock sam, tagom "products".)
+    if (dbResult.status === "fulfilled" && dbResult.value?.ok) bustCache("orders");
 
     return NextResponse.json({
       ok: true,

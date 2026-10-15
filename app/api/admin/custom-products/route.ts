@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 
 import { isAdmin, isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { jerseys } from "@/lib/data/jerseys";
+import { bustCache } from "@/lib/cache-tags";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -61,11 +61,11 @@ export async function POST(request: Request) {
 
   if (editId) {
     await prisma.customProduct.update({ where: { id: editId }, data: coreData });
-    revalidateTag("products"); // odmah osvježi katalog/tražilicu (bez 60s čekanja)
+    bustCache("products"); // odmah osvježi katalog/tražilicu (keš do 1 h)
     return NextResponse.json({ ok: true, id: editId });
   }
   const created = await prisma.customProduct.create({ data: { ...coreData, slug } });
-  revalidateTag("products"); // novi proizvod odmah vidljiv u tražilici i listama
+  bustCache("products"); // novi proizvod odmah vidljiv u tražilici i listama
   return NextResponse.json({ ok: true, id: created.id, slug });
 }
 
@@ -75,5 +75,6 @@ export async function DELETE(request: Request) {
   const id = url.searchParams.get("id");
   if (!id) return NextResponse.json({ ok: false }, { status: 400 });
   await prisma.customProduct.delete({ where: { id } }).catch(() => {});
+  bustCache("products"); // obrisani proizvod odmah nestaje s trgovine
   return NextResponse.json({ ok: true });
 }

@@ -2,6 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
+// Anketa novih narudžbi: svakih 30 s dok je admin vidljiv i aktivan; nakon 10 min
+// bez ikakve aktivnosti staje (baza može zaspati), a nastavlja se prvim klikom.
+const ADMIN_POLL_MS = 30_000;
+const ADMIN_IDLE_MS = 10 * 60_000;
+
 type Latest = {
   id: string;
   reference: string | null;
@@ -74,12 +79,22 @@ export function PwaBoot() {
     }
   }
 
-  // 2) Poll zadnje narudžbe → zvuk + toast + broj na ikoni (radi i bez push dozvole)
+  // 2) Poll zadnje narudžbe → zvuk + toast + broj na ikoni (radi i bez push dozvole).
+  // Pita bazu SAMO dok je admin otvoren (vidljiv tab) i aktivan. Prije je pitao
+  // svakih 25 s (60 s u pozadini) zauvijek — jedan zaboravljen admin tab držao je
+  // Neon budnim 24/7 (ispad kvote 15.10.2026.). Skriven ili neaktivan tab sad ne
+  // pita ništa: narudžbe tada javljaju push i Telegram, a povratkom se odmah osvježi.
   useEffect(() => {
     let alive = true;
-    let timer: ReturnType<typeof setTimeout>;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let inFlight = false;
+    let lastActive = Date.now();
+    const isActive = () => document.visibilityState === "visible" && Date.now() - lastActive < ADMIN_IDLE_MS;
 
     async function tick() {
+      timer = undefined;
+      if (inFlight) return;
+      inFlight = true;
       try {
         const r = await fetch("/api/admin/orders/latest/", { cache: "no-store" });
         const d = await r.json();
@@ -111,12 +126,31 @@ export function PwaBoot() {
       } catch {
         /* offline / preskoči */
       }
-      if (alive) timer = setTimeout(tick, document.hidden ? 60000 : 25000);
+      inFlight = false;
+      if (alive && isActive()) timer = setTimeout(tick, ADMIN_POLL_MS);
     }
+
+    // Povratak na tab ili bilo kakva aktivnost: ako je anketa stala, odmah osvježi.
+    const resume = () => {
+      lastActive = Date.now();
+      if (alive && document.visibilityState === "visible" && !timer && !inFlight) tick();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") resume();
+      else if (timer) { clearTimeout(timer); timer = undefined; }
+    };
+    const activity = ["pointerdown", "keydown", "wheel", "touchstart"] as const;
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", resume);
+    activity.forEach((ev) => window.addEventListener(ev, resume, { passive: true }));
+
     tick();
     return () => {
       alive = false;
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", resume);
+      activity.forEach((ev) => window.removeEventListener(ev, resume));
     };
   }, []);
 
