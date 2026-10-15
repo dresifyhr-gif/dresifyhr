@@ -3,9 +3,8 @@ import { NextResponse } from "next/server";
 
 import { ShippingLabelDoc } from "@/components/admin/shipping-label-pdf";
 import { isAdmin } from "@/lib/admin-auth";
-import { codAmount, getOrderReference } from "@/lib/orders";
+import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
-import { promoGrantsFreeShipping } from "@/lib/promo-db";
 import { getSettingsFresh } from "@/lib/settings";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
 
@@ -20,9 +19,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
   if (!order) return new NextResponse("Not found", { status: 404 });
 
-  // Streetwear = uvijek besplatna dostava (i kad je roba < 60 €).
-  const slugs = order.items.map((i) => i.slug).filter((s): s is string => !!s);
-  const hasStreetwear = slugs.length > 0 && (await prisma.customProduct.count({ where: { category: "streetwear", slug: { in: slugs } } })) > 0;
 
   const url = new URL(req.url);
   const q = url.searchParams.get("sender");
@@ -30,10 +26,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
   const isCod = order.payment?.toLowerCase().includes("pouze") || !order.payment;
-  // Isto pravilo kao na HTML naljepnici i blagajni.
-  const goods = Math.max(0, (order.total ?? 0) - (order.shipping ?? 0));
-  const freeShip = hasStreetwear || (await promoGrantsFreeShipping(order.promoCode, goods));
-  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode, freeShip) : 0;
+  // Pouzeće = ONO ŠTO JE KUPAC VIDIO I POTVRDIO NA BLAGAJNI (order.total = roba
+  // − popust + dostava, izračunato na serveru). Isto kao gumb "Za paket.hr".
+  // Prije se iznos ponovno računao po drugim pravilima (prag 60 € bez provjere
+  // gosta, streetwear uvijek bez dostave, roba nakon popusta) pa je naljepnica
+  // znala tražiti 7 € manje ili više nego što je kupac vidio.
+  const cod = isCod ? Math.max(0, order.total ?? 0) : 0;
 
   const recipientName = formatCroatianName(order.customerName);
 

@@ -4,9 +4,8 @@ import { AutoPrint } from "@/components/admin/auto-print";
 import { LabelSender } from "@/components/admin/label-sender";
 import { PdfLabelLink } from "@/components/admin/pdf-label-link";
 import { isAdmin } from "@/lib/admin-auth";
-import { codAmount, getOrderReference } from "@/lib/orders";
+import { getOrderReference } from "@/lib/orders";
 import { prisma } from "@/lib/prisma";
-import { promoGrantsFreeShipping } from "@/lib/promo-db";
 import { getSettingsFresh } from "@/lib/settings";
 import { formatCroatianName, formatCroatianPhone, repairText } from "@/lib/utils";
 
@@ -22,17 +21,15 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
   const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
   if (!order) notFound();
 
-  // Streetwear = uvijek besplatna dostava (i kad je roba < 60 €).
-  const slugs = order.items.map((i) => i.slug).filter((s): s is string => !!s);
-  const hasStreetwear = slugs.length > 0 && (await prisma.customProduct.count({ where: { category: "streetwear", slug: { in: slugs } } })) > 0;
 
   const reference = order.reference || getOrderReference(order.createdAt.toISOString());
   const isCod = order.payment?.toLowerCase().includes("pouze") || !order.payment;
-  // Kod tipa "besplatna dostava" (npr. DOSTAVA) gasi dostavu i na naljepnici;
-  // obični postotni kod NE — njega je blagajna kupcu naplatila.
-  const goods = Math.max(0, (order.total ?? 0) - (order.shipping ?? 0));
-  const freeShip = hasStreetwear || (await promoGrantsFreeShipping(order.promoCode, goods));
-  const cod = isCod ? codAmount(order.total, order.shipping, order.promoCode, freeShip) : 0;
+  // Pouzeće = ONO ŠTO JE KUPAC VIDIO I POTVRDIO NA BLAGAJNI (order.total = roba
+  // − popust + dostava, izračunato na serveru). Isto kao gumb "Za paket.hr".
+  // Prije se iznos ponovno računao po drugim pravilima (prag 60 € bez provjere
+  // gosta, streetwear uvijek bez dostave, roba nakon popusta) pa je naljepnica
+  // znala tražiti 7 € manje ili više nego što je kupac vidio.
+  const cod = isCod ? Math.max(0, order.total ?? 0) : 0;
 
   return (
     <div className="min-h-screen bg-[var(--a-surface-2)] px-4 py-8 print:bg-[var(--a-card)] print:p-0">
