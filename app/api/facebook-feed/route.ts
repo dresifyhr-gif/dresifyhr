@@ -69,7 +69,8 @@ export async function GET() {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       // s-maxage: CDN drži feed 1 h, pa Merchant/Meta dohvati ne pokreću funkciju svaki put.
-      "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+      // Kratki stale-while-revalidate: rijedak (dnevni) dohvat dobije SVJEŽ feed, ne jučerašnji.
+      "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=300",
     },
   });
 }

@@ -268,6 +268,36 @@ export async function getFeaturedProducts(base: Jersey[], limit = 12): Promise<J
   return DEFAULT_FEATURED_SLUGS.map((s) => bySlug.get(s)).filter((j): j is Jersey => Boolean(j));
 }
 
+// Svježe iz baze — SAMO za provjeru rasprodanih veličina na blagajni. Trgovina
+// drži proizvode u kešu do 1 h; ako se signal o smanjenju zalihe izgubi, keš bi
+// propustio upravo rasprodanu veličinu. Narudžba ionako budi bazu, pa ovo ne
+// smeta spavanju. JEDAN upit za sve slugove (custom + override). Ista logika
+// spajanja kao getProductBySlug (custom prvo, pa osnovni katalog + override);
+// ako baza ne radi, pada na keširanu verziju (i zapiše to u log).
+export async function getProductsFresh(items: { slug: string; base: Jersey | undefined }[]): Promise<Map<string, Jersey | undefined>> {
+  const out = new Map<string, Jersey | undefined>();
+  const unique = Array.from(new Map(items.map((i) => [i.slug, i])).values());
+  if (!unique.length) return out;
+  try {
+    const slugs = unique.map((i) => i.slug);
+    const [customs, overrides] = await Promise.all([
+      dbQuery(() => prisma.customProduct.findMany({ where: { slug: { in: slugs }, hidden: false } })),
+      dbQuery(() => prisma.productOverride.findMany({ where: { slug: { in: slugs } } }))
+    ]);
+    const cBy = new Map(customs.map((c) => [c.slug, c]));
+    const oBy = new Map(overrides.map((o) => [o.slug, o]));
+    for (const { slug, base } of unique) {
+      const c = cBy.get(slug);
+      if (c) out.set(slug, customToJersey(c as unknown as CustomRow));
+      else out.set(slug, base ? merge(base, oBy.get(slug) as Override | undefined) : undefined);
+    }
+  } catch (error) {
+    console.error("[orders] svježa provjera zaliha nije uspjela — koristim keš", error);
+    for (const { slug, base } of unique) out.set(slug, await getProductBySlug(slug, base));
+  }
+  return out;
+}
+
 // Dohvat pojedinog proizvoda po slugu: prvo custom, pa osnovni + override.
 // Kešira se po zahtjevu (React cache) — generateMetadata i stranica dijele isti
 // poziv umjesto dva. Svi DB dohvati idu preko keširanih fetchera (bez novih upita).

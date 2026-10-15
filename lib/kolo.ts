@@ -2,7 +2,7 @@ import "server-only";
 
 import { bustCache } from "@/lib/cache-tags";
 import { prisma } from "@/lib/prisma";
-import { getSettings } from "@/lib/settings";
+import { getSettings, getSettingsFresh, type ShopSettings } from "@/lib/settings";
 import { FREE_SHIPPING_THRESHOLD_EUR } from "@/lib/site";
 import { phoneKey } from "@/lib/utils";
 
@@ -66,8 +66,10 @@ async function bigOrderCount(key: string): Promise<number> {
   }).length;
 }
 
-export async function getSpinState(phone: string | null | undefined): Promise<SpinState> {
-  const s = await getSettings();
+// `settings`: zavrtanje (koje izdaje kodove = novac) prosljeđuje SVJEŽE postavke,
+// da ugašeno kolo ne dijeli nagrade dok javni keš ne istekne.
+export async function getSpinState(phone: string | null | undefined, settings?: ShopSettings): Promise<SpinState> {
+  const s = settings ?? (await getSettings());
   const base: SpinState = { active: s.koloActive, earned: 0, used: 0, left: 0 };
   if (!s.koloActive) return base;
 
@@ -103,7 +105,8 @@ export async function spin(phone: string | null | undefined): Promise<SpinResult
   const key = phoneKey(phone);
   if (!key) return { ok: false, reason: "no_phone" };
 
-  const state = await getSpinState(phone);
+  const fresh = await getSettingsFresh(); // svježe: zavrtanje izdaje kodove (novac)
+  const state = await getSpinState(phone, fresh);
   if (!state.active) return { ok: false, reason: "off" };
   if (state.left <= 0) return { ok: false, reason: "no_spins" };
 
@@ -139,6 +142,6 @@ export async function spin(phone: string | null | undefined): Promise<SpinResult
 
   await prisma.wheelSpin.create({ data: { phoneKey: key, prize: prize.id, code } });
 
-  const after = await getSpinState(phone);
+  const after = await getSpinState(phone, fresh);
   return { ok: true, prize: prize.id, label: prize.label, code, left: after.left };
 }

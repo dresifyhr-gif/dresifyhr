@@ -2,6 +2,7 @@ import "server-only";
 
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 
+import { dbQuery } from "@/lib/db-guard";
 import { prisma } from "@/lib/prisma";
 
 // ————————————————————————————————————————————————————————————————
@@ -114,6 +115,24 @@ export async function getIgToken(): Promise<IgTokenRow | null> {
   } catch {
     return null;
   }
+}
+
+// Isto kao getIgToken, ali greška BAZE se propušta (ne pretvara se u "nije
+// spojeno"). Za keširane funkcije: inače bi se tijekom ispada baze u keš spremio
+// lažni "nije spojeno" rezultat (npr. zamjenski broj pratitelja na 6 h).
+export async function getIgTokenStrict(): Promise<IgTokenRow | null> {
+  if (!process.env.DATABASE_URL) return null;
+  const row = await dbQuery(() => prisma.igConnection.findUnique({ where: { id: IG_PROVIDER_ID } }));
+  if (!row?.accessToken) return null;
+  const token = decryptToken(row.accessToken);
+  if (!token) return null;
+  return {
+    token,
+    igBusinessId: row.igBusinessId || envIgBusinessId(),
+    fbPageId: row.fbPageId || envFbPageId() || null,
+    username: row.username,
+    expiresAt: row.expiresAt
+  };
 }
 
 export async function saveIgToken(input: {

@@ -2,7 +2,7 @@ import "server-only";
 
 import { bustCache } from "@/lib/cache-tags";
 import { prisma } from "@/lib/prisma";
-import { getSettings, getSettingsFresh } from "@/lib/settings";
+import { getSettings, getSettingsFresh, type ShopSettings } from "@/lib/settings";
 import { phoneKey } from "@/lib/utils";
 
 // ── Dresify Klub ─────────────────────────────────────────────────────────────
@@ -41,8 +41,10 @@ async function collectedCount(key: string): Promise<number> {
   return rows.filter((o) => phoneKey(o.phone) === key).length;
 }
 
-export async function getKlubProgress(phone: string | null | undefined): Promise<KlubProgress> {
-  const s = await getSettings();
+// `settings`: izdavanje nagrade prosljeđuje SVJEŽE postavke (getSettingsFresh),
+// da prag i nagrada dolaze iz istog čitanja baze — javni prikaz koristi keš.
+export async function getKlubProgress(phone: string | null | undefined, settings?: ShopSettings): Promise<KlubProgress> {
+  const s = settings ?? (await getSettings());
   const key = phoneKey(phone);
   const base: KlubProgress = {
     active: s.klubActive, collected: 0, target: s.klubTarget,
@@ -96,7 +98,7 @@ export async function issueKlubRewardIfEarned(phone: string | null | undefined):
   const key = phoneKey(phone);
   if (!key) return null;
 
-  const p = await getKlubProgress(phone);
+  const p = await getKlubProgress(phone, s); // isti svježi prag kao aktivnost i nagrada
   if (p.earned <= p.issued) return null; // još nije zaslužio novu
 
   // Jedinstvena šifra (u praksi nikad ne sudari, ali provjeravamo).

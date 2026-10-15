@@ -9,7 +9,7 @@ import { sendOrderNotifications } from "@/lib/notifications";
 import { sendNewOrderPush } from "@/lib/push";
 import { logOrderToSheet } from "@/lib/sheets";
 import { saveOrderToDb } from "@/lib/order-db";
-import { getProductBySlug } from "@/lib/data/product-overrides";
+import { getProductsFresh } from "@/lib/data/product-overrides";
 import { getJerseyBySlug, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { normalizeIgHandle, autoEnterGiveaway } from "@/lib/giveaway";
 import { sendCapiPurchase } from "@/lib/meta-capi";
@@ -26,15 +26,20 @@ function readFbCookies(cookieHeader: string | null) {
 }
 
 // Serverska provjera dostupnosti pri narudžbi — da rasprodana veličina/segment
-// NE prođe čak i ako je kupac imao staru (keširanu) stranicu otvorenu. Čita ažurno
-// stanje (keš override-a se briše na revalidateTag("products") čim admin spremi).
+// NE prođe čak i ako je kupac imao staru (keširanu) stranicu otvorenu. Čita stanje
+// IZRAVNO iz baze (getProductsFresh), na keš pada samo kad baza ne radi.
 // Fail-open: ako provjera pukne, ne blokira narudžbu (nikad ne rušimo prodaju).
 async function findUnavailableItems(items: { slug: string; klub: string; igrac: string; size: string }[]) {
   const bad: string[] = [];
-  for (const it of items) {
-    if (!it.slug || !it.size) continue; // ručne stavke / bez veličine — preskoči
+  const checked = items.filter((it) => it.slug && it.size); // ručne stavke / bez veličine — preskoči
+  // Svježe iz baze, jednim upitom za sve artikle (ne iz keša trgovine) — rasprodana
+  // veličina ne smije proći čak ni ako se signal o smanjenju zalihe izgubio.
+  const products = await getProductsFresh(checked.map((it) => ({ slug: it.slug, base: getJerseyBySlug(it.slug) }))).catch(
+    () => new Map<string, ReturnType<typeof getJerseyBySlug>>()
+  );
+  for (const it of checked) {
     try {
-      const product = await getProductBySlug(it.slug, getJerseyBySlug(it.slug));
+      const product = products.get(it.slug);
       if (!product) continue; // nepoznat slug — ne blokiraj
       const opts = getJerseySizeOptions(product);
       const isAdultSize = (opts.adults as readonly string[]).includes(it.size);

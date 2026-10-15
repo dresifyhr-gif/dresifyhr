@@ -140,8 +140,18 @@ export function PwaBoot() {
       else if (timer) { clearTimeout(timer); timer = undefined; }
     };
     const activity = ["pointerdown", "keydown", "wheel", "touchstart"] as const;
+    // Pomicanje miša (npr. čitaš narudžbe bez klikanja) također je aktivnost —
+    // prigušeno na 1× u 15 s jer se okida stotinama puta u sekundi.
+    let lastMove = 0;
+    const onMove = () => {
+      const now = Date.now();
+      if (now - lastMove < 15_000) return;
+      lastMove = now;
+      resume();
+    };
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("focus", resume);
+    window.addEventListener("pointermove", onMove, { passive: true });
     activity.forEach((ev) => window.addEventListener(ev, resume, { passive: true }));
 
     tick();
@@ -150,6 +160,7 @@ export function PwaBoot() {
       if (timer) clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("focus", resume);
+      window.removeEventListener("pointermove", onMove);
       activity.forEach((ev) => window.removeEventListener(ev, resume));
     };
   }, []);

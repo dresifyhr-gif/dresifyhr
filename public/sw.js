@@ -35,6 +35,13 @@ self.addEventListener("push", (event) => {
       await self.registration.showNotification(title, options);
       // Zvuk + toast uživo u otvorenom adminu
       const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      // Značka na ikoni kad admin NIJE otvoren na ekranu: skriven admin više ne pita
+      // bazu (da Neon može spavati), pa oznaku "ima novih" daje push. Otvoren admin
+      // sam drži točan broj — tada ga ne diramo (setAppBadge() bez broja je točka).
+      const anyVisible = clients.some((c) => c.visibilityState === "visible" && String(c.url || "").includes("/admin"));
+      if (data.kind === "order" && !anyVisible && self.navigator && self.navigator.setAppBadge) {
+        try { await self.navigator.setAppBadge(); } catch (e) { /* nepodržano */ }
+      }
       for (const c of clients) c.postMessage({ type: "push", data });
     })()
   );
