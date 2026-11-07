@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useLeagues } from "@/components/admin/use-leagues";
 
@@ -35,9 +35,125 @@ type Product = {
   returns: number;
   description: string;
   descriptionAuto: string;
+  // Sve slike (za pregled na klik) i prodaja po veličini u zadnjih 60 dana.
+  gallery?: string[];
+  sizeSales?: Record<string, number>;
+  sold60?: number;
 };
 
 const eur = (n: number) => `${(n ?? 0).toFixed(0)} €`;
+
+// ── Stanje zalihe (za filtere i tablicu "Za nabavu") ─────────────────────────
+// Veličina "fali" ako je ručno označena rasprodanom, ima 0 kom, ili je cijeli
+// segment (odrasli/djeca/sve) označen kao rasprodan. "Malo" = 1–2 kom.
+const LOW_STOCK = 2;
+const isKidSize = (s: string) => /^\d{2,3}(\/\d{2,3})?$/.test(s);
+
+type StockInfo = { missing: string[]; low: string[]; soldOutAll: boolean };
+
+function stockInfo(p: Product): StockInfo {
+  const list = p.sizeList?.length ? p.sizeList : Object.keys(p.sizeStock || {});
+  const missing = new Set<string>();
+  for (const s of p.soldOutSizes || []) missing.add(s);
+  for (const [s, n] of Object.entries(p.sizeStock || {})) if (n <= 0) missing.add(s);
+  if (p.outOfStock === "all") list.forEach((s) => missing.add(s));
+  const noSplit = p.category === "trenirka" || p.category === "streetwear"; // shop: sve veličine su "odrasle"
+  if (p.outOfStock === "adults") list.filter((s) => noSplit || !isKidSize(s)).forEach((s) => missing.add(s));
+  if (p.outOfStock === "kids" && !noSplit) list.filter(isKidSize).forEach((s) => missing.add(s));
+  const low = Object.entries(p.sizeStock || {})
+    .filter(([s, n]) => n > 0 && n <= LOW_STOCK && !missing.has(s))
+    .map(([s]) => s);
+  const rank = (s: string) => (list.indexOf(s) === -1 ? 999 : list.indexOf(s));
+  const order = (arr: string[]) => [...arr].sort((a, b) => rank(a) - rank(b));
+  const soldOutAll = p.outOfStock === "all" || (list.length > 0 && list.every((s) => missing.has(s)));
+  return { missing: order([...missing]), low: order(low), soldOutAll };
+}
+
+type Cat = "dres" | "komplet" | "trenirka" | "dugi-rukav" | "streetwear";
+function catOf(p: Product): Cat {
+  if (p.category === "streetwear" || p.category === "trenirka" || p.category === "dugi-rukav") return p.category;
+  return p.liga === "Komplet" ? "komplet" : "dres";
+}
+const CAT_LABEL: Record<Cat, string> = {
+  dres: "👕 Dresovi",
+  komplet: "🎁 Kompleti",
+  trenirka: "🏃 Trenirke",
+  "dugi-rukav": "🧥 Dugi rukav",
+  streetwear: "🔥 Streetwear"
+};
+
+type Filter = "all" | "top" | "soldout" | "missing" | "low" | "hidden" | Cat;
+type Sort = "default" | "sold" | "sold60" | "stock" | "name";
+
+// Jedan red za nabavu = jedan proizvod + jedna veličina koju treba naručiti.
+type NabavaRow = { p: Product; size: string; status: "rasprodano" | "malo"; stanje: number; sold60: number; preporuka: number };
+
+// Preporuka = pokrij ~30 dana prodaje te veličine (pola od zadnjih 60 dana) minus
+// ono što još ima; za rasprodanu veličinu barem 1 kom.
+function nabavaRows(products: Product[], includeHidden: boolean): NabavaRow[] {
+  const rows: NabavaRow[] = [];
+  for (const p of products) {
+    if (p.hidden && !includeHidden) continue;
+    const info = stockInfo(p);
+    for (const s of info.missing) {
+      const sold60 = p.sizeSales?.[s] ?? 0;
+      rows.push({ p, size: s, status: "rasprodano", stanje: 0, sold60, preporuka: Math.max(1, Math.ceil(sold60 / 2)) });
+    }
+    for (const s of info.low) {
+      const stanje = p.sizeStock?.[s] ?? 0;
+      const sold60 = p.sizeSales?.[s] ?? 0;
+      const preporuka = Math.ceil(sold60 / 2) - stanje;
+      rows.push({ p, size: s, status: "malo", stanje, sold60, preporuka: Math.max(0, preporuka) });
+    }
+  }
+  return rows.sort(
+    (a, b) =>
+      b.sold60 - a.sold60 ||
+      (b.p.sold60 ?? 0) - (a.p.sold60 ?? 0) ||
+      b.p.sold - a.p.sold ||
+      (a.status === b.status ? 0 : a.status === "rasprodano" ? -1 : 1)
+  );
+}
+
+const todayHr = () => new Date().toLocaleDateString("hr-HR");
+const productUrl = (slug: string) => `${SITE_URL}/dres/${slug}/`;
+
+// CSV za Excel (HR Excel koristi ; kao razdjelnik, BOM za č/ć/š/ž/đ).
+function downloadNabavaCsv(rows: NabavaRow[]) {
+  const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+  const header = ["Klub / brend", "Igrač / model", "Kategorija", "Veličina", "Stanje", "Status", "Prodano 60 dana (ta veličina)", "Prodano ukupno (proizvod)", "Preporuka naručiti", "Link"];
+  const lines = rows.map((r) =>
+    [r.p.klub, r.p.igrac, CAT_LABEL[catOf(r.p)].replace(/^\S+\s/, ""), r.size, r.stanje, r.status, r.sold60, r.p.sold, r.preporuka, productUrl(r.p.slug)].map(cell).join(";")
+  );
+  const csv = "﻿" + [header.map(cell).join(";"), ...lines].join("\r\n");
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `dresify-za-nabavu-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Kratak tekst za dobavljača (WhatsApp/poruka): po proizvodu, veličina ×komada.
+function supplierText(rows: NabavaRow[]): string {
+  const groups = new Map<string, { title: string; parts: string[]; qty: number }>();
+  for (const r of rows) {
+    if (r.preporuka <= 0) continue;
+    const key = r.p.slug;
+    const g = groups.get(key) ?? { title: `${r.p.klub} — ${r.p.igrac}`, parts: [], qty: 0 };
+    g.parts.push(`${r.size} ×${r.preporuka}`);
+    g.qty += r.preporuka;
+    groups.set(key, g);
+  }
+  const total = [...groups.values()].reduce((s, g) => s + g.qty, 0);
+  return [
+    `DRESIFY — za nabavu (${todayHr()})`,
+    "",
+    ...[...groups.values()].map((g) => `• ${g.title}: ${g.parts.join(", ")}`),
+    "",
+    `Ukupno: ${total} kom`
+  ].join("\n");
+}
 
 const BADGE_OPTIONS = [
   { value: "", label: "Bez oznake" },
@@ -74,7 +190,168 @@ function Thumb({ src, alt, klub, size = "h-14 w-14", radius = "rounded-[10px]" }
   );
 }
 
-function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
+// Pregled slika preko cijelog ekrana: strelice/tipke ← →, Esc ili klik izvan zatvara.
+function ImageViewer({ images, title, onClose }: { images: string[]; title: string; onClose: () => void }) {
+  const [i, setI] = useState(0);
+  const n = images.length;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") setI((x) => (x + 1) % n);
+      if (e.key === "ArrowLeft") setI((x) => (x - 1 + n) % n);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [n, onClose]);
+  if (!n) return null;
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onClick={onClose}
+      className="fixed inset-0 z-[80] flex flex-col items-center justify-center bg-black/85 p-4"
+    >
+      <div className="mb-3 flex w-full max-w-4xl items-center justify-between gap-3 text-white">
+        <span className="truncate text-sm font-semibold">{title}</span>
+        <span className="shrink-0 text-xs text-white/60">{n > 1 ? `${i + 1} / ${n}` : ""}</span>
+        <button type="button" onClick={onClose} aria-label="Zatvori" className="shrink-0 rounded-full bg-white/10 px-3 py-1 text-sm hover:bg-white/20">✕</button>
+      </div>
+      <div className="relative flex w-full max-w-4xl flex-1 items-center justify-center" onClick={(e) => e.stopPropagation()}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={images[i]} alt={title} className="max-h-[78vh] max-w-full rounded-[12px] bg-white object-contain" />
+        {n > 1 && (
+          <>
+            <button type="button" aria-label="Prethodna" onClick={() => setI((x) => (x - 1 + n) % n)} className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-black/60 px-3 py-2 text-xl text-white hover:bg-black/80">‹</button>
+            <button type="button" aria-label="Sljedeća" onClick={() => setI((x) => (x + 1) % n)} className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full bg-black/60 px-3 py-2 text-xl text-white hover:bg-black/80">›</button>
+          </>
+        )}
+      </div>
+      {n > 1 && (
+        <div className="mt-3 flex max-w-4xl gap-2 overflow-x-auto" onClick={(e) => e.stopPropagation()}>
+          {images.map((src, k) => (
+            <button key={src + k} type="button" onClick={() => setI(k)} className={`shrink-0 overflow-hidden rounded-md border-2 ${k === i ? "border-[var(--a-accent)]" : "border-transparent opacity-60 hover:opacity-100"}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={src} alt="" className="h-14 w-14 bg-white object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const imagesOf = (p: Product) => (p.gallery?.length ? p.gallery : p.image ? [p.image] : []);
+
+// Tablica "Za nabavu": sve rasprodane veličine i one kojih je ostalo malo,
+// poredano po tome što se najviše prodaje. Izvoz u Excel (CSV) i tekst za dobavljača.
+function NabavaPanel({ products, onOpenImage }: { products: Product[]; onOpenImage: (p: Product) => void }) {
+  const [includeHidden, setIncludeHidden] = useState(false);
+  const [onlyMissing, setOnlyMissing] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const rows = useMemo(() => {
+    const all = nabavaRows(products, includeHidden);
+    return onlyMissing ? all.filter((r) => r.status === "rasprodano") : all;
+  }, [products, includeHidden, onlyMissing]);
+  const total = rows.reduce((s, r) => s + r.preporuka, 0);
+  const untracked = useMemo(
+    () => products.filter((p) => !p.hidden && Object.keys(p.sizeStock || {}).length === 0 && !(p.soldOutSizes || []).length && !p.outOfStock).length,
+    [products]
+  );
+
+  async function copyForSupplier() {
+    try {
+      await navigator.clipboard.writeText(supplierText(rows));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* preglednik nije dopustio — ništa */
+    }
+  }
+
+  return (
+    <div className="mb-4 rounded-[12px] border border-[var(--a-line)] bg-[var(--a-surface-2)] p-3 sm:p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="mr-auto">
+          <div className="text-sm font-bold text-[var(--a-text)]">📋 Za nabavu — što fali</div>
+          <div className="text-[11px] text-[var(--a-text-3)]">
+            {rows.length} veličina · preporuka ukupno <b className="text-[var(--a-text-2)]">{total} kom</b> · prodaja iz zadnjih 60 dana
+          </div>
+        </div>
+        <label className="flex items-center gap-1.5 text-[11px] text-[var(--a-text-2)]">
+          <input type="checkbox" checked={onlyMissing} onChange={(e) => setOnlyMissing(e.target.checked)} /> samo rasprodano
+        </label>
+        <label className="flex items-center gap-1.5 text-[11px] text-[var(--a-text-2)]">
+          <input type="checkbox" checked={includeHidden} onChange={(e) => setIncludeHidden(e.target.checked)} /> i skriveni
+        </label>
+        <button type="button" onClick={copyForSupplier} disabled={!rows.length} className="a-btn-sm px-3 py-1.5 text-[12px] disabled:opacity-40">
+          {copied ? "✓ Kopirano" : "💬 Kopiraj za dobavljača"}
+        </button>
+        <button
+          type="button"
+          onClick={() => downloadNabavaCsv(rows)}
+          disabled={!rows.length}
+          className="rounded-[10px] bg-[var(--a-good)] px-3 py-1.5 text-[12px] font-semibold text-white transition hover:brightness-95 disabled:opacity-40"
+        >
+          ⬇️ Izvezi u Excel
+        </button>
+      </div>
+
+      {rows.length === 0 ? (
+        <p className="mt-3 text-[12px] text-[var(--a-text-3)]">Ništa ne fali 🎉 (gleda se samo ono što ima upisanu zalihu ili označene rasprodane veličine).</p>
+      ) : (
+        <div className="mt-3 max-h-[60vh] overflow-auto rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)]">
+          <table className="w-full min-w-[620px] text-left text-[12px]">
+            <thead className="sticky top-0 z-10 bg-[var(--a-card)] text-[10px] uppercase tracking-wide text-[var(--a-text-3)]">
+              <tr className="border-b border-[var(--a-line)]">
+                <th className="px-2 py-2">Proizvod</th>
+                <th className="px-2 py-2">Vel.</th>
+                <th className="px-2 py-2">Stanje</th>
+                <th className="px-2 py-2 text-right" title="Koliko je te veličine prodano u zadnjih 60 dana">Prodano 60 d</th>
+                <th className="px-2 py-2 text-right" title="Ukupno prodano tog proizvoda">Ukupno</th>
+                <th className="px-2 py-2 text-right">Naruči</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={`${r.p.slug}|${r.size}`} className="border-b border-[var(--a-line)] last:border-0">
+                  <td className="px-2 py-1.5">
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => onOpenImage(r.p)} title="Otvori sliku" className="shrink-0">
+                        <Thumb src={r.p.image} alt={`${r.p.klub} ${r.p.igrac}`} klub={r.p.klub} size="h-9 w-9" radius="rounded-md" />
+                      </button>
+                      <div className="min-w-0">
+                        <div className="truncate font-medium text-[var(--a-text)]">{r.p.klub} — {r.p.igrac}</div>
+                        <div className="text-[10px] text-[var(--a-text-3)]">{CAT_LABEL[catOf(r.p)]}{r.p.hidden ? " · skriveno" : ""}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-2 py-1.5 font-bold text-[var(--a-text)]">{r.size}</td>
+                  <td className="px-2 py-1.5">
+                    {r.status === "rasprodano" ? (
+                      <span className="rounded bg-[var(--a-bad)] px-1.5 py-0.5 text-[10px] font-bold text-white">RASPRODANO</span>
+                    ) : (
+                      <span className="rounded bg-[var(--a-warn)] px-1.5 py-0.5 text-[10px] font-bold text-white">još {r.stanje}</span>
+                    )}
+                  </td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-[var(--a-text-2)]">{r.sold60}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-[var(--a-text-3)]">{r.p.sold}</td>
+                  <td className="px-2 py-1.5 text-right text-[13px] font-bold tabular-nums text-[var(--a-text)]">{r.preporuka || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      <p className="mt-2 text-[11px] text-[var(--a-text-3)]">
+        Preporuka = koliko te veličine se proda za ~30 dana (prema zadnjih 60 dana) minus ono što još imaš; za rasprodanu barem 1.
+        {untracked > 0 && <> {untracked} proizvoda nema upisanu zalihu po veličinama pa ih ovdje nema — upiši količine u „📦 Veličine” da i njih prati.</>}
+      </p>
+    </div>
+  );
+}
+
+function ProductRow({ p, sizes, onOpenImage, onSaved }: { p: Product; sizes: string[]; onOpenImage: (p: Product) => void; onSaved: (patch: Partial<Product> & { slug: string }) => void }) {
   const LIGE = useLeagues();
   // Urediva lista veličina ovog proizvoda (dodaj / promijeni / obriši).
   const [sizeListEdit, setSizeListEdit] = useState<string[]>(p.sizeList && p.sizeList.length ? p.sizeList : []);
@@ -157,9 +434,21 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     if (saving) return;
     setSaving(true);
     setSaved(false);
-    const res = await adminPost("/api/admin/products/", { slug: p.slug, klub, igrac, liga, images, price: price === "" ? null : Number(price.replace(",", ".")), stock: stock === "" ? null : Number(stock.replace(/[^0-9]/g, "")), sizeStock: Object.fromEntries(sizeListEdit.filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])])), sizes: sizesChanged ? sizeListEdit : undefined, outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, featured, description: descToSave });
+    const priceNum = price === "" ? null : Number(price.replace(",", "."));
+    const stockNum = stock === "" ? null : Number(stock.replace(/[^0-9]/g, ""));
+    const sizeStockNum: Record<string, number> = Object.fromEntries(sizeListEdit.filter((s) => (sizeStock[s] || "").trim() !== "").map((s) => [s, Number(sizeStock[s])]));
+    const res = await adminPost("/api/admin/products/", { slug: p.slug, klub, igrac, liga, images, price: priceNum, stock: stockNum, sizeStock: sizeStockNum, sizes: sizesChanged ? sizeListEdit : undefined, outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, featured, description: descToSave });
     setSaving(false);
     if (!res) return; // ne pokazuj lažni "✓" ako spremanje nije prošlo
+    // Javi roditelju novo stanje → tablica "Za nabavu", filteri i "fali" redak odmah točni.
+    onSaved({
+      slug: p.slug, klub, igrac, liga, images,
+      image: images[0] ?? p.image,
+      gallery: images.length ? images : p.gallery,
+      price: priceNum ?? p.price, stock: stockNum, sizeStock: sizeStockNum,
+      sizeList: sizeListEdit.length ? sizeListEdit : p.sizeList,
+      outOfStock: oos, soldOutSizes: soldSizes, hidden, badge, featured, description: descToSave
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   }
@@ -174,7 +463,18 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
     >
       {/* Zaglavlje: slika + naziv/statistika + cijena (uživo) */}
       <div className="flex items-start gap-3">
-        <Thumb src={p.image} alt={`${p.klub} ${p.igrac}`} klub={p.klub} />
+        <button
+          type="button"
+          onClick={() => onOpenImage(p)}
+          disabled={!imagesOf(p).length}
+          title={imagesOf(p).length > 1 ? `Otvori slike (${imagesOf(p).length})` : "Otvori sliku"}
+          className="relative shrink-0 cursor-zoom-in disabled:cursor-default"
+        >
+          <Thumb src={p.image} alt={`${p.klub} ${p.igrac}`} klub={p.klub} />
+          {imagesOf(p).length > 1 && (
+            <span className="absolute -bottom-1 -right-1 rounded-full bg-[var(--a-text)] px-1.5 text-[9px] font-bold leading-4 text-[var(--a-card)]">{imagesOf(p).length}</span>
+          )}
+        </button>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 font-semibold text-[var(--a-text)]">
             {isStreetwear && <span className="shrink-0 rounded bg-[var(--a-warn-bg)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--a-warn)]">🔥 Street</span>}
@@ -187,6 +487,17 @@ function ProductRow({ p, sizes }: { p: Product; sizes: string[] }) {
             <span className="font-medium text-[var(--a-good)]">📈 {eur(p.profit)} profit</span>
             {p.returns > 0 && <span className="font-medium text-[var(--a-bad)]">↩ {p.returns} vraćeno</span>}
           </div>
+          {(() => {
+            const info = stockInfo(p);
+            if (info.soldOutAll) return <div className="mt-0.5 text-[11px] font-semibold text-[var(--a-bad)]">⛔ Sve rasprodano</div>;
+            if (!info.missing.length && !info.low.length) return null;
+            return (
+              <div className="mt-0.5 flex flex-wrap gap-x-3 text-[11px] font-medium">
+                {info.missing.length > 0 && <span className="text-[var(--a-bad)]">⚠ fali: {info.missing.join(", ")}</span>}
+                {info.low.length > 0 && <span className="text-[var(--a-warn)]">📉 malo: {info.low.map((s) => `${s} (${p.sizeStock[s]})`).join(", ")}</span>}
+              </div>
+            );
+          })()}
         </div>
         <div className="shrink-0 whitespace-nowrap text-right text-[17px] font-bold tabular-nums text-[var(--a-text)]">
           {price || "—"} €
@@ -439,6 +750,16 @@ export function ProductsManager() {
   // (mjereno) — stranica bi trzala. Ostatak se dodaje na klik.
   const [limit, setLimit] = useState(24);
   const [focused, setFocused] = useState(false); // prikaz autocomplete dropdowna
+  const [filter, setFilter] = useState<Filter>("all");
+  const [sort, setSort] = useState<Sort>("default");
+  const [showNabava, setShowNabava] = useState(false);
+  const [viewer, setViewer] = useState<Product | null>(null);
+  const closeViewer = useCallback(() => setViewer(null), []);
+  const onSaved = useCallback(
+    (patch: Partial<Product> & { slug: string }) =>
+      setProducts((cur) => cur.map((x) => (x.slug === patch.slug ? { ...x, ...patch } : x))),
+    []
+  );
 
   // Početni pojam iz URL-a (?q=…) — kad ⌘K paleta skoči na proizvod.
   useEffect(() => {
@@ -459,11 +780,65 @@ export function ProductsManager() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = useMemo(() => {
+  // Pretraga (tekst) → zatim filter (čip) → zatim poredak.
+  const searched = useMemo(() => {
     const nq = q.trim().toLowerCase();
     if (!nq) return products;
     return products.filter((p) => `${p.klub} ${p.igrac} ${p.liga} ${p.category}`.toLowerCase().includes(nq));
   }, [q, products]);
+
+  const infoMap = useMemo(() => new Map(products.map((p) => [p.slug, stockInfo(p)])), [products]);
+
+  const matches = useCallback(
+    (p: Product, f: Filter) => {
+      const info = infoMap.get(p.slug)!;
+      switch (f) {
+        case "all": return true;
+        case "top": return p.sold > 0;
+        case "soldout": return info.soldOutAll;
+        case "missing": return info.missing.length > 0 && !info.soldOutAll;
+        case "low": return info.low.length > 0;
+        case "hidden": return p.hidden;
+        default: return catOf(p) === f;
+      }
+    },
+    [infoMap]
+  );
+
+  const filtered = useMemo(() => {
+    const list = searched.filter((p) => matches(p, filter));
+    const stockLeft = (p: Product) => {
+      const vals = Object.values(p.sizeStock || {});
+      if (infoMap.get(p.slug)?.soldOutAll) return 0;
+      return vals.length ? vals.reduce((a, b) => a + b, 0) : p.stock ?? Number.POSITIVE_INFINITY;
+    };
+    const effectiveSort: Sort = filter === "top" && sort === "default" ? "sold" : sort;
+    switch (effectiveSort) {
+      case "sold": return [...list].sort((a, b) => b.sold - a.sold);
+      case "sold60": return [...list].sort((a, b) => (b.sold60 ?? 0) - (a.sold60 ?? 0) || b.sold - a.sold);
+      case "stock": return [...list].sort((a, b) => stockLeft(a) - stockLeft(b) || b.sold - a.sold);
+      case "name": return [...list].sort((a, b) => `${a.klub} ${a.igrac}`.localeCompare(`${b.klub} ${b.igrac}`, "hr"));
+      default: return list;
+    }
+  }, [searched, filter, sort, matches, infoMap]);
+
+  const chips = useMemo(() => {
+    const base: { f: Filter; label: string }[] = [
+      { f: "all", label: "Svi" },
+      { f: "top", label: "🔥 Najprodavanije" },
+      { f: "soldout", label: "⛔ Rasprodano" },
+      { f: "missing", label: "⚠ Fale veličine" },
+      { f: "low", label: "📉 Malo zalihe" },
+      { f: "hidden", label: "🙈 Skriveno" },
+      ...(Object.keys(CAT_LABEL) as Cat[]).map((c) => ({ f: c as Filter, label: CAT_LABEL[c] }))
+    ];
+    return base
+      .map((c) => ({ ...c, count: searched.filter((p) => matches(p, c.f)).length }))
+      .filter((c) => c.f === "all" || c.f === filter || c.count > 0);
+  }, [searched, matches, filter]);
+
+  // Promjena filtera/poretka → kreni opet od vrha liste.
+  useEffect(() => setLimit(24), [filter, sort]);
 
   // Pretraga uvijek gleda CIJELI popis; ograničenje je samo koliko ih crtamo.
   const visible = useMemo(() => filtered.slice(0, limit), [filtered, limit]);
@@ -514,6 +889,55 @@ export function ProductsManager() {
         </div>
         <span className="shrink-0 text-xs text-[var(--a-text-3)]">{loading ? "…" : `${filtered.length} proizvoda`}</span>
       </div>
+
+      {!loading && (
+        <>
+          {/* Filteri (čipovi s brojem), poredak i tablica za nabavu */}
+          <div className="mb-3 flex flex-wrap items-center gap-1.5">
+            {chips.map((c) => (
+              <button
+                key={c.f}
+                type="button"
+                onClick={() => setFilter(c.f)}
+                className={`rounded-full px-2.5 py-1 text-[12px] font-semibold transition ${
+                  filter === c.f
+                    ? "bg-[var(--a-text)] text-[var(--a-card)]"
+                    : "border border-[var(--a-line)] text-[var(--a-text-2)] hover:bg-[var(--a-surface-2)]"
+                }`}
+              >
+                {c.label} <span className="opacity-60">{c.count}</span>
+              </button>
+            ))}
+          </div>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <label className="flex items-center gap-1.5 text-[12px] text-[var(--a-text-2)]">
+              Poredaj:
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as Sort)}
+                className="rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2 py-1 text-[12px] text-[var(--a-text)] outline-none focus:border-[var(--a-text-3)]"
+              >
+                <option value="default">Zadano</option>
+                <option value="sold">Najprodavanije (ukupno)</option>
+                <option value="sold60">Najprodavanije (60 dana)</option>
+                <option value="stock">Najmanje zalihe</option>
+                <option value="name">Naziv A–Ž</option>
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowNabava((v) => !v)}
+              className={`ml-auto rounded-[10px] px-3 py-1.5 text-[12px] font-bold transition ${
+                showNabava ? "bg-[var(--a-text)] text-[var(--a-card)]" : "bg-[var(--a-accent)] text-black hover:brightness-95"
+              }`}
+            >
+              {showNabava ? "Zatvori nabavu" : "📋 Za nabavu (što fali)"}
+            </button>
+          </div>
+          {showNabava && <NabavaPanel products={products} onOpenImage={setViewer} />}
+        </>
+      )}
+      {viewer && <ImageViewer images={imagesOf(viewer)} title={`${viewer.klub} — ${viewer.igrac}`} onClose={closeViewer} />}
       {loading ? (
         <div className="py-8 text-center text-sm text-[var(--a-text-3)]">Učitavam…</div>
       ) : (
@@ -534,8 +958,11 @@ export function ProductsManager() {
             ))}
           </div>
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2 2xl:grid-cols-3">
-            {visible.map((p) => <ProductRow key={p.slug} p={p} sizes={sizes} />)}
+            {visible.map((p) => <ProductRow key={p.slug} p={p} sizes={sizes} onOpenImage={setViewer} onSaved={onSaved} />)}
           </div>
+          {filtered.length === 0 && (
+            <div className="py-8 text-center text-sm text-[var(--a-text-3)]">Nema proizvoda za ovaj filter.</div>
+          )}
           {filtered.length > visible.length && (
             <button
               type="button"

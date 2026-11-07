@@ -1,5 +1,5 @@
 import { jerseys, isNationalTeam } from "@/lib/data/jerseys";
-import { getCatalogProducts, getStreetwearProducts } from "@/lib/data/product-overrides";
+import { getCatalogProducts, getStreetwearProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { JERSEY_PRICE_EUR, SITE_NAME, SITE_URL } from "@/lib/site";
 import { repairText } from "@/lib/utils";
@@ -22,8 +22,10 @@ function xmlEscape(value: string) {
 }
 
 export async function GET() {
-  const [catalog, streetwear] = await Promise.all([getCatalogProducts(jerseys), getStreetwearProducts()]);
-  const allProducts = [...catalog, ...streetwear];
+  // Trenirke imaju svoju stranicu (/trenirke) pa nisu u getCatalogProducts — dodaj ih
+  // izričito, inače ih katalog (Meta / Google Shopping) nikad ne vidi.
+  const [catalog, streetwear, trenirke] = await Promise.all([getCatalogProducts(jerseys), getStreetwearProducts(), getTrenirkaProducts()]);
+  const allProducts = [...catalog, ...streetwear, ...trenirke];
   const items = allProducts
     .map((product) => {
       const klub = repairText(product.klub);
@@ -35,10 +37,22 @@ export async function GET() {
       const isKomplet = product.liga === "Komplet";
       const adultRange = isNationalTeam(product) ? "S–XXL" : "S–XL";
 
-      const title = isKomplet ? `${klub} ${igrac}` : `${klub} ${igrac} — nogometni dres`;
+      const isTrenirka = product.category === "trenirka";
+      const isLongSleeve = product.category === "dugi-rukav";
+      const title = isKomplet
+        ? `${klub} ${igrac}`
+        : isTrenirka
+          ? `${klub} ${igrac} — trenirka (jakna + hlače)`
+          : isLongSleeve
+            ? `${klub} ${igrac} — dres dugih rukava`
+            : `${klub} ${igrac} — nogometni dres`;
       const description = isKomplet
         ? `${klub} ${igrac}. Komplet uključuje dres, hlačice, loptu i kapu. Dostupno za djecu i odrasle. Dostava pouzećem po cijeloj Hrvatskoj.`
-        : `Nogometni dres ${klub} ${igrac}. Dostupno za djecu (s hlačicama) i odrasle (${adultRange}). Ušiveno ime i broj. Dostava pouzećem po cijeloj Hrvatskoj.`;
+        : isTrenirka
+          ? `Trenirka ${klub} ${igrac} — komplet jakna + hlače. Dostupne veličine odaberi na stranici. Dostava pouzećem po cijeloj Hrvatskoj.`
+          : isLongSleeve
+            ? `Dres dugih rukava ${klub} ${igrac}. Veličine 152–176 i S–L, samo dres (bez hlačica). Dostava pouzećem po cijeloj Hrvatskoj.`
+            : `Nogometni dres ${klub} ${igrac}. Dostupno za djecu (s hlačicama) i odrasle (${adultRange}). Ušiveno ime i broj. Dostava pouzećem po cijeloj Hrvatskoj.`;
 
       return `    <item>
       <g:id>${xmlEscape(product.slug.slice(0, 50))}</g:id>

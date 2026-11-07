@@ -13,6 +13,9 @@ import { repairText } from "@/lib/utils";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Prozor za "prodano po veličini" u tablici Za nabavu.
+const SALES_WINDOW_DAYS = 60;
+
 const ALL_SIZES = [...streetwearSizes.filter((s) => !(adultSizes as readonly string[]).includes(s)), ...adultSizes, ...kidSizes];
 
 // Stvarne veličine koje taj proizvod ima (za editor: samo relevantne).
@@ -58,16 +61,37 @@ function cleanSizeStock(input: unknown, allowed: Set<string>): string | null {
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
-  const [overrideRows, customRows, soldRows, returnRows] = await Promise.all([
+  // Prodaja po veličini u zadnjih 60 dana — za tablicu "Za nabavu" (koliko čega naručiti).
+  const since = new Date(Date.now() - SALES_WINDOW_DAYS * 86_400_000);
+  const [overrideRows, customRows, soldRows, returnRows, sizeSalesRows] = await Promise.all([
     prisma.productOverride.findMany(),
     prisma.customProduct.findMany({ orderBy: { createdAt: "desc" } }) as unknown as Promise<CustomRow[]>,
     prisma.orderItem.groupBy({ by: ["slug"], where: { order: { status: { notIn: ["cancelled", "returned"] } } }, _sum: { quantity: true, unitPrice: true }, _count: true }),
-    prisma.orderItem.groupBy({ by: ["slug"], where: { order: { status: "returned" } }, _count: true })
+    prisma.orderItem.groupBy({ by: ["slug"], where: { order: { status: "returned" } }, _count: true }),
+    prisma.orderItem.groupBy({
+      by: ["slug", "size"],
+      where: { order: { status: { notIn: ["cancelled", "returned"] }, createdAt: { gte: since } } },
+      _sum: { quantity: true },
+      _count: true
+    })
   ]);
 
   const overrides = new Map(overrideRows.map((r) => [r.slug, r]));
   const soldMap = new Map(soldRows.map((r) => [r.slug ?? "", r]));
   const returnMap = new Map(returnRows.map((r) => [r.slug ?? "", r._count]));
+  // slug → { veličina: komada prodanih u zadnjih 60 dana }
+  const sizeSalesMap = new Map<string, Record<string, number>>();
+  for (const r of sizeSalesRows) {
+    if (!r.slug) continue;
+    const size = (r.size ?? "").trim() || "?";
+    const m = sizeSalesMap.get(r.slug) ?? {};
+    m[size] = (m[size] ?? 0) + (r._sum.quantity ?? r._count);
+    sizeSalesMap.set(r.slug, m);
+  }
+  const salesFor = (slug: string) => {
+    const sizeSales = sizeSalesMap.get(slug) ?? {};
+    return { sizeSales, sold60: Object.values(sizeSales).reduce((a, b) => a + b, 0) };
+  };
 
   const jerseyProducts = jerseys.map((j) => {
     const ov = overrides.get(j.slug);
@@ -97,6 +121,12 @@ export async function GET() {
       images: parseImagesArr(ov?.images ?? null),
       // Thumbnail za admin: override slika ako postoji, inače glavna iz kataloga.
       image: parseImagesArr(ov?.images ?? null)[0] ?? getJerseyGallery(j.slug)[0]?.src ?? null,
+      // Sve slike za pregled (klik na sliku u adminu).
+      gallery: (() => {
+        const own = parseImagesArr(ov?.images ?? null);
+        return own.length ? own : getJerseyGallery(j.slug).map((g) => g.src).filter(Boolean);
+      })(),
+      ...salesFor(j.slug),
       category: j.category ?? "dres",
       custom: false,
       price: ov?.price != null ? ov.price : j.price ?? JERSEY_PRICE_EUR,
@@ -135,6 +165,8 @@ export async function GET() {
       liga: streetwear ? "Streetwear" : c.liga,
       images: parseImagesArr(c.images ?? null),
       image: parseImagesArr(c.images ?? null)[0] ?? null,
+      gallery: parseImagesArr(c.images ?? null),
+      ...salesFor(c.slug),
       category: c.category ?? "dres",
       custom: true,
       price: c.price,
