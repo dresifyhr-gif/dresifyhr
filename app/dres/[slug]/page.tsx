@@ -14,6 +14,7 @@ import {
 } from "@/lib/data/seo-collections";
 import { getJerseyBySlug, getJerseyDescription, getJerseyStock, getRelatedJerseys, jerseys } from "@/lib/data/jerseys";
 import { getProductBySlug } from "@/lib/data/product-overrides";
+import { withStage } from "@/lib/data/stage-images";
 import { canFeature } from "@/lib/data/home-drop";
 import { buildBreadcrumbSchema, buildMetadata, buildProductSchema, productMainImage } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
@@ -77,7 +78,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const relatedProducts = getRelatedJerseys(product).filter(canFeature);
+  const relatedProducts = getRelatedJerseys(product).filter(canFeature).map(withStage);
   const stock = getJerseyStock(product);
   const productSchema = buildProductSchema(product, stock);
   const isStreetwear = product.category === "streetwear";
@@ -113,7 +114,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         />
 
         <div className="grid items-start gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
-          <ProductGallery product={product} />
+          <ProductGallery product={withStage(product)} />
           <ProductDetailPanel product={product} />
         </div>
 
@@ -163,7 +164,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <section className="mt-16">
           <div className="idx">{t.productPage.related}</div>
-          <h2 className="font-display text-[54px] uppercase leading-[0.92] text-fg lg:text-[72px]">{t.productPage.relatedTitle}</h2>
+          <h2 className="pt-[0.08em] font-display text-[54px] uppercase leading-[0.96] text-fg lg:text-[72px]">{t.productPage.relatedTitle}</h2>
           <div className="rail -mx-4 mt-6 px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-3 lg:overflow-visible lg:px-0">
             {relatedProducts.map((item) => (
               <div key={item.slug} className="w-[158px] shrink-0 snap-start sm:w-[200px] lg:w-auto">

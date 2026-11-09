@@ -6,6 +6,7 @@ import { cache } from "react";
 import { dbQuery, withLastGood } from "@/lib/db-guard";
 import { prisma } from "@/lib/prisma";
 import type { Jersey } from "@/lib/data/jerseys";
+import { stageImageFor, withStage } from "@/lib/data/stage-images";
 
 // ── Keširani DB dohvati ───────────────────────────────────────────────────────
 // Stranice su dinamičke (i18n cookie), pa bi bez keša svaki posjet i svaki bot
@@ -209,13 +210,13 @@ async function getCustomJerseys(): Promise<Jersey[]> {
 // sortiran po createdAt desc, pa filtriranje čuva redoslijed.
 export async function getStreetwearProducts(): Promise<Jersey[]> {
   const rows = await fetchCustomRows();
-  return rows.filter((c) => (c.category ?? "dres") === "streetwear").map(customToJersey);
+  return rows.filter((c) => (c.category ?? "dres") === "streetwear").map(customToJersey).map(withStage);
 }
 
 // Trenirke (kompleti: jakna + hlače) — zasebna stranica /trenirke.
 export async function getTrenirkaProducts(): Promise<Jersey[]> {
   const rows = await fetchCustomRows();
-  return rows.filter((c) => (c.category ?? "dres") === "trenirka").map(customToJersey);
+  return rows.filter((c) => (c.category ?? "dres") === "trenirka").map(customToJersey).map(withStage);
 }
 
 // Deterministička ocjena 4.5–5.0 + plauzibilan broj recenzija iz sluga.
@@ -239,7 +240,7 @@ function withRating(j: Jersey, sold: Set<string>): Jersey {
 // Puni katalog za shop: osnovni (s override-ima) + custom dresovi iz admina, s ocjenama.
 export async function getCatalogProducts(base: Jersey[]): Promise<Jersey[]> {
   const [withOv, custom, sold] = await Promise.all([withOverrides(base), getCustomJerseys(), getSoldSlugs()]);
-  return [...custom, ...withOv].map((j) => withRating(j, sold));
+  return [...custom, ...withOv].map((j) => withStage(withRating(j, sold)));
 }
 
 // Zadani "Najprodavaniji" ako Gazda još nije ručno označio nijedan proizvod.
@@ -263,9 +264,9 @@ export async function getFeaturedProducts(base: Jersey[], limit = 12): Promise<J
   const [withOv, customRows, sold] = await Promise.all([withOverrides(base), fetchCustomRows(), getSoldSlugs()]);
   const all = [...customRows.map(customToJersey), ...withOv].map((j) => withRating(j, sold));
   const picked = all.filter((j) => j.featured);
-  if (picked.length) return picked.slice(0, limit);
+  if (picked.length) return picked.slice(0, limit).map(withStage);
   const bySlug = new Map(all.map((j) => [j.slug, j]));
-  return DEFAULT_FEATURED_SLUGS.map((s) => bySlug.get(s)).filter((j): j is Jersey => Boolean(j));
+  return DEFAULT_FEATURED_SLUGS.map((s) => bySlug.get(s)).filter((j): j is Jersey => Boolean(j)).map(withStage);
 }
 
 // Svježe iz baze — SAMO za provjeru rasprodanih veličina na blagajni. Trgovina
@@ -319,6 +320,7 @@ export function forCards(list: Jersey[]): Jersey[] {
   return list.map((j) => ({
     ...j,
     descriptionOverride: undefined,
-    images: j.images ? j.images.slice(0, 2) : j.images
+    images: j.images ? j.images.slice(0, 2) : j.images,
+    stage: j.stage ?? stageImageFor(j)
   }));
 }

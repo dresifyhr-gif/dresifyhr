@@ -1,5 +1,8 @@
 import { repairText } from "@/lib/utils";
 
+// Izrezani dres za tamnu "pozornicu" (koncept A) — vidi lib/data/stage-images.ts.
+export type StageImage = { src: string; w: number; h: number; /** pravi snimak dresa (3D), ne render */ real: boolean };
+
 export type Jersey = {
   id: number;
   slug: string;
@@ -31,6 +34,8 @@ export type Jersey = {
   stock?: number;
   // Količina po veličini iz admina (npr. { S: 3, M: 5, L: 0 }); 0 = rasprodana veličina.
   sizeStock?: Record<string, number>;
+  // Izrezana slika za karticu/hero (samo prikaz; puni se na serveru).
+  stage?: StageImage;
 };
 
 export const jerseys: Jersey[] = [

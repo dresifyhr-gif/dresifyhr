@@ -8,15 +8,24 @@ export type BentoTile = {
   /** npr. "Dres + hlačice" — kratko, istinito */
   note?: string;
   price: string;
-  images: string[];
+  /** cutout = izrezani dres (bez kartice); inače originalna fotografija kao kartica. */
+  images: { src: string; cutout: boolean }[];
   variant?: "big" | "volt";
 };
 
-// Pločica s fotografijom kao nagnutom bijelom karticom na tamnoj pozornici.
-function PhotoCard({ src, className, sizes }: { src: string; className: string; sizes: string }) {
+// Pločica: izrezani dres "lebdi" na tamnoj pozornici (sjena je u slici); bez izreza
+// fotografija ide kao mala nagnuta kartica.
+function PhotoCard({ img, className, sizes }: { img: { src: string; cutout: boolean }; className: string; sizes: string }) {
+  if (img.cutout) {
+    return (
+      <div className={`absolute ${className}`}>
+        <Image src={img.src} alt="" fill sizes={sizes} className="object-contain" />
+      </div>
+    );
+  }
   return (
     <div className={`absolute overflow-hidden rounded-[3px] bg-white shadow-[0_14px_22px_rgba(0,0,0,.55)] ${className}`}>
-      <Image src={src} alt="" fill sizes={sizes} className="object-contain p-1" />
+      <Image src={img.src} alt="" fill sizes={sizes} className="object-contain p-1" />
     </div>
   );
 }
@@ -38,19 +47,22 @@ function Arrow({ dark = false }: { dark?: boolean }) {
 export function CategoryBento({
   tiles,
   titleLines,
-  subtitle
+  subtitle,
+  label
 }: {
   tiles: BentoTile[];
   titleLines: string[];
   subtitle: string;
+  label: string;
 }) {
   return (
     <section className="pb-3 pt-16 lg:pt-24">
       <div className="page-shell">
         <div className="idx">
-          <b>01</b>Kategorije
+          <b>01</b>
+          {label}
         </div>
-        <h1 className="max-w-[900px] font-display text-[44px] uppercase leading-[0.92] text-fg sm:text-6xl lg:text-[84px]">
+        <h1 className="max-w-[900px] pt-[0.08em] font-display text-[44px] uppercase leading-[0.96] text-fg sm:text-6xl lg:text-[84px]">
           {titleLines.map((line, i) => (
             <span key={i} className={`block ${i === titleLines.length - 1 ? "text-accent" : ""}`}>
               {line}
@@ -92,13 +104,13 @@ export function CategoryBento({
                 {!volt && big && tile.images[0] ? (
                   <>
                     <PhotoCard
-                      src={tile.images[0]}
+                      img={tile.images[0]}
                       sizes="(max-width: 1024px) 48vw, 22vw"
                       className="left-[6%] top-[14%] aspect-square w-[44%] -rotate-[7deg] transition-transform duration-300 group-hover:-rotate-[9deg] lg:top-[16%] lg:w-[46%]"
                     />
                     {tile.images[1] ? (
                       <PhotoCard
-                        src={tile.images[1]}
+                        img={tile.images[1]}
                         sizes="(max-width: 1024px) 48vw, 22vw"
                         className="right-[5%] top-[8%] aspect-square w-[46%] rotate-[6deg] transition-transform duration-300 group-hover:rotate-[8deg] lg:top-[10%] lg:w-[48%]"
                       />
@@ -108,7 +120,7 @@ export function CategoryBento({
 
                 {!volt && !big && tile.images[0] ? (
                   <PhotoCard
-                    src={tile.images[0]}
+                    img={tile.images[0]}
                     sizes="(max-width: 1024px) 40vw, 16vw"
                     className="left-1/2 top-[12px] aspect-square w-[74%] -translate-x-1/2 -rotate-[3deg] transition-transform duration-300 group-hover:rotate-0 lg:w-[44%]"
                   />
