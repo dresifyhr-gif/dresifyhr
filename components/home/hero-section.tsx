@@ -7,7 +7,7 @@ import { HeroKompletiCarousel } from "@/components/home/hero-kompleti-carousel";
 import { useLanguage } from "@/contexts/language-context";
 import { useShopSettings } from "@/contexts/shop-settings-context";
 
-export function HeroSection({ mysteryImage, deliveredCount = 0 }: { mysteryImage?: string; deliveredCount?: number }) {
+export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
   // Naslov/podnaslov iz Postavki; prazno = zadani tekst iz prijevoda.
   const { heroTitle, heroSubtitle } = useShopSettings();
   const customTitleLines = heroTitle ? heroTitle.split("\n").map((l) => l.trim()).filter(Boolean) : null;
@@ -84,12 +84,6 @@ export function HeroSection({ mysteryImage, deliveredCount = 0 }: { mysteryImage
                 {t.hero.cta}
               </Link>
               <span className="text-xs font-medium text-white/50 sm:text-sm">💵 Plaćanje pouzećem · 🚚 2–5 dana</span>
-              {/* Pravi broj iz baze (zaokružen nadolje na desetice) — samo kad je dovoljno velik. */}
-              {deliveredCount >= 100 && (
-                <span className="basis-full text-xs font-semibold text-emerald-400 sm:text-sm">
-                  ✅ {(Math.floor(deliveredCount / 10) * 10).toLocaleString("hr-HR")}+ dostavljenih paketa po cijeloj Hrvatskoj
-                </span>
-              )}
             </motion.div>
 
             {/* Stats row — desktop only */}

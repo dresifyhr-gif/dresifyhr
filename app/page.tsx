@@ -13,7 +13,6 @@ import { jerseys } from "@/lib/data/jerseys";
 import { forCards, getFeaturedProducts, getCatalogProducts, getStreetwearProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { getVisibleTestimonials } from "@/lib/testimonials";
 import { getSettings } from "@/lib/settings";
-import { getDeliveredCount } from "@/lib/shop-stats";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import { buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
@@ -81,7 +80,7 @@ export default async function HomePage() {
   return (
     <>
       <Ps5HomeBanner />
-      <HeroSection mysteryImage={mysteryImage} deliveredCount={await getDeliveredCount()} />
+      <HeroSection mysteryImage={mysteryImage} />
       {show("trust") && <TrustStrip />}
       <CategoryTiles tiles={tiles} />
       {show("featured") && <FeaturedSection products={forCards(await getFeaturedProducts(jerseys))} />}
