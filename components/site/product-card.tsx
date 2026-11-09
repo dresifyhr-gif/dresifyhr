@@ -2,25 +2,36 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, X } from "lucide-react";
 
 import { JerseyVisual } from "@/components/site/jersey-visual";
 import { WishlistButton } from "@/components/site/wishlist-button";
-import { Stars } from "@/components/site/stars";
 import { useCart } from "@/components/providers/cart-provider";
-import { type Jersey, getJerseyStock, getStockTone, getJerseySizeOptions } from "@/lib/data/jerseys";
+import { type Jersey, getJerseySizeOptions } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
-import { formatPrice, repairText } from "@/lib/utils";
+import { repairText } from "@/lib/utils";
+
+// Kratko ime za veliki display redak: "Gvardiol nr4 — 2026" → "Gvardiol 4",
+// a ostatak ("2026") ide u sitni podnaslov. Puni naziv ostaje u alt-u i title-u.
+export function splitJerseyName(igrac: string) {
+  const [head, ...rest] = repairText(igrac).split(/\s+[—–-]\s+/);
+  const name = head.replace(/\bnr\.?\s*(\d+)/i, "$1").trim();
+  return { name, sub: rest.join(" · ") };
+}
+
+function tagFor(product: Jersey, theme: "jersey" | "streetwear" | "trenirka") {
+  if (theme === "streetwear" || product.category === "streetwear") return { label: "Streetwear", volt: false };
+  if (theme === "trenirka" || product.category === "trenirka") return { label: "Trenirka", volt: false };
+  const parts: string[] = [];
+  if (product.badge === "novo") parts.push("Novo");
+  if (product.badge === "bestseller") parts.push("Bestseller");
+  if (product.retro) parts.push("Retro");
+  if (product.category === "dugi-rukav") parts.push("Dugi rukav");
+  if (!parts.length) return null;
+  return { label: parts.join(" · "), volt: product.badge === "novo" };
+}
 
 export function ProductCard({ product, priority = false, theme = "jersey" }: { product: Jersey; priority?: boolean; theme?: "jersey" | "streetwear" | "trenirka" }) {
-  const sw = theme === "streetwear"; // streetwear = svijetla kartica, narančasti akcenti
-  const tr = theme === "trenirka";   // trenirka = svijetla kartica, tirkizni akcenti
-  const light = sw || tr;            // svijetla (bijela) kartica — bijeli donji dio kao streetwear
-  const acText = sw ? "text-orange-500" : tr ? "text-teal-600" : "text-accent";
-  const acBg = sw ? "bg-orange-500" : tr ? "bg-teal-600" : "bg-accent";
-  const acBgHover = sw ? "hover:bg-orange-600" : tr ? "hover:bg-teal-700" : "hover:bg-[#f0ff71]";
-  const stock = getJerseyStock(product);
   const sizeOptions = getJerseySizeOptions(product);
   const { addItem } = useCart();
 
@@ -38,10 +49,15 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
 
   const currentSizes = segment === "adult" ? sizeOptions.adults : sizeOptions.kids;
   const segmentLabel = segment === "adult" || product.category === "dugi-rukav" ? "Dres" : "Dres i hlačice";
+  const href = `/dres/${product.slug}`;
+  const klub = repairText(product.klub);
+  const { name, sub } = splitJerseyName(product.igrac);
+  const tag = tagFor(product, theme);
+  const isJersey = theme === "jersey" && product.category !== "trenirka" && product.category !== "streetwear";
+  const subRaw = sub || (isJersey ? repairText(product.liga) : "");
+  const subLine = subRaw.toLowerCase() === name.toLowerCase() ? "" : subRaw;
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleAddToCart = () => {
     if (!selectedSize) return;
     const gallery = product.images ?? getJerseyGallery(product.slug);
     addItem({
@@ -58,177 +74,132 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
     setIsOpen(false);
   };
 
-  const handleSizeClick = (e: React.MouseEvent, size: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setSelectedSize(size);
-  };
-
-  const handleSegmentClick = (e: React.MouseEvent, seg: "adult" | "kid") => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleSegmentClick = (seg: "adult" | "kid") => {
     setSegment(seg);
     setSelectedSize(seg === "adult" ? availAdult : availKid);
   };
 
-  const handleMobileToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsOpen((v) => !v);
-  };
-
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
-      className="h-full"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+    <article
+      className="group relative flex h-full flex-col"
+      onMouseEnter={() => {
+        if (window.matchMedia("(hover: hover)").matches) setIsOpen(true);
+      }}
+      onMouseLeave={() => {
+        if (window.matchMedia("(hover: hover)").matches) setIsOpen(false);
+      }}
     >
-      <Link
-        href={`/dres/${product.slug}`}
-        className={`group relative flex h-full flex-col overflow-hidden rounded-[14px] border transition-all duration-200 ease-out ${light ? `border-slate-200 bg-white shadow-sm ${tr ? "hover:border-teal-400" : "hover:border-orange-400"}` : "border-white/10 bg-[#111111] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] hover:border-accent"}`}
-      >
-
-        <div className="relative">
+      <div className="relative">
+        <Link href={href} tabIndex={-1} aria-hidden="true" className="block">
           <JerseyVisual product={product} priority={priority} />
-          <WishlistButton slug={product.slug} klub={product.klub} igrac={product.igrac} className="absolute right-2.5 top-2.5 z-20" />
-          {(product.badge || product.retro) && (
-            <span className={`absolute left-2.5 top-2.5 z-20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] ${
-              product.badge === "bestseller"
-                ? light ? `${acBg} text-white` : "bg-accent text-black"
-                : product.badge === "novo"
-                ? "bg-[#3b82f6] text-white"
-                : "bg-black/70 border border-white/25 text-white/90"
-            }`}>
-              {product.badge === "bestseller" ? "★ Bestseller" : product.badge === "novo" ? "● Novo" : "Retro"}
-            </span>
-          )}
-          {product.category === "dugi-rukav" && (
-            <span className="absolute bottom-2.5 left-2.5 z-20 rounded-[6px] bg-sky-600 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white">
-              🧥 Dugi rukav
-            </span>
-          )}
-          {product.category === "trenirka" && (
-            <span className="absolute bottom-2.5 left-2.5 z-20 rounded-[6px] bg-teal-600 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white">
-              🏃 Trenirka
-            </span>
-          )}
-        </div>
+        </Link>
 
-        <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-3 sm:px-4 sm:pb-4 sm:pt-3.5">
-          {/* Name & league */}
-          <div>
-            <p className={`hidden text-[11px] uppercase tracking-[0.26em] sm:block ${sw ? "text-orange-500/70" : tr ? "text-teal-600/70" : "text-white/40"}`}>
-              {sw ? "Streetwear" : tr ? "Trenirka" : repairText(product.liga)}
-            </p>
-            <h3 className={`text-[0.85rem] font-semibold uppercase leading-tight sm:mt-2 sm:text-[1.1rem] ${light ? "text-slate-900" : "text-white"}`}>
-              {repairText(product.klub)}
-            </h3>
-            <p className={`mt-0.5 text-[11px] leading-4 sm:mt-1 sm:text-[13px] sm:leading-5 ${light ? "text-slate-500" : "text-white/50"}`}>
-              {repairText(product.igrac)}
-            </p>
-            {product.rating && (
-              <div className="mt-1">
-                <Stars value={product.rating.value} count={product.rating.count} />
+        {tag ? (
+          <span
+            className={`pointer-events-none absolute left-2 top-2 z-20 border px-1.5 pb-1 pt-[5px] text-[9px] font-black uppercase leading-none tracking-[0.12em] ${
+              tag.volt ? "border-accent bg-accent text-black" : "border-white/[0.18] bg-black text-fg"
+            }`}
+          >
+            {tag.label}
+          </span>
+        ) : null}
+
+        <WishlistButton
+          slug={product.slug}
+          klub={product.klub}
+          igrac={product.igrac}
+          className="absolute right-2 top-2 z-20 !h-8 !w-8 !border-black/10 !bg-black/80 [&>svg]:!h-[15px] [&>svg]:!w-[15px]"
+        />
+
+        {/* Brzo dodavanje — prekriva dno slike (bez pomicanja mreže). */}
+        {isOpen ? (
+          <div className="absolute inset-x-0 bottom-0 z-30 max-h-full overflow-y-auto border-t border-white/10 bg-ink p-2.5">
+            {sizeOptions.hasAdults && sizeOptions.hasKids ? (
+              <div className="mb-2 grid grid-cols-2 gap-1">
+                {(["adult", "kid"] as const).map((seg) => (
+                  <button
+                    key={seg}
+                    type="button"
+                    onClick={() => handleSegmentClick(seg)}
+                    className={`rounded-[2px] border py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition-colors ${
+                      segment === seg ? "border-fg bg-fg text-black" : "border-white/15 text-white/55 hover:text-white"
+                    }`}
+                  >
+                    {seg === "adult" ? "Odrasli" : "Djeca"}
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
+            ) : null}
 
-          {/* Price & stock */}
-          <div className={`mt-2 flex items-center justify-between gap-2 border-t pt-2 sm:mt-3 sm:pt-3 ${light ? "border-slate-200" : "border-white/8"}`}>
-            <p className={`font-heading text-[1.4rem] uppercase leading-none tracking-[0.03em] sm:text-[1.75rem] ${acText}`}>
-              {formatPrice(product.price)}
-            </p>
-            <p className={`hidden text-[12px] font-medium sm:block ${light ? "text-slate-400" : getStockTone(stock)}`}>Ostalo: {stock} kom</p>
-            {/* Mobile cart button */}
+            <div className="mb-2 flex flex-wrap gap-1">
+              {currentSizes.map((size) => {
+                const oos =
+                  (segment === "adult" && sizeOptions.adultsOutOfStock) ||
+                  (segment === "kid" && sizeOptions.kidsOutOfStock) ||
+                  sizeOptions.soldOutSizes.includes(size);
+                return (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => !oos && setSelectedSize(size)}
+                    disabled={oos}
+                    title={oos ? "Rasprodano" : undefined}
+                    className={`min-w-[38px] rounded-[2px] border px-1.5 py-1.5 text-[11px] font-bold transition-colors ${
+                      oos
+                        ? "cursor-not-allowed border-white/5 text-[#555] line-through"
+                        : selectedSize === size
+                        ? "border-accent bg-accent text-black"
+                        : "border-white/15 text-white/80 hover:border-white/40"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                );
+              })}
+            </div>
+
             <button
               type="button"
-              onClick={handleMobileToggle}
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[6px] transition-all duration-200 md:hidden ${
-                isOpen ? (light ? "bg-slate-100 text-slate-600" : "bg-white/10 text-white") : (light ? `${acBg} text-white` : "bg-accent text-black")
-              }`}
+              onClick={handleAddToCart}
+              disabled={!selectedSize}
+              className="flex h-9 w-full items-center justify-center gap-2 rounded-[2px] bg-accent text-[11px] font-black uppercase tracking-[0.1em] text-black transition-colors hover:bg-[#f0ff71] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {isOpen ? <X className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
+              <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
+              {selectedSize ? `Dodaj — ${`${product.price ?? 20} €`}` : "Rasprodano"}
             </button>
           </div>
+        ) : null}
+      </div>
 
-          {/* Quick-add panel */}
-          <AnimatePresence>
-            {isOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="overflow-hidden"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              >
-                <div className="pt-3">
-                  {/* Segment toggle */}
-                  {sizeOptions.hasAdults && sizeOptions.hasKids && (
-                    <div className="mb-2 flex gap-1.5">
-                      {(["adult", "kid"] as const).map((seg) => (
-                        <button
-                          key={seg}
-                          type="button"
-                          onClick={(e) => handleSegmentClick(e, seg)}
-                          className={`flex-1 rounded-[4px] border py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] transition-all duration-150 ${
-                            segment === seg
-                              ? light ? (tr ? "border-teal-500 bg-teal-50 text-teal-700" : "border-orange-500 bg-orange-50 text-orange-600") : "border-accent bg-accent/10 text-accent"
-                              : light ? "border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600" : "border-white/10 text-white/40 hover:border-white/25 hover:text-white/60"
-                          }`}
-                        >
-                          {seg === "adult" ? "Odrasli" : "Djeca"}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Size buttons */}
-                  <div className="mb-2.5 flex flex-wrap gap-1.5">
-                    {currentSizes.map((size) => {
-                      const oos = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock) || sizeOptions.soldOutSizes.includes(size);
-                      return (
-                        <button
-                          key={size}
-                          type="button"
-                          onClick={(e) => !oos && handleSizeClick(e, size)}
-                          disabled={oos}
-                          title={oos ? "Nema na stanju" : undefined}
-                          className={`min-w-[40px] rounded-[4px] border px-2 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-all duration-150 ${
-                            oos
-                              ? light ? "cursor-not-allowed border-slate-100 text-slate-300 line-through" : "cursor-not-allowed border-white/5 text-white/20"
-                              : selectedSize === size
-                              ? light ? `border-transparent ${acBg} text-white` : "border-accent bg-accent text-black"
-                              : light ? `border-slate-200 text-slate-600 ${tr ? "hover:border-teal-400" : "hover:border-orange-400"} hover:text-slate-900` : "border-white/15 text-white/60 hover:border-accent/50 hover:text-white"
-                          }`}
-                        >
-                          {size}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Add to cart button */}
-                  <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    disabled={!selectedSize}
-                    className={`flex w-full items-center justify-center gap-2 rounded-[4px] py-2.5 font-heading text-[11px] uppercase tracking-[0.14em] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${light ? `${acBg} text-white ${acBgHover}` : "bg-accent text-black hover:bg-[#f0ff71]"}`}
-                  >
-                    <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
-                    <span className="pl-[0.14em]">DODAJ U KOŠARICU</span>
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+      <Link href={href} className="block px-0.5 pt-2.5" title={`${klub} ${repairText(product.igrac)}`}>
+        <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.14em] text-mute">{klub}</p>
+        <h3 className="mt-1 line-clamp-2 pt-[0.14em] font-display text-[21px] uppercase leading-none text-fg sm:text-[23px]">{name}</h3>
+        {subLine ? (
+          <p className="mt-1 truncate text-[11.5px] font-medium leading-[1.3] text-mute">{subLine}</p>
+        ) : null}
       </Link>
-    </motion.article>
+
+      <div className="mt-auto flex items-center justify-between gap-2 px-0.5 pt-2">
+        <div className="flex min-w-0 items-baseline gap-2">
+          <span className="text-[15px] font-black leading-none text-fg">{`${product.price ?? 20} €`}</span>
+          {product.rating ? (
+            <span className="truncate text-[10.5px] font-bold leading-none text-mute">
+              <b className="text-fg">★ {product.rating.value.toFixed(1)}</b> ({product.rating.count})
+            </span>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsOpen((v) => !v)}
+          aria-label={isOpen ? "Zatvori brzo dodavanje" : "Brzo dodaj u košaricu"}
+          aria-expanded={isOpen}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors md:hidden ${
+            isOpen ? "border-white/20 bg-white/10 text-white" : "border-accent bg-accent text-black"
+          }`}
+        >
+          {isOpen ? <X className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
+        </button>
+      </div>
+    </article>
   );
 }

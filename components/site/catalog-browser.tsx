@@ -17,6 +17,7 @@ import {
   productSupportsSize,
   type Jersey
 } from "@/lib/data/jerseys";
+import { SHIPPING_PRICE_EUR } from "@/lib/site";
 import { repairText } from "@/lib/utils";
 
 type CatalogBrowserProps = {
@@ -161,6 +162,11 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
   // Koliko kartica je prikazano — ostale se dodaju gumbom "Prikaži još" (lakša stranica, brži mobitel).
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
+
+  // /dresovi?dugi=1 (pločica "Dugi rukav" na naslovnici / footer) → odmah uključen filter.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("dugi") === "1") setLongSleeveOnly(true);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -350,7 +356,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
   };
 
   const checkboxClass =
-    "flex items-center gap-3 rounded-[8px] border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white/72 transition duration-200 ease-out hover:border-white/20 hover:bg-white/[0.02]";
+    "flex items-center gap-3 rounded-[2px] border border-white/10 px-3 py-2.5 text-sm font-medium text-white/80 transition-colors duration-200 ease-out hover:border-white/25";
   const checkboxInputClass =
     "h-5 w-5 rounded-[4px] border-white/20 bg-black text-accent focus:ring-accent/30";
 
@@ -359,7 +365,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
       <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4 sm:pb-5">
         <div>
           <p className="text-xs uppercase tracking-[0.32em] text-white/45">{t.catalog.filters}</p>
-          <p className="mt-2 text-2xl uppercase leading-none text-white">{t.catalog.filterTitle}</p>
+          <p className="mt-2 font-display text-[28px] uppercase leading-none text-fg">{t.catalog.filterTitle}</p>
           <p className="mt-2 text-sm text-white/45">{t.catalog.filterDesc}</p>
         </div>
         {hasAnyFilter ? (
@@ -408,7 +414,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
                 value={clubSearch}
                 onChange={(event) => setClubSearch(event.target.value)}
                 placeholder={t.catalog.searchClub}
-                className="h-12 w-full rounded-[8px] border border-white/10 bg-black pl-10 pr-4 text-sm text-white outline-none transition duration-200 ease-out focus:border-accent"
+                className="h-12 w-full rounded-[2px] border border-white/[0.18] bg-ink2 pl-10 pr-4 text-sm text-fg outline-none transition-colors duration-200 ease-out focus:border-accent"
               />
             </label>
           ) : null}
@@ -465,10 +471,10 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
                   key={size}
                   type="button"
                   onClick={() => setSelectedSizes((current) => toggleFilterValue(current, size))}
-                  className={`rounded-[6px] border px-4 py-2.5 text-sm font-semibold transition duration-200 ease-out ${
+                  className={`rounded-[2px] border px-4 py-2.5 text-sm font-bold transition-colors duration-200 ease-out ${
                     selectedSizes.includes(size)
                       ? "border-accent bg-accent text-black"
-                      : "border-white/10 bg-[#111111] text-white hover:border-accent"
+                      : "border-white/[0.18] text-fg hover:border-white/50"
                   }`}
                 >
                   {size}
@@ -484,10 +490,10 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
                   key={size}
                   type="button"
                   onClick={() => setSelectedSizes((current) => toggleFilterValue(current, size))}
-                  className={`rounded-[6px] border px-4 py-2.5 text-sm font-semibold transition duration-200 ease-out ${
+                  className={`rounded-[2px] border px-4 py-2.5 text-sm font-bold transition-colors duration-200 ease-out ${
                     selectedSizes.includes(size)
                       ? "border-accent bg-accent text-black"
-                      : "border-white/10 bg-[#111111] text-white hover:border-accent"
+                      : "border-white/[0.18] text-fg hover:border-white/50"
                   }`}
                 >
                   {size}
@@ -507,7 +513,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
         <button
           type="button"
           onClick={() => setRetroOnly((current) => !current)}
-          className={`flex w-full items-center justify-between rounded-[8px] border px-4 py-4 transition duration-200 ease-out ${
+          className={`flex w-full items-center justify-between rounded-[2px] border px-4 py-4 transition-colors duration-200 ease-out ${
             retroOnly
               ? "border-accent bg-accent/10"
               : "border-white/10 bg-[#111111] hover:border-accent"
@@ -537,7 +543,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
         <button
           type="button"
           onClick={() => setLongSleeveOnly((current) => !current)}
-          className={`flex w-full items-center justify-between rounded-[8px] border px-4 py-4 transition duration-200 ease-out ${
+          className={`flex w-full items-center justify-between rounded-[2px] border px-4 py-4 transition-colors duration-200 ease-out ${
             longSleeveOnly
               ? "border-sky-500 bg-sky-500/10"
               : "border-white/10 bg-[#111111] hover:border-sky-500"
@@ -561,33 +567,75 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
   );
 
   return (
-    <div className="panel p-3 sm:p-5 lg:p-7">
+    <div>
       {compactHeader ? (
-        <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-5 sm:mb-6">
-          <div>
-            <p className="text-xs uppercase tracking-[0.32em] text-white/45">{t.catalog.label}</p>
-            <p className="mt-2 text-2xl uppercase leading-none text-white">{t.catalog.filterTitle}</p>
-          </div>
-          <span className="inline-flex w-fit rounded-[4px] bg-accent px-3 py-2 text-xs font-semibold text-black sm:px-4 sm:text-sm">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <h2 className="font-display text-[54px] uppercase leading-[0.92] text-fg lg:text-[80px]">
+            {headingTitle ?? t.catalog.filterTitle}
+          </h2>
+          <span className="mb-1 shrink-0 whitespace-nowrap border-b-[1.5px] border-fg pb-1 text-[11px] font-black uppercase leading-none tracking-[0.12em] text-fg">
             {t.catalog.count(filteredProducts.length)}
           </span>
         </div>
       ) : (
-        <div className="mb-6 flex flex-col gap-4 border-b border-white/10 pb-6 lg:mb-8 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mb-6 flex flex-col gap-4 lg:mb-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-white/45">{headingLabel ?? t.catalog.label}</p>
-            <h1 className="mt-3 text-3xl uppercase leading-none text-white sm:text-5xl">
+            <div className="idx">{headingLabel ?? t.catalog.label}</div>
+            <h1 className="font-display text-[44px] uppercase leading-[0.92] text-fg sm:text-6xl lg:text-[80px]">
               {headingTitle ?? t.catalog.title}
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60">
+            <p className="mt-3 max-w-2xl text-[14px] font-medium leading-[1.5] text-[#c4c4bd]">
               {headingDesc ?? t.catalog.desc}
             </p>
           </div>
-          <span className="inline-flex w-fit rounded-[4px] bg-accent px-4 py-2 text-sm font-semibold text-black">
+          <span className="w-fit shrink-0 whitespace-nowrap border-b-[1.5px] border-fg pb-1 text-[11px] font-black uppercase leading-none tracking-[0.12em] text-fg">
             {t.catalog.count(filteredProducts.length)}
           </span>
         </div>
       )}
+
+      {/* Brzi filteri (koncept A "chips") — samo prečaci na postojeće filtere. */}
+      <div className="rail mb-3">
+        {[
+          { key: "all", label: locale === "en" ? "All" : "Sve", on: !hasAnyFilter, onClick: clearAllFilters },
+          {
+            key: "rep",
+            label: locale === "en" ? "National teams" : "Reprezentacije",
+            on: selectedLeagues.includes("Reprezentacija"),
+            onClick: () => setSelectedLeagues((c) => toggleFilterValue(c, "Reprezentacija"))
+          },
+          { key: "retro", label: "Retro", on: retroOnly, onClick: () => setRetroOnly((v) => !v) },
+          {
+            key: "dugi",
+            label: locale === "en" ? "Long sleeve" : "Dugi rukav",
+            on: longSleeveOnly,
+            onClick: () => setLongSleeveOnly((v) => !v)
+          }
+        ].map((chip) => (
+          <button
+            key={chip.key}
+            type="button"
+            onClick={chip.onClick}
+            aria-pressed={chip.on}
+            className={`h-[34px] shrink-0 rounded-full border px-3.5 text-[11.5px] font-bold tracking-[0.04em] transition-colors ${
+              chip.on ? "border-fg bg-fg text-black" : "border-white/[0.18] text-[#d6d6cf] hover:border-white/40"
+            }`}
+          >
+            {chip.label}
+          </button>
+        ))}
+      </div>
+      <p className="mb-4 text-[12px] font-semibold leading-[1.35] text-soft">
+        {locale === "en" ? (
+          <>
+            Kids: <b className="text-fg">jersey + shorts</b> · Adults: jersey. Delivery {SHIPPING_PRICE_EUR} € · pay on delivery.
+          </>
+        ) : (
+          <>
+            Djeca: <b className="text-fg">dres + hlačice</b> · Odrasli: dres. Dostava {SHIPPING_PRICE_EUR} € · plaćaš pri preuzimanju.
+          </>
+        )}
+      </p>
 
       <div className="grid gap-6 lg:grid-cols-[272px_minmax(0,1fr)] lg:gap-7">
         <aside
@@ -606,7 +654,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
                 onChange={(e) => setSearch(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 placeholder={t.catalog.searchPlaceholder}
-                className="h-[52px] w-full rounded-[8px] border border-white/10 bg-black pl-11 pr-4 text-sm text-white outline-none transition duration-200 ease-out focus:border-accent sm:h-14"
+                className="h-12 w-full rounded-[2px] border border-white/[0.18] bg-ink2 pl-11 pr-4 text-sm text-fg outline-none transition-colors duration-200 ease-out placeholder:text-mute focus:border-accent"
               />
               {/* Suggestions dropdown */}
               <AnimatePresence>
@@ -628,14 +676,13 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
                           onClick={() => { setSearchFocused(false); setSearch(""); }}
                           className="flex items-center gap-3 border-b border-white/5 px-4 py-3 transition-all duration-150 last:border-0 hover:bg-white/5"
                         >
-                          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[6px] bg-[#0d0d0d]">
+                          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[2px] bg-white">
                             <Image
                               src={imgSrc}
                               alt={repairText(product.klub)}
                               fill
                               sizes="40px"
                               className="object-contain p-1"
-                              style={{ mixBlendMode: "screen" }}
                               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                             />
                           </div>
@@ -643,7 +690,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
                             <p className="truncate text-sm font-semibold text-white">{repairText(product.klub)}</p>
                             <p className="truncate text-xs text-white/45">{repairText(product.igrac)}</p>
                           </div>
-                          <span className="shrink-0 font-heading text-sm text-accent">{product.price ?? 20}€</span>
+                          <span className="shrink-0 text-sm font-black text-fg">{product.price ?? 20} €</span>
                         </Link>
                       );
                     })}
@@ -658,7 +705,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
                   aria-label={locale === "en" ? "Sort" : "Sortiraj"}
-                  className="h-[52px] w-full cursor-pointer appearance-none rounded-[8px] border border-white/10 bg-black pl-4 pr-10 text-sm text-white outline-none transition duration-200 ease-out focus:border-accent sm:h-14 sm:w-auto"
+                  className="h-12 w-full cursor-pointer appearance-none rounded-[2px] border border-white/[0.18] bg-ink2 pl-4 pr-10 text-sm font-semibold text-fg outline-none transition-colors duration-200 ease-out focus:border-accent sm:w-auto"
                 >
                   <option value="recommended">{locale === "en" ? "Recommended" : "Preporučeno"}</option>
                   <option value="price-asc">{locale === "en" ? "Price: low → high" : "Cijena: niža → viša"}</option>
@@ -671,12 +718,12 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
               <button
                 type="button"
                 onClick={() => setMobileFiltersOpen(true)}
-                className="inline-flex h-[52px] flex-1 items-center justify-center gap-3 rounded-[8px] border border-accent bg-transparent px-5 text-sm font-semibold uppercase tracking-[0.24em] text-accent transition duration-200 ease-out hover:bg-accent/10 sm:h-14 lg:hidden"
+                className="inline-flex h-12 flex-1 items-center justify-center gap-2.5 rounded-[2px] border border-fg bg-fg px-5 text-[12px] font-black uppercase tracking-[0.12em] text-black transition-colors duration-200 ease-out hover:bg-white lg:hidden"
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 {t.catalog.filtersMobile}
                 {activeFilterCount ? (
-                  <span className="rounded-[4px] bg-accent px-2 py-1 text-[11px] font-bold text-black">
+                  <span className="rounded-full bg-accent px-2 py-1 text-[11px] font-black leading-none text-black">
                     {activeFilterCount}
                   </span>
                 ) : null}
@@ -691,7 +738,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
                   key={`${tag.type}-${tag.value}`}
                   type="button"
                   onClick={() => removeTag(tag.type, tag.value)}
-                  className="inline-flex items-center gap-2 rounded-[4px] border border-accent/30 bg-accent/10 px-3 py-2 text-[13px] font-medium text-accent transition duration-200 ease-out hover:border-accent sm:px-4 sm:text-sm"
+                  className="inline-flex items-center gap-2 rounded-full border border-accent/40 px-3 py-2 text-[12px] font-bold text-accent transition-colors duration-200 ease-out hover:border-accent"
                 >
                   <span>{repairText(tag.value)}</span>
                   <X className="h-3.5 w-3.5" />
@@ -700,7 +747,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
             </div>
           ) : null}
 
-          <div className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-3 2xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-6 sm:gap-x-3 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {filteredProducts.slice(0, visibleCount).map((product, index) => (
               // Na naslovnici je katalog ispod hero slike → bez priority da ne krade hero sliku.
               <ProductCard key={product.slug} product={product} priority={!compactHeader && index < 4} />
@@ -708,11 +755,11 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           </div>
 
           {filteredProducts.length > visibleCount ? (
-            <div className="mt-6 flex justify-center sm:mt-8">
+            <div className="mt-7 flex justify-center sm:mt-9">
               <button
                 type="button"
                 onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
-                className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 bg-[#111111] px-7 text-sm font-bold uppercase tracking-wide text-white transition hover:border-accent hover:text-accent"
+                className="button-secondary w-full sm:w-auto sm:min-w-[320px]"
               >
                 Prikaži još ({filteredProducts.length - visibleCount})
               </button>
@@ -720,7 +767,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           ) : null}
 
           {!filteredProducts.length ? (
-            <div className="mt-6 rounded-[12px] border border-dashed border-white/10 bg-[#111111] p-6 text-center text-sm text-white/60 sm:mt-8 sm:p-8">
+            <div className="mt-6 rounded-[2px] border border-dashed border-white/15 p-6 text-center text-sm text-white/60 sm:mt-8 sm:p-8">
               {t.catalog.noResults}
             </div>
           ) : null}
@@ -735,7 +782,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               type="button"
-              className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-50 bg-black/80 lg:hidden"
               onClick={() => setMobileFiltersOpen(false)}
               aria-label={t.catalog.closeFilters}
             />
@@ -744,12 +791,12 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 240, damping: 28 }}
-              className="fixed inset-0 z-[60] flex w-full flex-col bg-[#0a0a0a] p-4 lg:hidden"
+              className="fixed inset-0 z-[60] flex w-full flex-col bg-ink p-4 lg:hidden"
             >
               <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.32em] text-white/45">{t.catalog.filters}</p>
-                  <h3 className="mt-2 text-3xl uppercase leading-none text-white">{t.catalog.select}</h3>
+                  <h3 className="mt-2 font-display text-4xl uppercase leading-none text-fg">{t.catalog.select}</h3>
                 </div>
                 <button
                   type="button"
@@ -766,7 +813,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
               <button
                 type="button"
                 onClick={() => setMobileFiltersOpen(false)}
-                className="button-primary mt-4 inline-flex h-14 items-center justify-center px-6"
+                className="button-primary mt-4 w-full"
               >
                 {t.catalog.apply}
               </button>
