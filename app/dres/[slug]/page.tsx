@@ -49,11 +49,17 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const klub = repairText(product.klub);
   const igrac = repairText(product.igrac);
 
+  // Opis za Google i dijeljenje linka (WhatsApp/IG/FB) — PRAVA cijena i vrsta proizvoda.
+  const price = product.price ?? (isStreetwear ? 50 : 20);
+  const what =
+    isStreetwear ? "streetwear komplet"
+    : product.liga === "Komplet" ? "komplet (dres, hlačice, lopta i kapa)"
+    : product.category === "trenirka" ? "trenirka (jakna + hlače)"
+    : product.category === "dugi-rukav" ? "dres dugih rukava"
+    : "nogometni dres";
   return buildMetadata({
     title: isStreetwear ? `${klub} ${igrac} — Streetwear` : `${klub} ${igrac}`,
-    description: isStreetwear
-      ? `${klub} ${igrac} streetwear komplet za ${product.price ?? 50}€. Besplatna dostava po cijeloj Hrvatskoj, plaćanje pouzećem.`
-      : `${klub} ${igrac} nogometni dres za 20€. Dostava po cijeloj Hrvatskoj za 2-5 dana.`,
+    description: `${klub} ${igrac} ${what} za ${price}€. Dostava po cijeloj Hrvatskoj za 2-5 dana, plaćanje pouzećem.`,
     image: productMainImage(product), // og:image = prava slika proizvoda (ne generični banner)
     path: `/dres/${product.slug}`,
     keywords: isStreetwear
