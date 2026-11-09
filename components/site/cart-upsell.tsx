@@ -23,9 +23,9 @@ export function CartUpsell({ onNavigate }: { onNavigate?: () => void }) {
   if (suggestions.length === 0) return null;
 
   return (
-    <div className="border-t border-white/10 pt-3">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/50">Nadopuni narudžbu</p>
-      <div className="flex gap-2 overflow-x-auto pb-1">
+    <div>
+      <p className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.16em] text-mute">Nadopuni narudžbu</p>
+      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {suggestions.map((s) => {
           const img = getJerseyGallery(s.slug)[0]?.src;
           return (
@@ -33,15 +33,15 @@ export function CartUpsell({ onNavigate }: { onNavigate?: () => void }) {
               key={s.slug}
               href={`/dres/${s.slug}`}
               onClick={onNavigate}
-              className="group w-24 shrink-0 rounded-lg border border-white/10 bg-[#0d0d0d] p-1.5 transition hover:border-accent/50"
+              className="group w-24 shrink-0 transition-opacity hover:opacity-90"
             >
-              <div className="relative aspect-square overflow-hidden rounded bg-[#111]">
-                {img && <Image src={img} alt={`${s.klub} ${s.igrac}`} fill sizes="96px" className="object-cover" />}
+              <div className="relative aspect-square overflow-hidden rounded-[2px] bg-white">
+                {img && <Image src={img} alt={`${s.klub} ${s.igrac}`} fill sizes="96px" className="object-contain p-1" />}
               </div>
-              <div className="mt-1 truncate text-[11px] font-medium text-white/80">{repairText(s.igrac)}</div>
+              <div className="mt-1.5 truncate text-[11px] font-bold text-fg">{repairText(s.igrac)}</div>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-white/40">{repairText(s.klub)}</span>
-                <span className="text-[11px] font-bold text-accent">{s.price ?? JERSEY_PRICE_EUR}€</span>
+                <span className="truncate text-[10px] text-mute">{repairText(s.klub)}</span>
+                <span className="shrink-0 text-[11px] font-black text-fg">{s.price ?? JERSEY_PRICE_EUR} €</span>
               </div>
             </Link>
           );

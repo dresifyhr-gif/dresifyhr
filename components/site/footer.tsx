@@ -4,7 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Instagram, MessageCircle, Mail } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
-import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, INSTAGRAM_HANDLE, NAV_LINKS } from "@/lib/site";
+import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, INSTAGRAM_HANDLE, NAV_LINKS, SHIPPING_PRICE_EUR } from "@/lib/site";
+
+const shopLinks = [
+  { href: "/dresovi", label: "Dresovi" },
+  { href: "/dresovi?dugi=1", label: "Dugi rukav" },
+  { href: "/kompleti", label: "Kompleti" },
+  { href: "/trenirke", label: "Trenirke" },
+  { href: "/streetwear", label: "Streetwear" }
+] as const;
 
 const seoFooterLinks = [
   { href: "/dresovi/klub/fc-barcelona", label: "Barcelona dresovi" },
@@ -14,6 +22,15 @@ const seoFooterLinks = [
   { href: "/dresovi/kategorija/retro-dresovi", label: "Retro dresovi" },
 ] as const;
 
+const helpLinks = [
+  { href: "/dostava-i-povrat", label: "Dostava i zamjena" },
+  { href: "/pravila-privatnosti", label: "Pravila privatnosti" },
+  { href: "/igre", label: "Mini igre" }
+] as const;
+
+const linkCls = "block py-1.5 text-[14px] font-bold leading-tight text-fg transition-colors hover:text-accent";
+const headCls = "mb-3 text-[10px] font-bold uppercase leading-none tracking-[0.16em] text-mute";
+
 export function Footer() {
   const { t } = useLanguage();
   const pathname = usePathname();
@@ -22,116 +39,101 @@ export function Footer() {
   if (pathname?.startsWith("/racun")) return null;
 
   return (
-    <footer className="border-t border-white/10 bg-[#0a0a0a]">
-      {/* Top CTA strip */}
-      <div className="border-b border-white/8 bg-[#111111]">
-        <div className="page-shell flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
+    <footer className="mt-20 overflow-hidden border-t border-white/10 bg-ink lg:mt-28">
+      <div className="page-shell pb-8 pt-10 lg:pt-14">
+        <div className="grid grid-cols-2 gap-x-2.5 gap-y-8 md:grid-cols-4 lg:gap-x-10">
           <div>
-            <p className="font-heading text-2xl uppercase text-white sm:text-3xl">{t.footer.cta}</p>
-            <p className="mt-1 text-sm text-white/50">{t.footer.ctaSub}</p>
-          </div>
-          <Link href="/dresovi" className="button-primary shrink-0">
-            {t.footer.ctaBtn}
-          </Link>
-        </div>
-      </div>
-
-      {/* Main footer grid */}
-      <div className="page-shell grid gap-10 py-12 md:grid-cols-[1.4fr_0.6fr_0.7fr_0.9fr]">
-        {/* Brand column */}
-        <div>
-          <Link href="/" className="font-heading text-4xl uppercase leading-none text-white">
-            DRES<span className="text-accent">IFY</span>
-          </Link>
-          <p className="mt-4 max-w-sm text-sm leading-7 text-white/50">
-            {t.footer.desc}
-          </p>
-          {/* Social links */}
-          <div className="mt-6 flex gap-3">
-            <a
-              href={`https://instagram.com/${INSTAGRAM_HANDLE.replace("@", "")}`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex h-10 w-10 items-center justify-center rounded-[6px] border border-white/10 text-white/50 transition-all duration-200 hover:border-accent hover:text-accent"
-            >
-              <Instagram className="h-4 w-4" />
-            </a>
-            <a
-              href={`https://wa.me/${CONTACT_PHONE_DISPLAY.replace(/\D/g, "")}`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex h-10 w-10 items-center justify-center rounded-[6px] border border-white/10 text-white/50 transition-all duration-200 hover:border-accent hover:text-accent"
-            >
-              <MessageCircle className="h-4 w-4" />
-            </a>
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className="flex h-10 w-10 items-center justify-center rounded-[6px] border border-white/10 text-white/50 transition-all duration-200 hover:border-accent hover:text-accent"
-            >
-              <Mail className="h-4 w-4" />
-            </a>
-          </div>
-        </div>
-
-        {/* Nav */}
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">{t.footer.nav}</p>
-          <div className="mt-5 flex flex-col gap-3">
-            {NAV_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
+            <p className={headCls}>Shop</p>
+            {shopLinks.map((link) => (
+              <Link key={link.href} href={link.href} className={linkCls}>
                 {link.label}
               </Link>
             ))}
-            <Link href="/dostava-i-povrat" className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
-              Dostava i zamjena
-            </Link>
-            <Link href="/pravila-privatnosti" className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
-              Pravila privatnosti
-            </Link>
-            <Link href="/igre" className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
-              Mini igre
-            </Link>
           </div>
-        </div>
 
-        {/* Popular */}
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">{t.footer.popular}</p>
-          <div className="mt-5 flex flex-col gap-3">
+          <div>
+            <p className={headCls}>{t.footer.nav}</p>
+            {NAV_LINKS.filter((l) => l.href !== "/" && l.href !== "/dresovi").map((link) => (
+              <Link key={link.href} href={link.href} className={linkCls}>
+                {link.label}
+              </Link>
+            ))}
+            {helpLinks.map((link) => (
+              <Link key={link.href} href={link.href} className={linkCls}>
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          <div>
+            <p className={headCls}>{t.footer.popular}</p>
             {seoFooterLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
+              <Link key={link.href} href={link.href} className={linkCls}>
                 {link.label}
               </Link>
             ))}
           </div>
-        </div>
 
-        {/* Contact */}
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">{t.footer.contact}</p>
-          <div className="mt-5 space-y-4">
-            <div className="rounded-[8px] border border-white/8 bg-[#111111] p-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">WhatsApp</p>
-              <p className="mt-1 text-sm font-medium text-white">{CONTACT_PHONE_DISPLAY}</p>
+          <div>
+            <p className={headCls}>{t.footer.contact}</p>
+            <p className="py-1.5 text-[14px] font-bold leading-tight text-fg">WhatsApp {CONTACT_PHONE_DISPLAY}</p>
+            <p className="py-1.5 text-[14px] font-bold leading-tight text-fg">Instagram {INSTAGRAM_HANDLE}</p>
+            <p className="mt-1 text-[12px] font-medium text-mute">{t.footer.response}</p>
+            <div className="mt-4 flex gap-2">
+              <a
+                href={`https://instagram.com/${INSTAGRAM_HANDLE.replace("@", "")}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.18] text-fg transition-colors hover:border-accent hover:text-accent"
+              >
+                <Instagram className="h-4 w-4" />
+              </a>
+              <a
+                href={`https://wa.me/${CONTACT_PHONE_DISPLAY.replace(/\D/g, "")}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="WhatsApp"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.18] text-fg transition-colors hover:border-accent hover:text-accent"
+              >
+                <MessageCircle className="h-4 w-4" />
+              </a>
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                aria-label="Email"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.18] text-fg transition-colors hover:border-accent hover:text-accent"
+              >
+                <Mail className="h-4 w-4" />
+              </a>
             </div>
-            <div className="rounded-[8px] border border-white/8 bg-[#111111] p-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">Instagram</p>
-              <p className="mt-1 text-sm font-medium text-white">{INSTAGRAM_HANDLE}</p>
-            </div>
-            <p className="text-xs text-white/35">{t.footer.response}</p>
           </div>
         </div>
-      </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-white/8">
-        <div className="page-shell flex flex-col items-center justify-between gap-2 py-5 sm:flex-row">
-          <p className="text-[11px] uppercase tracking-[0.28em] text-white/30">{t.footer.copyright}</p>
-          <div className="flex items-center gap-1">
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/20">{t.footer.madeWith}</span>
-            <span className="text-accent/60 text-[11px]">♥</span>
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/20">{t.footer.inCroatia}</span>
-          </div>
+        <p className="mt-10 max-w-xl text-[13px] font-medium leading-[1.5] text-mute">{t.footer.desc}</p>
+
+        <div className="mt-6 flex flex-wrap gap-1.5">
+          {["Pouzeće", "GLS", `Dostava ${SHIPPING_PRICE_EUR} €`, "Samo HR"].map((chip) => (
+            <span
+              key={chip}
+              className="rounded-full border border-white/[0.18] px-2.5 py-2 text-[10px] font-black uppercase leading-none tracking-[0.1em] text-[#d6d6cf]"
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+
+        <p
+          aria-hidden
+          className="-mx-1.5 mt-11 whitespace-nowrap font-display text-[29vw] uppercase leading-[0.78] tracking-[-0.01em] text-fg lg:text-[22vw] 2xl:text-[300px]"
+        >
+          Dresify<span className="text-accent">.</span>
+        </p>
+
+        <div className="mt-5 flex flex-col justify-between gap-1 text-[11px] font-medium leading-[1.4] text-mute sm:flex-row">
+          <span>{t.footer.copyright}</span>
+          <span>
+            {t.footer.madeWith} <span className="text-accent">♥</span> {t.footer.inCroatia}
+          </span>
         </div>
       </div>
     </footer>
