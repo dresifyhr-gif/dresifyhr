@@ -5,7 +5,7 @@ import { parseOrderPayload } from "@/lib/orders";
 import { lookupPromo } from "@/lib/promo-db";
 import { phoneKey } from "@/lib/utils";
 import { SHIPPING_PRICE_EUR, FREE_SHIPPING_THRESHOLD_EUR } from "@/lib/site";
-import { sendOrderNotifications } from "@/lib/notifications";
+import { sendOrderNotifications, sendAdminTelegramText } from "@/lib/notifications";
 import { sendNewOrderPush } from "@/lib/push";
 import { logOrderToSheet } from "@/lib/sheets";
 import { saveOrderToDb } from "@/lib/order-db";
@@ -29,14 +29,37 @@ function readFbCookies(cookieHeader: string | null) {
 // NE prođe čak i ako je kupac imao staru (keširanu) stranicu otvorenu. Čita stanje
 // IZRAVNO iz baze (getProductsFresh), na keš pada samo kad baza ne radi.
 // Fail-open: ako provjera pukne, ne blokira narudžbu (nikad ne rušimo prodaju).
-async function findUnavailableItems(items: { slug: string; klub: string; igrac: string; size: string }[]) {
+type FreshProducts = Map<string, ReturnType<typeof getJerseyBySlug>>;
+
+// Svježe iz baze, jednim upitom za sve artikle (ne iz keša trgovine). Koristi se i za
+// provjeru zalihe i za cijene. Kad baza ne radi → prazna mapa (fail-open).
+async function loadFreshProducts(items: { slug: string }[]): Promise<FreshProducts> {
+  const slugs = Array.from(new Set(items.map((it) => it.slug).filter(Boolean)));
+  if (!slugs.length) return new Map();
+  return getProductsFresh(slugs.map((slug) => ({ slug, base: getJerseyBySlug(slug) }))).catch(() => new Map());
+}
+
+// SIGURNOST NOVCA: cijena svakog artikla uzima se iz kataloga (baze), ne od klijenta.
+// Ručne/nepoznate stavke zadržavaju klijentsku cijenu. Vraća novi subtotal.
+function repriceItems(items: { slug: string; unitPrice: number }[], products: FreshProducts) {
+  let changed = false;
+  for (const it of items) {
+    const p = it.slug ? products.get(it.slug) : undefined;
+    const price = p?.price;
+    if (typeof price === "number" && price > 0 && price !== it.unitPrice) {
+      it.unitPrice = price;
+      changed = true;
+    }
+  }
+  return { changed, subtotal: items.reduce((sum, it) => sum + (it.unitPrice || 0), 0) };
+}
+
+async function findUnavailableItems(
+  items: { slug: string; klub: string; igrac: string; size: string }[],
+  products: FreshProducts
+) {
   const bad: string[] = [];
   const checked = items.filter((it) => it.slug && it.size); // ručne stavke / bez veličine — preskoči
-  // Svježe iz baze, jednim upitom za sve artikle (ne iz keša trgovine) — rasprodana
-  // veličina ne smije proći čak ni ako se signal o smanjenju zalihe izgubio.
-  const products = await getProductsFresh(checked.map((it) => ({ slug: it.slug, base: getJerseyBySlug(it.slug) }))).catch(
-    () => new Map<string, ReturnType<typeof getJerseyBySlug>>()
-  );
   for (const it of checked) {
     try {
       const product = products.get(it.slug);
@@ -89,6 +112,21 @@ export async function POST(request: Request) {
     // Ovako nitko ne može podvaliti dostava=0 ni lažni popust (bitno za Igor/Ivica podjelu).
     const { userId } = await auth();
     const signedIn = !!userId;
+
+    // Cijene iz kataloga (svježe iz baze). Ako se razlikuju od onoga što je kupac
+    // vidio (stara stranica ili podvala), vrijedi katalog + napomena za admina.
+    const freshProducts = await loadFreshProducts(payload!.items ?? []);
+    const items = payload!.items ?? [];
+    // Samo kad je SVAKA stavka u košarici imala cijenu — inače klijentski subtotal ostaje.
+    if (items.length && items.every((it) => it.unitPrice > 0)) {
+      const clientSubtotal = payload!.subtotal;
+      const { subtotal } = repriceItems(items, freshProducts);
+      if (subtotal > 0 && subtotal !== clientSubtotal) {
+        payload!.subtotal = subtotal;
+        const warn = `⚠ Cijena ispravljena po katalogu: kupac vidio ${clientSubtotal} €, katalog ${subtotal} €.`;
+        payload!.note = payload!.note ? `${warn}\n${payload!.note}` : warn;
+      }
+    }
     const goods = payload!.subtotal;
     let discount = 0;
     let freeship = false;
@@ -112,7 +150,7 @@ export async function POST(request: Request) {
 
     // Odbij narudžbu za rasprodanu veličinu/segment PRIJE slanja obavijesti —
     // da OOS narudžba nikad ne uđe (npr. kupac imao staru stranicu otvorenu).
-    const unavailable = await findUnavailableItems(payload!.items ?? []);
+    const unavailable = await findUnavailableItems(payload!.items ?? [], freshProducts);
     if (unavailable.length) {
       return NextResponse.json(
         {
@@ -183,6 +221,14 @@ export async function POST(request: Request) {
     // upisana u bazu. bustCache nikad ne baca, pa ne može srušiti narudžbu.
     // (Zalihe javlja decrementSizeStock sam, tagom "products".)
     if (dbResult.status === "fulfilled" && dbResult.value?.ok) bustCache("orders");
+    // Narudžba je stigla (mail/Telegram), ali NIJE upisana u admin bazu → ne bi se
+    // vidjela u adminu ni u obračunu. Javi odmah na Telegram da se ne izgubi.
+    const dbSkipped = dbResult.status === "fulfilled" && "skipped" in dbResult.value && dbResult.value.skipped;
+    if (!dbSkipped && !(dbResult.status === "fulfilled" && dbResult.value?.ok)) {
+      await sendAdminTelegramText(
+        `⚠️ Narudžba NIJE upisana u admin bazu — dodaj je ručno.\n${payload!.name} · ${payload!.phone} · ${payload!.total} €\n(podaci su u mailu/Telegram poruci i Google Sheetu)`
+      );
+    }
 
     return NextResponse.json({
       ok: true,

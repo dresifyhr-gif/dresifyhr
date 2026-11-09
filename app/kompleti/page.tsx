@@ -3,7 +3,7 @@ import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { buildBreadcrumbSchema, buildItemListSchema, buildMetadata } from "@/lib/seo";
 import { jerseys } from "@/lib/data/jerseys";
-import { getCatalogProducts } from "@/lib/data/product-overrides";
+import { forCards, getCatalogProducts } from "@/lib/data/product-overrides";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
 export const metadata = buildMetadata({
@@ -51,7 +51,7 @@ export default async function KompletiPage() {
         />
 
         <CatalogBrowser
-          products={kompleti}
+          products={forCards(kompleti)}
           headingLabel="Komplete"
           headingTitle="Komplete — Dres + Hlačice + Lopta + Kapa. 40€."
           headingDesc="Nogometni komplete za djecu i odrasle — dres, hlačice, lopta i kapa u jednom paketu. Fiksna cijena 40€, dostava pouzećem po cijeloj Hrvatskoj za 2–5 radnih dana."

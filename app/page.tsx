@@ -11,7 +11,7 @@ import { StreetwearBanner } from "@/components/home/streetwear-banner";
 import { TrenirkaBanner } from "@/components/home/trenirka-banner";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { jerseys } from "@/lib/data/jerseys";
-import { getFeaturedProducts, getCatalogProducts, getStreetwearProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
+import { forCards, getFeaturedProducts, getCatalogProducts, getStreetwearProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { getVisibleTestimonials } from "@/lib/testimonials";
 import { getSettings } from "@/lib/settings";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
@@ -78,14 +78,14 @@ export default async function HomePage() {
           images={trenirke.map((p) => p.images?.[0]?.src).filter((s): s is string => !!s).slice(0, 5)}
         />
       )}
-      {show("featured") && <FeaturedSection products={await getFeaturedProducts(jerseys)} />}
+      {show("featured") && <FeaturedSection products={forCards(await getFeaturedProducts(jerseys))} />}
 
       <section className="section-pad bg-[#0a0a0a]">
         <div className="page-shell">
           <HomeCatalogTabs
-            dresovi={dresovi}
-            streetwear={streetwear}
-            trenirke={trenirke}
+            dresovi={forCards(dresovi)}
+            streetwear={forCards(streetwear)}
+            trenirke={forCards(trenirke)}
             headingLabel={t.home.catalogKicker}
             headingTitle={t.home.catalogTitle}
             headingDesc={t.home.catalogDesc}

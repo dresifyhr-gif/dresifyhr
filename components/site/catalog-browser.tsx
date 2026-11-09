@@ -68,6 +68,8 @@ const clubLabelOrder = [
   "Italija"
 ];
 
+const PAGE_SIZE = 24;
+
 const adultSizeOptions = ["S", "M", "L", "XL"];
 const kidSizeOptions = ["116", "128", "140", "152", "164", "176"];
 
@@ -156,6 +158,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
   const [clubSearch, setClubSearch] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  // Koliko kartica je prikazano — ostale se dodaju gumbom "Prikaži još" (lakša stranica, brži mobitel).
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -195,6 +199,10 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
 
     return clubOptions.filter((club) => normalizeText(repairText(club)).includes(term));
   }, [clubOptions, clubSearch]);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, selectedLeagues, selectedClubs, selectedPlayers, selectedSizes, retroOnly, longSleeveOnly, sortBy]);
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = normalizeText(search.trim());
@@ -693,10 +701,23 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           ) : null}
 
           <div className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-3 2xl:grid-cols-3">
-            {filteredProducts.map((product, index) => (
-              <ProductCard key={product.slug} product={product} priority={index < 6} />
+            {filteredProducts.slice(0, visibleCount).map((product, index) => (
+              // Na naslovnici je katalog ispod hero slike → bez priority da ne krade hero sliku.
+              <ProductCard key={product.slug} product={product} priority={!compactHeader && index < 4} />
             ))}
           </div>
+
+          {filteredProducts.length > visibleCount ? (
+            <div className="mt-6 flex justify-center sm:mt-8">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 bg-[#111111] px-7 text-sm font-bold uppercase tracking-wide text-white transition hover:border-accent hover:text-accent"
+              >
+                Prikaži još ({filteredProducts.length - visibleCount})
+              </button>
+            </div>
+          ) : null}
 
           {!filteredProducts.length ? (
             <div className="mt-6 rounded-[12px] border border-dashed border-white/10 bg-[#111111] p-6 text-center text-sm text-white/60 sm:mt-8 sm:p-8">

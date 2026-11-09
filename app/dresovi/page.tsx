@@ -8,7 +8,7 @@ import {
   getJerseyPlayerCollections
 } from "@/lib/data/seo-collections";
 import { jerseys } from "@/lib/data/jerseys";
-import { getCatalogProducts } from "@/lib/data/product-overrides";
+import { forCards, getCatalogProducts } from "@/lib/data/product-overrides";
 import { buildBreadcrumbSchema, buildItemListSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
@@ -59,7 +59,7 @@ export default async function JerseysPage() {
           ]}
         />
 
-        <CatalogBrowser products={dresovi} />
+        <CatalogBrowser products={forCards(dresovi)} />
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <SeoLinkGrid

@@ -312,3 +312,13 @@ export const getProductBySlug = cache(async (slug: string, base: Jersey | undefi
   if (sold.has(slug)) product = { ...product, rating: ratingFor(slug) };
   return product;
 });
+
+// Za kartice u katalogu (klijentske komponente): bez dugog opisa i s najviše 2 slike
+// (prednja + stražnja za hover). Sve ovo ide u HTML svake stranice, pa je manje = brže.
+export function forCards(list: Jersey[]): Jersey[] {
+  return list.map((j) => ({
+    ...j,
+    descriptionOverride: undefined,
+    images: j.images ? j.images.slice(0, 2) : j.images
+  }));
+}
