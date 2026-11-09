@@ -47,100 +47,98 @@ export function Navbar() {
     window.location.reload();
   };
 
+  const iconBtn =
+    "inline-flex h-11 w-11 items-center justify-center text-fg transition-colors duration-200 ease-out hover:text-accent";
+  const cartButton = (
+    <button type="button" onClick={openDrawer} className={`relative ${iconBtn}`} aria-label={t.nav.openCart}>
+      <ShoppingBag className="h-[21px] w-[21px]" strokeWidth={1.8} />
+      {itemCount > 0 ? (
+        <span className="absolute right-1 top-1.5 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-accent px-1 text-[9px] font-black leading-none text-black">
+          {itemCount}
+        </span>
+      ) : null}
+    </button>
+  );
+  const accountLink = (
+    <>
+      <SignedOut>
+        <Link href="/prijava" className={iconBtn} aria-label="Prijava" title="Prijava / Registracija">
+          <User className="h-[21px] w-[21px]" strokeWidth={1.8} />
+        </Link>
+      </SignedOut>
+      <SignedIn>
+        <Link href="/racun" className={iconBtn} aria-label="Moj profil" title="Moj Dresify">
+          <User className="h-[21px] w-[21px]" strokeWidth={1.8} />
+        </Link>
+      </SignedIn>
+    </>
+  );
+  const logo = (
+    <Link href="/" className="font-display text-[1.6rem] uppercase leading-none tracking-[0.02em] text-fg md:text-[1.85rem]" aria-label="Dresify — početna">
+      DRESIFY<span className="text-accent">.</span>
+    </Link>
+  );
+
   return (
     <>
       <header
-        className="sticky z-40 border-b border-white/10 bg-[#0a0a0a]"
+        className="sticky z-40 border-b border-white/10 bg-ink"
         style={{ top: "var(--announcement-offset, 0px)" }}
       >
-        {/* MOBILE: ☰ + 🔍 lijevo · logo u sredini · račun + košarica desno */}
-        <div className="page-shell grid h-[76px] grid-cols-[1fr_auto_1fr] items-center gap-2 md:hidden">
-          <div className="flex items-center gap-1 justify-self-start">
+        {/* MOBILE: ☰ lijevo · logo u sredini · traži + račun + košarica desno */}
+        <div className="grid h-14 grid-cols-[1fr_auto_1fr] items-center px-2 md:hidden">
+          <div className="flex items-center justify-self-start">
             <button
               type="button"
               onClick={() => setIsMenuOpen(true)}
-              className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
+              className={iconBtn}
               aria-label={t.nav.openMenu}
             >
-              <Menu className="h-[18px] w-[18px]" />
+              <Menu className="h-6 w-6" strokeWidth={1.8} />
             </button>
-            <SearchOverlay />
           </div>
 
-          <Link href="/" className="justify-self-center font-heading text-[2.2rem] uppercase leading-none text-white">
-            DRES<span className="text-accent">IFY</span>
-          </Link>
+          <div className="justify-self-center">{logo}</div>
 
-          <div className="flex items-center gap-1 justify-self-end">
-            <SignedOut>
-              <Link
-                href="/prijava"
-                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
-                aria-label="Prijava"
-                title="Prijava / Registracija"
-              >
-                <User className="h-[18px] w-[18px]" />
-              </Link>
-            </SignedOut>
-            <SignedIn>
-              <Link
-                href="/racun"
-                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
-                aria-label="Moj profil"
-                title="Moj Dresify"
-              >
-                <User className="h-[18px] w-[18px]" />
-              </Link>
-            </SignedIn>
-            <button
-              type="button"
-              onClick={openDrawer}
-              className="relative inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
-              aria-label={t.nav.openCart}
-            >
-              <ShoppingBag className="h-[18px] w-[18px]" />
-              <span className="absolute -right-2 -top-2 min-w-6 rounded-full bg-accent px-1.5 py-1 text-[11px] font-bold leading-none text-black">
-                {itemCount}
-              </span>
-            </button>
+          <div className="flex items-center justify-self-end">
+            <SearchOverlay />
+            {accountLink}
+            {cartButton}
           </div>
         </div>
 
         {/* DESKTOP: logo lijevo · navigacija · jezik + pretraga + račun + košarica desno */}
-        <div className="page-shell hidden h-[76px] items-center justify-between gap-4 md:flex">
-          <Link href="/" className="font-heading text-[2.15rem] uppercase leading-none text-white">
-            DRES<span className="text-accent">IFY</span>
-          </Link>
+        <div className="page-shell hidden h-[68px] items-center justify-between gap-4 md:flex">
+          {logo}
 
-          <nav className="flex items-center gap-9">
+          <nav className="flex items-center gap-8 lg:gap-10">
             {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`whitespace-nowrap text-sm font-semibold uppercase tracking-[0.3em] transition-all duration-200 ease-out ${
-                    isActive ? "text-accent" : "text-white hover:text-accent"
+                  className={`relative whitespace-nowrap py-2 text-[12px] font-black uppercase tracking-[0.14em] transition-colors duration-200 ease-out ${
+                    isActive ? "text-accent" : "text-fg hover:text-accent"
                   }`}
                 >
                   {item.label}
+                  {isActive ? <span className="absolute inset-x-0 -bottom-[3px] h-[2px] bg-accent" /> : null}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {/* Language switcher */}
-            <div className="flex items-center gap-0">
+            <div className="mr-2 flex items-center">
               {(["hr", "en"] as Locale[]).map((l, i) => (
                 <button
                   key={l}
                   type="button"
                   onClick={() => handleLocale(l)}
-                  className={`h-8 px-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition-all duration-200 ease-out ${
-                    locale === l
-                      ? "text-accent"
-                      : "text-white/40 hover:text-white/70"
+                  className={`h-8 px-2.5 text-[11px] font-bold uppercase tracking-[0.16em] transition-colors duration-200 ease-out ${
+                    locale === l ? "text-accent" : "text-white/40 hover:text-white/70"
                   } ${i === 0 ? "border-r border-white/10" : ""}`}
                 >
                   {l.toUpperCase()}
@@ -149,39 +147,8 @@ export function Navbar() {
             </div>
 
             <SearchOverlay />
-
-            <SignedOut>
-              <Link
-                href="/prijava"
-                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
-                aria-label="Prijava"
-                title="Prijava / Registracija"
-              >
-                <User className="h-[18px] w-[18px]" />
-              </Link>
-            </SignedOut>
-            <SignedIn>
-              <Link
-                href="/racun"
-                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
-                aria-label="Moj profil"
-                title="Moj Dresify"
-              >
-                <User className="h-[18px] w-[18px]" />
-              </Link>
-            </SignedIn>
-
-            <button
-              type="button"
-              onClick={openDrawer}
-              className="relative inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
-              aria-label={t.nav.openCart}
-            >
-              <ShoppingBag className="h-[18px] w-[18px]" />
-              <span className="absolute -right-2 -top-2 min-w-6 rounded-full bg-accent px-1.5 py-1 text-[11px] font-bold leading-none text-black">
-                {itemCount}
-              </span>
-            </button>
+            {accountLink}
+            {cartButton}
           </div>
         </div>
       </header>
@@ -192,30 +159,31 @@ export function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-[#0a0a0a] md:hidden"
+            className="fixed inset-0 z-50 bg-ink md:hidden"
           >
             <div className="page-shell flex h-full flex-col py-6">
               <div className="flex items-center justify-between border-b border-white/10 pb-5">
-                <Link href="/" className="font-heading text-[2.15rem] uppercase leading-none text-white">
-                  DRES<span className="text-accent">IFY</span>
-                </Link>
+                {logo}
                 <button
                   type="button"
                   onClick={() => setIsMenuOpen(false)}
-                  className="inline-flex h-11 w-11 items-center justify-center border border-white/10 bg-[#111111] text-white"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/[0.18] text-fg"
                   aria-label={t.nav.closeMenu}
                 >
                   <X className="h-[18px] w-[18px]" />
                 </button>
               </div>
 
-              <nav className="flex flex-1 flex-col justify-center gap-5">
-                {NAV_ITEMS.map((item) => (
+              <nav className="flex flex-1 flex-col justify-center gap-1">
+                {NAV_ITEMS.map((item, i) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="font-heading text-[2.7rem] uppercase leading-[0.9] text-white transition-all duration-200 ease-out hover:text-accent"
+                    className="flex items-baseline gap-4 border-b border-white/10 py-3 font-display text-[2.6rem] uppercase leading-[0.95] text-fg transition-colors duration-200 ease-out hover:text-accent"
                   >
+                    <span className="w-7 text-[11px] font-black not-italic tracking-[0.16em] text-mute" style={{ fontFamily: "var(--font-archivo)" }}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
                     {item.label}
                   </Link>
                 ))}
@@ -228,7 +196,7 @@ export function Navbar() {
                     key={l}
                     type="button"
                     onClick={() => handleLocale(l)}
-                    className={`font-heading text-2xl uppercase tracking-[0.2em] transition-all duration-200 ease-out ${
+                    className={`text-sm font-black uppercase tracking-[0.2em] transition-all duration-200 ease-out ${
                       locale === l ? "text-accent" : "text-white/35 hover:text-white/60"
                     }`}
                   >

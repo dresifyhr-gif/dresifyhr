@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { hrHR } from "@clerk/localizations";
-import { Barlow, Bebas_Neue } from "next/font/google";
+import { Anton, Archivo, Barlow } from "next/font/google";
 import { cookies } from "next/headers";
 
 import { LanguageProvider } from "@/contexts/language-context";
@@ -29,16 +29,28 @@ import { SiteChrome } from "@/components/site/site-chrome";
 import { buildOrganizationSchema, buildWebsiteSchema, defaultMetadata } from "@/lib/seo";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
-const bebas = Bebas_Neue({
+// Koncept A "Matchday Drop": Anton (veliki zbijeni naslovi) + Archivo (tekst/gumbi).
+// latin-ext je obavezan zbog č ć š ž đ.
+const anton = Anton({
   weight: "400",
-  subsets: ["latin"],
-  variable: "--font-bebas"
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-anton",
+  display: "swap"
+});
+
+const archivo = Archivo({
+  subsets: ["latin", "latin-ext"],
+  weight: ["500", "600", "700", "800", "900"],
+  variable: "--font-archivo",
+  display: "swap"
 });
 
 const barlow = Barlow({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-barlow"
+  variable: "--font-barlow",
+  // Barlow je ostao samo za admin — ne preloadamo ga na shopu.
+  preload: false
 });
 
 export const metadata: Metadata = {
@@ -106,7 +118,7 @@ export default async function RootLayout({
   return (
     <ClerkProvider localization={hrHR} signInUrl="/prijava" signUpUrl="/registracija" signInFallbackRedirectUrl="/racun" signUpFallbackRedirectUrl="/racun">
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${bebas.variable} ${barlow.variable}`}>
+      <body className={`${barlow.variable} ${anton.variable} ${archivo.variable}`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
