@@ -355,7 +355,7 @@ export async function getDashboardMetrics() {
     }),
     prisma.order.findMany({
       where: { status: { in: ["shipped", "done"] }, cashCollected: true, ...collectedSinceFilter },
-      select: { total: true, shipping: true, shippedBy: true, promoCode: true, courier: true, createdAt: true, userId: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
+      select: { total: true, shipping: true, shippedBy: true, courier: true, createdAt: true, userId: true, items: { select: { slug: true, klub: true, igrac: true, quantity: true } } }
     }),
     profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter }),
     prisma.adSpend.groupBy({ by: ["paidBy"], _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined })
@@ -381,7 +381,8 @@ export async function getDashboardMetrics() {
   }
   let shipPLCollected = 0; // saldo dostave nad prikupljenim narudžbama (GLS marža − besplatne dostave)
   for (const o of collectedCashOrders) {
-    shipPLCollected += shipPLFor({ ...o, status: "shipped" }, freeShipThreshold, deliveryCost, returnCost);
+    const pl = shipPLFor({ ...o, status: "shipped" }, freeShipThreshold, deliveryCost, returnCost);
+    shipPLCollected += pl;
     const who = o.shippedBy === "igor" ? "igor" : o.shippedBy === "ivica" ? "ivica" : null;
     if (!who) continue;
     const amt = o.total - (o.shipping ?? 0);
@@ -393,9 +394,10 @@ export async function getDashboardMetrics() {
     const b = cashSplit[who];
     b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k; b.collectedStreet += s;
     b.collectedLong += l; b.collectedTren += tr;
-    // Besplatna dostava = roba ≥ 60€ ILI osvojeno na igrici ILI streetwear → mi platili ~5€ pošti.
-    const isFreeShip = amt >= 60 || Boolean(o.promoCode && o.promoCode.trim()) || o.items.some((it) => it.slug && streetwearSlugs.has(it.slug));
-    if (isFreeShip) freeDeliveries++;
+    // Besplatna dostava = isto pravilo kao shipPLFor (jedna definicija): pl < 0 znači da je
+    // dostava stvarno bila besplatna (shipping=0, roba ≥ prag, registriran ili prije 3.8.2026)
+    // pa smo je mi platili. Promo kod sam po sebi NIJE besplatna dostava (npr. -10%).
+    if (pl < 0) freeDeliveries++;
   }
   // ── Pouzeće UKUPNO (sve poslano, neovisno o poravnanju) ────────────────────
   // Iste brojke kao na stranici Narudžbe: koliko je prikupljeno, koliko još fali,

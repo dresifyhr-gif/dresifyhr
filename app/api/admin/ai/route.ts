@@ -7,6 +7,7 @@ import { getOldUnshipped } from "@/lib/admin-winback";
 import { getOrderReference } from "@/lib/orders";
 import { adjustCustomerTotals } from "@/lib/order-db";
 import { prisma } from "@/lib/prisma";
+import { adjustOrderStock } from "@/lib/stock";
 import { formatCroatianName } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -132,6 +133,7 @@ ${context}`;
         if (res.count === 1 && order.status !== "returned") {
           const netGoods = order.total - (order.shipping ?? 0);
           await adjustCustomerTotals(order.phone, -netGoods, -1);
+          await adjustOrderStock(orderId, 1); // vrati zalihu (kao HTTP cancel ruta)
         }
         return {
           ok: true,

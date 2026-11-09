@@ -117,6 +117,34 @@ export async function sendPushToEndpoint(endpoint: string, msg: PushMessage) {
   return sendToSubs([sub], msg);
 }
 
+// "Ivana Rukavina" → "Ivana R." (kratko za obavijest na mobitelu).
+function shortName(full: string) {
+  const parts = (full || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "Kupac";
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1].charAt(0).toUpperCase()}.`;
+}
+
+// Tekst obavijesti o novim povratima (GLS/HP kurir javio povrat). Do 3 imena pa "+N".
+// SAMO podsjetnik — status narudžbe se NE mijenja, čovjek klikne "Vraćeno" u adminu.
+export function buildReturnedText(list: { name: string; total: number }[]) {
+  const shown = list.slice(0, 3).map((r) => `${shortName(r.name)} (${(r.total || 0).toFixed(2).replace(".", ",").replace(",00", "")} €)`);
+  const more = list.length > 3 ? ` +${list.length - 3}` : "";
+  return `${shown.join(", ")}${more} — potvrdi u adminu`;
+}
+
+// Novi povrati iz GLS crona → JEDAN push svima. Best-effort (pozivatelj hvata grešku).
+export async function sendReturnedPush(list: { name: string; total: number }[]) {
+  if (list.length === 0) return { configured, sent: 0, failed: 0, pruned: 0 };
+  return sendPushToAll({
+    title: list.length === 1 ? "↩ Povrat" : `↩ Povrati (${list.length})`,
+    body: buildReturnedText(list),
+    url: "/admin/narudzbe/",
+    tag: "returned",
+    kind: "returned"
+  });
+}
+
 // Nova narudžba → push svima. Best-effort (pozivatelj hvata grešku).
 export async function sendNewOrderPush(order: OrderPayload) {
   const ref = getOrderReference(order.createdAt);

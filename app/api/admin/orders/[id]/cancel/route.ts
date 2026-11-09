@@ -4,6 +4,7 @@ import { isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { adjustCustomerTotals } from "@/lib/order-db";
 import { setOrderStatusInSheet } from "@/lib/sheets";
+import { adjustOrderStock } from "@/lib/stock";
 
 export const runtime = "nodejs";
 
@@ -37,6 +38,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
     if (res.count === 1 && !alreadyOffTotals) {
       await adjustCustomerTotals(order.phone, -netGoods, -1);
+      // Roba nije otišla kupcu → vrati zalihu po veličini (samo na stvarnom
+      // prijelazu; ako je već bila "returned", zaliha je vraćena tada).
+      await adjustOrderStock(id, 1);
     }
   } else {
     const restoreData =
@@ -49,6 +53,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
     if (res.count === 1) {
       await adjustCustomerTotals(order.phone, netGoods, 1);
+      // Narudžba je opet aktivna → ponovno skini zalihu (simetrično otkazu).
+      await adjustOrderStock(id, -1);
     }
   }
 

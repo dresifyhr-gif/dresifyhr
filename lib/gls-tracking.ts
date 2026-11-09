@@ -83,12 +83,12 @@ export async function checkGlsDeliveries(opts: { dryRun?: boolean } = {}) {
   // ne zanima nas više u praćenju dostave (i puno manje upita kuririma).
   const orders = await prisma.order.findMany({
     where: { status: { in: ["shipped", "done"] }, cashCollected: false },
-    select: { id: true, customerName: true, tracking: true, courier: true, deliveryStatus: true }
+    select: { id: true, customerName: true, total: true, tracking: true, courier: true, deliveryStatus: true }
   });
   const cand = orders.filter((o) => (o.tracking || "").trim());
   const counts = { delivered: 0, returned: 0, transit: 0, prep: 0, unknown: 0 };
   const newlyDelivered: { name: string; tracking: string }[] = [];
-  const newlyReturned: { name: string; tracking: string }[] = [];
+  const newlyReturned: { name: string; tracking: string; total: number }[] = [];
   const BATCH = 5;
   for (let i = 0; i < cand.length; i += BATCH) {
     const chunk = cand.slice(i, i + BATCH);
@@ -103,7 +103,7 @@ export async function checkGlsDeliveries(opts: { dryRun?: boolean } = {}) {
       if (!st) { counts.unknown++; continue; }
       counts[st]++;
       if (st === "delivered" && o.deliveryStatus !== "delivered") newlyDelivered.push({ name: o.customerName, tracking: (o.tracking || "").trim() });
-      if (st === "returned" && o.deliveryStatus !== "returned") newlyReturned.push({ name: o.customerName, tracking: (o.tracking || "").trim() });
+      if (st === "returned" && o.deliveryStatus !== "returned") newlyReturned.push({ name: o.customerName, tracking: (o.tracking || "").trim(), total: o.total || 0 });
       if (!opts.dryRun && o.deliveryStatus !== st) {
         // Samo OZNAKA dostave — status narudžbe NE diramo (Gazda sam klikne "Vraćeno").
         // Povrat čisti eventualni lažni deliveredAt da ne ostane u naplati.

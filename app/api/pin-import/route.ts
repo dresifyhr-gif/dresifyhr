@@ -105,11 +105,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, matched: true, orderId: already.id, alreadyHad: true, customerName: already.customerName });
   }
 
-  // Kandidati: narudžbe čije ime sadrži i ime i prezime primatelja (bez dijakritike).
-  // Mali skup → filtriramo u JS-u (kao i pretraga narudžbi).
+  // Kandidati: SAMO aktivne narudžbe (nova/poslana), bez PIN-a, čije ime sadrži i ime i
+  // prezime primatelja (bez dijakritike). Otkazane/vraćene/gotove ne diramo — inače PIN može
+  // sjesti na krivu narudžbu istog imena. Bez vremenskog prozora: narudžba može čekati robu tjednima.
   const orders = await prisma.order.findMany({
+    where: { status: { in: ["new", "shipped"] }, pin: null },
     orderBy: { createdAt: "desc" },
-    select: { id: true, customerName: true, createdAt: true, status: true, courier: true, pin: true }
+    select: { id: true, customerName: true, createdAt: true }
   });
   const dIme = deaccent(ime);
   const dPrez = deaccent(prezime);
@@ -119,18 +121,30 @@ export async function POST(request: Request) {
   });
 
   if (matches.length === 0) {
-    // Zabilježimo da mail nije spojen — Apps Script će to logirati, a Gazda može ručno.
+    // Nije spojeno (npr. ponovno slanje narudžbe koja već ima stari PIN) — PIN ipak ide na
+    // Telegram s upozorenjem da se ne izgubi; Apps Script to logira, a Gazda upiše ručno.
+    await sendPinTelegram(`${ime} ${prezime}`.trim(), pin, "⚠️ NESPOJENO — nije pronađena narudžba, upiši ručno").catch(() => {});
     return NextResponse.json({ ok: true, matched: false, reason: "Nema narudžbe s tim imenom", ime, prezime });
   }
 
-  // Odaberi najbolju: bez postojećeg PIN-a > GLS/prazan kurir (paketomat PIN nije za HP) > najnovija.
-  const best = [...matches].sort((a, b) => {
-    const pinRank = (o: typeof a) => (o.pin ? 1 : 0);
-    if (pinRank(a) !== pinRank(b)) return pinRank(a) - pinRank(b);
-    const glsRank = (o: typeof a) => (o.courier === "hp" ? 1 : 0);
-    if (glsRank(a) !== glsRank(b)) return glsRank(a) - glsRank(b);
-    return b.createdAt.getTime() - a.createdAt.getTime();
-  })[0];
+  if (matches.length > 1) {
+    // Više aktivnih narudžbi s istim imenom — NE pogađamo. PIN ne upisujemo nikamo,
+    // ali ga ipak proslijedimo na Telegram s upozorenjem da čovjek ručno provjeri.
+    const refs = matches.map((o) => `${o.customerName} ${getOrderReference(o.createdAt.toISOString())}`).join(", ");
+    const who = `${ime} ${prezime}`.trim();
+    await sendPinTelegram(who, pin, `⚠️ NESIGURNO — više narudžbi s istim imenom: ${refs}`).catch(() => {});
+    return NextResponse.json({
+      ok: true,
+      matched: false,
+      ambiguous: true,
+      reason: "Više narudžbi s istim imenom — PIN nije upisan, provjeri ručno",
+      ime,
+      prezime,
+      candidates: matches.map((o) => o.id)
+    });
+  }
+
+  const best = matches[0];
 
   await prisma.order.update({ where: { id: best.id }, data: { pin, ...(paketId ? { paketId } : {}) } });
 
@@ -142,6 +156,6 @@ export async function POST(request: Request) {
     matched: true,
     orderId: best.id,
     customerName: best.customerName,
-    ambiguous: matches.length > 1 // više kandidata istog imena — Gazda neka provjeri
+    ambiguous: false
   });
 }

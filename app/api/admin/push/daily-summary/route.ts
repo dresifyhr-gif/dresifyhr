@@ -34,28 +34,67 @@ async function run() {
   if (!pushConfigured()) return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
 
   const start = zagrebStartOfToday();
+  const fiveDaysAgo = new Date(Date.now() - 5 * 86_400_000);
+  const SENT = { in: ["shipped", "done"] };
   let count = 0;
   let revenue = 0;
+  // To-do brojke (jeftini count/aggregate upiti, samo u ovom dnevnom cronu).
+  let toShip = 0; // status "new" — čeka slanje
+  let stuck = 0; // poslano prije >5 dana, kurir još ne javlja dostavu/povrat
+  let unpaid = 0; // kurir javio dostavljeno, pouzeće još nije označeno naplaćenim
+  let unpaidSum = 0;
+  let toConfirmReturn = 0; // kurir javio povrat, a narudžba još nije označena "Vraćeno"
   try {
-    const orders = await prisma.order.findMany({
-      where: { createdAt: { gte: start }, status: { notIn: ["cancelled"] } },
-      select: { total: true }
-    });
+    const [orders, newCount, stuckCount, unpaidAgg, returnCount] = await Promise.all([
+      prisma.order.findMany({
+        where: { createdAt: { gte: start }, status: { notIn: ["cancelled"] } },
+        select: { total: true }
+      }),
+      prisma.order.count({ where: { status: "new" } }),
+      prisma.order.count({
+        where: {
+          status: SENT,
+          cashCollected: false,
+          shippedAt: { lt: fiveDaysAgo },
+          // deliveryStatus null (još neprovjereno) se mora uključiti eksplicitno — notIn ne hvata NULL.
+          OR: [{ deliveryStatus: null }, { deliveryStatus: { notIn: ["delivered", "returned"] } }]
+        }
+      }),
+      prisma.order.aggregate({
+        _count: { _all: true },
+        _sum: { total: true },
+        where: { status: SENT, deliveryStatus: "delivered", cashCollected: false }
+      }),
+      prisma.order.count({ where: { status: SENT, deliveryStatus: "returned" } })
+    ]);
     count = orders.length;
     revenue = orders.reduce((s, o) => s + (o.total || 0), 0);
+    toShip = newCount;
+    stuck = stuckCount;
+    unpaid = unpaidAgg._count._all;
+    unpaidSum = unpaidAgg._sum.total || 0;
+    toConfirmReturn = returnCount;
   } catch (e) {
     console.error("[push/daily] upit nije uspio:", e);
     return NextResponse.json({ ok: false, error: "db" }, { status: 500 });
   }
 
-  const eur = `${revenue.toFixed(2).replace(".", ",")} €`;
-  const body =
+  const fmt = (n: number) => `${n.toFixed(2).replace(".", ",")} €`;
+  const eur = fmt(revenue);
+  const today =
     count === 0
       ? "Danas još nema narudžbi."
-      : `${count} ${count === 1 ? "narudžba" : count < 5 ? "narudžbe" : "narudžbi"} · ${eur}`;
+      : `Danas: ${count} ${count === 1 ? "narudžba" : count < 5 ? "narudžbe" : "narudžbi"} · ${eur}`;
+  const todo = [
+    `Za slanje: ${toShip}`,
+    `Na dostavi >5 dana: ${stuck}`,
+    `Dostavljeno, nije naplaćeno: ${unpaid}${unpaid > 0 ? ` (${fmt(unpaidSum)})` : ""}`,
+    `Povrati za potvrdu: ${toConfirmReturn}`
+  ].join(" · ");
+  const body = `${today}\n${todo}`;
 
   const res = await sendPushToAll({ title: "📅 Dnevni sažetak", body, url: "/admin/", tag: "daily", kind: "daily" });
-  return NextResponse.json({ ok: true, count, revenue, push: res });
+  return NextResponse.json({ ok: true, count, revenue, toShip, stuck, unpaid, unpaidSum, toConfirmReturn, push: res });
 }
 
 // Vercel Cron šalje GET s "Authorization: Bearer <CRON_SECRET>".
