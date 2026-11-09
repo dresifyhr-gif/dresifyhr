@@ -162,6 +162,11 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
+  // /dresovi?dugi=1 (pločica "Dugi rukav" na naslovnici) → odmah uključen filter.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("dugi") === "1") setLongSleeveOnly(true);
+  }, []);
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {

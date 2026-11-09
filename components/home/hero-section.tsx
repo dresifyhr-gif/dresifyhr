@@ -7,13 +7,6 @@ import { HeroKompletiCarousel } from "@/components/home/hero-kompleti-carousel";
 import { useLanguage } from "@/contexts/language-context";
 import { useShopSettings } from "@/contexts/shop-settings-context";
 
-const TICKER_ITEMS = [
-  "Real Madrid", "Barcelona", "PSG", "Bayern München", "Man United",
-  "Atletico Madrid", "Dortmund", "Al-Nassr", "Inter Miami", "Santos",
-  "Brazil", "Italija", "Mbappe", "Ronaldo", "Messi", "Bellingham",
-  "Neymar", "Yamal", "Griezmann", "Musiala", "Raphinha", "Kvaratskhelia",
-];
-
 export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
   // Naslov/podnaslov iz Postavki; prazno = zadani tekst iz prijevoda.
   const { heroTitle, heroSubtitle } = useShopSettings();
@@ -44,7 +37,7 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
 
             {/* Eyebrow badge */}
             <motion.div
-              className="section-kicker mb-6"
+              className="section-kicker mb-4 sm:mb-6"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: "easeOut" }}
@@ -73,7 +66,7 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
             </motion.h1>
 
             <motion.p
-              className="mt-5 text-base leading-7 text-white/60 sm:text-lg sm:leading-8"
+              className="mt-4 text-[15px] leading-6 text-white/60 sm:mt-5 sm:text-lg sm:leading-8"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.08, ease: "easeOut" }}
@@ -82,7 +75,7 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
             </motion.p>
 
             <motion.div
-              className="mt-8"
+              className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 sm:mt-8"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.16, ease: "easeOut" }}
@@ -90,6 +83,7 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
               <Link href="/dresovi" className="button-primary">
                 {t.hero.cta}
               </Link>
+              <span className="text-xs font-medium text-white/50 sm:text-sm">💵 Plaćanje pouzećem · 🚚 2–5 dana</span>
             </motion.div>
 
             {/* Stats row — desktop only */}
@@ -124,36 +118,6 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
           </motion.div>
         </div>
 
-        {/* ── Ticker strip ── */}
-        <motion.div
-          className="relative mt-10 overflow-hidden border-t border-white/10 pt-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-        >
-          <div
-            className="flex gap-0 whitespace-nowrap"
-            style={{
-              animation: "tickerScroll 28s linear infinite",
-            }}
-          >
-            {[...TICKER_ITEMS, ...TICKER_ITEMS].map((name, i) => (
-              <span
-                key={i}
-                className="inline-flex items-center gap-4 px-6 text-sm font-semibold uppercase tracking-[0.22em] text-white/25"
-              >
-                {name}
-                <span className="h-1 w-1 rounded-full bg-accent/40" />
-              </span>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* SEO tekst — čist H2 + opis s ključnim pojmovima (Google long-tail). */}
-        <div className="mt-8 max-w-3xl border-t border-white/10 pt-6">
-          <h2 className="font-heading text-lg uppercase tracking-wide text-white/80 sm:text-xl">{t.hero.seoTitle}</h2>
-          <p className="mt-2 text-sm leading-6 text-white/45">{t.hero.seoText}</p>
-        </div>
       </div>
     </section>
   );

@@ -7,8 +7,7 @@ import { InstagramSection } from "@/components/home/instagram-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Ps5HomeBanner } from "@/components/home/ps5-home-banner";
 import { ReviewsSection } from "@/components/home/reviews-section";
-import { StreetwearBanner } from "@/components/home/streetwear-banner";
-import { TrenirkaBanner } from "@/components/home/trenirka-banner";
+import { CategoryTiles, type CategoryTile } from "@/components/home/category-tiles";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { jerseys } from "@/lib/data/jerseys";
 import { forCards, getFeaturedProducts, getCatalogProducts, getStreetwearProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
@@ -63,24 +62,30 @@ export default async function HomePage() {
   // Mystery box slika za hero rotaciju (ako je proizvod dodan i ima sliku).
   const mysteryImage = dresovi.find((p) => p.slug?.includes("mystery"))?.images?.[0]?.src;
 
+  // Pločice kategorija — slika = prvi proizvod s fotografijom u toj kategoriji.
+  const firstImg = (list: typeof dresovi) => list.find((p) => p.images?.[0]?.src)?.images?.[0]?.src;
+  const fromPrice = (list: typeof dresovi, fallback: number) =>
+    `${list.length ? Math.min(...list.map((p) => p.price ?? fallback)) : fallback} €`;
+  const kompleti = (await getCatalogProducts(jerseys)).filter((j) => j.liga === "Komplet");
+  const dugiRukav = dresovi.filter((j) => j.category === "dugi-rukav");
+  const obicni = dresovi.filter((j) => j.category !== "dugi-rukav" && !j.slug?.includes("mystery"));
+  const tiles: CategoryTile[] = [
+    { href: "/dresovi", label: "Dresovi", price: fromPrice(obicni, 20), image: firstImg(obicni.filter((j) => j.klub === "Hrvatska")) ?? firstImg(obicni) },
+    { href: "/kompleti", label: "Kompleti", price: fromPrice(kompleti, 40), image: firstImg(kompleti), note: "+ lopta i kapa" },
+    ...(dugiRukav.length ? [{ href: "/dresovi?dugi=1", label: "Dugi rukav", price: fromPrice(dugiRukav, 30), image: firstImg(dugiRukav), note: "Novo" }] : []),
+    ...(trenirke.length && show("trenirke") ? [{ href: "/trenirke", label: "Trenirke", price: fromPrice(trenirke, 35), image: firstImg(trenirke), note: "Novo" }] : []),
+    ...(streetwear.length && show("streetwear") ? [{ href: "/streetwear", label: "Streetwear", price: fromPrice(streetwear, 50), image: firstImg(streetwear) }] : [])
+  ];
+
   return (
     <>
       <Ps5HomeBanner />
       <HeroSection mysteryImage={mysteryImage} />
       {show("trust") && <TrustStrip />}
-      {show("streetwear") && streetwear.length > 0 && (
-        <StreetwearBanner
-          images={streetwear.map((p) => p.images?.[0]?.src).filter((s): s is string => !!s).slice(0, 5)}
-        />
-      )}
-      {show("trenirke") && trenirke.length > 0 && (
-        <TrenirkaBanner
-          images={trenirke.map((p) => p.images?.[0]?.src).filter((s): s is string => !!s).slice(0, 5)}
-        />
-      )}
+      <CategoryTiles tiles={tiles} />
       {show("featured") && <FeaturedSection products={forCards(await getFeaturedProducts(jerseys))} />}
 
-      <section className="section-pad bg-[#0a0a0a]">
+      <section id="katalog" className="section-pad scroll-mt-20 bg-[#0a0a0a]">
         <div className="page-shell">
           <HomeCatalogTabs
             dresovi={forCards(dresovi)}
@@ -93,13 +98,20 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {show("games") && <GamesCta />}
-
       {show("testimonials") && <TestimonialsSection items={testimonials} />}
       {show("reviews") && <ReviewsSection />}
-      {show("instagram") && <InstagramSection />}
       {show("faq") && <FaqSection />}
+      {show("instagram") && <InstagramSection />}
+      {show("games") && <GamesCta />}
       {show("newsletter") && <NewsletterSection />}
+
+      {/* SEO tekst (prije u heroju) — ostaje na stranici za Google, ali ne smeta kupcu. */}
+      <section className="bg-[#0a0a0a] pb-10">
+        <div className="page-shell max-w-3xl border-t border-white/10 pt-6">
+          <h2 className="font-heading text-lg uppercase tracking-wide text-white/70 sm:text-xl">{t.hero.seoTitle}</h2>
+          <p className="mt-2 text-sm leading-6 text-white/40">{t.hero.seoText}</p>
+        </div>
+      </section>
     </>
   );
 }

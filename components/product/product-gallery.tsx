@@ -24,7 +24,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-[4/5] min-h-[420px] overflow-hidden rounded-[18px] border border-white/10 bg-[#fbfbfb]">
+      <div className="relative aspect-square overflow-hidden rounded-[18px] sm:aspect-[4/5] sm:min-h-[420px] border border-white/10 bg-[#fbfbfb]">
         {/* Subtle bottom shadow so jersey doesn't float */}
         <div className="absolute inset-x-[15%] bottom-[4%] h-10 rounded-full bg-black/10 blur-[24px]" />
         <Image

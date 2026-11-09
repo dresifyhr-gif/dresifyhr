@@ -89,7 +89,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   };
 
   return (
-    <div className="border border-white/10 bg-[#111111] p-5 sm:p-8">
+    <div className="border border-white/10 bg-[#111111] p-4 sm:p-8">
       <div className="flex flex-wrap items-center gap-3">
         <span className="border border-accent bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-black">
           {product.category === "streetwear" ? "Streetwear" : repairText(product.liga)}
@@ -99,7 +99,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         </span>
       </div>
 
-      <h1 className="mt-6 text-5xl uppercase leading-none text-white sm:text-6xl">
+      <h1 className="mt-4 text-3xl uppercase leading-[0.95] text-white sm:mt-6 sm:text-6xl sm:leading-none">
         {repairText(product.igrac)}
       </h1>
       {product.rating && (
@@ -107,61 +107,64 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
           <Stars value={product.rating.value} count={product.rating.count} size="md" />
         </div>
       )}
-      <p className="mt-4 text-4xl font-semibold text-accent">{productPrice}€</p>
-      <p className={`mt-4 text-sm font-semibold uppercase tracking-[0.2em] ${getStockTone(stock)}`}>
+      <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 sm:mt-4">
+        <p className="text-4xl font-semibold text-accent">{productPrice}€</p>
+        <p className="text-xs text-white/50">💵 pouzećem · 🚚 2–5 dana</p>
+      </div>
+      <p className={`mt-3 text-xs font-semibold uppercase tracking-[0.2em] sm:mt-4 sm:text-sm ${getStockTone(stock)}`}>
         {t.product.stockWarning(stock)}
       </p>
 
       {sizeOptions.hasAdults && sizeOptions.hasKids ? (
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+        <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-8 sm:gap-3">
           <button
             type="button"
             onClick={() => handleSegmentChange("adult")}
-            className={`border p-4 text-left transition duration-200 ease-out ${
+            className={`border p-3 text-left transition duration-200 ease-out sm:p-4 ${
               segment === "adult"
                 ? "border-accent bg-accent/10"
                 : "border-white/10 bg-[#0a0a0a] hover:border-accent/40"
             }`}
           >
             <p className="text-xs uppercase tracking-[0.3em] text-white/45">{t.product.adults}</p>
-            <p className="mt-3 text-2xl uppercase leading-none text-white">{t.product.jersey}</p>
+            <p className="mt-1.5 text-lg uppercase leading-none text-white sm:mt-3 sm:text-2xl">{t.product.jersey}</p>
           </button>
           <button
             type="button"
             onClick={() => handleSegmentChange("kid")}
-            className={`border p-4 text-left transition duration-200 ease-out ${
+            className={`border p-3 text-left transition duration-200 ease-out sm:p-4 ${
               segment === "kid"
                 ? "border-accent bg-accent/10"
                 : "border-white/10 bg-[#0a0a0a] hover:border-accent/40"
             }`}
           >
             <p className="text-xs uppercase tracking-[0.3em] text-white/45">{t.product.kids}</p>
-            <p className="mt-3 text-2xl uppercase leading-none text-white">{isLongSleeve ? t.product.jersey : t.product.jerseyAndShorts}</p>
+            <p className="mt-1.5 text-lg uppercase leading-none text-white sm:mt-3 sm:text-2xl">{isLongSleeve ? t.product.jersey : t.product.jerseyAndShorts}</p>
           </button>
         </div>
       ) : null}
 
       {currentSizes.length === 0 ? (
-        <p className="mt-8 text-sm font-medium uppercase tracking-[0.24em] text-white/50">Jedna veličina</p>
+        <p className="mt-5 text-sm font-medium uppercase tracking-[0.24em] text-white/50 sm:mt-8">Jedna veličina</p>
       ) : availableSizes.length === 0 ? (
-        <div className="mt-8 rounded-[12px] border border-red-500/30 bg-red-500/[0.06] px-5 py-4 text-center">
+        <div className="mt-5 rounded-[12px] border border-red-500/30 sm:mt-8 bg-red-500/[0.06] px-5 py-4 text-center">
           <p className="text-sm font-bold uppercase tracking-[0.24em] text-red-400">Rasprodano</p>
           <p className="mt-1 text-xs text-white/40">Trenutno nema veličina na stanju.</p>
         </div>
       ) : (
-        <div className="mt-8">
+        <div className="mt-5 sm:mt-8">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/70">{t.product.selectSize}</p>
             <SizeGuide showXXL={sizeOptions.adults.includes("XXL")} />
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+          <div className="mt-3 grid grid-cols-4 gap-2 sm:mt-4 sm:gap-3">
             {availableSizes.map((size) => (
               <button
                 key={size}
                 type="button"
                 onClick={() => setSelectedSize(size)}
                 aria-pressed={selectedSize === size}
-                className={`relative h-14 border text-sm font-semibold transition duration-200 ease-out ${
+                className={`relative h-12 border text-sm font-semibold sm:h-14 transition duration-200 ease-out ${
                   selectedSize === size
                     ? "border-accent bg-accent text-black"
                     : "border-white/10 bg-[#0a0a0a] text-white hover:border-accent/40"
@@ -192,7 +195,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
             category: product.category
           });
         }}
-        className="button-primary mt-8 w-full disabled:cursor-not-allowed disabled:opacity-40"
+        className="button-primary mt-5 w-full sm:mt-8 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {allSoldOut ? "Trenutno rasprodano" : t.product.addToCart}
       </button>
