@@ -58,6 +58,7 @@ export function ReviewsSection() {
               <p className="mt-4 text-xs uppercase tracking-[0.28em] text-white/50">
                 {review.name}, {review.city}
               </p>
+              <p className="mt-1 text-[11px] text-white/35">📸 poruka s Instagrama</p>
               <p className="mt-4 text-sm leading-7 text-white/70">{review.text}</p>
             </motion.article>
           ))}

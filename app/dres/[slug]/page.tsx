@@ -116,6 +116,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <ProductDetailPanel product={product} />
         </div>
 
+        {relatedProducts.length > 0 && (
+          <section className="mt-8 sm:mt-12">
+            <h2 className="mb-3 font-heading text-2xl uppercase leading-none text-white sm:mb-5 sm:text-3xl">{t.productPage.relatedTitle}</h2>
+            {/* Mobitel: vodoravni red (kupac ne mora scrollati do dna); desktop: mreža. */}
+            <div className="-mx-3 sm:mx-0">
+              <div className="flex snap-x gap-3 overflow-x-auto px-3 pb-2 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 xl:grid-cols-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {relatedProducts.map((item) => (
+                  <div key={item.slug} className="w-[46%] shrink-0 snap-start sm:w-auto">
+                    <ProductCard product={item} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         <section className="mt-10 max-w-3xl">
           <h2 className="font-heading text-3xl uppercase leading-none text-white sm:text-4xl">
             {locale === "en" ? "About" : "O proizvodu"} — {repairText(product.klub)} {repairText(product.igrac)}
@@ -160,19 +176,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
           ) : null}
         </div>
 
-        <section className="mt-16">
-          <div className="mb-8 flex items-end justify-between">
-            <div>
-              <span className="section-kicker">{t.productPage.related}</span>
-              <h2 className="mt-3 text-5xl uppercase leading-none text-white">{t.productPage.relatedTitle}</h2>
-            </div>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {relatedProducts.map((item) => (
-              <ProductCard key={item.slug} product={item} />
-            ))}
-          </div>
-        </section>
       </div>
     </section>
   );

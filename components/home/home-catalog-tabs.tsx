@@ -62,7 +62,7 @@ export function HomeCatalogTabs({
                 type="button"
                 onClick={() => setTab("trenirka")}
                 className={`rounded-full px-5 py-2.5 text-sm font-bold uppercase tracking-wide transition sm:px-7 ${
-                  tab === "trenirka" ? "bg-teal-500 text-white" : "text-white/60 hover:text-white"
+                  tab === "trenirka" ? "bg-accent text-black" : "text-white/60 hover:text-white"
                 }`}
               >
                 🏃 Trenirke
@@ -73,7 +73,7 @@ export function HomeCatalogTabs({
                 type="button"
                 onClick={() => setTab("streetwear")}
                 className={`rounded-full px-5 py-2.5 text-sm font-bold uppercase tracking-wide transition sm:px-7 ${
-                  tab === "streetwear" ? "bg-orange-500 text-white" : "text-white/60 hover:text-white"
+                  tab === "streetwear" ? "bg-accent text-black" : "text-white/60 hover:text-white"
                 }`}
               >
                 🔥 Streetwear
@@ -90,15 +90,15 @@ export function HomeCatalogTabs({
       {tab === "trenirka" && (
         <div>
           <div className="mb-6 text-center">
-            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-teal-400/90">Trenirke</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-accent/90">Trenirke</span>
             <h2 className="mt-2 font-heading text-3xl uppercase leading-none text-white sm:text-4xl">Komplet trenirke</h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-white/55">
               Jakna + hlače u klupskom dizajnu. 35 €, dostava po cijeloj Hrvatskoj, plaćanje pouzećem.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-3">
             {trenirke.map((product) => (
-              <ProductCard key={product.slug} product={product} theme="trenirka" />
+              <ProductCard key={product.slug} product={product} />
             ))}
           </div>
         </div>
@@ -107,15 +107,15 @@ export function HomeCatalogTabs({
       {tab === "streetwear" && (
         <div>
           <div className="mb-6 text-center">
-            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-orange-500/80">Streetwear</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-accent/90">Streetwear</span>
             <h2 className="mt-2 font-heading text-3xl uppercase leading-none text-white sm:text-4xl">Ulični kompleti</h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-white/55">
               Majica + hlačice u uličnom stilu. Veličine XS–L, plaćanje pouzećem, besplatna dostava od 60 € za registrirane.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-3">
             {streetwear.map((product) => (
-              <ProductCard key={product.slug} product={product} theme="streetwear" />
+              <ProductCard key={product.slug} product={product} />
             ))}
           </div>
         </div>
