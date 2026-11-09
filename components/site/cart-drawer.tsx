@@ -55,7 +55,7 @@ export function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             type="button"
-            className="fixed inset-0 z-50 bg-black/75"
+            className="fixed inset-0 z-[65] bg-black/75"
             onClick={closeDrawer}
             aria-label={t.cart.closeOverlay}
           />
@@ -67,7 +67,7 @@ export function CartDrawer() {
             role="dialog"
             aria-modal="true"
             aria-label={t.cart.title}
-            className="fixed inset-x-0 bottom-0 z-[60] flex max-h-[90vh] flex-col rounded-t-[14px] border-t border-white/10 bg-[#111] md:inset-x-auto md:right-0 md:top-0 md:h-full md:max-h-none md:w-full md:max-w-md md:rounded-none md:border-l md:border-t-0"
+            className="fixed inset-x-0 bottom-0 z-[66] flex max-h-[90vh] flex-col rounded-t-[14px] border-t border-white/10 bg-[#111] md:inset-x-auto md:right-0 md:top-0 md:h-full md:max-h-none md:w-full md:max-w-md md:rounded-none md:border-l md:border-t-0"
           >
             <span aria-hidden className="mx-auto mt-2.5 block h-1 w-10 rounded-full bg-white/20 md:hidden" />
             <div className="flex items-center justify-between px-4 pb-3 pt-3 md:px-5 md:pt-5">

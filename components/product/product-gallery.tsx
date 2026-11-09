@@ -73,7 +73,8 @@ export function ProductGallery({ product }: ProductGalleryProps) {
         />
       </div>
 
-      {/* Brojač + crtice */}
+      {/* Brojač + crtice (samo kad ima više slika) */}
+      {gallery.length > 1 ? (
       <div className="flex items-center justify-between px-4 pt-3 sm:px-0">
         <p className="text-[10.5px] font-bold uppercase leading-none tracking-[0.14em] text-mute">
           <b className="text-fg">{String(activeIndex + 1).padStart(2, "0")}</b> / {String(gallery.length).padStart(2, "0")} —{" "}
@@ -87,6 +88,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
           </div>
         ) : null}
       </div>
+      ) : null}
 
       {gallery.length > 1 ? (
         <div className="grid grid-cols-4 gap-1.5 px-4 pt-3 sm:px-0">
