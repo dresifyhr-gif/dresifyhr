@@ -1,36 +1,61 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Truck, RotateCcw, MessageCircle, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeftRight, CreditCard, Info, Truck } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
 import { StickyAddToCart } from "@/components/product/sticky-add-to-cart";
 import { SizeGuide } from "@/components/product/size-guide";
-import { Stars } from "@/components/site/stars";
 import { fbTrack } from "@/lib/fbpixel";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
-import {
-  getJerseySizeOptions,
-  getJerseyStock,
-  getStockTone,
-  type Jersey
-} from "@/lib/data/jerseys";
-import { PAYMENT_METHOD_LABEL, SHIPPING_PRICE_LABEL } from "@/lib/site";
+import { getJerseySizeOptions, getJerseyStock, type Jersey } from "@/lib/data/jerseys";
+import { SHIPPING_PRICE_EUR } from "@/lib/site";
 import { createWhatsAppUrl, repairText } from "@/lib/utils";
 
 type ProductDetailPanelProps = {
   product: Jersey;
 };
 
+// Dječja veličina = visina u cm → okvirna dob (ista tablica kao "Vodič za veličine").
+const KID_AGE: Record<string, string> = {
+  "104": "3–4 g.",
+  "116": "5–6 g.",
+  "128": "7–8 g.",
+  "140": "9–10 g.",
+  "152": "11–12 g.",
+  "164": "13–14 g.",
+  "176": "15–16 g."
+};
+
+const WEEKDAYS_HR = ["ned", "pon", "uto", "sri", "čet", "pet", "sub"];
+const WEEKDAYS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function addWorkingDays(from: Date, days: number) {
+  const d = new Date(from);
+  let left = days;
+  while (left > 0) {
+    d.setDate(d.getDate() + 1);
+    const wd = d.getDay();
+    if (wd !== 0 && wd !== 6) left--;
+  }
+  return d;
+}
+
 export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   const { t, locale } = useLanguage();
+  const en = locale === "en";
+  const router = useRouter();
   const sizeOptions = getJerseySizeOptions(product);
   const gallery = product.images ?? getJerseyGallery(product.slug);
   const frontImage = gallery[0]?.src;
+  // Zaliha se prikazuje SAMO ako je stvarno upisana u adminu (bez izmišljenih brojki).
+  const hasRealStock = product.stock != null || (product.sizeStock != null && Object.keys(product.sizeStock).length > 0);
   const stock = getJerseyStock(product);
-  const { addItem } = useCart();
+  const { addItem, closeAddModal } = useCart();
   const mainButtonRef = useRef<HTMLButtonElement>(null);
+  const sizesRef = useRef<HTMLDivElement>(null);
   const firstAvailable = (arr: string[], segmentOut: boolean) =>
     segmentOut ? "" : (arr.find((s) => !sizeOptions.soldOutSizes.includes(s)) ?? "");
   const defaultAdultSize = firstAvailable(sizeOptions.adults, sizeOptions.adultsOutOfStock);
@@ -42,16 +67,14 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   // ne odabere). Auto-odabir najmanje dostupne veličine ('S') vodio je u krive
   // narudžbe → skupe zamjene (a politika je samo zamjena veličine).
   const [selectedSize, setSelectedSize] = useState("");
+  const [eta, setEta] = useState<string | null>(null);
 
-  // Kod promjene proizvoda biraj segment u kojem STVARNO ima veličina. Prije je
-  // ovdje bilo `hasAdults ? "adult" : "kid"` bez obzira na zalihu, pa je kod
-  // proizvoda s rasprodanim odraslim veličinama ostajao prazan odabir — a gumb
-  // ga je svejedno puštao u košaricu (33 od 403 artikla je stiglo bez veličine).
+  // Kod promjene proizvoda: segment u kojem STVARNO ima veličina + bez predodabira.
   useEffect(() => {
     const nextSegment: "adult" | "kid" =
       sizeOptions.hasAdults && defaultAdultSize ? "adult" : defaultKidSize ? "kid" : sizeOptions.hasAdults ? "adult" : "kid";
     setSegment(nextSegment);
-    setSelectedSize(""); // bez predodabira — kupac bira svjesno; ne vuče se ni veličina prethodnog proizvoda
+    setSelectedSize("");
   }, [product.slug, sizeOptions.hasAdults, defaultAdultSize, defaultKidSize]);
 
   useEffect(() => {
@@ -64,157 +87,229 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
     });
   }, [product.slug, product.klub, product.igrac, product.price]);
 
-  const currentSizes = segment === "adult" ? sizeOptions.adults : sizeOptions.kids;
-  // Prikazujemo SAMO dostupne veličine (rasprodane se sakriju). Ako u ovom
-  // segmentu nema nijedne dostupne → "Rasprodano".
-  const segmentOut = (segment === "adult" && sizeOptions.adultsOutOfStock) || (segment === "kid" && sizeOptions.kidsOutOfStock);
-  const availableSizes = segmentOut ? [] : currentSizes.filter((size) => !sizeOptions.soldOutSizes.includes(size));
-  // Dugi rukav = samo gornji dio (bez hlačica) — i dječje veličine pišu samo "Dres".
+  // Procjena dostave (2–5 radnih dana) — računa se tek u pregledniku (bez hydration razlike).
+  useEffect(() => {
+    const now = new Date();
+    const a = addWorkingDays(now, 2);
+    const b = addWorkingDays(now, 5);
+    const days = en ? WEEKDAYS_EN : WEEKDAYS_HR;
+    const f = (d: Date) => `${days[d.getDay()]} ${d.getDate()}.${d.getMonth() + 1}.`;
+    setEta(`${f(a)} – ${f(b)}`);
+  }, [en]);
+
   const isLongSleeve = product.category === "dugi-rukav";
+  const isSet = product.category === "trenirka" || product.category === "streetwear" || product.liga === "Komplet";
   const segmentLabel = segment === "adult" || isLongSleeve ? t.product.segmentAdult : t.product.segmentKid;
   const productPrice = product.price ?? 20;
+  const total = productPrice + SHIPPING_PRICE_EUR;
   const whatsappMessage = `Pozdrav, želim naručiti: ${repairText(product.klub)} ${repairText(
     product.igrac
   )}${selectedSize ? `, veličina: ${selectedSize}` : ""}. Cijena: ${productPrice}€.`;
   const whatsappUrl = createWhatsAppUrl(whatsappMessage);
 
+  const isOut = (seg: "adult" | "kid", size: string) =>
+    (seg === "adult" && sizeOptions.adultsOutOfStock) ||
+    (seg === "kid" && sizeOptions.kidsOutOfStock) ||
+    sizeOptions.soldOutSizes.includes(size);
+
   // "Jedna veličina" (npr. dio streetweara) nema izbornik pa ni ne treba odabir.
   const hasSizePicker = sizeOptions.adults.length > 0 || sizeOptions.kids.length > 0;
   const allSoldOut = hasSizePicker && !defaultAdultSize && !defaultKidSize;
   const needsSize = hasSizePicker && !selectedSize;
+  const soldOutKid = sizeOptions.kids.find((s) => isOut("kid", s));
 
-  const handleSegmentChange = (nextSegment: "adult" | "kid") => {
-    setSegment(nextSegment);
-    setSelectedSize(""); // promjena Odrasli/Djeca — očisti odabir, veličine se razlikuju
+  const priceLabel = isSet
+    ? en ? "set" : "komplet"
+    : selectedSize
+    ? segment === "kid" && !isLongSleeve
+      ? en ? "jersey + shorts" : "dres + hlačice"
+      : en ? "jersey" : "dres"
+    : sizeOptions.hasKids && !isLongSleeve && !defaultAdultSize && defaultKidSize
+    ? en ? "jersey + shorts" : "dres + hlačice"
+    : sizeOptions.hasKids && !isLongSleeve
+    ? en ? "kids: + shorts" : "djeca: + hlačice"
+    : en ? "jersey" : "dres";
+
+  const pick = (seg: "adult" | "kid", size: string) => {
+    if (isOut(seg, size)) return;
+    setSegment(seg);
+    setSelectedSize(size);
   };
 
-  return (
-    <div className="border border-white/10 bg-[#111111] p-5 sm:p-8">
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="border border-accent bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-black">
-          {product.category === "streetwear" ? "Streetwear" : repairText(product.liga)}
-        </span>
-        <span className="border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
-          {repairText(product.klub)}
-        </span>
-      </div>
+  const add = () => {
+    if (needsSize) return; // pojas i tregeri — bez veličine ne ide u košaricu
+    addItem({
+      slug: product.slug,
+      klub: repairText(product.klub),
+      igrac: repairText(product.igrac),
+      size: selectedSize,
+      segment,
+      segmentLabel,
+      imageSrc: frontImage,
+      price: product.price,
+      category: product.category
+    });
+  };
 
-      <h1 className="mt-6 text-5xl uppercase leading-none text-white sm:text-6xl">
-        {repairText(product.igrac)}
-      </h1>
-      {product.rating && (
-        <div className="mt-3">
-          <Stars value={product.rating.value} count={product.rating.count} size="md" />
-        </div>
-      )}
-      <p className="mt-4 text-4xl font-semibold text-accent">{productPrice}€</p>
-      <p className={`mt-4 text-sm font-semibold uppercase tracking-[0.2em] ${getStockTone(stock)}`}>
-        {t.product.stockWarning(stock)}
+  const buyNow = () => {
+    if (needsSize) {
+      sizesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    add();
+    closeAddModal();
+    router.push("/checkout");
+  };
+
+  const sizeButton = (seg: "adult" | "kid", size: string, withAge: boolean) => {
+    const out = isOut(seg, size);
+    const active = selectedSize === size && segment === seg;
+    return (
+      <button
+        key={`${seg}-${size}`}
+        type="button"
+        onClick={() => pick(seg, size)}
+        disabled={out}
+        aria-pressed={active}
+        aria-label={out ? `${size} — ${en ? "sold out" : "rasprodano"}` : size}
+        className={`flex h-[52px] min-w-0 flex-col items-center justify-center rounded-[2px] border transition-colors duration-150 ${
+          out
+            ? "cursor-not-allowed border-white/10 text-[#555]"
+            : active
+            ? "border-accent bg-accent text-black"
+            : "border-white/[0.18] text-fg hover:border-white/60"
+        }`}
+      >
+        <span className={`text-[15px] font-black leading-none ${out ? "line-through" : ""}`}>{size}</span>
+        {out ? (
+          <span className="mt-1 text-[8.5px] font-bold leading-none">{en ? "sold out" : "rasprodano"}</span>
+        ) : withAge && KID_AGE[size] ? (
+          <span className={`mt-1 text-[9.5px] font-medium leading-none ${active ? "text-black/70" : "text-mute"}`}>{KID_AGE[size]}</span>
+        ) : null}
+      </button>
+    );
+  };
+
+  const showGroups = sizeOptions.hasKids && sizeOptions.hasAdults;
+
+  return (
+    <div className="lg:sticky lg:top-[calc(var(--announcement-offset,0px)+88px)] lg:self-start">
+      <p className="truncate text-[10.5px] font-bold uppercase leading-none tracking-[0.16em] text-mute">
+        {repairText(product.klub)} · {product.category === "streetwear" ? "Streetwear" : repairText(product.liga)}
       </p>
 
-      {sizeOptions.hasAdults && sizeOptions.hasKids ? (
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => handleSegmentChange("adult")}
-            className={`border p-4 text-left transition duration-200 ease-out ${
-              segment === "adult"
-                ? "border-accent bg-accent/10"
-                : "border-white/10 bg-[#0a0a0a] hover:border-accent/40"
-            }`}
-          >
-            <p className="text-xs uppercase tracking-[0.3em] text-white/45">{t.product.adults}</p>
-            <p className="mt-3 text-2xl uppercase leading-none text-white">{t.product.jersey}</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSegmentChange("kid")}
-            className={`border p-4 text-left transition duration-200 ease-out ${
-              segment === "kid"
-                ? "border-accent bg-accent/10"
-                : "border-white/10 bg-[#0a0a0a] hover:border-accent/40"
-            }`}
-          >
-            <p className="text-xs uppercase tracking-[0.3em] text-white/45">{t.product.kids}</p>
-            <p className="mt-3 text-2xl uppercase leading-none text-white">{isLongSleeve ? t.product.jersey : t.product.jerseyAndShorts}</p>
-          </button>
-        </div>
+      <h1 className="mt-2.5 pt-[0.1em] font-display text-[52px] uppercase leading-[0.92] text-fg sm:text-[64px] lg:text-[72px]">
+        {repairText(product.igrac)}
+      </h1>
+      {product.rating ? (
+        <p className="mt-2.5 text-[12px] font-bold text-mute">
+          <span className="text-fg">★ {product.rating.value.toFixed(1)}</span> ({product.rating.count}{" "}
+          {en ? "ratings" : "ocjena"})
+        </p>
       ) : null}
 
-      {currentSizes.length === 0 ? (
-        <p className="mt-8 text-sm font-medium uppercase tracking-[0.24em] text-white/50">Jedna veličina</p>
-      ) : availableSizes.length === 0 ? (
-        <div className="mt-8 rounded-[12px] border border-red-500/30 bg-red-500/[0.06] px-5 py-4 text-center">
-          <p className="text-sm font-bold uppercase tracking-[0.24em] text-red-400">Rasprodano</p>
-          <p className="mt-1 text-xs text-white/40">Trenutno nema veličina na stanju.</p>
-        </div>
-      ) : (
-        <div className="mt-8">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/70">{t.product.selectSize}</p>
-            <SizeGuide showXXL={sizeOptions.adults.includes("XXL")} />
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
-            {availableSizes.map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => setSelectedSize(size)}
-                aria-pressed={selectedSize === size}
-                className={`relative h-14 border text-sm font-semibold transition duration-200 ease-out ${
-                  selectedSize === size
-                    ? "border-accent bg-accent text-black"
-                    : "border-white/10 bg-[#0a0a0a] text-white hover:border-accent/40"
-                }`}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="mt-4 flex items-end gap-3">
+        <p className="font-display text-[64px] leading-[0.85] text-fg">{productPrice} €</p>
+        <p className="pb-1 text-[11px] font-bold uppercase leading-none tracking-[0.14em] text-mute">{priceLabel}</p>
+      </div>
+      <p className="mt-2 text-[14px] font-medium leading-[1.4] text-soft">
+        {en ? (
+          <>
+            + {SHIPPING_PRICE_EUR} € delivery · total <b className="text-fg">{total} €</b> paid to the courier
+          </>
+        ) : (
+          <>
+            + {SHIPPING_PRICE_EUR} € dostava · ukupno <b className="text-fg">{total} €</b> plaćaš dostavljaču
+          </>
+        )}
+      </p>
+      {hasRealStock && stock > 0 && stock <= 5 ? (
+        <p className="mt-2 text-[12px] font-bold uppercase tracking-[0.12em] text-[#ff8a5c]">{t.product.stockWarning(stock)}</p>
+      ) : null}
 
+      {/* ── Veličine ── */}
+      <div ref={sizesRef} className="mt-7 scroll-mt-32">
+        {!hasSizePicker ? (
+          <p className="text-[12px] font-bold uppercase tracking-[0.16em] text-mute">{en ? "One size" : "Jedna veličina"}</p>
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[13px] font-black uppercase tracking-[0.1em] text-fg">
+                {en ? "Size" : "Veličina"}: <span className="text-accent">{selectedSize || "—"}</span>
+              </p>
+              <SizeGuide showXXL={sizeOptions.adults.includes("XXL")} />
+            </div>
+
+            {sizeOptions.kids.length > 0 ? (
+              <div className="mt-3">
+                {showGroups ? (
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-mute">
+                    {en ? "Kids · height in cm" : "Djeca · visina u cm"}
+                  </p>
+                ) : null}
+                <div className="grid grid-cols-4 gap-1.5">{sizeOptions.kids.map((s) => sizeButton("kid", s, true))}</div>
+              </div>
+            ) : null}
+
+            {sizeOptions.adults.length > 0 ? (
+              <div className="mt-3">
+                {showGroups ? (
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-mute">{en ? "Adults" : "Odrasli"}</p>
+                ) : null}
+                <div className="grid grid-cols-5 gap-1.5">{sizeOptions.adults.map((s) => sizeButton("adult", s, false))}</div>
+              </div>
+            ) : null}
+
+            {sizeOptions.hasKids && !allSoldOut ? (
+              <p className="mt-3 flex gap-2.5 rounded-[2px] border border-white/10 bg-ink2 px-3 py-2.5 text-[12.5px] font-medium leading-[1.4] text-[#c4c4bd]">
+                <Info className="mt-px h-4 w-4 shrink-0 text-accent" />
+                <span>
+                  {en ? (
+                    <>
+                      Kids size = child&apos;s height in cm. <b className="text-fg">Between two?</b> Take the bigger one.
+                    </>
+                  ) : (
+                    <>
+                      Broj = visina djeteta u cm. <b className="text-fg">Između dvije?</b> Uzmi veću — dres traje i iduću sezonu.
+                    </>
+                  )}
+                </span>
+              </p>
+            ) : null}
+            {soldOutKid && !allSoldOut ? (
+              <p className="mt-2.5 flex items-center gap-2 text-[11.5px] font-bold text-[#ff5c5c]">
+                <i className="inline-block h-1.5 w-1.5 rounded-full bg-[#ff5c5c]" />
+                {en ? "Some sizes are currently sold out" : "Neke veličine su trenutno rasprodane"}
+              </p>
+            ) : null}
+          </>
+        )}
+      </div>
+
+      {/* ── Glavni CTA (jedan) ── */}
       <button
         ref={mainButtonRef}
         type="button"
         disabled={needsSize}
-        onClick={() => {
-          if (needsSize) return; // pojas i tregeri — bez veličine ne ide u košaricu
-          addItem({
-            slug: product.slug,
-            klub: repairText(product.klub),
-            igrac: repairText(product.igrac),
-            size: selectedSize,
-            segment,
-            segmentLabel,
-            imageSrc: frontImage,
-            price: product.price,
-            category: product.category
-          });
-        }}
-        className="button-primary mt-8 w-full disabled:cursor-not-allowed disabled:opacity-40"
+        onClick={add}
+        className="button-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {allSoldOut ? "Trenutno rasprodano" : t.product.addToCart}
+        {allSoldOut ? "Trenutno rasprodano" : `${t.product.addToCart} — ${productPrice} €`}
       </button>
 
-      {/* Reassurance u trenutku odluke — najveći strah kod pouzeća je "što ako
-          platim pa ne stigne". Zato baš ispod gumba potvrdimo: platiš TEK kad
-          paket stigne. Diže konverziju kod kupaca s reklama (impulzivni). */}
-      {!allSoldOut && (
-        <div className="mt-3 flex items-center justify-center gap-2 rounded-[8px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2.5 text-center">
-          <Truck className="h-4 w-4 shrink-0 text-emerald-400" />
-          <span className="text-xs font-medium text-white/75">
-            {locale === "en"
-              ? "Pay cash on delivery — only when the package arrives at your door."
-              : "Platiš gotovinom tek kad paket stigne na tvoja vrata."}
-          </span>
-        </div>
-      )}
+      {!allSoldOut ? (
+        <button
+          type="button"
+          onClick={buyNow}
+          className="mt-3 block w-full text-center text-[14px] font-semibold text-fg underline-offset-4 hover:underline"
+        >
+          {en ? "or order now in 1 step →" : "ili naruči odmah u 1 koraku →"}
+        </button>
+      ) : null}
 
-      {/* Bez ovoga je kupac klikao rasprodane veličine, ništa se nije događalo i
-          mislio je da stranica ne radi — pa je odustao ili naručio bez veličine. */}
-      {needsSize && (
-        <p className="mt-3 text-sm text-white/60">
+      {/* Bez ovoga je kupac klikao rasprodane veličine i mislio da stranica ne radi. */}
+      {needsSize ? (
+        <p className="mt-2 text-center text-[12.5px] text-mute">
           {allSoldOut ? (
             <>
               Sve veličine su trenutno rasprodane.{" "}
@@ -223,29 +318,63 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
               </a>{" "}
               i javimo ti čim stigne.
             </>
+          ) : en ? (
+            "Pick a size to continue."
           ) : (
             "Odaberi veličinu da nastaviš."
           )}
         </p>
-      )}
+      ) : null}
 
-      <p className="mt-3 text-sm text-white/50">
-        {t.product.paymentSummary(PAYMENT_METHOD_LABEL.toLowerCase(), SHIPPING_PRICE_LABEL)}
-      </p>
-
-      <div className="mt-8 grid grid-cols-2 gap-2 border-t border-white/10 pt-6">
+      {/* ── Dostava / pouzeće ── */}
+      <div className="mt-7 overflow-hidden rounded-[2px] border border-white/10">
+        <div className="border-b border-white/10 bg-[linear-gradient(90deg,rgba(232,255,60,.10),transparent)] px-4 py-3.5">
+          <p className="text-[10px] font-bold uppercase leading-none tracking-[0.16em] text-mute">
+            {en ? "Order today · estimated delivery" : "Naručiš danas · procjena dostave"}
+          </p>
+          <p className="mt-2 font-display text-[26px] uppercase leading-none text-fg">
+            {en ? "Arrives" : "Stiže"} <span className="text-accent">{eta ?? (en ? "in 2–5 working days" : "za 2–5 radnih dana")}</span>
+          </p>
+        </div>
         {[
-          { icon: Truck, text: t.product.benefits.delivery },
-          { icon: Zap, text: t.product.benefits.response },
-          { icon: RotateCcw, text: t.product.benefits.returns },
-          { icon: MessageCircle, text: t.product.benefits.orderToday },
-        ].map(({ icon: Icon, text }) => (
-          <div key={text} className="flex items-center gap-2.5 rounded-[8px] border border-white/8 bg-[#0d0d0d] px-3 py-3">
-            <Icon className="h-4 w-4 shrink-0 text-accent/70" />
-            <span className="text-xs leading-tight text-white/55">{text}</span>
+          {
+            Icon: CreditCard,
+            title: en ? "Cash on delivery" : "Plaćanje pouzećem",
+            text: en
+              ? "Pay the courier in cash when the package arrives. Nothing to pay online."
+              : "Gotovinom dostavljaču kad paket stigne. Ništa ne plaćaš na webu."
+          },
+          {
+            Icon: Truck,
+            title: `${en ? "GLS delivery" : "GLS dostava"} · ${SHIPPING_PRICE_EUR} €`,
+            text: en ? "To any address in Croatia, 2–5 working days." : "Na adresu bilo gdje u Hrvatskoj, 2–5 radnih dana."
+          },
+          {
+            Icon: ArrowLeftRight,
+            title: en ? "Size exchange" : "Zamjena veličine",
+            text: en ? "Doesn't fit? We'll swap it for another size." : "Ne paše? Zamijenimo za drugu veličinu."
+          }
+        ].map(({ Icon, title, text }) => (
+          <div key={title} className="flex gap-3 border-b border-white/10 px-4 py-3.5 last:border-b-0">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink3 text-fg">
+              <Icon className="h-4 w-4" />
+            </span>
+            <span>
+              <b className="block text-[14px] font-black leading-tight text-fg">{title}</b>
+              <small className="mt-0.5 block text-[12.5px] font-medium leading-[1.4] text-mute">{text}</small>
+            </span>
           </div>
         ))}
       </div>
+
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-3 block text-center text-[12.5px] font-semibold text-mute transition-colors hover:text-accent"
+      >
+        {en ? "Questions? Order on WhatsApp →" : "Pitanje? Naruči na WhatsApp →"}
+      </a>
 
       <StickyAddToCart
         product={product}
@@ -254,6 +383,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         segmentLabel={segmentLabel}
         imageSrc={frontImage}
         mainButtonRef={mainButtonRef}
+        onNeedSize={() => sizesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
       />
     </div>
   );
