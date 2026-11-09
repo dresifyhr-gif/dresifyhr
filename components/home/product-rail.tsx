@@ -47,7 +47,7 @@ export function ProductRail({
           {kicker}
         </div>
         <div className="flex items-end justify-between gap-4">
-          <h2 className={`font-display uppercase leading-[0.92] text-fg ${checker ? "text-[84px] lg:text-[120px]" : "text-[54px] lg:text-[80px]"}`}>
+          <h2 className={`pt-[0.08em] font-display uppercase leading-[0.96] text-fg ${checker ? "text-[84px] lg:text-[120px]" : "text-[54px] lg:text-[80px]"}`}>
             {title}
           </h2>
           {href && linkLabel ? (
@@ -63,7 +63,7 @@ export function ProductRail({
       </div>
 
       <div className="page-shell mt-6 lg:mt-8">
-        <div className="rail -mx-4 px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-5 lg:gap-3 lg:overflow-visible lg:px-0">
+        <div className="rail -mx-4 px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-3 lg:overflow-visible lg:px-0">
           {products.map((p) => (
             <div key={p.slug} className="w-[158px] shrink-0 snap-start sm:w-[200px] lg:w-auto">
               <ProductCard product={p} />

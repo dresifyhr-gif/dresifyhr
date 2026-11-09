@@ -1,34 +1,31 @@
 import { ArrowLeftRight } from "lucide-react";
 
+import type { Translations } from "@/lib/i18n";
 import { FREE_SHIPPING_THRESHOLD_EUR, SHIPPING_PRICE_EUR } from "@/lib/site";
 
 // "Bez plaćanja unaprijed. Platiš kad stigne." — najveći strah kupca s reklame je
 // platiti unaprijed. Iznosi se računaju iz konstanti (lib/site), ne pišu se ručno.
-export function CodSection({ index = "04", basePrice = 20 }: { index?: string; basePrice?: number }) {
+export function CodSection({ index = "04", basePrice = 20, t }: { index?: string; basePrice?: number; t: Translations["drop"] }) {
   const total = basePrice + SHIPPING_PRICE_EUR;
-  const steps = [
-    { k: "01", title: "Odaberi dres i veličinu", text: "Djeca 104–176 · Odrasli S–XXL", pill: "Veličine" },
-    { k: "02", title: "Upiši adresu", text: "Ne trebaš račun ni karticu na webu", pill: "Bez registracije" },
-    { k: "03", title: "GLS ti ga donese", text: "Bilo gdje u Hrvatskoj", pill: "2–5 dana" },
-    { k: "04", title: "Platiš dostavljaču", text: "Pouzećem — tek kad paket stigne", pill: "Pouzeće", hl: true }
-  ];
+  const steps = t.codSteps.map((st, i) => ({ ...st, k: String(i + 1).padStart(2, "0"), hl: i === t.codSteps.length - 1 }));
+  const [f1, f2, f3] = t.codFacts;
 
   return (
     <section className="pt-20 lg:pt-28">
       <div className="page-shell grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
         <div>
           <div className="idx">
-            <b>{index}</b>Kako kupuješ
+            <b>{index}</b>
+            {t.codKicker}
           </div>
           <h2 className="font-display text-[64px] uppercase leading-[0.95] text-fg lg:text-[96px]">
-            <span className="block">Bez plaćanja</span>
-            <span className="block">unaprijed.</span>
-            <span className="block text-accent">Platiš kad</span>
-            <span className="block text-accent">stigne.</span>
+            <span className="block">{t.codTitle[0]}</span>
+            <span className="block">{t.codTitle[1]}</span>
+            <span className="block text-accent">{t.codTitle[2]}</span>
+            <span className="block text-accent">{t.codTitle[3]}</span>
           </h2>
           <p className="mt-3.5 max-w-[520px] text-[14.5px] font-medium leading-[1.45] text-[#c4c4bd]">
-            Naručiš u par klikova, GLS dostavlja na kućni prag, a dostavljaču plaćaš tek kad paket držiš u rukama.
-            Dres {basePrice} € + dostava {SHIPPING_PRICE_EUR} € = {total} €, bez skrivenih troškova.
+            {t.codText(basePrice, SHIPPING_PRICE_EUR, total)}
           </p>
         </div>
 
@@ -56,17 +53,17 @@ export function CodSection({ index = "04", basePrice = 20 }: { index?: string; b
             <div className="border-r border-white/10 px-2.5 py-4 text-center">
               <b className="block font-display text-[30px] font-normal leading-none text-fg">{SHIPPING_PRICE_EUR} €</b>
               <small className="mt-1.5 block text-[9.5px] font-bold uppercase leading-[1.25] tracking-[0.1em] text-mute">
-                Dostava
+                {f1[0]}
                 <br />
-                cijela HR
+                {f1[1]}
               </small>
             </div>
             <div className="border-r border-white/10 px-2.5 py-4 text-center">
               <b className="block font-display text-[30px] font-normal leading-none text-fg">2–5</b>
               <small className="mt-1.5 block text-[9.5px] font-bold uppercase leading-[1.25] tracking-[0.1em] text-mute">
-                Radnih
+                {f2[0]}
                 <br />
-                dana
+                {f2[1]}
               </small>
             </div>
             <div className="px-2.5 py-4 text-center">
@@ -74,14 +71,14 @@ export function CodSection({ index = "04", basePrice = 20 }: { index?: string; b
                 <ArrowLeftRight className="h-7 w-7" strokeWidth={2} />
               </b>
               <small className="mt-1.5 block text-[9.5px] font-bold uppercase leading-[1.25] tracking-[0.1em] text-mute">
-                Zamjena
+                {f3[0]}
                 <br />
-                veličine
+                {f3[1]}
               </small>
             </div>
           </div>
           <p className="mt-3 text-[12px] font-medium leading-[1.4] text-mute">
-            Registrirani kupci imaju besplatnu dostavu za narudžbe od {FREE_SHIPPING_THRESHOLD_EUR} €.
+            {t.codFree(FREE_SHIPPING_THRESHOLD_EUR)}
           </p>
         </div>
       </div>

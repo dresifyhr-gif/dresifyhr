@@ -7,11 +7,11 @@ import { useLanguage } from "@/contexts/language-context";
 import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, INSTAGRAM_HANDLE, NAV_LINKS, SHIPPING_PRICE_EUR } from "@/lib/site";
 
 const shopLinks = [
-  { href: "/dresovi", label: "Dresovi" },
-  { href: "/dresovi?dugi=1", label: "Dugi rukav" },
-  { href: "/kompleti", label: "Kompleti" },
-  { href: "/trenirke", label: "Trenirke" },
-  { href: "/streetwear", label: "Streetwear" }
+  { href: "/dresovi", label: "Dresovi", en: "Jerseys" },
+  { href: "/dresovi?dugi=1", label: "Dugi rukav", en: "Long sleeve" },
+  { href: "/kompleti", label: "Kompleti", en: "Kits" },
+  { href: "/trenirke", label: "Trenirke", en: "Tracksuits" },
+  { href: "/streetwear", label: "Streetwear", en: "Streetwear" }
 ] as const;
 
 const seoFooterLinks = [
@@ -23,16 +23,17 @@ const seoFooterLinks = [
 ] as const;
 
 const helpLinks = [
-  { href: "/dostava-i-povrat", label: "Dostava i zamjena" },
-  { href: "/pravila-privatnosti", label: "Pravila privatnosti" },
-  { href: "/igre", label: "Mini igre" }
+  { href: "/dostava-i-povrat", label: "Dostava i zamjena", en: "Delivery & exchange" },
+  { href: "/pravila-privatnosti", label: "Pravila privatnosti", en: "Privacy policy" },
+  { href: "/igre", label: "Mini igre", en: "Mini games" }
 ] as const;
 
 const linkCls = "block py-1.5 text-[14px] font-bold leading-tight text-fg transition-colors hover:text-accent";
 const headCls = "mb-3 text-[10px] font-bold uppercase leading-none tracking-[0.16em] text-mute";
 
 export function Footer() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const en = locale === "en";
   const pathname = usePathname();
 
   // Na korisničkom računu footer se skriva — profil je "app-like", bez footera.
@@ -46,7 +47,7 @@ export function Footer() {
             <p className={headCls}>Shop</p>
             {shopLinks.map((link) => (
               <Link key={link.href} href={link.href} className={linkCls}>
-                {link.label}
+                {en ? link.en : link.label}
               </Link>
             ))}
           </div>
@@ -60,7 +61,7 @@ export function Footer() {
             ))}
             {helpLinks.map((link) => (
               <Link key={link.href} href={link.href} className={linkCls}>
-                {link.label}
+                {en ? link.en : link.label}
               </Link>
             ))}
           </div>
@@ -112,7 +113,10 @@ export function Footer() {
         <p className="mt-10 max-w-xl text-[13px] font-medium leading-[1.5] text-mute">{t.footer.desc}</p>
 
         <div className="mt-6 flex flex-wrap gap-1.5">
-          {["Pouzeće", "GLS", `Dostava ${SHIPPING_PRICE_EUR} €`, "Samo HR"].map((chip) => (
+          {(en
+            ? ["Cash on delivery", "GLS", `Delivery ${SHIPPING_PRICE_EUR} €`, "Croatia only"]
+            : ["Pouzeće", "GLS", `Dostava ${SHIPPING_PRICE_EUR} €`, "Samo HR"]
+          ).map((chip) => (
             <span
               key={chip}
               className="rounded-full border border-white/[0.18] px-2.5 py-2 text-[10px] font-black uppercase leading-none tracking-[0.1em] text-[#d6d6cf]"

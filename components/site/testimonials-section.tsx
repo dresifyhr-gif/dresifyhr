@@ -4,16 +4,22 @@ import type { Testimonial } from "@/lib/testimonials";
 
 // "Kupci u našim dresovima" — PRAVE fotografije kupaca (dodaju se u adminu).
 // Koncept A: okviri 9:16 kao story/DM screenshot, vodoravni niz.
-export function TestimonialsSection({ items }: { items: Testimonial[] }) {
+const COPY = {
+  hr: { kicker: "Recenzije", title: "Kupci u našim dresovima", lead: "Prave slike kupaca koje nam pošalju nakon dostave — hvala na povjerenju!" },
+  en: { kicker: "Reviews", title: "Customers in our jerseys", lead: "Real photos customers send us after delivery — thank you for your trust!" }
+};
+
+export function TestimonialsSection({ items, locale = "hr" }: { items: Testimonial[]; locale?: "hr" | "en" }) {
+  const c = COPY[locale];
   if (!items.length) return null;
 
   return (
     <section className="pt-20 lg:pt-28">
       <div className="page-shell">
-        <div className="idx">Recenzije</div>
-        <h2 className="font-display text-[54px] uppercase leading-[0.92] text-fg lg:text-[80px]">Kupci u našim dresovima</h2>
+        <div className="idx">{c.kicker}</div>
+        <h2 className="pt-[0.08em] font-display text-[54px] uppercase leading-[0.96] text-fg lg:text-[80px]">{c.title}</h2>
         <p className="mt-3 max-w-[360px] text-[14px] font-medium leading-[1.45] text-soft lg:max-w-[520px]">
-          Prave slike kupaca koje nam pošalju nakon dostave — hvala na povjerenju!
+          {c.lead}
         </p>
       </div>
       <div className="page-shell mt-6">

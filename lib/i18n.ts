@@ -97,10 +97,55 @@ const hr = {
   },
 
   home: {
-    catalogKicker: "Upravo stiglo",
-    catalogTitle: "Novi drop",
+    catalogKicker: "Katalog",
+    catalogTitle: "Nogometni dresovi",
     catalogDesc:
       "Jedna cijena, jasan izbor i katalog koji kombinira najtraženije aktualne modele i retro favorite.",
+  },
+
+  // Koncept A "Matchday Drop" — tekstovi nove naslovnice.
+  drop: {
+    chooseSize: "Odaberi veličinu",
+    shipping: (eur: number) => `+${eur} € dostava`,
+    payOnDelivery: "plaćaš pri preuzimanju",
+    payWhenArrives: "Plaćaš kad stigne",
+    gls: "GLS 2–5 dana",
+    stickerKids: ["dres +", "hlačice"],
+    stickerFixed: ["fiksna", "cijena"],
+    categories: "Kategorije",
+    tileJerseys: "Dresovi",
+    tileJerseysNote: "Djeca: dres + hlačice",
+    tileLong: "Dugi rukav",
+    tileTracksuits: "Trenirke",
+    tileTracksuitsNote: "Jakna + hlače",
+    tileKits: "Kompleti",
+    tileKitsNote: "S loptom i kapom",
+    tileStreetwear: "Streetwear",
+    tileStreetwearNote: "Komplet",
+    bestKicker: "Najprodavanije",
+    bestTitle: ["Top", "izbor"],
+    all: (n: number) => `Svi ${n} →`,
+    allShort: "Sve →",
+    vatreniKicker: "Kolekcija",
+    vatreniTitle: ["Za", "Vatrene"],
+    vatreniLead: "Dresovi reprezentacije za SP 2026. Dječje veličine od 104 cm — za male navijače koji rastu brže od dresa.",
+    tracksuitSub: "trenirka · jakna + hlače",
+    tracksuit: "Trenirka",
+    codKicker: "Kako kupuješ",
+    codTitle: ["Bez plaćanja", "unaprijed.", "Platiš kad", "stigne."],
+    codText: (base: number, ship: number, total: number) =>
+      `Naručiš u par klikova, GLS dostavlja na kućni prag, a dostavljaču plaćaš tek kad paket držiš u rukama. Dres ${base} € + dostava ${ship} € = ${total} €, bez skrivenih troškova.`,
+    codSteps: [
+      { title: "Odaberi dres i veličinu", text: "Djeca 104–176 · Odrasli S–XXL", pill: "Veličine" },
+      { title: "Upiši adresu", text: "Ne trebaš račun ni karticu na webu", pill: "Bez registracije" },
+      { title: "GLS ti ga donese", text: "Bilo gdje u Hrvatskoj", pill: "2–5 dana" },
+      { title: "Platiš dostavljaču", text: "Pouzećem — tek kad paket stigne", pill: "Pouzeće" }
+    ],
+    codFacts: [["Dostava", "cijela HR"], ["Radnih", "dana"], ["Zamjena", "veličine"]],
+    codFree: (eur: number) => `Registrirani kupci imaju besplatnu dostavu za narudžbe od ${eur} €.`,
+    sizeHelpTitle: "Ne znaš veličinu?",
+    sizeHelpText: "Pošalji nam visinu djeteta na WhatsApp — predložit ćemo pravu veličinu.",
+    sizeHelpMsg: "Pozdrav! Ne znam koju veličinu uzeti. Visina djeteta je: ",
   },
 
   catalog: {
@@ -374,10 +419,54 @@ const en: typeof hr = {
   },
 
   home: {
-    catalogKicker: "Just landed",
-    catalogTitle: "New drop",
+    catalogKicker: "Catalog",
+    catalogTitle: "Football jerseys",
     catalogDesc:
       "One price, a clear choice and a catalog that combines the most-wanted current models and retro favourites.",
+  },
+
+  drop: {
+    chooseSize: "Choose size",
+    shipping: (eur: number) => `+${eur} € delivery`,
+    payOnDelivery: "pay on delivery",
+    payWhenArrives: "Pay when it arrives",
+    gls: "GLS 2–5 days",
+    stickerKids: ["jersey +", "shorts"],
+    stickerFixed: ["fixed", "price"],
+    categories: "Categories",
+    tileJerseys: "Jerseys",
+    tileJerseysNote: "Kids: jersey + shorts",
+    tileLong: "Long sleeve",
+    tileTracksuits: "Tracksuits",
+    tileTracksuitsNote: "Jacket + pants",
+    tileKits: "Kits",
+    tileKitsNote: "With ball and cap",
+    tileStreetwear: "Streetwear",
+    tileStreetwearNote: "Set",
+    bestKicker: "Best sellers",
+    bestTitle: ["Top", "picks"],
+    all: (n: number) => `All ${n} →`,
+    allShort: "All →",
+    vatreniKicker: "Collection",
+    vatreniTitle: ["For the", "Vatreni"],
+    vatreniLead: "Croatia national team jerseys for the 2026 World Cup. Kids sizes from 104 cm — for little fans who grow faster than their jersey.",
+    tracksuitSub: "tracksuit · jacket + pants",
+    tracksuit: "Tracksuit",
+    codKicker: "How it works",
+    codTitle: ["No payment", "up front.", "Pay when", "it arrives."],
+    codText: (base: number, ship: number, total: number) =>
+      `Order in a few clicks, GLS delivers to your door and you pay the courier only when the parcel is in your hands. Jersey ${base} € + delivery ${ship} € = ${total} €, no hidden costs.`,
+    codSteps: [
+      { title: "Pick a jersey and size", text: "Kids 104–176 · Adults S–XXL", pill: "Sizes" },
+      { title: "Enter your address", text: "No account or card needed", pill: "No sign-up" },
+      { title: "GLS brings it", text: "Anywhere in Croatia", pill: "2–5 days" },
+      { title: "Pay the courier", text: "Cash on delivery — only when it arrives", pill: "COD" }
+    ],
+    codFacts: [["Delivery", "all of HR"], ["Business", "days"], ["Size", "exchange"]],
+    codFree: (eur: number) => `Registered customers get free delivery on orders from ${eur} €.`,
+    sizeHelpTitle: "Not sure about size?",
+    sizeHelpText: "Send us your child's height on WhatsApp — we'll suggest the right size.",
+    sizeHelpMsg: "Hi! I'm not sure which size to take. My child's height is: ",
   },
 
   catalog: {

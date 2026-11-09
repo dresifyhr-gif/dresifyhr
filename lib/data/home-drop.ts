@@ -1,5 +1,6 @@
-import type { Jersey } from "@/lib/data/jerseys";
+import { getJerseySizeOptions, type Jersey, type StageImage } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
+import { stageImageFor } from "@/lib/data/stage-images";
 
 // Dres koji se NIKAD ne smije isticati (vlasnik: loš dres) — ni u heroju, ni u
 // railovima, ni na pločicama kategorija. Na popisu kataloga može ostati.
@@ -28,6 +29,8 @@ export type HomeDrop = {
   igrac: string;
   price: number;
   image?: string;
+  /** Izrezani dres (pravi 3D snimak ili izrezani render) za tamnu pozornicu. */
+  stage?: StageImage;
   imageAlt: string;
   /** Odrasle veličine nisu dostupne → kupac realno dobiva dječji dres + hlačice. */
   kidsOnly: boolean;
@@ -41,30 +44,58 @@ export function canFeature(p: Pick<Jersey, "slug">) {
   return !NEVER_FEATURE_SLUGS.has(p.slug);
 }
 
-/** Hero proizvod po slugu, uz mekani pad na prvi hrvatski dres sa slikom. */
-export function resolveHomeDrop(products: Jersey[]): HomeDrop | null {
-  const bySlug = products.find((p) => p.slug === HOME_DROP.slug);
-  const fallback =
-    bySlug ??
-    products.find((p) => p.klub === "Hrvatska" && canFeature(p) && p.liga !== "Komplet" && firstImage(p));
-  if (!fallback || !canFeature(fallback)) return null;
+/** Koliko veličina kupac STVARNO može odabrati (bez rasprodanih). */
+export function availableSizeCount(p: Jersey) {
+  const o = getJerseySizeOptions(p);
+  const adults = o.adultsOutOfStock ? [] : o.adults;
+  const kids = o.kidsOutOfStock ? [] : o.kids;
+  return [...adults, ...kids].filter((s) => !o.soldOutSizes.includes(s)).length;
+}
 
-  const isConfigured = fallback.slug === HOME_DROP.slug;
-  const kidsOnly =
-    fallback.outOfStock === "adults" || (!fallback.vel?.includes("Odrasli") && fallback.vel?.includes("Djeca"));
+// Hero mora biti dres koji se realno može kupiti: ne rasprodan i s barem 4 slobodne veličine.
+const MIN_HERO_SIZES = 4;
+const heroReady = (p: Jersey) =>
+  canFeature(p) && p.outOfStock !== "all" && Boolean(firstImage(p)) && availableSizeCount(p) >= MIN_HERO_SIZES;
+
+/** "Vušković nr22 — SP 2026" → { name: "Vušković 22", sub: "SP 2026" } */
+function shortName(igrac: string) {
+  const [head, ...rest] = igrac.split(/\s+[—–-]\s+/);
+  return { name: head.replace(/\bnr\.?\s*(\d+)/i, "$1").trim(), sub: rest.join(" · ") };
+}
+
+/**
+ * Hero proizvod: HOME_DROP.slug ako je na zalihi; inače prvi hrvatski dres (ne komplet,
+ * ne dugi rukav) koji ima slobodnih veličina — prednost onima s izrezanim 3D snimkom.
+ */
+export function resolveHomeDrop(products: Jersey[]): HomeDrop | null {
+  const configured = products.find((p) => p.slug === HOME_DROP.slug);
+  const candidates = products.filter(
+    (p) => p.klub === "Hrvatska" && p.liga !== "Komplet" && p.category !== "dugi-rukav" && heroReady(p)
+  );
+  const pick =
+    (configured && heroReady(configured) ? configured : undefined) ??
+    candidates.find((p) => stageImageFor(p)) ??
+    candidates[0] ??
+    (configured && canFeature(configured) ? configured : undefined);
+  if (!pick) return null;
+
+  const isConfigured = pick.slug === HOME_DROP.slug;
+  const kidsOnly = pick.outOfStock === "adults" || (!pick.vel?.includes("Odrasli") && pick.vel?.includes("Djeca"));
+  const short = shortName(pick.igrac);
 
   return {
-    slug: fallback.slug,
+    slug: pick.slug,
     headline: HOME_DROP.headline,
     kicker: HOME_DROP.kicker,
     live: HOME_DROP.live,
-    name: isConfigured ? HOME_DROP.name : fallback.igrac.split("—")[0].replace(/\bnr\s*/i, "").trim(),
-    sub: isConfigured ? HOME_DROP.sub : fallback.igrac.split("—")[1]?.trim() ?? "",
-    klub: fallback.klub,
-    igrac: fallback.igrac,
-    price: fallback.price ?? 20,
-    image: firstImage(fallback),
-    imageAlt: `${fallback.klub} ${fallback.igrac} — dres`,
+    name: isConfigured ? HOME_DROP.name : short.name,
+    sub: isConfigured ? HOME_DROP.sub : short.sub,
+    klub: pick.klub,
+    igrac: pick.igrac,
+    price: pick.price ?? 20,
+    image: firstImage(pick),
+    stage: stageImageFor(pick),
+    imageAlt: `${pick.klub} ${pick.igrac} — dres`,
     kidsOnly: Boolean(kidsOnly)
   };
 }

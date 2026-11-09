@@ -54,7 +54,7 @@ const minPrice = (list: Jersey[], fallback: number) =>
   `${list.length ? Math.min(...list.map((p) => p.price ?? fallback)) : fallback} €`;
 
 export default async function HomePage() {
-  const { t } = await getServerTranslations();
+  const { t, locale } = await getServerTranslations();
 
   // Sekcije se pale/gase u Postavkama (Izgled). Hero, kategorije i katalog su uvijek tu.
   const { hiddenSections, heroTitle, heroSubtitle } = await getSettings();
@@ -76,35 +76,47 @@ export default async function HomePage() {
     ? heroTitle.split("\n").map((l) => l.trim()).filter(Boolean)
     : [t.hero.line1, t.hero.line2, t.hero.line3];
 
-  // Pločice kategorija — slike su prvi proizvodi sa slikom u toj kategoriji (nikad zabranjeni dres).
-  const withImg = (list: Jersey[]) => list.filter((p) => canFeature(p) && firstImage(p));
+  // Pločice kategorija — prvi proizvodi sa slikom u toj kategoriji (nikad zabranjeni dres;
+  // Modrić tek na kraju — vlasnik ga ne želi isticati). Izrez (3D dres) ima prednost.
+  const d = t.drop;
+  const notModric = (p: Jersey) => (p.slug.includes("modric") ? 1 : 0);
+  const withImg = (list: Jersey[]) =>
+    list
+      .filter((p) => canFeature(p) && firstImage(p))
+      .sort((a, b) => notModric(a) - notModric(b) || Number(Boolean(b.stage)) - Number(Boolean(a.stage)));
+  const tileImg = (p: Jersey) =>
+    p.stage ? { src: p.stage.src, cutout: true } : { src: firstImage(p) as string, cutout: false };
   const dugiRukav = dresovi.filter((j) => j.category === "dugi-rukav");
   const obicni = dresovi.filter((j) => j.category !== "dugi-rukav" && !j.slug?.includes("mystery"));
   const bigImages = [
-    drop?.image,
-    ...withImg(featured.filter((p) => p.klub !== "Hrvatska" && p.category !== "trenirka" && p.category !== "streetwear")).map(firstImage),
-    ...withImg(obicni.filter((p) => p.klub !== "Hrvatska")).map(firstImage)
-  ].filter((s): s is string => Boolean(s));
+    drop?.stage ? { src: drop.stage.src, cutout: true } : drop?.image ? { src: drop.image, cutout: false } : undefined,
+    ...withImg(featured.filter((p) => p.klub !== "Hrvatska" && p.category !== "trenirka" && p.category !== "streetwear" && p.liga !== "Komplet")).map(tileImg),
+    ...withImg(obicni.filter((p) => p.klub !== "Hrvatska")).map(tileImg)
+  ].filter((x): x is { src: string; cutout: boolean } => Boolean(x));
+  const uniqBig = bigImages.filter((x, i) => bigImages.findIndex((y) => y.src === x.src) === i).slice(0, 2);
   const tiles: BentoTile[] = [
-    { href: "/dresovi", label: "Dresovi", note: "Djeca: dres + hlačice", price: minPrice(obicni, 20), images: [...new Set(bigImages)].slice(0, 2), variant: "big" },
+    { href: "/dresovi", label: d.tileJerseys, note: d.tileJerseysNote, price: minPrice(obicni, 20), images: uniqBig, variant: "big" },
     ...(dugiRukav.length
-      ? [{ href: "/dresovi?dugi=1", label: "Dugi rukav", price: minPrice(dugiRukav, 30), images: withImg(dugiRukav).map(firstImage).filter((s): s is string => !!s).slice(0, 1) }]
+      ? [{ href: "/dresovi?dugi=1", label: d.tileLong, price: minPrice(dugiRukav, 30), images: withImg(dugiRukav).slice(0, 1).map(tileImg) }]
       : []),
     ...(trenirke.length && show("trenirke")
-      ? [{ href: "/trenirke", label: "Trenirke", note: "Jakna + hlače", price: minPrice(trenirke, 35), images: withImg(trenirke).map(firstImage).filter((s): s is string => !!s).slice(0, 1) }]
+      ? [{ href: "/trenirke", label: d.tileTracksuits, note: d.tileTracksuitsNote, price: minPrice(trenirke, 35), images: withImg(trenirke).slice(0, 1).map(tileImg) }]
       : []),
     ...(kompleti.length
-      ? [{ href: "/kompleti", label: "Kompleti", note: "S loptom i kapom", price: minPrice(kompleti, 40), images: withImg(kompleti).map(firstImage).filter((s): s is string => !!s).slice(0, 1) }]
+      ? [{ href: "/kompleti", label: d.tileKits, note: d.tileKitsNote, price: minPrice(kompleti, 40), images: withImg(kompleti).slice(0, 1).map(tileImg) }]
       : []),
     ...(streetwear.length && show("streetwear")
-      ? [{ href: "/streetwear", label: "Streetwear", note: "Komplet", price: minPrice(streetwear, 50), images: [], variant: "volt" as const }]
+      ? [{ href: "/streetwear", label: d.tileStreetwear, note: d.tileStreetwearNote, price: minPrice(streetwear, 50), images: [], variant: "volt" as const }]
       : [])
   ];
+
+  // "Top izbor" — samo dresovi (trenirke/kompleti imaju svoje pločice i stranice).
+  const topPicks = featured.filter((p) => p.category !== "trenirka" && p.category !== "streetwear" && p.liga !== "Komplet" && p.liga !== "Trenirka");
 
   // "Za Vatrene" — hrvatski dresovi sa slikom; hero dres prvi, zabranjeni nikad.
   const vatreni = withImg(dresovi.filter((p) => p.klub === "Hrvatska" && p.category !== "dugi-rukav"))
     .sort((a, b) => (a.slug === drop?.slug ? -1 : b.slug === drop?.slug ? 1 : 0))
-    .slice(0, 10);
+    .slice(0, 8);
 
   let n = 1;
   const idx = () => String(++n).padStart(2, "0");
@@ -112,25 +124,26 @@ export default async function HomePage() {
   return (
     <>
       <Ps5HomeBanner />
-      {drop ? <DropHero drop={drop} /> : null}
+      {drop ? <DropHero drop={drop} t={d} /> : null}
       <ClubTape />
 
-      <CategoryBento tiles={tiles} titleLines={titleLines} subtitle={heroSubtitle || t.hero.subtitle} />
+      <CategoryBento tiles={tiles} titleLines={titleLines} subtitle={heroSubtitle || t.hero.subtitle} label={d.categories} />
 
-      {featured.length ? (
+      {topPicks.length ? (
         <ProductRail
           index={idx()}
-          kicker="Najprodavanije"
+          kicker={d.bestKicker}
           title={
             <>
-              Top
-              <br />
-              izbor
+              {d.bestTitle[0]}
+              <br className="lg:hidden" />
+              <span className="hidden lg:inline"> </span>
+              {d.bestTitle[1]}
             </>
           }
-          products={forCards(featured.slice(0, 10))}
+          products={forCards(topPicks.slice(0, 8))}
           href="/dresovi"
-          linkLabel={`Svi ${dresovi.length} →`}
+          linkLabel={d.all(dresovi.length)}
         />
       ) : null}
 
@@ -138,7 +151,8 @@ export default async function HomePage() {
         <div className="page-shell">
           <HomeCatalogTabs
             index={idx()}
-            dresovi={forCards(dresovi)}
+            dresovi={forCards(dresovi.filter(canFeature))}
+            flagshipSlug={drop?.slug}
             streetwear={forCards(streetwear)}
             trenirke={forCards(trenirke)}
             headingLabel={t.home.catalogKicker}
@@ -152,29 +166,29 @@ export default async function HomePage() {
         <ProductRail
           checker
           index={idx()}
-          kicker="Kolekcija"
+          kicker={d.vatreniKicker}
           title={
             <>
-              Za
+              {d.vatreniTitle[0]}
               <br />
-              <span className="text-outline">Vatrene</span>
+              <span className="text-outline">{d.vatreniTitle[1]}</span>
             </>
           }
-          lead="Dresovi reprezentacije za SP 2026. Dječje veličine od 104 cm — za male navijače koji rastu brže od dresa."
+          lead={d.vatreniLead}
           products={forCards(vatreni)}
           href="/dresovi/klub/hrvatska"
-          linkLabel="Sve →"
+          linkLabel={d.allShort}
         />
       ) : null}
 
-      {show("trust") && <CodSection index={idx()} basePrice={20} />}
+      {show("trust") && <CodSection index={idx()} basePrice={20} t={d} />}
 
       {show("reviews") && <ReviewsSection index={idx()} />}
-      {show("testimonials") && <TestimonialsSection items={testimonials} />}
+      {show("testimonials") && <TestimonialsSection items={testimonials} locale={locale} />}
       {show("instagram") && <InstagramSection />}
       {show("games") && <GamesCta />}
       {show("faq") && <FaqSection />}
-      <SizeHelp />
+      <SizeHelp t={{ title: d.sizeHelpTitle, text: d.sizeHelpText, msg: d.sizeHelpMsg }} />
 
       {/* SEO tekst — ostaje na stranici za Google (long-tail), tiho stiliziran. */}
       <section className="pt-20 lg:pt-28">

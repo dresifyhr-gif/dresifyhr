@@ -17,7 +17,8 @@ export function HomeCatalogTabs({
   trenirke,
   headingLabel,
   headingTitle,
-  headingDesc
+  headingDesc,
+  flagshipSlug
 }: {
   index?: string;
   dresovi: Jersey[];
@@ -26,6 +27,7 @@ export function HomeCatalogTabs({
   headingLabel: string;
   headingTitle: string;
   headingDesc: string;
+  flagshipSlug?: string;
 }) {
   const [tab, setTab] = useState<Tab>("dresovi");
 
@@ -78,13 +80,13 @@ export function HomeCatalogTabs({
       )}
 
       {tab === "dresovi" && (
-        <CatalogBrowser products={dresovi} compactHeader headingLabel={headingLabel} headingTitle={headingTitle} headingDesc={headingDesc} />
+        <CatalogBrowser products={dresovi} compactHeader headingLabel={headingLabel} headingTitle={headingTitle} headingDesc={headingDesc} flagshipSlug={flagshipSlug} />
       )}
 
       {tab === "trenirka" && (
         <div>
           <div className="mb-6">
-            <h2 className="font-display text-[54px] uppercase leading-[0.92] text-fg lg:text-[80px]">Komplet trenirke</h2>
+            <h2 className="pt-[0.08em] font-display text-[54px] uppercase leading-[0.96] text-fg lg:text-[80px]">Komplet trenirke</h2>
             <p className="mt-3 max-w-xl text-[14px] font-medium leading-[1.45] text-soft">
               Jakna + hlače u klupskom dizajnu. 35 €, dostava po cijeloj Hrvatskoj, plaćanje pouzećem.
             </p>
@@ -100,7 +102,7 @@ export function HomeCatalogTabs({
       {tab === "streetwear" && (
         <div>
           <div className="mb-6">
-            <h2 className="font-display text-[54px] uppercase leading-[0.92] text-fg lg:text-[80px]">Ulični kompleti</h2>
+            <h2 className="pt-[0.08em] font-display text-[54px] uppercase leading-[0.96] text-fg lg:text-[80px]">Ulični kompleti</h2>
             <p className="mt-3 max-w-xl text-[14px] font-medium leading-[1.45] text-soft">
               Majica + hlačice u uličnom stilu. Veličine XS–L, plaćanje pouzećem, besplatna dostava od 60 € za registrirane.
             </p>
