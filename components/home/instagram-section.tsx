@@ -2,7 +2,6 @@
 
 import Script from "next/script";
 
-import { SectionHeading } from "@/components/site/section-heading";
 import { useLanguage } from "@/contexts/language-context";
 import { useInstagram } from "@/contexts/shop-settings-context";
 
@@ -13,24 +12,26 @@ export function InstagramSection() {
   const { t } = useLanguage();
 
   return (
-    <section className="section-pad bg-[#111111]">
+    <section className="pt-20 lg:pt-28">
       <div className="page-shell">
-        <SectionHeading
-          kicker={t.instagram.kicker}
-          title={t.instagram.title(ig.handle)}
-          description={t.instagram.desc}
-        />
+        <div className="mb-3.5 flex items-center justify-between gap-3">
+          <h2 className="font-display text-[32px] uppercase leading-none text-fg lg:text-[48px]">{ig.handle}</h2>
+          <a
+            href={ig.url}
+            target="_blank"
+            rel="noreferrer"
+            className="shrink-0 text-[12px] font-bold text-mute transition-colors hover:text-accent"
+          >
+            {t.instagram.follow} →
+          </a>
+        </div>
+        <p className="mb-5 max-w-[520px] text-[14px] font-medium leading-[1.45] text-soft">{t.instagram.desc}</p>
 
         <Script src="https://w.behold.so/widget.js" strategy="lazyOnload" />
         {/* @ts-expect-error custom element */}
         <behold-widget feed-id={BEHOLD_FEED_ID} />
 
-        <a
-          href={ig.url}
-          target="_blank"
-          rel="noreferrer"
-          className="button-secondary mt-8 px-6"
-        >
+        <a href={ig.url} target="_blank" rel="noreferrer" className="button-secondary mt-6 w-full sm:w-auto">
           {t.instagram.cta(ig.handle)}
         </a>
       </div>

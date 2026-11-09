@@ -11,6 +11,7 @@ type Tab = "dresovi" | "streetwear" | "trenirka";
 // Switch na naslovnoj: prebacuje katalog dresova ⇄ streetwear ⇄ trenirke u mjestu.
 // Banner (i #streetwear / #trenirke u URL-u) mogu preselektirati odgovarajući tab.
 export function HomeCatalogTabs({
+  index,
   dresovi,
   streetwear,
   trenirke,
@@ -18,6 +19,7 @@ export function HomeCatalogTabs({
   headingTitle,
   headingDesc
 }: {
+  index?: string;
   dresovi: Jersey[];
   streetwear: Jersey[];
   trenirke: Jersey[];
@@ -44,42 +46,34 @@ export function HomeCatalogTabs({
 
   return (
     <div id="streetwear" className="scroll-mt-24">
-      {/* Switch */}
+      <div className="idx">
+        {index ? <b>{index}</b> : null}
+        {headingLabel}
+      </div>
+
+      {/* Switch: dresovi ⇄ trenirke ⇄ streetwear */}
       {(hasStreetwear || hasTrenirke) && (
-        <div className="mb-6 flex justify-center sm:mb-8">
-          <div className="inline-flex flex-wrap justify-center rounded-full border border-white/10 bg-[#111111] p-1">
-            <button
-              type="button"
-              onClick={() => setTab("dresovi")}
-              className={`rounded-full px-5 py-2.5 text-sm font-bold uppercase tracking-wide transition sm:px-7 ${
-                tab === "dresovi" ? "bg-accent text-black" : "text-white/60 hover:text-white"
-              }`}
-            >
-              👕 Dresovi
-            </button>
-            {hasTrenirke && (
+        <div className="rail mb-5" role="tablist">
+          {([
+            ["dresovi", "Dresovi", true],
+            ["trenirka", "Trenirke", hasTrenirke],
+            ["streetwear", "Streetwear", hasStreetwear]
+          ] as const)
+            .filter(([, , on]) => on)
+            .map(([key, label]) => (
               <button
+                key={key}
                 type="button"
-                onClick={() => setTab("trenirka")}
-                className={`rounded-full px-5 py-2.5 text-sm font-bold uppercase tracking-wide transition sm:px-7 ${
-                  tab === "trenirka" ? "bg-teal-500 text-white" : "text-white/60 hover:text-white"
+                role="tab"
+                aria-selected={tab === key}
+                onClick={() => setTab(key)}
+                className={`h-[34px] shrink-0 rounded-full border px-3.5 text-[11.5px] font-bold uppercase tracking-[0.04em] transition-colors ${
+                  tab === key ? "border-fg bg-fg text-black" : "border-white/[0.18] text-[#d6d6cf] hover:border-white/40"
                 }`}
               >
-                🏃 Trenirke
+                {label}
               </button>
-            )}
-            {hasStreetwear && (
-              <button
-                type="button"
-                onClick={() => setTab("streetwear")}
-                className={`rounded-full px-5 py-2.5 text-sm font-bold uppercase tracking-wide transition sm:px-7 ${
-                  tab === "streetwear" ? "bg-orange-500 text-white" : "text-white/60 hover:text-white"
-                }`}
-              >
-                🔥 Streetwear
-              </button>
-            )}
-          </div>
+            ))}
         </div>
       )}
 
@@ -89,14 +83,13 @@ export function HomeCatalogTabs({
 
       {tab === "trenirka" && (
         <div>
-          <div className="mb-6 text-center">
-            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-teal-400/90">Trenirke</span>
-            <h2 className="mt-2 font-heading text-3xl uppercase leading-none text-white sm:text-4xl">Komplet trenirke</h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm text-white/55">
+          <div className="mb-6">
+            <h2 className="font-display text-[54px] uppercase leading-[0.92] text-fg lg:text-[80px]">Komplet trenirke</h2>
+            <p className="mt-3 max-w-xl text-[14px] font-medium leading-[1.45] text-soft">
               Jakna + hlače u klupskom dizajnu. 35 €, dostava po cijeloj Hrvatskoj, plaćanje pouzećem.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-6 sm:gap-x-3 lg:grid-cols-4">
             {trenirke.map((product) => (
               <ProductCard key={product.slug} product={product} theme="trenirka" />
             ))}
@@ -106,14 +99,13 @@ export function HomeCatalogTabs({
 
       {tab === "streetwear" && (
         <div>
-          <div className="mb-6 text-center">
-            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-orange-500/80">Streetwear</span>
-            <h2 className="mt-2 font-heading text-3xl uppercase leading-none text-white sm:text-4xl">Ulični kompleti</h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm text-white/55">
+          <div className="mb-6">
+            <h2 className="font-display text-[54px] uppercase leading-[0.92] text-fg lg:text-[80px]">Ulični kompleti</h2>
+            <p className="mt-3 max-w-xl text-[14px] font-medium leading-[1.45] text-soft">
               Majica + hlačice u uličnom stilu. Veličine XS–L, plaćanje pouzećem, besplatna dostava od 60 € za registrirane.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-6 sm:gap-x-3 lg:grid-cols-4">
             {streetwear.map((product) => (
               <ProductCard key={product.slug} product={product} theme="streetwear" />
             ))}

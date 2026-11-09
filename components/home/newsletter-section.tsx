@@ -44,29 +44,35 @@ export function NewsletterSection() {
   };
 
   return (
-    <section className="section-pad bg-[#111111]">
+    <section className="pt-20 lg:pt-28">
       <div className="page-shell">
-        <div className="border border-accent/30 bg-[#0a0a0a] p-6 sm:p-8 lg:p-10">
-          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-            <div>
-              <span className="section-kicker">{t.newsletter.kicker}</span>
-              <h2 className="section-title">{t.newsletter.title}</h2>
-            </div>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:flex-row">
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder={t.newsletter.placeholder}
-                className="h-14 flex-1 rounded-[4px] border border-white/10 bg-[#111111] px-5 text-sm text-white outline-none transition duration-200 ease-out focus:border-accent"
-              />
-              <button type="submit" className="button-primary px-7" disabled={loading}>
-                {loading ? "..." : t.newsletter.submit}
-              </button>
-            </form>
+        <div className="grid gap-6 border-t border-white/10 pt-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end lg:pt-12">
+          <div>
+            <h2 className="font-display text-[36px] uppercase leading-[0.92] text-fg lg:text-[56px]">{t.newsletter.title}</h2>
+            <p className="mt-2 text-[13px] font-medium leading-[1.4] text-mute">{t.newsletter.sub}</p>
           </div>
-          {message ? <p className="mt-4 text-sm text-accent">{message}</p> : null}
+          <form onSubmit={handleSubmit} className="flex border-b-[1.5px] border-fg">
+            <label htmlFor="newsletter-email" className="sr-only">
+              Email
+            </label>
+            <input
+              id="newsletter-email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder={t.newsletter.placeholder}
+              className="h-12 min-w-0 flex-1 bg-transparent text-[15px] font-medium text-fg outline-none placeholder:text-mute2"
+            />
+            <button
+              type="submit"
+              className="shrink-0 pl-3 text-[12px] font-black uppercase tracking-[0.12em] text-fg transition-colors hover:text-accent disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? "..." : t.newsletter.submit}
+            </button>
+          </form>
         </div>
+        {message ? <p className="mt-3 text-sm text-accent">{message}</p> : null}
       </div>
     </section>
   );

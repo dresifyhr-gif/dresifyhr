@@ -9,10 +9,11 @@ export const HR_COUNTRIES = new Set(["HR", "BA", "RS", "SI", "ME", "MK"]);
 
 const hr = {
   announcement: [
-    "🏆 SP 2026 je tu — navijaj u svom dresu! Reprezentacije od 20€",
-    "📦 Dostava pouzećem po cijeloj Hrvatskoj — 7,00€",
-    "⚡ Novo svaki tjedan — provjeri katalog",
-    "💬 Naruči na WhatsApp — odgovaramo u sat vremena",
+    "Plaćanje pouzećem",
+    "Dostava GLS 2–5 dana · 7 €",
+    "Zamjena veličine",
+    "Djeca 104–176 · Odrasli S–XXL",
+    "SP 2026 — reprezentacije od 20 €",
   ],
 
   nav: {
@@ -96,8 +97,8 @@ const hr = {
   },
 
   home: {
-    catalogKicker: "Drop",
-    catalogTitle: "Odaberi svoj sljedeći dres",
+    catalogKicker: "Upravo stiglo",
+    catalogTitle: "Novi drop",
     catalogDesc:
       "Jedna cijena, jasan izbor i katalog koji kombinira najtraženije aktualne modele i retro favorite.",
   },
@@ -161,18 +162,20 @@ const hr = {
 
   newsletter: {
     kicker: "Newsletter",
-    title: "Budi prvi koji sazna za nove dresove i akcije.",
-    placeholder: "Upiši email adresu",
-    submit: "Prijavi se",
+    title: "Prvi saznaj za novi drop",
+    sub: "Novi dresovi i akcije na mail. Bez spama.",
+    placeholder: "tvoj@email.hr",
+    submit: "Prijavi me",
     error: "Unesi ispravnu email adresu.",
     success: "Prijava uspješna. Javljamo ti se kad stigne novi drop.",
   },
 
   reviews: {
-    kicker: "Recenzije",
-    title: "Što kažu kupci",
-    desc: "Kratke poruke iz stvarnih narudžbi koje nam dolaze nakon isporuke.",
-    bar: "200+ narudžbi • Dostava 2–5 dana • WhatsApp podrška • Novo svaki tjedan",
+    kicker: "Kupci kažu",
+    title: "Prave poruke kupaca",
+    desc: "Poruke koje nam kupci pošalju na Instagram nakon dostave. Bez izmišljenih recenzija.",
+    source: "Poruka s Instagrama",
+    bar: "Dostava 2–5 dana • WhatsApp podrška • Novo svaki tjedan",
   },
 
   blog: {
@@ -190,6 +193,7 @@ const hr = {
     title: (handle: string) => `Prati nas ${handle}`,
     desc: "Tamo prvi objavljujemo nove dropove, dostupne veličine i najtraženije retro komade.",
     cta: (handle: string) => `Otvori Instagram ${handle}`,
+    follow: "Prati nas",
   },
 
   socialProof: {
@@ -281,10 +285,11 @@ const hr = {
 
 const en: typeof hr = {
   announcement: [
-    "🏆 World Cup 2026 is here — cheer in your jersey! National teams from €20",
-    "📦 Cash on delivery across Croatia — 7.00€",
-    "⚡ New drops every week — check the catalog",
-    "💬 Order on WhatsApp — we reply within the hour",
+    "Cash on delivery",
+    "GLS delivery 2–5 days · €7",
+    "Size exchange",
+    "Kids 104–176 · Adults S–XXL",
+    "World Cup 2026 — national teams from €20",
   ],
 
   nav: {
@@ -369,8 +374,8 @@ const en: typeof hr = {
   },
 
   home: {
-    catalogKicker: "Drop",
-    catalogTitle: "Pick your next jersey",
+    catalogKicker: "Just landed",
+    catalogTitle: "New drop",
     catalogDesc:
       "One price, a clear choice and a catalog that combines the most-wanted current models and retro favourites.",
   },
@@ -430,18 +435,20 @@ const en: typeof hr = {
 
   newsletter: {
     kicker: "Newsletter",
-    title: "Be the first to know about new jerseys and deals.",
-    placeholder: "Enter your email",
+    title: "Be first to know about the next drop",
+    sub: "New jerseys and deals by email. No spam.",
+    placeholder: "your@email.com",
     submit: "Subscribe",
     error: "Please enter a valid email address.",
     success: "Subscribed! We'll notify you when the next drop arrives.",
   },
 
   reviews: {
-    kicker: "Reviews",
-    title: "What customers say",
-    desc: "Short messages from real orders received after delivery.",
-    bar: "200+ orders • Delivery 2–5 days • WhatsApp support • New every week",
+    kicker: "Customers say",
+    title: "Real customer messages",
+    desc: "Messages customers send us on Instagram after delivery. No made-up reviews.",
+    source: "Instagram message",
+    bar: "Delivery 2–5 days • WhatsApp support • New every week",
   },
 
   blog: {
@@ -458,6 +465,7 @@ const en: typeof hr = {
     title: (handle: string) => `Follow us ${handle}`,
     desc: "We post new drops, available sizes and the most-wanted retro pieces there first.",
     cta: (handle: string) => `Open Instagram ${handle}`,
+    follow: "Follow us",
   },
 
   socialProof: {

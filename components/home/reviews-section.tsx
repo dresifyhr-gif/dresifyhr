@@ -1,9 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Star } from "lucide-react";
-
-import { SectionHeading } from "@/components/site/section-heading";
 import { useLanguage } from "@/contexts/language-context";
 
 const reviews = [
@@ -29,41 +25,44 @@ const reviews = [
   }
 ];
 
-export function ReviewsSection() {
+export function ReviewsSection({ index = "05" }: { index?: string }) {
   const { t } = useLanguage();
 
   return (
-    <section className="section-pad bg-[#0a0a0a]">
+    <section className="pt-20 lg:pt-28">
       <div className="page-shell">
-        <SectionHeading
-          kicker={t.reviews.kicker}
-          title={t.reviews.title}
-          description={t.reviews.desc}
-        />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {reviews.map((review, index) => (
-            <motion.article
-              key={`${review.name}-${review.city}`}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ delay: index * 0.08, duration: 0.35 }}
-              className="border border-white/10 bg-[#111111] p-5 sm:p-6"
-            >
-              <div className="flex items-center gap-1 text-accent">
-                {Array.from({ length: 5 }).map((_, starIndex) => (
-                  <Star key={starIndex} className="h-4 w-4 fill-current" />
-                ))}
-              </div>
-              <p className="mt-4 text-xs uppercase tracking-[0.28em] text-white/50">
-                {review.name}, {review.city}
-              </p>
-              <p className="mt-4 text-sm leading-7 text-white/70">{review.text}</p>
-            </motion.article>
-          ))}
+        <div className="idx">
+          <b>{index}</b>
+          {t.reviews.kicker}
         </div>
-        <div className="mt-6 border border-white/10 bg-[#111111] px-5 py-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-white sm:px-6 sm:py-5 sm:text-sm sm:tracking-[0.24em]">
-          {t.reviews.bar}
+        <h2 className="font-display text-[54px] uppercase leading-[0.92] text-fg lg:text-[80px]">{t.reviews.title}</h2>
+        <p className="mt-3 max-w-[360px] text-[14px] font-medium leading-[1.45] text-soft lg:max-w-[520px]">{t.reviews.desc}</p>
+      </div>
+      <div className="page-shell mt-6">
+        <div className="rail -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-3 lg:px-0">
+          {reviews.map((review) => (
+            <article
+              key={`${review.name}-${review.city}`}
+              className="w-[250px] shrink-0 snap-start rounded-[14px] border border-white/[0.18] bg-[#111] p-3 lg:w-auto"
+            >
+              <div className="flex items-center gap-2 border-b border-white/10 pb-2.5">
+                <i
+                  aria-hidden
+                  className="h-[26px] w-[26px] shrink-0 rounded-full"
+                  style={{ background: "conic-gradient(#e8ff3c, #ff4fa3, #e8ff3c)" }}
+                />
+                <div className="min-w-0">
+                  <b className="block truncate text-[11.5px] font-black leading-none text-fg">
+                    {review.name}, {review.city}
+                  </b>
+                  <small className="mt-1 block text-[10px] font-medium leading-none text-mute">{t.reviews.source}</small>
+                </div>
+              </div>
+              <p className="mt-3 rounded-[12px] rounded-tl-[4px] bg-[#262626] px-3 py-2.5 text-[13.5px] font-medium leading-[1.45] text-fg">
+                {review.text}
+              </p>
+            </article>
+          ))}
         </div>
       </div>
     </section>

@@ -92,7 +92,7 @@ export function FaqSection() {
   };
 
   return (
-    <section className="section-pad bg-[#0a0a0a]">
+    <section className="pt-20 lg:pt-28">
       <div className="page-shell">
         <SectionHeading
           kicker={locale === "en" ? "FAQ" : "Česta pitanja"}
@@ -104,7 +104,7 @@ export function FaqSection() {
           }
         />
 
-        <div className="mx-auto mt-8 max-w-3xl divide-y divide-white/10 border-y border-white/10">
+        <div className="max-w-3xl divide-y divide-white/10 border-y border-white/10">
           {items.map((item, i) => {
             const isOpen = open === i;
             return (
@@ -115,9 +115,9 @@ export function FaqSection() {
                   className="flex w-full items-center justify-between gap-4 py-5 text-left"
                   aria-expanded={isOpen}
                 >
-                  <span className="text-base font-semibold text-white sm:text-lg">{item.q}</span>
+                  <span className="text-[14px] font-black uppercase leading-[1.3] tracking-[0.04em] text-fg sm:text-[15px]">{item.q}</span>
                   <ChevronDown
-                    className={`h-5 w-5 shrink-0 text-accent transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                    className={`h-5 w-5 shrink-0 text-fg transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
                   />
                 </button>
                 <div
@@ -126,7 +126,7 @@ export function FaqSection() {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <p className="text-sm leading-6 text-white/60 sm:text-[15px]">{item.a}</p>
+                    <p className="text-[14px] leading-[1.6] text-[#c4c4bd] sm:text-[15px]">{item.a}</p>
                   </div>
                 </div>
               </div>
