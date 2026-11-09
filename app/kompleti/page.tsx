@@ -84,7 +84,7 @@ export default async function KompletiPage() {
             <p>
               Šaljemo GLS kurirskom službom po cijeloj Hrvatskoj, rok isporuke je 2–5 radnih dana.
               Plaćaš <strong className="text-white">pouzećem</strong> — tek kad ti paket stigne, ništa
-              ne plaćaš unaprijed. Za narudžbe iznad 60 € dostava je besplatna. Ako ti komplet treba za
+              ne plaćaš unaprijed. Registriranim kupcima dostava je besplatna za narudžbe od 60 €. Ako ti komplet treba za
               točan datum (rođendan, turnir), javi nam rok pa ćemo se potruditi.
             </p>
             <h3 className="pt-2 font-heading text-lg uppercase tracking-[0.04em] text-white">

@@ -21,7 +21,7 @@ export function CatalogFaq({ locale = "hr" }: { locale?: "hr" | "en" }) {
         { q: "Imate li jeftine nogometne dresove?", a: "Da — svi naši dresovi su 20 €, što je među najpovoljnijima u Hrvatskoj, uz istu fiksnu cijenu za dječje i odrasle veličine." },
         { q: "Imate li dječje nogometne dresove?", a: "Da, dječje veličine 104–176 (dres + hlačice) za sve klubove i reprezentacije, po istoj cijeni od 20 €." },
         { q: "Koje veličine dresova nudite?", a: "Dječje 104–176 i odrasle S–XL (reprezentacije S–XXL)." },
-        { q: "Koliko traje dostava i kako plaćam?", a: "Dostava je 2–5 radnih dana po cijeloj Hrvatskoj, a plaćaš pouzećem pri preuzimanju — dostava 7 €, besplatna od 60 €." },
+        { q: "Koliko traje dostava i kako plaćam?", a: "Dostava je 2–5 radnih dana po cijeloj Hrvatskoj, a plaćaš pouzećem pri preuzimanju — dostava 7 €, a registriranim kupcima besplatna od 60 €." },
         { q: "Jesu li dresovi kvalitetni?", a: "Ušiveno ime i broj igrača, vjerni originalnom izgledu, izrađeni od laganog i prozračnog materijala." }
       ];
 

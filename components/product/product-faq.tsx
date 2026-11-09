@@ -54,7 +54,7 @@ export function ProductFaq({ product, locale = "hr" }: { product: Jersey; locale
         },
         {
           q: "Koliko košta dostava i koliko traje?",
-          a: "Dostava je 7,00 € po cijeloj Hrvatskoj (besplatna za narudžbe od 60 €), uz isporuku 2–5 radnih dana putem GLS."
+          a: "Dostava je 7,00 € po cijeloj Hrvatskoj (besplatna za registrirane kupce na narudžbe od 60 €), uz isporuku 2–5 radnih dana putem GLS."
         },
         {
           q: `Kako plaćam ${klub} dres?`,

@@ -26,7 +26,7 @@ export function TrenirkaBanner({ images = [] }: { images?: string[] }) {
             </h2>
             {/* Opis samo na širem ekranu — mobilna ostaje kratka */}
             <p className="mt-2 hidden max-w-md text-[13px] leading-5 text-white/90 sm:block sm:text-sm">
-              Kompleti trenirki — jakna + hlače. Topla i udobna, besplatna dostava, plaćanje pouzećem.
+              Kompleti trenirki — jakna + hlače. Topla i udobna, plaćanje pouzećem, besplatna dostava od 60 € za registrirane.
             </p>
           </div>
 

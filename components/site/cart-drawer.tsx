@@ -5,6 +5,8 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ShoppingBag, Trash2, X } from "lucide-react";
 
+import { useUser } from "@clerk/nextjs";
+
 import { useCart } from "@/components/providers/cart-provider";
 import { CartUpsell } from "@/components/site/cart-upsell";
 import { useLanguage } from "@/contexts/language-context";
@@ -14,8 +16,11 @@ import { formatEuroAmount, repairText } from "@/lib/utils";
 export function CartDrawer() {
   const { items, subtotal, isDrawerOpen, closeDrawer, removeItem, clearCart } = useCart();
   const { t } = useLanguage();
-  const hasStreetwear = items.some((i) => i.category === "streetwear"); // streetwear = besplatna dostava
-  const freeShipping = hasStreetwear || subtotal >= FREE_SHIPPING_THRESHOLD_EUR;
+  // Besplatna dostava od 60 € SAMO za prijavljene kupce — isto pravilo kao blagajna i server.
+  const { isSignedIn } = useUser();
+  const signedIn = isSignedIn === true;
+  const reachedThreshold = subtotal >= FREE_SHIPPING_THRESHOLD_EUR;
+  const freeShipping = signedIn && reachedThreshold;
   const shipping = items.length && !freeShipping ? SHIPPING_PRICE_EUR : 0;
   const total = subtotal + shipping;
   const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD_EUR - subtotal);
@@ -115,16 +120,20 @@ export function CartDrawer() {
                   <p className="text-center text-[12px] leading-5 text-white/75">
                     {freeShipping ? (
                       <span className="font-semibold text-accent">🎉 Ostvario si besplatnu dostavu!</span>
+                    ) : reachedThreshold ? (
+                      <>
+                        🔒 <Link href="/prijava/" onClick={closeDrawer} className="font-semibold text-accent underline">Prijavi se ili registriraj (besplatno)</Link> i dostava je <span className="font-semibold text-white">besplatna</span> — uštediš {SHIPPING_PRICE_LABEL}
+                      </>
                     ) : (
                       <>
-                        Dodaj još <span className="font-semibold text-accent">{formatEuroAmount(remainingForFree)}</span> za <span className="font-semibold text-white">besplatnu dostavu</span>
+                        Dodaj još <span className="font-semibold text-accent">{formatEuroAmount(remainingForFree)}</span> za <span className="font-semibold text-white">besplatnu dostavu</span>{!signedIn && " (za registrirane)"}
                       </>
                     )}
                   </p>
                   <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                     <div
                       className="h-full rounded-full bg-accent transition-all duration-500 ease-out"
-                      style={{ width: `${freeShipping ? 100 : Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD_EUR) * 100)}%` }}
+                      style={{ width: `${reachedThreshold ? 100 : Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD_EUR) * 100)}%` }}
                     />
                   </div>
                 </div>

@@ -82,8 +82,8 @@ export default async function StreetwearPage() {
             <p>
               Streetwear komplet je najlakši način da izgledaš sređeno bez razmišljanja — gornji i donji dio
               su usklađeni pa ne moraš pogađati paše li boja. Kod nas su svi kompleti u uličnom kroju,
-              malo opuštenijem, kakav se danas nosi. Cijena kompleta je 50 €, a dostava po cijeloj
-              Hrvatskoj je za njih besplatna.
+              malo opuštenijem, kakav se danas nosi. Cijena kompleta je 50 €, dostava po cijeloj
+              Hrvatskoj je 7 €, a registriranim kupcima besplatna za narudžbe od 60 €.
             </p>
             <h3 className="pt-2 font-heading text-lg uppercase tracking-[0.04em] text-slate-900">
               Kako odabrati veličinu
@@ -99,7 +99,7 @@ export default async function StreetwearPage() {
             <p>
               Šaljemo GLS kurirskom službom na svaku adresu u Hrvatskoj, rok je 2–5 radnih dana.
               Plaćaš <strong>pouzećem</strong> — dakle tek kad ti paket stigne na vrata, ne unaprijed.
-              Za streetwear komplete dostavu snosimo mi.
+              Dostava je 7 €, a registriranim kupcima besplatna za narudžbe od 60 €.
             </p>
             <h3 className="pt-2 font-heading text-lg uppercase tracking-[0.04em] text-slate-900">
               Zašto Dresify

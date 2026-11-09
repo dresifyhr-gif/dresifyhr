@@ -26,7 +26,7 @@ export function StreetwearBanner({ images = [] }: { images?: string[] }) {
             </h2>
             {/* Opis samo na širem ekranu — mobilna ostaje kratka */}
             <p className="mt-2 hidden max-w-md text-[13px] leading-5 text-white/90 sm:block sm:text-sm">
-              Kompleti u uličnom stilu — majica + hlačice. Veličine XS–L, besplatna dostava, plaćanje pouzećem.
+              Kompleti u uličnom stilu — majica + hlačice. Veličine XS–L, plaćanje pouzećem, besplatna dostava od 60 € za registrirane.
             </p>
           </div>
 

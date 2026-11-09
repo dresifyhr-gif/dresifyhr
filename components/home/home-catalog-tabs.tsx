@@ -110,7 +110,7 @@ export function HomeCatalogTabs({
             <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-orange-500/80">Streetwear</span>
             <h2 className="mt-2 font-heading text-3xl uppercase leading-none text-white sm:text-4xl">Ulični kompleti</h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-white/55">
-              Majica + hlačice u uličnom stilu. Veličine XS–L, besplatna dostava, plaćanje pouzećem.
+              Majica + hlačice u uličnom stilu. Veličine XS–L, plaćanje pouzećem, besplatna dostava od 60 € za registrirane.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">

@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ShoppingBag, Trash2 } from "lucide-react";
 
+import { useUser } from "@clerk/nextjs";
+
 import { useCart } from "@/components/providers/cart-provider";
 import { CartUpsell } from "@/components/site/cart-upsell";
 import { useLanguage } from "@/contexts/language-context";
@@ -13,8 +15,11 @@ import { formatEuroAmount, repairText } from "@/lib/utils";
 export function CartPageContent() {
   const { t } = useLanguage();
   const { items, subtotal, removeItem } = useCart();
-  const hasStreetwear = items.some((i) => i.category === "streetwear");
-  const freeShipping = hasStreetwear || subtotal >= FREE_SHIPPING_THRESHOLD_EUR;
+  // Besplatna dostava od 60 € SAMO za prijavljene kupce — isto pravilo kao blagajna i server.
+  const { isSignedIn } = useUser();
+  const signedIn = isSignedIn === true;
+  const reachedThreshold = subtotal >= FREE_SHIPPING_THRESHOLD_EUR;
+  const freeShipping = signedIn && reachedThreshold;
   const shipping = items.length && !freeShipping ? SHIPPING_PRICE_EUR : 0;
   const total = subtotal + shipping;
   const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD_EUR - subtotal);
@@ -114,9 +119,13 @@ export function CartPageContent() {
               <p className="text-center text-[12px] leading-5 text-white/75">
                 {freeShipping ? (
                   <span className="font-semibold text-accent">🎉 Ostvario si besplatnu dostavu!</span>
+                ) : reachedThreshold ? (
+                  <>
+                    🔒 <Link href="/prijava/" className="font-semibold text-accent underline">Prijavi se ili registriraj (besplatno)</Link> i dostava je besplatna — uštediš {SHIPPING_PRICE_LABEL}
+                  </>
                 ) : (
                   <>
-                    Dodaj još <span className="font-semibold text-accent">{formatEuroAmount(remainingForFree)}</span> za besplatnu dostavu
+                    Dodaj još <span className="font-semibold text-accent">{formatEuroAmount(remainingForFree)}</span> za besplatnu dostavu{!signedIn && " (za registrirane)"}
                   </>
                 )}
               </p>

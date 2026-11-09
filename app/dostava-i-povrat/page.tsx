@@ -9,7 +9,7 @@ import { getSettings } from "@/lib/settings";
 export const metadata: Metadata = buildMetadata({
   title: "Dostava i zamjena",
   description:
-    "Sve o dostavi i zamjeni veličine: GLS dostava 2–5 radnih dana, plaćanje pouzećem, besplatna dostava preko 60 €, jednostavna zamjena veličine.",
+    "Sve o dostavi i zamjeni veličine: GLS dostava 2–5 radnih dana, plaćanje pouzećem, besplatna dostava od 60 € za registrirane, jednostavna zamjena veličine.",
   path: "/dostava-i-povrat"
 });
 
@@ -37,7 +37,7 @@ const deliveryItems = [
   {
     icon: MapPin,
     title: "Cijena dostave",
-    text: "Dostava je 7,00 € po cijeloj Hrvatskoj. Za narudžbe preko 60 € dostava je besplatna."
+    text: "Dostava je 7,00 € po cijeloj Hrvatskoj. Registriranim kupcima dostava je besplatna za narudžbe od 60 €."
   }
 ];
 

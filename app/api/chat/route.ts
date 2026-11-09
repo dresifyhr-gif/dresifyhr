@@ -35,7 +35,7 @@ Na stranici /igre postoje šest mini igara: Penalty Cup, Flappy Ball, Football K
 - Spojnica (memory): spoji svih 6 parova u ograničenom broju pokušaja → besplatna dostava (od 40€)
 - Zmija: jedi lopte i rasti — 5 lopti=besplatna dostava (od 40€), 12 lopti=-15% + dostava (od 80€), 20 lopti=-20% + dostava (od 100€)
 - Uhvati dres: hvataj dresove u kutiju kroz 3 razine — razina 1=besplatna dostava (od 40€), razina 2=-15% + dostava (od 80€), razina 3=-20% + dostava (od 100€)
-Klasična besplatna dostava (bez igre) vrijedi na sve narudžbe od 60€.
+Klasična besplatna dostava (bez igre) vrijedi SAMO za registrirane/prijavljene kupce na narudžbe od 60€; gosti plaćaju dostavu 7€. Streetwear NEMA besplatnu dostavu.
 Nagrada se automatski primijeni pri narudžbi, kupac ne mora ništa upisivati.
 Slobodno preporuči igrice kad netko pita za popust, nagradu ili kako uštedjeti.
 
