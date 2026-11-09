@@ -82,7 +82,7 @@ export function ProductFaq({ product, locale = "hr" }: { product: Jersey; locale
 
   return (
     <section className="mt-10 max-w-3xl">
-      <h2 className="font-display text-[40px] uppercase leading-[0.92] text-fg sm:text-5xl">{heading}</h2>
+      <h2 className="pt-[0.08em] font-display text-[40px] uppercase leading-[0.96] text-fg sm:text-5xl">{heading}</h2>
       <div className="mt-5 divide-y divide-white/10 border-y border-white/10">
         {items.map((it) => (
           <details key={it.q} className="group py-4">

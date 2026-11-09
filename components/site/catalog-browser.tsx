@@ -26,6 +26,8 @@ type CatalogBrowserProps = {
   headingLabel?: string;
   headingTitle?: string;
   headingDesc?: string;
+  /** Proizvod koji ide prvi u "Preporučeno" (naslovnica: hero dres). */
+  flagshipSlug?: string;
 };
 
 type FilterSectionKey = "liga" | "klub" | "igrac" | "velicina" | "retro" | "dugirukav";
@@ -119,7 +121,7 @@ function FilterSection({
   );
 }
 
-export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc }: CatalogBrowserProps) {
+export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc, flagshipSlug = FLAGSHIP_SLUG }: CatalogBrowserProps) {
   const { t, locale } = useLanguage();
   // Klubovi za filter se grade iz STVARNIH proizvoda (uključujući ručno dodane/custom),
   // ne iz statičnog kataloga — inače novi klub/repka (npr. Palestina) nema svoj filter/grupu.
@@ -244,8 +246,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
       .sort((left, right) => {
         const recommended = () => {
           // Flagship product is always first
-          if (left.slug === FLAGSHIP_SLUG) return -1;
-          if (right.slug === FLAGSHIP_SLUG) return 1;
+          if (left.slug === flagshipSlug) return -1;
+          if (right.slug === flagshipSlug) return 1;
 
           // Croatian national team jerseys always second
           const leftHR = left.klub === "Hrvatska";
@@ -295,7 +297,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
     selectedLeagues,
     selectedPlayers,
     selectedSizes,
-    sortBy
+    sortBy,
+    flagshipSlug
   ]);
 
   const activeTags = [
@@ -566,22 +569,30 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
     </div>
   );
 
+  // Mala kolekcija (kompleti): bez filtera/pretrage/sortiranja — samo mreža.
+  const isKits = products.length > 0 && products.every((p) => p.liga === "Komplet");
+  const smallSet = isKits || products.length < 12;
+  const countLabel = isKits
+    ? locale === "en" ? `${filteredProducts.length} kits` : `${filteredProducts.length} kompleta`
+    : t.catalog.count(filteredProducts.length);
+  const kitPrice = products.length ? Math.min(...products.map((p) => p.price ?? 40)) : 40;
+
   return (
     <div>
       {compactHeader ? (
         <div className="mb-5 flex items-end justify-between gap-4">
-          <h2 className="font-display text-[54px] uppercase leading-[0.92] text-fg lg:text-[80px]">
+          <h2 className="pt-[0.08em] font-display text-[54px] uppercase leading-[0.96] text-fg lg:text-[80px]">
             {headingTitle ?? t.catalog.filterTitle}
           </h2>
           <span className="mb-1 shrink-0 whitespace-nowrap border-b-[1.5px] border-fg pb-1 text-[11px] font-black uppercase leading-none tracking-[0.12em] text-fg">
-            {t.catalog.count(filteredProducts.length)}
+            {countLabel}
           </span>
         </div>
       ) : (
         <div className="mb-6 flex flex-col gap-4 lg:mb-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+          <div className="lg:flex-1">
             <div className="idx">{headingLabel ?? t.catalog.label}</div>
-            <h1 className="font-display text-[44px] uppercase leading-[0.92] text-fg sm:text-6xl lg:text-[80px]">
+            <h1 className="pt-[0.08em] font-display text-[44px] uppercase leading-[0.96] text-fg sm:text-6xl lg:text-[80px]">
               {headingTitle ?? t.catalog.title}
             </h1>
             <p className="mt-3 max-w-2xl text-[14px] font-medium leading-[1.5] text-[#c4c4bd]">
@@ -589,12 +600,33 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
             </p>
           </div>
           <span className="w-fit shrink-0 whitespace-nowrap border-b-[1.5px] border-fg pb-1 text-[11px] font-black uppercase leading-none tracking-[0.12em] text-fg">
-            {t.catalog.count(filteredProducts.length)}
+            {countLabel}
           </span>
         </div>
       )}
 
-      {/* Brzi filteri (koncept A "chips") — samo prečaci na postojeće filtere. */}
+      {/* Brzi filteri (koncept A "chips") — samo prečaci na postojeće filtere.
+          Mala kolekcija (npr. 8 kompleta) ih ne treba — tamo samo jedna istinita rečenica. */}
+      {smallSet ? (
+        <p className="mb-5 text-[12px] font-semibold leading-[1.35] text-soft">
+          {isKits ? (
+            locale === "en" ? (
+              <>
+                Kit: <b className="text-fg">jersey + shorts + ball + cap</b> · {kitPrice} € · delivery {SHIPPING_PRICE_EUR} €
+              </>
+            ) : (
+              <>
+                Komplet: <b className="text-fg">dres + hlačice + lopta + kapa</b> · {kitPrice} € · dostava {SHIPPING_PRICE_EUR} €
+              </>
+            )
+          ) : locale === "en" ? (
+            <>Delivery {SHIPPING_PRICE_EUR} € · pay on delivery.</>
+          ) : (
+            <>Dostava {SHIPPING_PRICE_EUR} € · plaćaš pri preuzimanju.</>
+          )}
+        </p>
+      ) : (
+      <>
       <div className="rail mb-3">
         {[
           { key: "all", label: locale === "en" ? "All" : "Sve", on: !hasAnyFilter, onClick: clearAllFilters },
@@ -636,17 +668,19 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           </>
         )}
       </p>
+      </>
+      )}
 
-      <div className="grid gap-6 lg:grid-cols-[272px_minmax(0,1fr)] lg:gap-7">
+      <div className={`grid gap-6 lg:gap-7 ${smallSet ? "" : "lg:grid-cols-[272px_minmax(0,1fr)]"}`}>
         <aside
-          className="hidden lg:block lg:sticky"
+          className={smallSet ? "hidden" : "hidden lg:block lg:sticky"}
           style={{ top: "calc(var(--announcement-offset, 0px) + 96px)" }}
         >
           {filterSidebar}
         </aside>
 
         <div className="min-w-0">
-          <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center">
+          <div className={`mb-4 flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center ${smallSet ? "hidden" : "flex"}`}>
             <div ref={searchWrapperRef} className="relative w-full sm:flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/35" />
               <input
@@ -699,26 +733,26 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
               </AnimatePresence>
             </div>
 
-            <div className="flex gap-3">
-              <div className="relative flex-1 sm:flex-none">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 sm:flex">
+              <div className="relative min-w-0 sm:flex-none">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
                   aria-label={locale === "en" ? "Sort" : "Sortiraj"}
-                  className="h-12 w-full cursor-pointer appearance-none rounded-[2px] border border-white/[0.18] bg-ink2 pl-4 pr-10 text-sm font-semibold text-fg outline-none transition-colors duration-200 ease-out focus:border-accent sm:w-auto"
+                  className="h-12 w-full cursor-pointer appearance-none truncate rounded-[2px] border border-white/[0.18] bg-ink2 pl-3.5 pr-8 text-[15px] font-semibold text-fg outline-none transition-colors duration-200 ease-out focus:border-accent sm:w-auto"
                 >
                   <option value="recommended">{locale === "en" ? "Recommended" : "Preporučeno"}</option>
                   <option value="price-asc">{locale === "en" ? "Price: low → high" : "Cijena: niža → viša"}</option>
                   <option value="price-desc">{locale === "en" ? "Price: high → low" : "Cijena: viša → niža"}</option>
                   <option value="name">{locale === "en" ? "Name: A–Z" : "Naziv: A–Z"}</option>
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
               </div>
 
               <button
                 type="button"
                 onClick={() => setMobileFiltersOpen(true)}
-                className="inline-flex h-12 flex-1 items-center justify-center gap-2.5 rounded-[2px] border border-fg bg-fg px-5 text-[12px] font-black uppercase tracking-[0.12em] text-black transition-colors duration-200 ease-out hover:bg-white lg:hidden"
+                className="inline-flex h-12 min-w-0 flex-1 items-center justify-center gap-2.5 rounded-[2px] border border-fg bg-fg px-3 text-[12px] font-black uppercase tracking-[0.12em] text-black transition-colors duration-200 ease-out hover:bg-white lg:hidden"
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 {t.catalog.filtersMobile}
@@ -747,7 +781,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
             </div>
           ) : null}
 
-          <div className="grid grid-cols-2 gap-x-2 gap-y-6 sm:gap-x-3 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div className={`grid grid-cols-2 gap-x-2 gap-y-6 sm:gap-x-3 md:grid-cols-3 ${smallSet ? "lg:grid-cols-4" : "lg:grid-cols-3 xl:grid-cols-4"}`}>
             {filteredProducts.slice(0, visibleCount).map((product, index) => (
               // Na naslovnici je katalog ispod hero slike → bez priority da ne krade hero sliku.
               <ProductCard key={product.slug} product={product} priority={!compactHeader && index < 4} />

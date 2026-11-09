@@ -35,7 +35,7 @@ export function ReviewsSection({ index = "05" }: { index?: string }) {
           <b>{index}</b>
           {t.reviews.kicker}
         </div>
-        <h2 className="font-display text-[54px] uppercase leading-[0.92] text-fg lg:text-[80px]">{t.reviews.title}</h2>
+        <h2 className="pt-[0.08em] font-display text-[54px] uppercase leading-[0.96] text-fg lg:text-[80px]">{t.reviews.title}</h2>
         <p className="mt-3 max-w-[360px] text-[14px] font-medium leading-[1.45] text-soft lg:max-w-[520px]">{t.reviews.desc}</p>
       </div>
       <div className="page-shell mt-6">

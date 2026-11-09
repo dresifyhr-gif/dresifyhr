@@ -191,6 +191,8 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   };
 
   const showGroups = sizeOptions.hasKids && sizeOptions.hasAdults;
+  const [titleHead, ...titleRest] = repairText(product.igrac).split(/\s+[—–]\s+/);
+  const titleTail = titleRest.join(" · ");
 
   return (
     <div className="lg:sticky lg:top-[calc(var(--announcement-offset,0px)+88px)] lg:self-start">
@@ -198,15 +200,16 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         {repairText(product.klub)} · {product.category === "streetwear" ? "Streetwear" : repairText(product.liga)}
       </p>
 
-      <h1 className="mt-2.5 pt-[0.1em] font-display text-[52px] uppercase leading-[0.92] text-fg sm:text-[64px] lg:text-[72px]">
-        {repairText(product.igrac)}
+      {/* H1 = puni naziv (SEO); dio iza crtice ("— 2026") je sitni drugi red. */}
+      <h1 className="mt-2.5 pt-[0.08em] font-display text-[52px] uppercase leading-[0.96] text-fg sm:text-[64px] lg:text-[72px]">
+        {titleHead}
+        {titleTail ? (
+          <span className="mt-2 block font-body text-[0.24em] font-bold leading-none tracking-[0.14em] text-soft">
+            <span className="sr-only"> — </span>
+            {titleTail}
+          </span>
+        ) : null}
       </h1>
-      {product.rating ? (
-        <p className="mt-2.5 text-[12px] font-bold text-mute">
-          <span className="text-fg">★ {product.rating.value.toFixed(1)}</span> ({product.rating.count}{" "}
-          {en ? "ratings" : "ocjena"})
-        </p>
-      ) : null}
 
       <div className="mt-4 flex items-end gap-3">
         <p className="font-display text-[64px] leading-[0.85] text-fg">{productPrice} €</p>
@@ -290,9 +293,18 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
       <button
         ref={mainButtonRef}
         type="button"
-        disabled={needsSize}
-        onClick={add}
-        className="button-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-40"
+        aria-disabled={needsSize}
+        onClick={() => {
+          // Bez veličine: gumb ostaje pun volt (ne "mutna maslinasta"), a klik vodi na veličine.
+          if (needsSize) {
+            if (!allSoldOut) sizesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+          }
+          add();
+        }}
+        className={`button-primary mt-6 w-full ${
+          allSoldOut ? "!cursor-not-allowed !bg-[#2a2a2a] !text-[#777]" : needsSize ? "cursor-pointer" : ""
+        }`}
       >
         {allSoldOut ? "Trenutno rasprodano" : `${t.product.addToCart} — ${productPrice} €`}
       </button>

@@ -42,6 +42,9 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
   const defaultSegment: "adult" | "kid" =
     sizeOptions.hasAdults && availAdult ? "adult" : availKid ? "kid" : sizeOptions.hasAdults ? "adult" : "kid";
   const defaultSize = defaultSegment === "adult" ? availAdult : availKid;
+  // "Jedna veličina" (dio streetweara, kompleti bez veličina) — nema izbornika, dodaje se odmah.
+  const hasSizePicker = sizeOptions.adults.length > 0 || sizeOptions.kids.length > 0;
+  const allSoldOut = hasSizePicker && !availAdult && !availKid;
 
   const [isOpen, setIsOpen] = useState(false);
   const [segment, setSegment] = useState<"adult" | "kid">(defaultSegment);
@@ -51,14 +54,20 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
   const segmentLabel = segment === "adult" || product.category === "dugi-rukav" ? "Dres" : "Dres i hlačice";
   const href = `/dres/${product.slug}`;
   const klub = repairText(product.klub);
-  const { name, sub } = splitJerseyName(product.igrac);
+  const isTrenirka = theme === "trenirka" || product.category === "trenirka";
+  const isKit = product.liga === "Komplet";
+  const split = splitJerseyName(product.igrac);
+  // Trenirke se zovu samo "Komplet"/igrač — naslov je klub, a podnaslov što dobiješ.
+  const name = isTrenirka ? klub : split.name;
+  const sub = isTrenirka ? `trenirka · jakna + hlače` : split.sub;
   const tag = tagFor(product, theme);
-  const isJersey = theme === "jersey" && product.category !== "trenirka" && product.category !== "streetwear";
+  const isJersey = theme === "jersey" && !isTrenirka && product.category !== "streetwear";
   const subRaw = sub || (isJersey ? repairText(product.liga) : "");
   const subLine = subRaw.toLowerCase() === name.toLowerCase() ? "" : subRaw;
+  const eyebrow = isTrenirka ? "Trenirka" : klub;
 
   const handleAddToCart = () => {
-    if (!selectedSize) return;
+    if (hasSizePicker && !selectedSize) return;
     const gallery = product.images ?? getJerseyGallery(product.slug);
     addItem({
       slug: product.slug,
@@ -83,7 +92,7 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
     <article
       className="group relative flex h-full flex-col"
       onMouseEnter={() => {
-        if (window.matchMedia("(hover: hover)").matches) setIsOpen(true);
+        if (hasSizePicker && window.matchMedia("(hover: hover)").matches) setIsOpen(true);
       }}
       onMouseLeave={() => {
         if (window.matchMedia("(hover: hover)").matches) setIsOpen(false);
@@ -96,7 +105,7 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
 
         {tag ? (
           <span
-            className={`pointer-events-none absolute left-2 top-2 z-20 border px-1.5 pb-1 pt-[5px] text-[9px] font-black uppercase leading-none tracking-[0.12em] ${
+            className={`pointer-events-none absolute ${isKit ? "right-2" : "left-2"} top-2 z-20 max-w-[calc(100%-3.25rem)] truncate border px-1.5 pb-1 pt-[5px] text-[9px] font-black uppercase leading-none tracking-[0.12em] ${
               tag.volt ? "border-accent bg-accent text-black" : "border-white/[0.18] bg-black text-fg"
             }`}
           >
@@ -108,7 +117,7 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
           slug={product.slug}
           klub={product.klub}
           igrac={product.igrac}
-          className="absolute right-2 top-2 z-20 !h-8 !w-8 !border-black/10 !bg-black/80 [&>svg]:!h-[15px] [&>svg]:!w-[15px]"
+          className={`absolute ${isKit ? "left-2" : "right-2"} top-2 z-20 !h-8 !w-8 !border-black/10 !bg-black/80 [&>svg]:!h-[15px] [&>svg]:!w-[15px]`}
         />
 
         {/* Brzo dodavanje — prekriva dno slike (bez pomicanja mreže). */}
@@ -161,18 +170,18 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
             <button
               type="button"
               onClick={handleAddToCart}
-              disabled={!selectedSize}
+              disabled={hasSizePicker && !selectedSize}
               className="flex h-9 w-full items-center justify-center gap-2 rounded-[2px] bg-accent text-[11px] font-black uppercase tracking-[0.1em] text-black transition-colors hover:bg-[#f0ff71] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
-              {selectedSize ? `Dodaj — ${`${product.price ?? 20} €`}` : "Rasprodano"}
+              {selectedSize || !hasSizePicker ? `Dodaj — ${product.price ?? 20} €` : allSoldOut ? "Rasprodano" : "Odaberi veličinu"}
             </button>
           </div>
         ) : null}
       </div>
 
       <Link href={href} className="block px-0.5 pt-2.5" title={`${klub} ${repairText(product.igrac)}`}>
-        <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.14em] text-mute">{klub}</p>
+        <p className="truncate text-[10px] font-bold uppercase leading-none tracking-[0.14em] text-mute">{eyebrow}</p>
         <h3 className="mt-1 line-clamp-2 pt-[0.14em] font-display text-[21px] uppercase leading-none text-fg sm:text-[23px]">{name}</h3>
         {subLine ? (
           <p className="mt-1 truncate text-[11.5px] font-medium leading-[1.3] text-mute">{subLine}</p>
@@ -180,20 +189,13 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
       </Link>
 
       <div className="mt-auto flex items-center justify-between gap-2 px-0.5 pt-2">
-        <div className="flex min-w-0 items-baseline gap-2">
-          <span className="text-[15px] font-black leading-none text-fg">{`${product.price ?? 20} €`}</span>
-          {product.rating ? (
-            <span className="truncate text-[10.5px] font-bold leading-none text-mute">
-              <b className="text-fg">★ {product.rating.value.toFixed(1)}</b> ({product.rating.count})
-            </span>
-          ) : null}
-        </div>
+        <span className="text-[15px] font-black leading-none text-fg">{`${product.price ?? 20} €`}</span>
         <button
           type="button"
-          onClick={() => setIsOpen((v) => !v)}
+          onClick={() => (hasSizePicker ? setIsOpen((v) => !v) : handleAddToCart())}
           aria-label={isOpen ? "Zatvori brzo dodavanje" : "Brzo dodaj u košaricu"}
           aria-expanded={isOpen}
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors md:hidden ${
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors ${hasSizePicker ? "[@media(hover:hover)]:hidden" : ""} ${
             isOpen ? "border-white/20 bg-white/10 text-white" : "border-accent bg-accent text-black"
           }`}
         >

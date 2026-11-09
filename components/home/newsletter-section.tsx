@@ -48,7 +48,7 @@ export function NewsletterSection() {
       <div className="page-shell">
         <div className="grid gap-6 border-t border-white/10 pt-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end lg:pt-12">
           <div>
-            <h2 className="font-display text-[36px] uppercase leading-[0.92] text-fg lg:text-[56px]">{t.newsletter.title}</h2>
+            <h2 className="pt-[0.08em] font-display text-[36px] uppercase leading-[0.96] text-fg lg:text-[56px]">{t.newsletter.title}</h2>
             <p className="mt-2 text-[13px] font-medium leading-[1.4] text-mute">{t.newsletter.sub}</p>
           </div>
           <form onSubmit={handleSubmit} className="flex border-b-[1.5px] border-fg">

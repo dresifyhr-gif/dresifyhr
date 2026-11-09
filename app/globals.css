@@ -170,7 +170,7 @@ body {
   }
 
   .section-title {
-    @apply font-display text-[2.75rem] uppercase leading-[0.92] sm:text-6xl md:text-7xl;
+    @apply pt-[0.08em] font-display text-[2.75rem] uppercase leading-[0.96] sm:text-6xl md:text-7xl;
   }
 
   .section-copy {
