@@ -236,3 +236,81 @@ export async function publishImage(input: { imageUrl: string; caption: string })
     return { ok: false, error: msg };
   }
 }
+
+// ————————————————————————————————————————————————————————————————
+// Objava REELA (video). IG video obrađuje 30 s – nekoliko min, pa je dvokoračno:
+// createReelContainer → (preglednik ponavlja) finishReel dok ne bude objavljeno.
+// ————————————————————————————————————————————————————————————————
+function metaError(e: unknown): string {
+  let msg = e instanceof Error ? e.message : "Nepoznata greška";
+  try {
+    const parsed = JSON.parse(msg);
+    if (parsed?.error?.message) msg = parsed.error.message;
+  } catch {
+    /* nije JSON */
+  }
+  return msg;
+}
+
+export async function createReelContainer(input: { videoUrl: string; caption: string }): Promise<{ ok: boolean; id?: string; error?: string }> {
+  const conn = await ensureFreshIgToken();
+  if (!conn || !conn.igBusinessId) return { ok: false, error: "Instagram nije spojen." };
+  try {
+    const body = new URLSearchParams({
+      media_type: "REELS",
+      video_url: input.videoUrl,
+      caption: input.caption,
+      share_to_feed: "true",
+      access_token: conn.token
+    });
+    const res = await fetch(`${GRAPH}/${conn.igBusinessId}/media`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+      signal: AbortSignal.timeout(25_000)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const j = await res.json();
+    const id = String(j?.id || "");
+    if (!id) throw new Error("Nema creation_id (container).");
+    return { ok: true, id };
+  } catch (e) {
+    return { ok: false, error: metaError(e) };
+  }
+}
+
+export async function finishReel(
+  containerId: string
+): Promise<{ ok: boolean; status?: "processing" | "published"; permalink?: string; error?: string }> {
+  const conn = await ensureFreshIgToken();
+  if (!conn || !conn.igBusinessId) return { ok: false, error: "Instagram nije spojen." };
+  const { token, igBusinessId: ig } = conn;
+  try {
+    const st = await graphGet(containerId, { fields: "status_code,status" }, token);
+    const code = String(st?.status_code || "");
+    if (code === "ERROR" || code === "EXPIRED") {
+      return { ok: false, error: `Instagram nije mogao obraditi video (${st?.status || code}).` };
+    }
+    if (code === "PUBLISHED") return { ok: true, status: "published" };
+    if (code !== "FINISHED") return { ok: true, status: "processing" };
+
+    const pubRes = await fetch(`${GRAPH}/${ig}/media_publish`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ creation_id: containerId, access_token: token }),
+      signal: AbortSignal.timeout(25_000)
+    });
+    if (!pubRes.ok) throw new Error(await pubRes.text());
+    const mediaId = String((await pubRes.json())?.id || "");
+    let permalink: string | undefined;
+    try {
+      const info = await graphGet(mediaId, { fields: "permalink" }, token);
+      if (info?.permalink) permalink = String(info.permalink);
+    } catch {
+      /* bonus */
+    }
+    return { ok: true, status: "published", permalink };
+  } catch (e) {
+    return { ok: false, error: metaError(e) };
+  }
+}

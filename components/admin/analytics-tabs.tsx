@@ -5,26 +5,32 @@ import { useState, type ReactNode } from "react";
 // Prekidač (segment) na Analitici: Prodaja / Google / Instagram. Sadržaj svakog
 // taba je server-renderiran i proslijeđen kao prop — mi samo prebacujemo prikaz
 // (sve ostaje montirano, pa nema ponovnog dohvaćanja pri kliku).
-type TabId = "prodaja" | "google" | "instagram";
+type TabId = "prodaja" | "google" | "instagram" | "reklame";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "prodaja", label: "📊 Prodaja" },
   { id: "google", label: "🌍 Google" },
-  { id: "instagram", label: "📷 Instagram" }
+  { id: "instagram", label: "📷 Instagram" },
+  { id: "reklame", label: "🎬 Reklame" }
 ];
 
 export function AnalyticsTabs({
   prodaja,
   google,
   instagram,
+  reklame,
   initialTab = "prodaja"
 }: {
   prodaja: ReactNode;
   google: ReactNode;
   instagram: ReactNode;
+  reklame: ReactNode;
   initialTab?: TabId;
 }) {
   const [tab, setTab] = useState<TabId>(initialTab);
+  // Reklame se montiraju tek kad se prvi put otvore, a onda ostaju montirane
+  // (skriveno CSS-om) — da objava reela u tijeku ne izgubi stanje pri prebacivanju.
+  const [reklameOpened, setReklameOpened] = useState(initialTab === "reklame");
   return (
     <>
       <div className="mb-5 inline-flex max-w-full flex-wrap gap-1 rounded-[12px] bg-[var(--a-surface-2)] p-1">
@@ -32,7 +38,10 @@ export function AnalyticsTabs({
           <button
             key={t.id}
             type="button"
-            onClick={() => setTab(t.id)}
+            onClick={() => {
+              setTab(t.id);
+              if (t.id === "reklame") setReklameOpened(true);
+            }}
             className={`rounded-[10px] px-3.5 py-1.5 text-sm font-semibold transition ${
               tab === t.id ? "bg-[var(--a-card)] text-[var(--a-text)] shadow-sm" : "text-[var(--a-text-3)] hover:text-[var(--a-text)]"
             }`}
@@ -44,6 +53,7 @@ export function AnalyticsTabs({
       <div className={tab === "prodaja" ? "" : "hidden"}>{prodaja}</div>
       <div className={tab === "google" ? "" : "hidden"}>{google}</div>
       <div className={tab === "instagram" ? "" : "hidden"}>{instagram}</div>
+      {reklameOpened && <div className={tab === "reklame" ? "" : "hidden"}>{reklame}</div>}
     </>
   );
 }

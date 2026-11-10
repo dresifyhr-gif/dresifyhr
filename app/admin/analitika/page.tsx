@@ -11,6 +11,7 @@ import { AnalyticsTabs } from "@/components/admin/analytics-tabs";
 import { GaStatsPanel } from "@/components/admin/ga-stats";
 import { InstagramConnect } from "@/components/admin/instagram-connect";
 import { InstagramStatsPanel } from "@/components/admin/instagram-stats";
+import { ReklameManager } from "@/components/admin/reklame-manager";
 import { Panel, Stat } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Analitika — Dresify Admin", robots: { index: false, follow: false } };
@@ -110,8 +111,8 @@ export default async function AnalyticsPage({ searchParams }: { searchParams?: {
       ? Math.round(((ig.reach7d - ig.reachPrev7d) / ig.reachPrev7d) * 100)
       : null;
 
-  const initialTab = (["prodaja", "google", "instagram"] as const).includes(searchParams?.tab as never)
-    ? (searchParams?.tab as "prodaja" | "google" | "instagram")
+  const initialTab = (["prodaja", "google", "instagram", "reklame"] as const).includes(searchParams?.tab as never)
+    ? (searchParams?.tab as "prodaja" | "google" | "instagram" | "reklame")
     : "prodaja";
 
   const prodaja = (
@@ -289,7 +290,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams?: {
 
   return (
     <AdminShell title="Analitika" subtitle="Prodaja, Google i Instagram">
-      <AnalyticsTabs initialTab={initialTab} prodaja={prodaja} google={<GaStatsPanel ga={ga} />} instagram={instagram} />
+      <AnalyticsTabs initialTab={initialTab} prodaja={prodaja} google={<GaStatsPanel ga={ga} />} instagram={instagram} reklame={<ReklameManager />} />
     </AdminShell>
   );
 }
