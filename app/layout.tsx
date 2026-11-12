@@ -20,6 +20,7 @@ import { AnnouncementBar } from "@/components/site/announcement-bar";
 import { CartDrawer } from "@/components/site/cart-drawer";
 import { ContentProtection } from "@/components/site/content-protection";
 import { ChatWidget } from "@/components/site/chat-widget";
+import { FloatingWhatsAppButton } from "@/components/site/floating-whatsapp-button";
 import { Footer } from "@/components/site/footer";
 import { CookieNotice } from "@/components/site/cookie-notice";
 import { Navbar } from "@/components/site/navbar";
@@ -133,6 +134,7 @@ export default async function RootLayout({
                   <SocialProof />
                   <AddToCartModal />
                   <ContentProtection />
+                  <FloatingWhatsAppButton />
                   <ChatWidget />
                   <PromoCapture />
                 </>

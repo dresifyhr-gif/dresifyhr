@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Wallet, Sun, Moon, Truck } from "lucide-react";
+import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Wallet, Sun, Moon, Clapperboard } from "lucide-react";
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
 import { CommandPalette } from "@/components/admin/command-palette";
@@ -12,11 +12,11 @@ import { PwaBoot } from "@/components/admin/pwa-boot";
 const NAV = [
   { href: "/admin", label: "Pregled", hint: "Početna", icon: LayoutDashboard },
   { href: "/admin/narudzbe", label: "Narudžbe", hint: "Traži i mijenjaj", icon: Package },
-  { href: "/admin/slanje", label: "Slanje", hint: "Što čeka pakiranje", icon: Truck },
   { href: "/admin/proizvodi", label: "Proizvodi", hint: "Cijena i zaliha", icon: Shirt },
   { href: "/admin/kupci", label: "Kupci", hint: "Tko kupuje", icon: Users },
   { href: "/admin/novci", label: "Novci", hint: "Podjela i poravnanje", icon: Wallet },
-  { href: "/admin/analitika", label: "Analitika", hint: "Brojke, Google i Instagram", icon: BarChart3 }
+  { href: "/admin/analitika", label: "Analitika", hint: "Brojke, Google i Instagram", icon: BarChart3 },
+  { href: "/admin/reklame", label: "Reklame", hint: "Videi i objava na Instagram", icon: Clapperboard }
 ];
 
 function isActive(pathname: string, href: string) {
