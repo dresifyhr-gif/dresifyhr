@@ -132,6 +132,25 @@ export async function GET(request: Request) {
     };
   };
 
+  // ── Spajanje: ista osoba (isti broj) ima više NEPOSLANIH narudžbi → ponudi "Spoji".
+  const isOpen = (o: { status: string; tracking?: string | null; pin?: string | null }) => o.status === "new" && !o.tracking && !o.pin;
+  const openByPhone = new Map<string, { id: string; reference: string; promo: boolean }[]>();
+  for (const o of all) {
+    const key = phoneKey(o.phone);
+    if (!key || !isOpen(o)) continue;
+    const arr = openByPhone.get(key) || [];
+    arr.push({ id: o.id, reference: o.reference || getOrderReference(o.createdAt.toISOString()), promo: !!o.promoCode });
+    openByPhone.set(key, arr);
+  }
+  // Dvije narudžbe s popust-kodom se ne spajaju (brojanje kodova je po narudžbi).
+  const mergeFor = (o: { id: string; phone?: string | null; status: string; tracking?: string | null; pin?: string | null; promoCode?: string | null }) => {
+    if (!isOpen(o)) return [];
+    const key = phoneKey(o.phone);
+    return (key ? openByPhone.get(key) || [] : [])
+      .filter((x) => x.id !== o.id && !(x.promo && o.promoCode))
+      .map(({ id, reference }) => ({ id, reference }));
+  };
+
   // Datumski period prvo (lista + brojke poštuju odabrani period).
   const dateFiltered = from || to ? all.filter((o) => inPeriod(o.createdAt)) : all;
 
@@ -318,6 +337,7 @@ export async function GET(request: Request) {
       cashCollected: o.cashCollected,
       registered: !!o.userId,
       risk: { ...riskFor(o), min: riskMinFailed },
+      mergeWith: mergeFor(o),
       items: o.items.map((it) => ({
         id: it.id,
         slug: it.slug || null,

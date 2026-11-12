@@ -87,6 +87,7 @@ type Order = {
   promoCode: string | null;
   cashCollected: boolean;
   risk?: { failed: number; collected: number; priorOrders: number; min?: number };
+  mergeWith?: { id: string; reference: string }[]; // druge NEPOSLANE narudžbe istog kupca → "Spoji"
   items: { id: string; slug: string | null; image: string | null; klub: string; igrac: string; label: string; size: string; quantity: number; unitPrice: number }[];
 };
 
@@ -700,6 +701,30 @@ export function OrdersManager() {
     return () => io.disconnect();
   }, [q, page, pages, loading, fetchPage]);
 
+  // Spoji dvije neposlane narudžbe istog kupca u jednu pošiljku (starija ostaje).
+  async function mergeOrders(id: string, otherId: string, otherRef: string) {
+    if (!confirm(`Spojiti s narudžbom ${otherRef} u JEDNU pošiljku?\n\nSvi artikli idu u stariju narudžbu, dostava se naplaćuje jednom, a druga narudžba se briše. Ovo se ne može poništiti.`)) return;
+    setBusy(id);
+    try {
+      const res = await fetch(`/api/admin/orders/${id}/merge/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ otherId })
+      });
+      const j = await res.json().catch(() => null);
+      if (!res.ok || !j?.ok) {
+        alert(`⚠️ Nije spojeno — ${j?.message || `greška ${res.status}`}`);
+      } else {
+        alert(`✅ Spojeno u ${j.reference}: ${j.itemCount} kom, pouzeće ${Number(j.total).toFixed(2)} €`);
+      }
+    } catch {
+      alert("⚠️ Nije spojeno — problem s mrežom.");
+    } finally {
+      setBusy(null);
+      fetchPage(q, 1, false);
+    }
+  }
+
   async function act(id: string, endpoint: string, body: object) {
     if (busy) return;
     setBusy(id);
@@ -1042,6 +1067,17 @@ export function OrdersManager() {
                         </span>
                       )}
                     </div>
+                    {o.mergeWith && o.mergeWith.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5 rounded-[10px] bg-amber-50 px-2.5 py-1.5 text-[12px] text-amber-800">
+                        <span className="font-semibold">🔗 Isti kupac ima još {o.mergeWith.length === 1 ? "jednu neposlanu narudžbu" : `${o.mergeWith.length} neposlane narudžbe`}:</span>
+                        {o.mergeWith.map((m) => (
+                          <button key={m.id} type="button" disabled={isBusy} onClick={() => mergeOrders(o.id, m.id, m.reference)}
+                            className="rounded-[8px] bg-amber-500 px-2.5 py-1 text-[12px] font-bold text-white disabled:opacity-50">
+                            Spoji s {m.reference}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <div className="mt-0.5 text-xs text-[var(--a-text-2)]">
                       {o.date} · {formatCroatianPhone(o.phone)}
                       {o.address ? (
