@@ -34,8 +34,8 @@ const KOMPLET_SLIDES: Slide[] = [
 const XMAS_VIDEO_SLIDE: Slide = {
   key: "video-bozic",
   alt: "Dresify — božićna reklama",
-  video: "/hero/reklama-bozic.mp4",
-  poster: "/hero/reklama-bozic-poster.jpg",
+  video: "/hero/reklama-bozic-v2.mp4",
+  poster: "/hero/reklama-bozic-v2-poster.jpg",
   href: "/slozi-mix",
   cta: "Složi svoj mix →"
 };
