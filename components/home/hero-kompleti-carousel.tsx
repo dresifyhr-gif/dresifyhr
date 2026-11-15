@@ -11,8 +11,8 @@ type Slide = { key: string; alt: string; src?: string; video?: string; poster?: 
 const VIDEO_SLIDE: Slide = {
   key: "video",
   alt: "Dresify — nogometni dresovi",
-  video: "/hero/promo.mp4",
-  poster: "/hero/promo-poster.jpg",
+  video: "/hero/reklama-v4.mp4",
+  poster: "/hero/reklama-v4-poster.jpg",
   href: "/dresovi",
   cta: "Pogledaj dresove →"
 };
@@ -37,6 +37,9 @@ const PS5_SLIDE: Slide = {
 };
 
 const INTERVAL_MS = 4000;
+// Video reklama traje ~21 s — slide ostaje do kraja videa (onEnded), a ovo je
+// samo rezerva ako preglednik ne pusti video (npr. iPhone u štednji baterije).
+const VIDEO_FALLBACK_MS = 23000;
 const SWIPE_THRESHOLD = 45;
 
 export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }) {
@@ -57,16 +60,16 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
   const paginate = (dir: number) =>
     setIndex((current) => (current + dir + SLIDES.length) % SLIDES.length);
 
+  const active = SLIDES[index];
+
   useEffect(() => {
-    const timer = setInterval(() => {
+    const timer = setTimeout(() => {
       if (!pausedRef.current) {
         setIndex((current) => (current + 1) % SLIDES.length);
       }
-    }, INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [SLIDES.length]);
-
-  const active = SLIDES[index];
+    }, active.video ? VIDEO_FALLBACK_MS : INTERVAL_MS);
+    return () => clearTimeout(timer);
+  }, [index, active.video, SLIDES.length]);
 
   return (
     <div className="relative mx-auto max-w-[540px]">
@@ -100,8 +103,9 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
                   poster={active.poster}
                   autoPlay
                   muted
-                  loop
                   playsInline
+                  preload="metadata"
+                  onEnded={() => { if (!pausedRef.current) paginate(1); }}
                   draggable={false}
                   className="pointer-events-none h-full w-full select-none object-cover"
                 />
