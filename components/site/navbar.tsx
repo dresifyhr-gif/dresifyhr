@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, ShoppingBag, User, X } from "lucide-react";
+import { Heart, Menu, ShoppingBag, User, X } from "lucide-react";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
 import { useCart } from "@/components/providers/cart-provider";
+import { useWishlist } from "@/components/providers/wishlist-provider";
 import { useLanguage } from "@/contexts/language-context";
 import { useShopSettings } from "@/contexts/shop-settings-context";
 import { SearchOverlay } from "@/components/site/search-overlay";
@@ -17,6 +18,7 @@ import type { Locale } from "@/lib/i18n";
 export function Navbar() {
   const pathname = usePathname();
   const { itemCount, openDrawer } = useCart();
+  const { count: favCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { t, locale, setLocale } = useLanguage();
   const { christmasOn } = useShopSettings();
@@ -61,7 +63,7 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0a0a0a]">
-        {/* MOBILE (60px): izbornik + pretraga lijevo · logo u sredini · račun + košarica desno */}
+        {/* MOBILE (60px): izbornik + pretraga lijevo · logo u sredini · favoriti + košarica desno (račun je u donjoj traci) */}
         <div className="page-shell grid h-[60px] grid-cols-[1fr_auto_1fr] items-center gap-2 md:hidden">
           <div className="flex items-center gap-1 justify-self-start">
             <button
@@ -80,26 +82,19 @@ export function Navbar() {
           </Link>
 
           <div className="flex items-center gap-1 justify-self-end">
-            <SignedOut>
-              <Link
-                href="/prijava"
-                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
-                aria-label="Prijava"
-                title="Prijava / Registracija"
-              >
-                <User className="h-[18px] w-[18px]" />
-              </Link>
-            </SignedOut>
-            <SignedIn>
-              <Link
-                href="/racun"
-                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
-                aria-label="Moj profil"
-                title="Moj Dresify"
-              >
-                <User className="h-[18px] w-[18px]" />
-              </Link>
-            </SignedIn>
+            <Link
+              href="/favoriti/"
+              className="relative inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
+              aria-label="Favoriti"
+              title="Favoriti"
+            >
+              <Heart className="h-[18px] w-[18px]" />
+              {favCount > 0 ? (
+                <span className="absolute right-0.5 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold leading-none text-black">
+                  {favCount > 99 ? "99+" : favCount}
+                </span>
+              ) : null}
+            </Link>
             <button
               type="button"
               onClick={openDrawer}
@@ -158,6 +153,19 @@ export function Navbar() {
 
             <SearchOverlay />
 
+            <Link
+              href="/favoriti/"
+              className="relative inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
+              aria-label="Favoriti"
+              title="Favoriti"
+            >
+              <Heart className="h-[18px] w-[18px]" />
+              {favCount > 0 ? (
+                <span className="absolute right-0.5 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold leading-none text-black">
+                  {favCount > 99 ? "99+" : favCount}
+                </span>
+              ) : null}
+            </Link>
             <SignedOut>
               <Link
                 href="/prijava"

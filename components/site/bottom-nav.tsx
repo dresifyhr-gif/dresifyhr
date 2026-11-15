@@ -3,9 +3,8 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, House, Shirt, User } from "lucide-react";
+import { Gamepad2, House, Shirt, User } from "lucide-react";
 
-import { useWishlist } from "@/components/providers/wishlist-provider";
 import { useWhatsAppUrl } from "@/contexts/shop-settings-context";
 
 // Donja navigacija u stilu aplikacije — samo mobitel (md:hidden).
@@ -15,6 +14,9 @@ import { useWhatsAppUrl } from "@/contexts/shop-settings-context";
 
 // Stranice s vlastitom donjom trakom ili tokom kupnje — tu je nema.
 const HIDDEN_PREFIXES = ["/dres/", "/kosarica", "/checkout", "/zahvala", "/admin", "/prijava", "/registracija"];
+
+// Pojedinačne igre (/igra, /kolo, /kviz …) — tab "Igrice" ostaje označen.
+const GAME_PREFIXES = ["/igra", "/flappy", "/gadaj", "/kolo", "/kviz", "/spojnica", "/trkac", "/uhvati", "/zmija"];
 
 const CATALOG_PREFIXES = ["/dresovi", "/kompleti", "/trenirke", "/streetwear"];
 
@@ -35,13 +37,12 @@ const WA_PATH = "M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2
 const ITEMS: Item[] = [
   { href: "/", label: "Početna", icon: House, match: (p) => p === "/" },
   { href: "/dresovi/", label: "Dresovi", icon: Shirt, match: (p) => CATALOG_PREFIXES.some((c) => p === c || p.startsWith(`${c}/`)) },
-  { href: "/favoriti/", label: "Favoriti", icon: Heart, match: (p) => p === "/favoriti" },
+  { href: "/igre/", label: "Igrice", icon: Gamepad2, match: (p) => p === "/igre" || GAME_PREFIXES.some((g) => p === g || p.startsWith(`${g}/`)) },
   { href: "/racun/", label: "Račun", icon: User, match: (p) => p === "/racun" || p.startsWith("/racun/") }
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { count } = useWishlist();
   const whatsappUrl = useWhatsAppUrl();
   const hidden = isBottomNavHidden(pathname);
   const p = normalize(pathname);
@@ -64,7 +65,6 @@ export function BottomNav() {
         {ITEMS.map((item, idx) => {
           const active = item.match(p);
           const Icon = item.icon;
-          const isFav = item.href === "/favoriti/";
           const wa = idx === 2 ? (
             <li key="whatsapp" className="min-w-0">
               <a
@@ -92,12 +92,7 @@ export function BottomNav() {
               >
                 {(
                   <span className="relative flex h-8 items-center justify-center">
-                    <Icon strokeWidth={1.5} className={`h-[22px] w-[22px] ${isFav && active ? "fill-accent/20" : ""}`} />
-                    {isFav && count > 0 ? (
-                      <span className="absolute -right-2.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold leading-none text-black">
-                        {count > 99 ? "99+" : count}
-                      </span>
-                    ) : null}
+                    <Icon strokeWidth={1.5} className="h-[22px] w-[22px]" />
                   </span>
                 )}
                 <span className="max-w-full truncate px-0.5">{item.label}</span>
