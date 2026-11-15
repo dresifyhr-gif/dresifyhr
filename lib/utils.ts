@@ -158,8 +158,15 @@ export function createCartInquiryMessage(
     .join("\n");
 }
 
+// Što je zapravo artikl — po kategoriji, ne po "segmentu" (trenirka nije dres).
+export function cartItemTypeLabel(item: { segmentLabel: string; category?: string }) {
+  if (item.category === "trenirka") return "trenirka (jakna + hlače)";
+  if (item.category === "streetwear") return "streetwear";
+  return item.segmentLabel.toLowerCase();
+}
+
 export function createCartOrderSummary(
-  items: Array<{ klub: string; igrac: string; size: string; segmentLabel: string }>
+  items: Array<{ klub: string; igrac: string; size: string; segmentLabel: string; category?: string; price?: number }>
 ) {
   if (!items.length) {
     return "";
@@ -168,7 +175,7 @@ export function createCartOrderSummary(
   return items
     .map(
       (item, index) =>
-        `${index + 1}. ${item.klub} - ${item.igrac}, ${item.segmentLabel.toLowerCase()}, veli\u010dina ${item.size}, ${formatEuroAmount(JERSEY_PRICE_EUR)}`
+        `${index + 1}. ${item.klub} - ${item.igrac}, ${cartItemTypeLabel(item)}, veli\u010dina ${item.size}, ${formatEuroAmount(item.price ?? JERSEY_PRICE_EUR)}`
     )
     .join("\n");
 }

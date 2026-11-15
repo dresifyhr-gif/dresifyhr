@@ -71,7 +71,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   const availableSizes = segmentOut ? [] : currentSizes.filter((size) => !sizeOptions.soldOutSizes.includes(size));
   // Dugi rukav = samo gornji dio (bez hlačica) — i dječje veličine pišu samo "Dres".
   const isLongSleeve = product.category === "dugi-rukav";
-  const segmentLabel = segment === "adult" || isLongSleeve ? t.product.segmentAdult : t.product.segmentKid;
+  const segmentLabel = product.category === "trenirka" ? "Trenirka" : product.category === "streetwear" ? "Streetwear" : segment === "adult" || isLongSleeve ? t.product.segmentAdult : t.product.segmentKid;
   const productPrice = product.price ?? 20;
   const whatsappMessage = `Pozdrav, želim naručiti: ${repairText(product.klub)} ${repairText(
     product.igrac

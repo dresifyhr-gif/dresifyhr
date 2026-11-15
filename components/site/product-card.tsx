@@ -37,7 +37,7 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
   const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
 
   const currentSizes = segment === "adult" ? sizeOptions.adults : sizeOptions.kids;
-  const segmentLabel = segment === "adult" || product.category === "dugi-rukav" ? "Dres" : "Dres i hlačice";
+  const segmentLabel = product.category === "trenirka" ? "Trenirka" : product.category === "streetwear" ? "Streetwear" : segment === "adult" || product.category === "dugi-rukav" ? "Dres" : "Dres i hlačice";
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
