@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { useShopSettings, useWhatsAppUrl, useInstagram } from "@/contexts/shop-settings-context";
 
-const FACEBOOK_URL = "https://facebook.com/dresifyshop";
+const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61574349353574";
 const TIKTOK_URL = "https://tiktok.com/@dresify.shop";
 
 const buildChannels = (WHATSAPP_URL: string, INSTAGRAM_URL: string, CONTACT_EMAIL: string, CONTACT_PHONE_DISPLAY: string) => [
