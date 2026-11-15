@@ -20,7 +20,14 @@ const nextConfig = {
       { source: "/dres/real-ronaldo-2014", destination: "/dresovi/igrac/ronaldo/", permanent: true },
       { source: "/dres/psg-ronaldinho-retro", destination: "/dresovi/igrac/ronaldinho/", permanent: true },
       { source: "/dres/manchester-city-crni", destination: "/dresovi/", permanent: true },
-      { source: "/dres/milan-ibrahimovic", destination: "/dresovi/", permanent: true }
+      { source: "/dres/milan-ibrahimovic", destination: "/dresovi/", permanent: true },
+      // Stare mini igre su ugašene (ostaju Penalty Cup, Kviz dana, Žongliranje i
+      // Kolo sreće) — 308 na hub igara, da linkovi i bookmarki ne vode u 404.
+      ...["flappy", "zmija", "uhvati", "trkac", "gadaj", "spojnica"].map((slug) => ({
+        source: `/${slug}`,
+        destination: "/igre/",
+        permanent: true
+      }))
     ];
   }
 };
