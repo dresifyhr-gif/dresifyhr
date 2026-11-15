@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { X, Send, Bot, MessageCircle, MessagesSquare, ChevronRight } from "lucide-react";
 
 import { useWhatsAppUrl } from "@/contexts/shop-settings-context";
+import { isBottomNavHidden } from "@/components/site/bottom-nav";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -39,6 +40,16 @@ export function ChatWidget() {
   const [open, setOpen] = useState(false); // chat panel
   const [menu, setMenu] = useState(false); // izbor WhatsApp / asistent
   const [scrollHidden, setScrollHidden] = useState(false);
+  // Mobitel s donjom navigacijom: WhatsApp je već u traci → gumb otvara samo asistenta.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const on = () => setIsMobile(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  const assistantOnly = isMobile && !isBottomNavHidden(pathname);
   const rootRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Bok! Mogu li ti pomoći pronaći pravi dres?" }
@@ -149,14 +160,15 @@ export function ChatWidget() {
         type="button"
         onClick={() => {
           if (anyOpen) { setOpen(false); setMenu(false); }
+          else if (assistantOnly) setOpen(true);
           else setMenu(true);
         }}
         aria-expanded={anyOpen}
-        aria-haspopup="menu"
-        aria-label={anyOpen ? "Zatvori" : "Trebaš pomoć?"}
+        aria-haspopup={assistantOnly ? "dialog" : "menu"}
+        aria-label={anyOpen ? "Zatvori" : assistantOnly ? "Pitaj asistenta" : "Trebaš pomoć?"}
         className={`fab fab-1 fixed right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#111] text-accent ring-1 ring-accent/70 md:right-6 ${hideLauncher ? "fab-hide" : ""}`}
       >
-        {anyOpen ? <X strokeWidth={1.75} className="h-5 w-5" /> : <MessagesSquare strokeWidth={1.5} className="h-[22px] w-[22px]" />}
+        {anyOpen ? <X strokeWidth={1.75} className="h-5 w-5" /> : assistantOnly ? <Bot strokeWidth={1.5} className="h-[22px] w-[22px]" /> : <MessagesSquare strokeWidth={1.5} className="h-[22px] w-[22px]" />}
       </button>
 
       {/* Mali izbornik iznad gumba */}
