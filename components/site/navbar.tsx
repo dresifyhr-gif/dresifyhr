@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, Menu, ShoppingBag, User, X } from "lucide-react";
+import { Heart, Instagram, Menu, ShoppingBag, User, X } from "lucide-react";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
 import { useCart } from "@/components/providers/cart-provider";
@@ -14,6 +14,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { useShopSettings } from "@/contexts/shop-settings-context";
 import { SearchOverlay } from "@/components/site/search-overlay";
 import { isBottomNavHidden } from "@/components/site/bottom-nav";
+import { INSTAGRAM_URL } from "@/lib/site";
 import type { Locale } from "@/lib/i18n";
 
 export function Navbar() {
@@ -65,7 +66,7 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0a0a0a]">
-        {/* MOBILE (60px): izbornik + pretraga lijevo · logo u sredini · favoriti desno (košarica i račun su u donjoj traci) */}
+        {/* MOBILE (60px): izbornik + pretraga lijevo · logo u sredini · Instagram + favoriti desno (košarica i račun su u donjoj traci) */}
         <div className="page-shell grid h-[60px] grid-cols-[1fr_auto_1fr] items-center gap-2 md:hidden">
           <div className="flex items-center gap-1 justify-self-start">
             <button
@@ -84,6 +85,19 @@ export function Navbar() {
           </Link>
 
           <div className="flex items-center gap-1 justify-self-end">
+            {/* Gdje je donja traka (košarica je dolje): Instagram + srce → simetrično 2-2. */}
+            {!navHidden && (
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
+                aria-label="Dresify na Instagramu"
+                title="Instagram"
+              >
+                <Instagram className="h-[18px] w-[18px]" />
+              </a>
+            )}
             <Link
               href="/favoriti/"
               className="relative inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
