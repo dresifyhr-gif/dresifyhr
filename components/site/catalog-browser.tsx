@@ -564,17 +564,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
 
   return (
     <div className="panel p-3 sm:p-5 lg:p-7">
-      {compactHeader ? (
-        <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-5 sm:mb-6">
-          <div>
-            <p className="text-xs uppercase tracking-[0.32em] text-white/45">{t.catalog.label}</p>
-            <p className="mt-2 text-2xl uppercase leading-none text-white">{t.catalog.filterTitle}</p>
-          </div>
-          <span className="inline-flex w-fit rounded-[4px] bg-accent px-3 py-2 text-xs font-semibold text-black sm:px-4 sm:text-sm">
-            {t.catalog.count(filteredProducts.length)}
-          </span>
-        </div>
-      ) : (
+      {/* Kompaktno (naslovnica ispod prekidača, landing stranice s vlastitim naslovom): bez naslova. */}
+      {compactHeader ? null : (
         <div className="mb-6 flex flex-col gap-4 border-b border-white/10 pb-6 lg:mb-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-white/45">{headingLabel ?? t.catalog.label}</p>
