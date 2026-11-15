@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 
 import { useLanguage } from "@/contexts/language-context";
 import { useShopSettings } from "@/contexts/shop-settings-context";
+import { daysLeft, deadlineLabel } from "@/lib/christmas";
 
 const STORAGE_KEY = "dresify_announcement_hidden_until";
 const ANNOUNCEMENT_OFFSET = "40px";
@@ -20,7 +21,7 @@ function getEndOfDayTimestamp() {
 export function AnnouncementBar() {
   const { t } = useLanguage();
   // Traka se pali/gasi i tekst se mijenja u Postavkama (prazan tekst = zadane poruke).
-  const { announcementActive, announcementText } = useShopSettings();
+  const { announcementActive, announcementText, christmasOn, christmasDeadline } = useShopSettings();
   const messages = useMemo(
     () => (announcementText ? [announcementText] : t.announcement),
     [announcementText, t.announcement]
@@ -31,7 +32,7 @@ export function AnnouncementBar() {
   useEffect(() => {
     const hiddenUntilRaw = window.localStorage.getItem(STORAGE_KEY);
     const hiddenUntil = hiddenUntilRaw ? Number(hiddenUntilRaw) : 0;
-    const nextVisible = announcementActive && (!hiddenUntil || Date.now() > hiddenUntil);
+    const nextVisible = (christmasOn || announcementActive) && (!hiddenUntil || Date.now() > hiddenUntil);
 
     setIsVisible(nextVisible);
     document.documentElement.style.setProperty(
@@ -42,7 +43,7 @@ export function AnnouncementBar() {
     return () => {
       document.documentElement.style.setProperty("--announcement-offset", "0px");
     };
-  }, [announcementActive]);
+  }, [announcementActive, christmasOn]);
 
   useEffect(() => {
     if (!isVisible) {
@@ -57,6 +58,9 @@ export function AnnouncementBar() {
   }, [isVisible, messages.length]);
 
   const currentMessage = useMemo(() => messages[messageIndex % messages.length], [messageIndex, messages]);
+  // Dani do roka računaju se tek u pregledniku (server nema "danas" kupca).
+  const [left, setLeft] = useState<number | null>(null);
+  useEffect(() => { if (christmasOn) setLeft(daysLeft(christmasDeadline)); }, [christmasOn, christmasDeadline]);
 
   const handleDismiss = () => {
     window.localStorage.setItem(STORAGE_KEY, String(getEndOfDayTimestamp()));
@@ -71,9 +75,25 @@ export function AnnouncementBar() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          className="sticky top-0 z-50 border-b border-black/10 bg-accent text-black"
+          className={christmasOn ? "xmas-bar sticky top-0 z-50 text-white" : "sticky top-0 z-50 border-b border-black/10 bg-accent text-black"}
         >
           <div className="page-shell relative flex h-10 items-center justify-center pr-10 sm:h-11 sm:pr-12">
+            {christmasOn ? (
+              <p className="flex items-center gap-2.5 whitespace-nowrap text-[12px] font-semibold sm:gap-3 sm:text-[13px]">
+                <span className="hidden text-[10.5px] font-extrabold tracking-[0.22em] text-[#E3B85C] sm:inline">BOŽIĆ S DRESIFYJEM</span>
+                <span className="hidden opacity-30 sm:inline">|</span>
+                {left === 0 ? (
+                  <span>Narudžbe sada stižu nakon Božića · plaćaš pouzećem</span>
+                ) : (
+                  <span>Naruči do <b>{deadlineLabel(christmasDeadline)}</b> — stiže pod bor</span>
+                )}
+                {left ? (
+                  <span className="rounded-full border border-[#E3B85C] px-2 py-0.5 text-[10.5px] font-extrabold text-[#E3B85C]">
+                    još {left} {left === 1 ? "dan" : "dana"}
+                  </span>
+                ) : null}
+              </p>
+            ) : (
             <AnimatePresence mode="wait">
               <motion.p
                 key={currentMessage}
@@ -86,11 +106,12 @@ export function AnnouncementBar() {
                 {currentMessage}
               </motion.p>
             </AnimatePresence>
+            )}
 
             <button
               type="button"
               onClick={handleDismiss}
-              className="absolute right-3 inline-flex h-8 w-8 items-center justify-center text-black/70 transition-all duration-200 ease-out hover:text-black sm:right-6"
+              className={`absolute right-3 inline-flex h-8 w-8 items-center justify-center transition-all duration-200 ease-out sm:right-6 ${christmasOn ? "text-white/60 hover:text-white" : "text-black/70 hover:text-black"}`}
               aria-label="Zatvori obavijest"
             >
               <X className="h-4 w-4" />

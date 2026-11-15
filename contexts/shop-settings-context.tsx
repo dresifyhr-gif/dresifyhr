@@ -16,6 +16,9 @@ export type PublicShopSettings = {
   announcementText: string;
   heroTitle: string;
   heroSubtitle: string;
+  // Božićna tema: uključena u Postavkama i još nije prošao 26.12.
+  christmasOn: boolean;
+  christmasDeadline: string; // YYYY-MM-DD
 };
 
 const FALLBACK: PublicShopSettings = {
@@ -27,7 +30,9 @@ const FALLBACK: PublicShopSettings = {
   announcementActive: true,
   announcementText: "",
   heroTitle: "",
-  heroSubtitle: ""
+  heroSubtitle: "",
+  christmasOn: false,
+  christmasDeadline: "2026-12-19"
 };
 
 const Ctx = createContext<PublicShopSettings>(FALLBACK);

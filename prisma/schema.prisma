@@ -281,6 +281,9 @@ model Settings {
   accentColor        String? // npr. #e8ff3c
   // Kolo sreće (/kolo)
   koloActive         Boolean? // uključeno kolo sreće
+  // Božićna tema (kapa na logu, bordo traka, efekti naslovne, pokloni po budžetu)
+  christmasActive    Boolean?
+  christmasDeadline  String? // zadnji dan narudžbe za Božić, YYYY-MM-DD
   // Dresify Klub (vjernost po telefonu)
   klubActive         Boolean? // uključen program vjernosti
   klubTarget         Int? // koliko PREUZETIH narudžbi do nagrade (npr. 3)

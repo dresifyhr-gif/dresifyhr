@@ -97,7 +97,10 @@ export default async function RootLayout({
     announcementActive: s.announcementActive,
     announcementText: s.announcementText,
     heroTitle: s.heroTitle,
-    heroSubtitle: s.heroSubtitle
+    heroSubtitle: s.heroSubtitle,
+    // Sama se gasi 27.12. (godina iz roka narudžbe), da nitko ne mora pamtiti.
+    christmasOn: (s.christmasActive || (process.env.NODE_ENV !== "production" && process.env.XMAS_PREVIEW === "1")) && Date.now() < Date.parse(`${s.christmasDeadline.slice(0, 4)}-12-27T00:00:00+01:00`),
+    christmasDeadline: s.christmasDeadline
   };
 
   const cookieStore = await cookies();

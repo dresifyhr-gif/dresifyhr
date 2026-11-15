@@ -57,6 +57,9 @@ export type ShopSettings = {
   accentColor: string;
   // Kolo sreće
   koloActive: boolean;
+  // Božićna tema
+  christmasActive: boolean;
+  christmasDeadline: string; // YYYY-MM-DD
   // Dresify Klub
   klubActive: boolean;
   klubTarget: number;
@@ -106,6 +109,8 @@ const DEFAULTS: ShopSettings = {
   hiddenSections: [],
   accentColor: "#e8ff3c",
   koloActive: false,          // kolo sreće — pali se u Postavkama
+  christmasActive: false,     // božićna tema — prekidač u Postavkama
+  christmasDeadline: "2026-12-19",
   klubActive: false,          // pali se u Postavkama kad Gazda želi
   klubTarget: 3,              // 3 preuzete narudžbe
   klubRewardKind: "amount",   // fiksni popust = gratis dres
@@ -208,6 +213,8 @@ function toSettings(r: Awaited<ReturnType<typeof readSettingsRow>>): ShopSetting
     hiddenSections: parseLeagues(r.hiddenSections) ?? [],
     accentColor: /^#[0-9a-fA-F]{6}$/.test(r.accentColor || "") ? r.accentColor! : DEFAULTS.accentColor,
     koloActive: bool(r.koloActive, DEFAULTS.koloActive),
+    christmasActive: bool(r.christmasActive, DEFAULTS.christmasActive),
+    christmasDeadline: /^\d{4}-\d{2}-\d{2}$/.test(r.christmasDeadline || "") ? r.christmasDeadline! : DEFAULTS.christmasDeadline,
     klubActive: bool(r.klubActive, DEFAULTS.klubActive),
     klubTarget: Math.max(1, Math.round(num(r.klubTarget, DEFAULTS.klubTarget))),
     klubRewardKind: str(r.klubRewardKind, DEFAULTS.klubRewardKind),

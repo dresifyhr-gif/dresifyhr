@@ -36,6 +36,8 @@ type Settings = {
   hiddenSections: string[];
   accentColor: string;
   koloActive: boolean;
+  christmasActive: boolean;
+  christmasDeadline: string;
   klubActive: boolean;
   klubTarget: number;
   klubRewardKind: string;
@@ -103,7 +105,7 @@ export function SettingsForm() {
 
   const setNum = (k: keyof Settings) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, [k]: e.target.value } as unknown as Settings : cur));
-  const setStr = (k: "iban" | "businessName" | "contactPhone" | "contactEmail" | "whatsappNumber" | "instagramHandle" | "announcementText" | "heroSubtitle" | "accentColor" | "klubRewardLabel") => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const setStr = (k: "iban" | "businessName" | "contactPhone" | "contactEmail" | "whatsappNumber" | "instagramHandle" | "announcementText" | "heroSubtitle" | "accentColor" | "klubRewardLabel" | "christmasDeadline") => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, [k]: e.target.value } : cur));
   const setSender = (who: "igor" | "ivica", f: "name" | "address" | "city") => (e: React.ChangeEvent<HTMLInputElement>) =>
     setS((cur) => (cur ? { ...cur, senders: { ...cur.senders, [who]: { ...cur.senders[who], [f]: e.target.value } } } : cur));
@@ -134,6 +136,7 @@ export function SettingsForm() {
         heroTitle: s.heroTitle, heroSubtitle: s.heroSubtitle,
         hiddenSections: s.hiddenSections, accentColor: s.accentColor,
         koloActive: s.koloActive,
+        christmasActive: s.christmasActive, christmasDeadline: s.christmasDeadline,
         klubActive: s.klubActive, klubTarget: s.klubTarget, klubRewardKind: s.klubRewardKind,
         klubRewardValue: s.klubRewardValue, klubRewardLabel: s.klubRewardLabel,
         monthlyGoal: s.monthlyGoal
@@ -251,6 +254,15 @@ export function SettingsForm() {
 
       {tab === "naslovnica" && (
       <div className="space-y-4">
+      <Card title="🎄 Božićna tema" hint="Kapa na logu, bordo traka s rokom, premium efekti na naslovnoj, božićni slajd i „Pokloni po budžetu”. Gasi se kad god želiš — a sama se gasi 27.12.">
+        <label className="mb-3 flex cursor-pointer items-center gap-2 text-[14px] text-[var(--a-text)]">
+          <input type="checkbox" checked={s.christmasActive} onChange={(e) => setS((cur) => (cur ? { ...cur, christmasActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />
+          Božićna tema je uključena
+        </label>
+        <span className={label}>Zadnji dan narudžbe za Božić</span>
+        <input type="date" value={s.christmasDeadline} onChange={setStr("christmasDeadline")} className={inp} />
+        <p className="mt-2 text-[11px] text-[var(--a-text-3)]">Prikazuje se na traci („Naruči do …”) i u odbrojavanju. Nakon tog dana traka piše da narudžbe više ne stižu do Božića.</p>
+      </Card>
       <Card title="Traka obavijesti" hint="Žuta traka na vrhu shopa. Prazan tekst = zadane poruke koje se izmjenjuju.">
         <label className="mb-3 flex cursor-pointer items-center gap-2 text-[14px] text-[var(--a-text)]">
           <input type="checkbox" checked={s.announcementActive} onChange={(e) => setS((cur) => (cur ? { ...cur, announcementActive: e.target.checked } : cur))} className="h-4 w-4 accent-[#1d1d1f]" />

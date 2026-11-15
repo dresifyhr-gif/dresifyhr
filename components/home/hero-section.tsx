@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 import { HeroKompletiCarousel } from "@/components/home/hero-kompleti-carousel";
+import { ChristmasHeroFx } from "@/components/bozic/hero-fx";
 import { useLanguage } from "@/contexts/language-context";
 import { useShopSettings } from "@/contexts/shop-settings-context";
 
@@ -16,13 +17,17 @@ const TICKER_ITEMS = [
 
 export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
   // Naslov/podnaslov iz Postavki; prazno = zadani tekst iz prijevoda.
-  const { heroTitle, heroSubtitle } = useShopSettings();
+  const { heroTitle, heroSubtitle, christmasOn } = useShopSettings();
   const customTitleLines = heroTitle ? heroTitle.split("\n").map((l) => l.trim()).filter(Boolean) : null;
 
   const { t } = useLanguage();
 
   return (
     <section className="relative overflow-hidden bg-black">
+      {christmasOn ? (
+        <ChristmasHeroFx />
+      ) : (
+        <>
       {/* Background atmosphere — left accent glow */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_6%_22%,rgba(232,255,60,0.13),transparent_52%)]" />
       {/* Right-bottom second glow */}
@@ -35,6 +40,9 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
           backgroundSize: "32px 32px",
         }}
       />
+
+        </>
+      )}
 
       <div className="page-shell relative z-10 py-8 sm:py-10 lg:py-14">
         <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(480px,580px)] lg:gap-12">

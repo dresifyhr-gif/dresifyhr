@@ -2,6 +2,7 @@ import { FaqSection } from "@/components/home/faq-section";
 import { FeaturedSection } from "@/components/home/featured-section";
 import { GamesCta } from "@/components/home/games-cta";
 import { HeroSection } from "@/components/home/hero-section";
+import { GiftsByBudget } from "@/components/bozic/gifts-by-budget";
 import { HomeCatalogTabs } from "@/components/home/home-catalog-tabs";
 import { InstagramSection } from "@/components/home/instagram-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
@@ -67,6 +68,7 @@ export default async function HomePage() {
     <>
       <Ps5HomeBanner />
       <HeroSection mysteryImage={mysteryImage} />
+      <GiftsByBudget />
       {show("trust") && <TrustStrip />}
       {show("streetwear") && streetwear.length > 0 && (
         <StreetwearBanner

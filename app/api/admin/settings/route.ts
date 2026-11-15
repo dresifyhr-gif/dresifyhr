@@ -72,6 +72,8 @@ export async function POST(request: Request) {
     hiddenSections: Array.isArray(b?.hiddenSections) && b.hiddenSections.length ? JSON.stringify(b.hiddenSections.filter((x: unknown) => typeof x === "string")) : null,
     accentColor: /^#[0-9a-fA-F]{6}$/.test(String(b?.accentColor ?? "")) ? String(b.accentColor) : null,
     koloActive: b?.koloActive === true,
+    christmasActive: b?.christmasActive === true,
+    christmasDeadline: /^\d{4}-\d{2}-\d{2}$/.test(String(b?.christmasDeadline ?? "")) ? String(b.christmasDeadline) : null,
     klubActive: b?.klubActive === true,
     klubTarget: intOrNull(b?.klubTarget),
     klubRewardKind: strOrNull(b?.klubRewardKind),

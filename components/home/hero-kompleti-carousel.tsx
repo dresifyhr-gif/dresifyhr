@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { useShopSettings } from "@/contexts/shop-settings-context";
+
 type Slide = { key: string; alt: string; src?: string; video?: string; poster?: string; href: string; cta: string };
 
 // Video promo — prvi slide u rotaciji.
@@ -28,6 +30,15 @@ const KOMPLET_SLIDES: Slide[] = [
   { key: "portugal-ronaldo-komplet", alt: "Portugal Ronaldo komplet — dres, hlačice, lopta i kapa" },
 ].map((s) => ({ ...s, src: `/dresovi/${s.key}/komplet.png`, href: "/kompleti", cta: "Pogledaj komplete →" }));
 
+// Božićna tema: prvi slajd (Postavke → Božićna tema).
+const XMAS_SLIDE: Slide = {
+  key: "bozic",
+  alt: "Božićna kolekcija — dres, lopta i kapa, složi svoj mix",
+  src: "/bozic/slajd.webp",
+  href: "/slozi-mix",
+  cta: "Složi svoj mix →"
+};
+
 const PS5_SLIDE: Slide = {
   key: "ps5",
   alt: "Osvoji PS5 + EA SPORTS FC 27 — Dresify nagradna igra",
@@ -43,8 +54,10 @@ const VIDEO_FALLBACK_MS = 23000;
 const SWIPE_THRESHOLD = 45;
 
 export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }) {
+  const { christmasOn } = useShopSettings();
   const SLIDES: Slide[] = useMemo(
     () => [
+      ...(christmasOn ? [XMAS_SLIDE] : []),
       VIDEO_SLIDE,
       PS5_SLIDE,
       ...(mysteryImage
@@ -52,7 +65,7 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
         : []),
       ...KOMPLET_SLIDES
     ],
-    [mysteryImage]
+    [mysteryImage, christmasOn]
   );
   const [index, setIndex] = useState(0);
   const pausedRef = useRef(false);
@@ -67,7 +80,7 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
       if (!pausedRef.current) {
         setIndex((current) => (current + 1) % SLIDES.length);
       }
-    }, active.video ? VIDEO_FALLBACK_MS : INTERVAL_MS);
+    }, active.video ? VIDEO_FALLBACK_MS : active.key === "bozic" ? 8000 : INTERVAL_MS);
     return () => clearTimeout(timer);
   }, [index, active.video, SLIDES.length]);
 
@@ -75,7 +88,7 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
     <div className="relative mx-auto max-w-[540px]">
       <span className="section-kicker mb-3 inline-flex">
         <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-        Posebna ponuda — Kompleti 40€
+        {christmasOn ? "Božićna kolekcija — složi svoj mix" : "Posebna ponuda — Kompleti 40€"}
       </span>
 
       <div className="relative overflow-hidden rounded-[14px] border border-white/10 bg-[#fbfbfb]">

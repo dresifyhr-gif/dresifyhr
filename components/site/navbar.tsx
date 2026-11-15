@@ -1,5 +1,6 @@
 "use client";
 
+import { SantaHat } from "@/components/bozic/santa-hat";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -67,8 +68,8 @@ export function Navbar() {
             <SearchOverlay />
           </div>
 
-          <Link href="/" className="justify-self-center font-heading text-[2.2rem] uppercase leading-none text-white">
-            DRES<span className="text-accent">IFY</span>
+          <Link href="/" className="relative justify-self-center font-heading text-[2.2rem] uppercase leading-none text-white">
+            <SantaHat />DRES<span className="text-accent">IFY</span>
           </Link>
 
           <div className="flex items-center gap-1 justify-self-end">
@@ -108,8 +109,8 @@ export function Navbar() {
 
         {/* DESKTOP: logo lijevo · navigacija · jezik + pretraga + račun + košarica desno */}
         <div className="page-shell hidden h-[76px] items-center justify-between gap-4 md:flex">
-          <Link href="/" className="font-heading text-[2.15rem] uppercase leading-none text-white">
-            DRES<span className="text-accent">IFY</span>
+          <Link href="/" className="relative font-heading text-[2.15rem] uppercase leading-none text-white">
+            <SantaHat />DRES<span className="text-accent">IFY</span>
           </Link>
 
           <nav className="flex items-center gap-9">
@@ -196,8 +197,8 @@ export function Navbar() {
           >
             <div className="page-shell flex h-full flex-col py-6">
               <div className="flex items-center justify-between border-b border-white/10 pb-5">
-                <Link href="/" className="font-heading text-[2.15rem] uppercase leading-none text-white">
-                  DRES<span className="text-accent">IFY</span>
+                <Link href="/" className="relative font-heading text-[2.15rem] uppercase leading-none text-white">
+                  <SantaHat />DRES<span className="text-accent">IFY</span>
                 </Link>
                 <button
                   type="button"
