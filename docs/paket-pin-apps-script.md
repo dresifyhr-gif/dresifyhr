@@ -69,13 +69,17 @@ function uvoziPinove() {
 }
 
 function parsePin_(body) {
-  var out = { pin: "", ime: "", prezime: "", paketId: "" };
+  var out = { pin: "", ime: "", prezime: "", paketId: "", referenca: "" };
 
   var pin = body.match(/paketomatu\s*:?\s*([0-9]{4,})/i);
   if (pin) out.pin = pin[1];
 
   var pid = body.match(/ID\s*narud\S*be[\s\S]{0,40}?([0-9]{4,})/i);
   if (pid) out.paketId = pid[1];
+
+  // Dresify referenca (DRS-…) iz polja "Referenca" — najtočnije spajanje, i kod istih imena.
+  var ref = body.match(/(DRS-[0-9]{6}-[0-9]{4})/i);
+  if (ref) out.referenca = ref[1].toUpperCase();
 
   // Ime/Prezime SAMO iz bloka primatelja (ne pošiljatelja = Dresify).
   var idx = body.search(/Informacije\s+o\s+primatelju/i);
@@ -143,10 +147,10 @@ function getOrCreateLabel_(name) {
 
 ## Kako spaja na narudžbu
 
-Po **imenu i prezimenu** primatelja (bez dijakritike). Ako ima više kupaca istog
-imena, uzima onaj **bez PIN-a**, **GLS/prazan kurir**, i **najnoviju** narudžbu.
-Idempotentno je: isti PIN / isti paket.hr ID neće se dvaput upisati.
+1. Po **referenci** (`DRS-…`) iz polja **Referenca** u paket.hr mailu — puni je auto-popuna
+   (Tampermonkey), pa je spajanje točno i kad više kupaca ima isto ime.
+2. Ako reference nema: po **imenu i prezimenu** primatelja (bez dijakritike), samo aktivne
+   narudžbe bez PIN-a. Ako isti kupac ima i staru narudžbu zaglavljenu na "poslano" bez PIN-a,
+   uzima se jedina iz zadnjih 45 dana. Inače PIN ide na Telegram s upozorenjem "NESIGURNO".
 
-> Za 100% točno spajanje čak i kod istih imena: kad kreiraš pošiljku na paket.hr,
-> upiši Dresify referencu (npr. `DRS-...`) u polje **Referenca**. Trenutno je prazno,
-> pa spajamo po imenu — što za tvoj volumen radi dobro.
+Idempotentno je: isti PIN / isti paket.hr ID neće se dvaput upisati.

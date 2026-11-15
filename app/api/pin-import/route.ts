@@ -71,6 +71,8 @@ export async function POST(request: Request) {
   const ime = String(body?.ime || "").trim();
   const prezime = String(body?.prezime || "").trim();
   const paketId = String(body?.paketId || "").trim() || null;
+  // Dresify referenca (DRS-…) iz polja "Referenca" u paket.hr mailu — najtočnije spajanje.
+  const referenca = String(body?.referenca || body?.reference || "").trim().toUpperCase();
 
   // ── Uvoz TRACKING broja (drugi paket.hr mail, nakon predaje u paketomat) ──
   // Spaja se na narudžbu po paket.hr ID-u (koji smo spremili kad je stigao PIN).
@@ -105,7 +107,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, matched: true, orderId: already.id, alreadyHad: true, customerName: already.customerName });
   }
 
-  // Kandidati: SAMO aktivne narudžbe (nova/poslana), bez PIN-a, čije ime sadrži i ime i
+  // 1) Po referenci (DRS-…) — paket.hr mail je nosi u polju "Referenca" (puni je auto-popuna).
+  if (/^DRS-\d{6}-\d{4}$/.test(referenca)) {
+    const byRef = await prisma.order.findFirst({
+      where: { reference: referenca, status: { in: ["new", "shipped"] }, pin: null },
+      select: { id: true, customerName: true, createdAt: true }
+    });
+    if (byRef) return attach(byRef, pin, paketId);
+  }
+
+  // 2) Po imenu: SAMO aktivne narudžbe (nova/poslana), bez PIN-a, čije ime sadrži i ime i
   // prezime primatelja (bez dijakritike). Otkazane/vraćene/gotove ne diramo — inače PIN može
   // sjesti na krivu narudžbu istog imena. Bez vremenskog prozora: narudžba može čekati robu tjednima.
   const orders = await prisma.order.findMany({
@@ -115,10 +126,18 @@ export async function POST(request: Request) {
   });
   const dIme = deaccent(ime);
   const dPrez = deaccent(prezime);
-  const matches = orders.filter((o) => {
+  let matches = orders.filter((o) => {
     const n = deaccent(o.customerName);
     return (!dIme || n.includes(dIme)) && (!dPrez || n.includes(dPrez));
   });
+
+  // Isti kupac s davnom narudžbom koja je ostala "poslano" bez PIN-a (prije uvoza PIN-ova)
+  // ne smije blokirati novu: ako je točno jedna narudžba iz zadnjih 45 dana, a ostale su
+  // starije, PIN ide na nju. (Npr. Toni Matijević: srpanj + studeni.)
+  if (matches.length > 1) {
+    const recent = matches.filter((o) => Date.now() - o.createdAt.getTime() <= RECENT_MS);
+    if (recent.length === 1) matches = recent;
+  }
 
   if (matches.length === 0) {
     // Nije spojeno (npr. ponovno slanje narudžbe koja već ima stari PIN) — PIN ipak ide na
@@ -144,8 +163,12 @@ export async function POST(request: Request) {
     });
   }
 
-  const best = matches[0];
+  return attach(matches[0], pin, paketId);
+}
 
+const RECENT_MS = 45 * 86_400_000;
+
+async function attach(best: { id: string; customerName: string; createdAt: Date }, pin: string, paketId: string | null) {
   await prisma.order.update({ where: { id: best.id }, data: { pin, ...(paketId ? { paketId } : {}) } });
 
   // Novi PIN → pošalji na "Dresify pinovi" Telegram bot (ime + prezime + PIN). Best-effort.
