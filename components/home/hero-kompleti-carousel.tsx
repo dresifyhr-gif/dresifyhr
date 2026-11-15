@@ -60,7 +60,8 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
   const SLIDES: Slide[] = useMemo(
     () => [
       // PS5 slajd je maknut: nagradnu igru već nosi PS5 traka (bez duplog "Sudjeluj").
-      ...(christmasOn ? [XMAS_VIDEO_SLIDE, XMAS_SLIDE] : [VIDEO_SLIDE]),
+      // Božić: prvo božićna reklama (15 s), odmah iza nje obična reklama (21 s), pa slika.
+      ...(christmasOn ? [XMAS_VIDEO_SLIDE, VIDEO_SLIDE, XMAS_SLIDE] : [VIDEO_SLIDE]),
       ...(mysteryImage
         ? [{ key: "mystery", alt: "Mystery Box — nasumičan dres, iznenađenje", src: mysteryImage, href: "/dres/dresify-mystery-3-pack", cta: "Naruči Mystery Box →" } as Slide]
         : []),
