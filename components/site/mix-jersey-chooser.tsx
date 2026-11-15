@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-export type MixJersey = { slug: string; klub: string; igrac: string; price: number; image?: string };
+export type MixJersey = { slug: string; klub: string; igrac: string; price: number; image?: string; kind?: "dres" | "trenirka" };
 
 // Korak 1 na /slozi-mix: pretraži i odaberi dres → stranica dresa s otvorenim mixom.
 export function MixJerseyChooser({ jerseys }: { jerseys: MixJersey[] }) {
@@ -37,7 +37,7 @@ export function MixJerseyChooser({ jerseys }: { jerseys: MixJersey[] }) {
             <div className="p-3">
               <p className="truncate text-xs uppercase tracking-wide text-white/50">{j.klub}</p>
               <p className="truncate text-sm font-semibold text-white">{j.igrac}</p>
-              <p className="mt-1 text-xs text-accent">Mix {j.price + 10}–{j.price + 20} € · dres {j.price} €</p>
+              <p className="mt-1 text-xs text-accent">Mix {j.price + 10}–{j.price + 20} € · {j.kind === "trenirka" ? "trenirka" : "dres"} {j.price} €</p>
             </div>
           </Link>
         ))}

@@ -4,7 +4,7 @@ import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { MixJerseyChooser, type MixJersey } from "@/components/site/mix-jersey-chooser";
 import { getJerseySizeOptions, jerseys } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
-import { getCatalogProducts } from "@/lib/data/product-overrides";
+import { getCatalogProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { MIX_ADDON_PRICE_EUR, MIX_CLUBS, isMixEligible, mixImage } from "@/lib/mix";
 import { buildMetadata } from "@/lib/seo";
 import { repairText } from "@/lib/utils";
@@ -26,7 +26,9 @@ export default async function SloziMixPage({ searchParams }: { searchParams: { v
     const sizes = [...(o.adultsOutOfStock ? [] : o.adults), ...(o.kidsOutOfStock ? [] : o.kids)];
     return sizes.some((s) => !o.soldOutSizes.includes(s));
   };
-  const products = (await getCatalogProducts(jerseys)).filter(
+  // Katalog namjerno izostavlja trenirke (imaju svoju stranicu) — dodajemo ih ručno.
+  const [catalog, trenirke] = await Promise.all([getCatalogProducts(jerseys), getTrenirkaProducts()]);
+  const products = [...catalog, ...trenirke].filter(
     (p) => isMixEligible(p) && hasStock(p) && (!vrsta || p.category === vrsta)
   );
   const list: MixJersey[] = products.map((p) => ({
@@ -34,6 +36,7 @@ export default async function SloziMixPage({ searchParams }: { searchParams: { v
     klub: repairText(p.klub),
     igrac: repairText(p.igrac),
     price: p.price ?? 20,
+    kind: p.category === "trenirka" ? "trenirka" : "dres",
     image: (p.images ?? getJerseyGallery(p.slug))[0]?.src
   }));
 
