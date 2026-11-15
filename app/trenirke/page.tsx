@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ProductCard } from "@/components/site/product-card";
+import { MixPromoCard } from "@/components/site/mix-promo-card";
 import { getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 
@@ -52,6 +53,7 @@ export default async function TrenirkePage() {
 
         {products.length > 0 ? (
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+            <MixPromoCard variant="trenirka" />
             {products.map((p, i) => (
               <ProductCard key={p.slug} product={p} priority={i < 5} theme="trenirka" />
             ))}

@@ -17,14 +17,18 @@ export const metadata = buildMetadata({
   keywords: ["dres i lopta", "dres lopta kapa", "nogometni set", "poklon za nogometaša", "složi svoj mix"]
 });
 
-export default async function SloziMixPage() {
+export default async function SloziMixPage({ searchParams }: { searchParams: { vrsta?: string } }) {
+  // ?vrsta=dugi-rukav | trenirka — artikli "Složi svoj mix" za dugi rukav / trenirku.
+  const vrsta = searchParams?.vrsta === "dugi-rukav" || searchParams?.vrsta === "trenirka" ? searchParams.vrsta : null;
   // Samo dresovi kojima je ostala barem jedna veličina (rasprodani nemaju mix izbor).
   const hasStock = (p: Parameters<typeof getJerseySizeOptions>[0]) => {
     const o = getJerseySizeOptions(p);
     const sizes = [...(o.adultsOutOfStock ? [] : o.adults), ...(o.kidsOutOfStock ? [] : o.kids)];
     return sizes.some((s) => !o.soldOutSizes.includes(s));
   };
-  const products = (await getCatalogProducts(jerseys)).filter((p) => isMixEligible(p) && hasStock(p));
+  const products = (await getCatalogProducts(jerseys)).filter(
+    (p) => isMixEligible(p) && hasStock(p) && (!vrsta || p.category === vrsta)
+  );
   const list: MixJersey[] = products.map((p) => ({
     slug: p.slug,
     klub: repairText(p.klub),
@@ -66,7 +70,7 @@ export default async function SloziMixPage() {
             </p>
           </div>
           <div className="relative mx-auto aspect-square w-full max-w-[420px] overflow-hidden rounded-[14px]">
-            <Image src="/mix/slozi-mix.jpg" alt="Složi svoj mix — dres, lopta i kapa" fill priority sizes="420px" className="object-cover" />
+            <Image src={vrsta ? `/mix/slozi-mix-${vrsta}.jpg` : "/mix/slozi-mix.jpg"} alt="Složi svoj mix — lopta i kapa kluba po izboru" fill priority sizes="420px" className="object-cover" />
           </div>
         </div>
 
@@ -81,7 +85,7 @@ export default async function SloziMixPage() {
           ))}
         </div>
 
-        <h2 className="mt-10 font-heading text-2xl uppercase text-white">1. Odaberi dres ili trenirku</h2>
+        <h2 className="mt-10 font-heading text-2xl uppercase text-white">1. Odaberi {vrsta === "trenirka" ? "trenirku" : vrsta === "dugi-rukav" ? "dres dugih rukava" : "dres ili trenirku"}</h2>
         <p className="mb-4 mt-1 text-sm text-white/55">Klikni dres → odaberi veličinu → dodaj loptu i/ili kapu.</p>
         <MixJerseyChooser jerseys={list} />
       </div>

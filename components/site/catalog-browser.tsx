@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/site/product-card";
-import { MixPromoCard } from "@/components/site/mix-promo-card";
+import { MixPromoCard, type MixVariant } from "@/components/site/mix-promo-card";
 import { useLanguage } from "@/contexts/language-context";
 import { hasJerseyGallery } from "@/lib/data/jersey-media";
 import {
@@ -26,7 +26,7 @@ type CatalogBrowserProps = {
   headingLabel?: string;
   headingTitle?: string;
   headingDesc?: string;
-  showMixPromo?: boolean; // prva kartica "Složi svoj mix"
+  showMixPromo?: boolean | MixVariant[]; // kartice "Složi svoj mix" na početku popisa
 };
 
 type FilterSectionKey = "liga" | "klub" | "igrac" | "velicina" | "retro" | "dugirukav";
@@ -703,7 +703,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           ) : null}
 
           <div className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-3 2xl:grid-cols-3">
-            {showMixPromo && <MixPromoCard />}
+            {(showMixPromo === true ? (["dres"] as MixVariant[]) : showMixPromo || []).map((v) => <MixPromoCard key={v} variant={v} />)}
             {filteredProducts.slice(0, visibleCount).map((product, index) => (
               // Na naslovnici je katalog ispod hero slike → bez priority da ne krade hero sliku.
               <ProductCard key={product.slug} product={product} priority={!compactHeader && index < 4} />
