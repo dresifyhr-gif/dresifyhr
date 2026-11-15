@@ -96,15 +96,15 @@ export function ChatWidget() {
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-black shadow-[0_16px_36px_rgba(232,255,60,0.22)] transition-transform duration-200 ease-out hover:-translate-y-1 sm:bottom-6 sm:right-6"
+        className="fab fab-1 fixed right-3 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-black shadow-[0_6px_18px_rgba(0,0,0,0.45)] ring-1 ring-black/20 transition-transform duration-200 ease-out hover:-translate-y-0.5 sm:right-6"
         aria-label="Otvori chat asistenta"
       >
-        {open ? <X className="h-7 w-7" /> : <Bot className="h-7 w-7" />}
+        {open ? <X className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
       </button>
 
       {/* Chat window */}
       {open && (
-        <div className="fixed bottom-24 right-4 z-40 flex w-[340px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-[18px] border border-white/10 bg-[#0d0d0d] shadow-[0_24px_64px_rgba(0,0,0,0.7)] sm:bottom-28 sm:right-6">
+        <div className="fab-panel fixed right-3 z-[45] flex w-[340px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-[18px] border border-white/10 bg-[#0d0d0d] shadow-[0_24px_64px_rgba(0,0,0,0.7)] sm:right-6">
           {/* Header */}
           <div className="flex items-center gap-3 border-b border-white/10 bg-[#111] px-4 py-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/15 text-accent">

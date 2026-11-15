@@ -31,6 +31,13 @@ export function StickyAddToCart({ product, selectedSize, segment, segmentLabel, 
     return () => observer.disconnect();
   }, [mainButtonRef]);
 
+  // Plutajući gumbi (WhatsApp, AI) se dignu iznad trake samo dok je traka vidljiva (mobitel).
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--fab-lift", visible ? "84px" : "0px");
+    return () => root.style.setProperty("--fab-lift", "0px");
+  }, [visible]);
+
   const handleAdd = () => {
     if (!selectedSize) return;
     addItem({ slug: product.slug, klub: repairText(product.klub), igrac: repairText(product.igrac), size: selectedSize, segment, segmentLabel, imageSrc, price: product.price, category: product.category });

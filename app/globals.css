@@ -486,3 +486,14 @@ body::before {
   .santa-hat, .xmas-ghost { animation: none; }
   .santa-hat { transform: rotate(-11deg); }
 }
+
+/* Plutajući gumbi (AI + WhatsApp): mali, u kutu, iznad trake proizvoda kad je ona vidljiva */
+.fab { transition: bottom 0.25s ease, transform 0.2s ease; }
+.fab-1 { bottom: calc(14px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); }
+.fab-2 { bottom: calc(72px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); }
+.fab-panel { bottom: calc(72px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); }
+@media (min-width: 640px) {
+  .fab-1 { bottom: 24px; }
+  .fab-2 { bottom: 84px; }
+  .fab-panel { bottom: 84px; }
+}
