@@ -10,6 +10,7 @@ import { SignedIn, SignedOut } from "@clerk/nextjs";
 
 import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
+import { useShopSettings } from "@/contexts/shop-settings-context";
 import { SearchOverlay } from "@/components/site/search-overlay";
 import type { Locale } from "@/lib/i18n";
 
@@ -18,6 +19,7 @@ export function Navbar() {
   const { itemCount, openDrawer } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { t, locale, setLocale } = useLanguage();
+  const { christmasOn } = useShopSettings();
 
   // Gornji izbornik je fokusiran na kupnju. "Početna" izbačena (logo vodi doma),
   // "Nagradna igra" je već u žutoj PS5 traci ispod, a "O nama" je u footeru —
@@ -28,6 +30,14 @@ export function Navbar() {
     { href: "/trenirke", label: "Trenirke" },
     { href: "/streetwear", label: "Streetwear" },
     { href: "/kontakt", label: t.nav.contact },
+  ];
+
+  // Mobilni izbornik: prvo sezonske stavke (mix + pokloni), zatim kategorije.
+  // "Pokloni po budžetu" postoji samo dok je božićna tema uključena (sekcija #pokloni na naslovnoj).
+  const MOBILE_ITEMS = [
+    { href: "/slozi-mix", label: locale === "en" ? "Build your mix" : "Složi svoj mix", accent: true },
+    ...(christmasOn ? [{ href: "/#pokloni", label: locale === "en" ? "Gifts by budget" : "Pokloni po budžetu", accent: false }] : []),
+    ...NAV_ITEMS.map((item) => ({ ...item, accent: false })),
   ];
 
   useEffect(() => {
@@ -50,12 +60,9 @@ export function Navbar() {
 
   return (
     <>
-      <header
-        className="sticky z-40 border-b border-white/10 bg-[#0a0a0a]"
-        style={{ top: "var(--announcement-offset, 0px)" }}
-      >
-        {/* MOBILE: ☰ + 🔍 lijevo · logo u sredini · račun + košarica desno */}
-        <div className="page-shell grid h-[76px] grid-cols-[1fr_auto_1fr] items-center gap-2 md:hidden">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0a0a0a]">
+        {/* MOBILE (60px): izbornik + pretraga lijevo · logo u sredini · račun + košarica desno */}
+        <div className="page-shell grid h-[60px] grid-cols-[1fr_auto_1fr] items-center gap-2 md:hidden">
           <div className="flex items-center gap-1 justify-self-start">
             <button
               type="button"
@@ -68,7 +75,7 @@ export function Navbar() {
             <SearchOverlay />
           </div>
 
-          <Link href="/" className="relative justify-self-center font-heading text-[2.2rem] uppercase leading-none text-white">
+          <Link href="/" className="relative justify-self-center font-heading text-[2.1rem] uppercase leading-none text-white">
             <SantaHat />DRES<span className="text-accent">IFY</span>
           </Link>
 
@@ -195,9 +202,9 @@ export function Navbar() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-[#0a0a0a] md:hidden"
           >
-            <div className="page-shell flex h-full flex-col py-6">
-              <div className="flex items-center justify-between border-b border-white/10 pb-5">
-                <Link href="/" className="relative font-heading text-[2.15rem] uppercase leading-none text-white">
+            <div className="page-shell flex h-full flex-col overflow-y-auto pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <Link href="/" className="relative font-heading text-[2.1rem] uppercase leading-none text-white">
                   <SantaHat />DRES<span className="text-accent">IFY</span>
                 </Link>
                 <button
@@ -210,26 +217,42 @@ export function Navbar() {
                 </button>
               </div>
 
-              <nav className="flex flex-1 flex-col justify-center gap-5">
-                {NAV_ITEMS.map((item) => (
+              <nav className="flex flex-col pt-4">
+                {MOBILE_ITEMS.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="font-heading text-[2.7rem] uppercase leading-[0.9] text-white transition-all duration-200 ease-out hover:text-accent"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`py-2 font-heading text-[2rem] uppercase leading-none transition-colors duration-200 ease-out ${
+                      item.accent ? "text-accent" : pathname === item.href ? "text-accent" : "text-white hover:text-accent"
+                    }`}
                   >
                     {item.label}
                   </Link>
                 ))}
               </nav>
 
+              <div className="mt-5 flex flex-wrap gap-x-5 gap-y-1 border-t border-white/10 pt-4 text-[15px] text-white/70">
+                <Link href="/racun" onClick={() => setIsMenuOpen(false)} className="py-1.5 hover:text-accent">
+                  {locale === "en" ? "My account" : "Moj račun"}
+                </Link>
+                <Link href="/dostava-i-povrat" onClick={() => setIsMenuOpen(false)} className="py-1.5 hover:text-accent">
+                  {locale === "en" ? "Delivery & exchange" : "Dostava i zamjena"}
+                </Link>
+              </div>
+
+              <p className="mt-3 text-[12px] text-white/40">
+                {locale === "en" ? "Cash on delivery · 2–5 business days · Size exchange" : "Pouzeće · 2–5 radnih dana · Zamjena veličine"}
+              </p>
+
               {/* Language switcher — mobile */}
-              <div className="flex items-center gap-4 border-t border-white/10 pt-6">
+              <div className="mt-3 flex items-center gap-1 border-t border-white/10 pt-3">
                 {(["hr", "en"] as Locale[]).map((l) => (
                   <button
                     key={l}
                     type="button"
                     onClick={() => handleLocale(l)}
-                    className={`font-heading text-2xl uppercase tracking-[0.2em] transition-all duration-200 ease-out ${
+                    className={`inline-flex h-11 min-w-11 items-center justify-center px-2 font-heading text-xl uppercase tracking-[0.2em] transition-all duration-200 ease-out ${
                       locale === l ? "text-accent" : "text-white/35 hover:text-white/60"
                     }`}
                   >

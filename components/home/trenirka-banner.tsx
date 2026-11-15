@@ -3,51 +3,50 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 // Naslovni banner koji vodi na /trenirke — ista uloga kao StreetwearBanner
-// (mobilna vidljivost: većina kupaca gleda naslovnu, ne izbornik). Teal identitet
-// (kao trenirke kartice). Mobilna: kompaktno. Desktop: opis + slike trenirki.
+// (mobilna vidljivost). U bojama branda: crna ploha, tanki rub, bordo crta
+// i pola riječi u accentu (kao logo DRES|IFY).
+// Mobilna: kompaktno. Desktop: opis + slike trenirki.
 export function TrenirkaBanner({ images = [] }: { images?: string[] }) {
   const tiles = images.filter(Boolean).slice(0, 5);
 
   return (
-    <section className="bg-[#0a0a0a] px-4 pb-2 pt-2 sm:pb-4 sm:pt-4">
+    <section className="bg-[#0a0a0a] pb-2 pt-1.5 sm:pb-4 sm:pt-2">
       <div className="page-shell">
         <Link
           href="/trenirke"
-          className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 px-5 py-4 shadow-[0_10px_40px_-12px_rgba(20,184,166,0.6)] transition hover:from-teal-400 hover:to-teal-500 sm:px-8 sm:py-8"
+          className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-[14px] border border-white/10 bg-[#111111] py-3.5 pl-5 pr-3.5 transition hover:border-accent/50 sm:px-8 sm:py-6"
         >
-          {/* Suptilni uzorak u pozadini */}
-          <span aria-hidden className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-          <span aria-hidden className="pointer-events-none absolute -bottom-12 left-1/3 h-40 w-40 rounded-full bg-black/10 blur-2xl" />
+          <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-[#8e1020]" />
 
-          <div className="relative shrink-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-white/80 sm:text-[11px]">Za trening i van</p>
-            <h2 className="mt-0.5 font-heading text-3xl uppercase leading-none text-white sm:mt-1 sm:text-5xl">
-              TRENI<span className="text-slate-900">RKE</span>
+          <div className="relative min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45 sm:text-[11px]">Za trening i van</p>
+            <h2 className="mt-0.5 font-heading text-[28px] uppercase leading-none text-white sm:mt-1 sm:text-5xl">
+              TRENI<span className="text-accent">RKE</span>
             </h2>
             {/* Opis samo na širem ekranu — mobilna ostaje kratka */}
-            <p className="mt-2 hidden max-w-md text-[13px] leading-5 text-white/90 sm:block sm:text-sm">
-              Kompleti trenirki — jakna + hlače. Topla i udobna, plaćanje pouzećem, besplatna dostava od 60 € za registrirane.
+            <p className="mt-2 hidden max-w-md text-sm leading-6 text-white/60 sm:block">
+              Jakna + hlače u klupskom dizajnu. Topla i udobna, plaćanje pouzećem, besplatna dostava od 60 € za registrirane.
             </p>
           </div>
 
-          {/* Slike trenirki — preklapajuće bijele pločice (samo na širem ekranu) */}
+          {/* Slike trenirki — preklapajuće pločice (samo na širem ekranu) */}
           {tiles.length > 0 && (
             <div className="relative ml-auto hidden shrink-0 items-center lg:flex">
               {tiles.map((src, i) => (
                 <div
                   key={src}
-                  className="relative h-24 w-24 overflow-hidden rounded-xl border-2 border-white/70 bg-white shadow-lg transition-transform duration-200 group-hover:-translate-y-0.5 xl:h-28 xl:w-28"
-                  style={{ marginLeft: i === 0 ? 0 : "-1.25rem", rotate: `${(i - (tiles.length - 1) / 2) * 4}deg`, zIndex: tiles.length - i }}
+                  className="relative h-20 w-20 overflow-hidden rounded-[10px] border border-white/10 bg-[#fbfbfb] transition-transform duration-200 group-hover:-translate-y-0.5 xl:h-24 xl:w-24"
+                  style={{ marginLeft: i === 0 ? 0 : "-1rem", rotate: `${(i - (tiles.length - 1) / 2) * 3}deg`, zIndex: tiles.length - i }}
                 >
-                  <Image src={src} alt="Dresify trenirka komplet" fill sizes="112px" className="object-contain p-1.5" />
+                  <Image src={src} alt="Dresify trenirka komplet" fill sizes="96px" className="object-contain p-1.5" />
                 </div>
               ))}
             </div>
           )}
 
-          <span className="relative ml-4 flex shrink-0 items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition group-hover:bg-black sm:px-5 sm:text-sm">
+          <span className="relative flex shrink-0 items-center gap-1.5 rounded-full border border-accent/60 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-accent transition group-hover:bg-accent group-hover:text-black sm:ml-4 sm:px-5 sm:text-sm">
             Pogledaj
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={1.75} />
           </span>
         </Link>
       </div>

@@ -49,14 +49,6 @@ const XMAS_SLIDE: Slide = {
   cta: "Složi svoj mix →"
 };
 
-const PS5_SLIDE: Slide = {
-  key: "ps5",
-  alt: "Osvoji PS5 + EA SPORTS FC 27 — Dresify nagradna igra",
-  src: "/ps5/hero.png",
-  href: "/ps5",
-  cta: "Sudjeluj u nagradnoj igri →"
-};
-
 const INTERVAL_MS = 4000;
 // Video reklama traje ~21 s — slide ostaje do kraja videa (onEnded), a ovo je
 // samo rezerva ako preglednik ne pusti video (npr. iPhone u štednji baterije).
@@ -67,8 +59,8 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
   const { christmasOn } = useShopSettings();
   const SLIDES: Slide[] = useMemo(
     () => [
+      // PS5 slajd je maknut: nagradnu igru već nosi PS5 traka (bez duplog "Sudjeluj").
       ...(christmasOn ? [XMAS_VIDEO_SLIDE, XMAS_SLIDE] : [VIDEO_SLIDE]),
-      PS5_SLIDE,
       ...(mysteryImage
         ? [{ key: "mystery", alt: "Mystery Box — nasumičan dres, iznenađenje", src: mysteryImage, href: "/dres/dresify-mystery-3-pack", cta: "Naruči Mystery Box →" } as Slide]
         : []),
@@ -95,10 +87,13 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
 
   return (
     <div className="relative mx-auto max-w-[540px]">
-      <span className="section-kicker mb-3 inline-flex">
-        <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-        {christmasOn ? "Božićna kolekcija — složi svoj mix" : "Posebna ponuda — Kompleti 40€"}
-      </span>
+      {/* U božićnoj temi video slajd već nosi "Složi svoj mix →", pa bez duplog natpisa. */}
+      {christmasOn ? null : (
+        <span className="section-kicker mb-3 inline-flex">
+          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+          Posebna ponuda — kompleti 40 €
+        </span>
+      )}
 
       <div className="relative overflow-hidden rounded-[14px] border border-white/10 bg-[#fbfbfb]">
         <div className="relative aspect-square">
@@ -147,15 +142,15 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
         </div>
       </div>
 
-      {/* Dots */}
+      {/* Dots — točkica je mala, ::after daje veću površinu za prst */}
       <div className="mt-3 flex justify-center gap-2">
         {SLIDES.map((slide, i) => (
           <button
             key={slide.key}
             type="button"
-            aria-label={`Komplet ${i + 1}`}
+            aria-label={`Slajd ${i + 1}`}
             onClick={() => { pausedRef.current = true; setIndex(i); }}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
+            className={`relative h-1.5 rounded-full transition-all duration-300 after:absolute after:-inset-x-1 after:-inset-y-3 after:content-[''] ${
               i === index ? "w-6 bg-accent" : "w-1.5 bg-white/25 hover:bg-white/40"
             }`}
           />

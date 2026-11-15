@@ -1,25 +1,30 @@
 import Link from "next/link";
 import { Gift, ArrowRight } from "lucide-react";
 
-import { getFollowerCount } from "@/lib/ig-stats";
 import { Ps5HomeCounter } from "@/components/home/ps5-home-counter";
 
-// Slim horizontalna traka na naslovnoj (iznad heroa): live IG counter + link na /ps5.
-// Namjerno niska (jedan red na desktopu) jer je naslovna već natrpana.
+// Slim traka za PS5 nagradnu igru: live IG counter + link na /ps5.
+// - "strip": puna širina iznad heroa (samo tablet/desktop).
+// - "card": uokvirena kartica ispod glavnog gumba u heroju (mobitel), da prvi
+//   ekran na mobitelu ne počinje s tri trake prije naslova.
 const GOAL = 10000;
 
-export async function Ps5HomeBanner() {
-  const followers = await getFollowerCount();
+export function Ps5HomeBanner({ followers, variant = "strip" }: { followers: number; variant?: "strip" | "card" }) {
+  const card = variant === "card";
 
   return (
     <Link
       href="/ps5"
-      className="group block border-y border-white/10 bg-white/[0.02] transition hover:bg-white/[0.04]"
+      className={
+        card
+          ? "group block rounded-[12px] border border-white/10 bg-white/[0.02] transition hover:border-accent/40"
+          : "group block border-y border-white/10 bg-white/[0.02] transition hover:bg-white/[0.04]"
+      }
     >
-      {/* Sve u jednom redu (i mobitel i desktop): naslov · Pac-Man staza · gumb. */}
-      <div className="page-shell flex items-center gap-2.5 py-2.5 sm:gap-5 sm:py-3">
+      {/* Sve u jednom redu: naslov · staza napretka · gumb. */}
+      <div className={`${card ? "px-3" : "page-shell"} flex items-center gap-2.5 py-2.5 sm:gap-5 sm:py-3`}>
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
-          <Gift className="h-5 w-5 shrink-0 text-accent" />
+          <Gift className="h-[18px] w-[18px] shrink-0 text-accent" strokeWidth={1.75} />
           <span className="whitespace-nowrap text-xs font-bold uppercase tracking-wide text-white sm:text-sm">
             Osvoji <span className="text-accent">PS5</span>
             {/* "+ FC 27" samo na desktopu — na mobitelu je red pretijesan */}

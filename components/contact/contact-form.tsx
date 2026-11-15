@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { ArrowRight, Loader2, Truck } from "lucide-react";
+import { ArrowRight, CircleAlert, Gift, Loader2, Lock, Tag, Truck } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
@@ -117,6 +118,7 @@ export function ContactForm() {
   const [error, setError] = useState<string | null>(null);
 
   const [promoInput, setPromoInput] = useState("");
+  const [promoOpen, setPromoOpen] = useState(false);
   const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
   const [promoMessage, setPromoMessage] = useState<string | null>(null);
   const [autoPromoTried, setAutoPromoTried] = useState(false);
@@ -163,7 +165,7 @@ export function ContactForm() {
           street: f.street || street,
           houseNumber: f.houseNumber || houseNumber,
           city: f.city || a.city || "",
-          postalCode: f.postalCode || a.postalCode || ""
+          postalCode: f.postalCode || String(a.postalCode || "").replace(/\s/g, "")
         }));
       })
       .catch(() => {});
@@ -187,7 +189,7 @@ export function ContactForm() {
         street: f.street || d.street || "",
         houseNumber: f.houseNumber || d.houseNumber || "",
         city: f.city || d.city || "",
-        postalCode: f.postalCode || d.postalCode || ""
+        postalCode: f.postalCode || String(d.postalCode || "").replace(/\s/g, "")
       }));
     } catch {}
   }, [isSignedIn]);
@@ -205,6 +207,14 @@ export function ContactForm() {
   const discount = signedIn ? computePromoDiscount(appliedPromo, orderSubtotal) : 0;
   const total = orderSubtotal - discount + shipping;
   const rewardActive = signedIn && !!appliedPromo && (discount > 0 || promoFreeShipping);
+  // Iznos u gumbu: kupac vidi koliko plaća dostavljaču prije nego klikne.
+  // Bez košarice (ručni upis) iznos je samo procjena → ostaje obični tekst.
+  const submitLabel = hasCartItems
+    ? locale === "en"
+      ? `Order — pay ${formatEuroAmount(total)} on delivery`
+      : `Naruči — plaćaš ${formatEuroAmount(total)} pri preuzimanju`
+    : t.contactForm.submit;
+  const showPromoField = promoOpen || !!promoInput || !!promoMessage;
 
   // Kodovi žive u bazi (uređuju se u adminu) → provjera ide na server.
   async function applyPromo() {
@@ -218,7 +228,7 @@ export function ContactForm() {
       setAppliedPromo(result.promo);
       setPromoMessage(
         result.promo.kind === "freeship"
-          ? "Besplatna dostava primijenjena 🎉"
+          ? "Besplatna dostava primijenjena."
           : `Popust primijenjen — ušteda ${formatEuroAmount(result.discount)}`
       );
     } else if (result.reason === "min_not_met" && result.promo) {
@@ -263,7 +273,7 @@ export function ContactForm() {
       setAppliedPromo(result.promo);
       setPromoMessage(
         result.promo.kind === "freeship"
-          ? "Besplatna dostava primijenjena 🎉"
+          ? "Besplatna dostava primijenjena."
           : `Popust primijenjen — ušteda ${formatEuroAmount(result.discount)}`
       );
       setAutoPromoTried(true);
@@ -405,6 +415,20 @@ export function ContactForm() {
     }
   }
 
+  // Duži tekst s iznosom → manji font i manji razmak slova da stane na iPhone širinu.
+  const submitClass = hasCartItems
+    ? "button-primary px-4 py-3 text-center text-[19px] leading-[1.1] tracking-[0.06em] [text-indent:0] disabled:opacity-70"
+    : "button-primary disabled:opacity-70";
+  const submitInner = loading ? (
+    <Loader2 className="h-5 w-5 animate-spin" />
+  ) : hasCartItems ? (
+    <span className="[text-wrap:balance]">{submitLabel}</span>
+  ) : (
+    <span className="inline-flex items-center gap-2">
+      {submitLabel} <ArrowRight className="h-4 w-4" />
+    </span>
+  );
+
   return (
     <form onSubmit={handleSubmit} className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       {/* Honeypot — skriveno od ljudi (i za oči i za čitače ekrana), botovi ga ipak popune.
@@ -420,7 +444,7 @@ export function ContactForm() {
         className="absolute left-[-9999px] h-0 w-0 opacity-0"
       />
       {/* LEFT */}
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-4">
 
         {/* Step 1 — Kontakt */}
         <div className="panel p-5 sm:p-7">
@@ -434,8 +458,10 @@ export function ContactForm() {
                 id="name"
                 type="text"
                 autoComplete="name"
+                autoCapitalize="words"
+                enterKeyHint="next"
                 required
-                placeholder="Luka Horvat"
+                placeholder="npr. Luka Horvat"
                 value={form.name}
                 onChange={(e) => set("name", e.target.value)}
                 className={inputClass}
@@ -448,9 +474,11 @@ export function ContactForm() {
               <input
                 id="phone"
                 type="tel"
+                inputMode="tel"
                 autoComplete="tel"
+                enterKeyHint="next"
                 required
-                placeholder="+385 91 234 5678"
+                placeholder="npr. 091 234 5678"
                 value={form.phone}
                 onChange={(e) => set("phone", e.target.value)}
                 className={inputClass}
@@ -458,13 +486,17 @@ export function ContactForm() {
               {klub && (
                 <div className="mt-2 rounded-[8px] border border-accent/30 bg-accent/[0.07] px-3 py-2">
                   {klub.hasReward ? (
-                    <p className="text-[13px] font-semibold text-accent">
-                      🎁 Imaš nagradu u Dresify Klubu! Javi nam se na WhatsApp i šaljemo ti kod.
+                    <p className="flex items-start gap-2 text-[13px] font-semibold text-accent">
+                      <Gift className="mt-0.5 h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+                      <span>Imaš nagradu u Dresify Klubu! Javi nam se na WhatsApp i šaljemo ti kod.</span>
                     </p>
                   ) : (
                     <>
-                      <p className="text-[13px] text-white/70">
-                        🎁 Dresify Klub: <b className="text-accent">{klub.inCycle}/{klub.target}</b> — još {klub.remaining} do gratis nagrade
+                      <p className="flex items-start gap-2 text-[13px] text-white/70">
+                        <Gift className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" strokeWidth={1.75} />
+                        <span>
+                          Dresify Klub: <b className="text-accent">{klub.inCycle}/{klub.target}</b> — još {klub.remaining} do gratis nagrade
+                        </span>
                       </p>
                       <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                         <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${Math.round((klub.inCycle / klub.target) * 100)}%` }} />
@@ -481,9 +513,14 @@ export function ContactForm() {
               <input
                 id="email"
                 type="email"
+                inputMode="email"
                 autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="next"
                 required
-                placeholder="luka@email.com"
+                placeholder="npr. luka@email.com"
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
                 className={inputClass}
@@ -532,7 +569,7 @@ export function ContactForm() {
           {needsAddress && (
             <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_150px]">
               <div className="sm:col-span-2 flex items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/50">
-                🇭🇷 Zasad dostavljamo samo unutar Hrvatske.
+                Zasad dostavljamo samo unutar Hrvatske.
               </div>
               <div className="flex gap-3 sm:col-span-2">
                 <div className="flex-1">
@@ -543,8 +580,9 @@ export function ContactForm() {
                     id="street"
                     type="text"
                     autoComplete="address-line1"
+                    enterKeyHint="next"
                     required
-                    placeholder="Ilica"
+                    placeholder="npr. Ilica"
                     value={form.street}
                     onChange={(e) => set("street", e.target.value)}
                     className={inputClass}
@@ -557,9 +595,10 @@ export function ContactForm() {
                   <input
                     id="houseNumber"
                     type="text"
-                    autoComplete="address-line2"
+                    autoComplete="off"
+                    enterKeyHint="next"
                     required
-                    placeholder="12b"
+                    placeholder="npr. 12b"
                     value={form.houseNumber}
                     onChange={(e) => set("houseNumber", e.target.value)}
                     className={inputClass}
@@ -574,8 +613,9 @@ export function ContactForm() {
                   id="city"
                   type="text"
                   autoComplete="address-level2"
+                  enterKeyHint="next"
                   required
-                  placeholder="Zagreb"
+                  placeholder="npr. Zagreb"
                   value={form.city}
                   onChange={(e) => set("city", e.target.value)}
                   className={inputClass}
@@ -588,9 +628,13 @@ export function ContactForm() {
                 <input
                   id="postalCode"
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  title="Poštanski broj — samo brojke, npr. 10000"
                   autoComplete="postal-code"
+                  enterKeyHint="next"
                   required
-                  placeholder="10000"
+                  placeholder="npr. 10000"
                   value={form.postalCode}
                   onChange={(e) => set("postalCode", e.target.value)}
                   className={inputClass}
@@ -631,8 +675,9 @@ export function ContactForm() {
 
           {/* PS5 nagradna igra — neobavezno IG polje; upisom kupac automatski ulazi u igru */}
           <div className="mt-5 rounded-[10px] border border-accent/30 bg-accent/[0.05] p-4">
-            <label htmlFor="igHandle" className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-accent">
-              🎁 Uđi u PS5 nagradnu igru (neobavezno)
+            <label htmlFor="igHandle" className="mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-accent">
+              <Gift className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+              Uđi u PS5 nagradnu igru (neobavezno)
             </label>
             <input
               id="igHandle"
@@ -666,56 +711,54 @@ export function ContactForm() {
           </div>
         )}
 
-        {/* Error */}
+        {/* Error — desktop (na mobitelu stoji odmah iznad gumba, vidi dolje) */}
         {error && (
-          <div className="flex items-start gap-3 rounded-[8px] border border-red-500/25 bg-red-500/8 px-4 py-3 text-sm text-red-400">
-            <span className="mt-0.5 shrink-0">⚠</span>
+          <div role="alert" className="hidden items-start gap-3 rounded-[8px] border border-red-500/25 bg-red-500/8 px-4 py-3 text-sm text-red-400 xl:flex">
+            <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Mobile submit */}
-        <button type="submit" disabled={loading} className="button-primary w-full xl:hidden">
-          {loading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <span className="inline-flex items-center gap-2">
-              {t.contactForm.submit} <ArrowRight className="h-4 w-4" />
-            </span>
-          )}
-        </button>
-        <div className="mt-3 flex items-start gap-2 rounded-[8px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2.5 xl:hidden">
-          <Truck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
-          <span className="text-xs leading-5 text-white/75">{shipTrust}</span>
-        </div>
       </div>
 
-      {/* RIGHT — summary */}
-      <aside className="h-fit xl:sticky xl:top-24">
+      {/* Sažetak — na mobitelu stoji odmah iznad gumba (redoslijed u gridu),
+          na desktopu je sticky stupac desno s vlastitim gumbom. */}
+      <aside className="h-fit min-w-0 xl:sticky xl:top-24">
         <div className="panel overflow-hidden p-5 sm:p-6">
-          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-white/45">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-white/45">
             {t.contactForm.orderSummary}
           </p>
 
           {hasCartItems ? (
-            <div className="space-y-3">
+            <ul className="space-y-3">
               {items.map((item) => (
-                <div key={item.id} className="flex items-start justify-between gap-3 text-sm">
-                  <div className="min-w-0">
+                <li key={item.id} className="flex items-center gap-3 text-sm">
+                  <div className="relative h-14 w-12 shrink-0 overflow-hidden rounded-[4px] border border-white/10 bg-[#0a0a0a]">
+                    {item.imageSrc ? (
+                      <Image
+                        src={item.imageSrc}
+                        alt=""
+                        fill
+                        sizes="48px"
+                        className="object-contain p-1"
+                      />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-white">{repairText(item.klub)}</p>
-                    <p className="mt-0.5 text-xs text-white/40">
+                    <p className="mt-0.5 truncate text-xs text-white/45">
                       {repairText(item.igrac)} · {item.size} · {item.segmentLabel}
                     </p>
                   </div>
-                  <span className="shrink-0 font-semibold text-accent">{formatEuroAmount(item.price)}</span>
-                </div>
+                  <span className="shrink-0 font-semibold text-white">{formatEuroAmount(item.price)}</span>
+                </li>
               ))}
-            </div>
+            </ul>
           ) : (
             <p className="text-sm text-white/35">{t.contactForm.cartEmpty}</p>
           )}
 
-          <div className="mt-5 space-y-2.5 border-t border-white/8 pt-5 text-sm">
+          <div className="mt-4 space-y-2.5 border-t border-white/8 pt-4 text-sm">
             <div className="flex items-center justify-between text-white/50">
               <span>
                 {t.contactForm.items}
@@ -733,7 +776,7 @@ export function ContactForm() {
             {/* Gift reward from quiz */}
             {hasGift && (
               <div className="flex items-center gap-2 rounded-[6px] border border-accent/30 bg-accent/8 px-3 py-2 text-sm text-accent">
-                <span>🎁</span>
+                <Gift className="h-4 w-4 shrink-0" strokeWidth={1.75} />
                 <span>Poklon iznenađenja aktiviran — prilaže se uz narudžbu</span>
               </div>
             )}
@@ -747,52 +790,10 @@ export function ContactForm() {
             ) : null}
             {rewardActive && promoFreeShipping ? (
               <div className="flex items-center justify-between text-accent">
-                <span>Besplatna dostava 🎉</span>
+                <span>Besplatna dostava (kod)</span>
                 <span>-{formatEuroAmount(selectedOption.price)}</span>
               </div>
             ) : null}
-
-            <div className="pt-1">
-              {rewardActive ? (
-                <button
-                  type="button"
-                  onClick={clearPromo}
-                  className="text-[12px] text-white/45 underline transition hover:text-white"
-                >
-                  Ukloni promo kod
-                </button>
-              ) : (
-                <div className="space-y-2">
-                {!signedIn && (
-                  <a href="/prijava" className="block rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] text-white/70 transition hover:bg-accent/10">
-                    🔒 <b className="text-accent">Prijavi se</b> za besplatnu dostavu iznad 60&nbsp;€ i popuste.
-                  </a>
-                )}
-                <div className="flex gap-2">
-                  <input
-                    type="password"
-                    autoComplete="off"
-                    value={promoInput}
-                    onChange={(e) => setPromoInput(e.target.value)}
-                    placeholder="Promo kod"
-                    className="h-10 flex-1 rounded-[6px] border border-white/10 bg-[#0d0d0d] px-3 text-sm uppercase tracking-[0.3em] text-white placeholder:tracking-normal placeholder:text-white/25 outline-none focus:border-accent/50"
-                  />
-                  <button
-                    type="button"
-                    onClick={applyPromo}
-                    className="h-10 shrink-0 rounded-[6px] border border-accent/40 bg-accent/10 px-4 text-xs font-semibold uppercase tracking-[0.14em] text-accent transition hover:bg-accent/20"
-                  >
-                    Primijeni
-                  </button>
-                </div>
-                </div>
-              )}
-              {promoMessage ? (
-                <p className={`mt-2 text-[12px] ${rewardActive ? "text-accent" : "text-white/45"}`}>
-                  {promoMessage}
-                </p>
-              ) : null}
-            </div>
 
             <div className="flex items-center justify-between border-t border-white/8 pt-3">
               <span className="font-heading text-lg uppercase tracking-wide text-white">
@@ -805,32 +806,112 @@ export function ContactForm() {
               </span>
               <span className="font-heading text-2xl text-accent">{formatEuroAmount(total)}</span>
             </div>
+
+            {/* Prijava + promo kod — sklopljeno, da ne odvlači pažnju od narudžbe */}
+            <div className="space-y-2 pt-1">
+              {rewardActive ? (
+                <button
+                  type="button"
+                  onClick={clearPromo}
+                  className="inline-flex min-h-[40px] items-center text-[12px] text-white/45 underline underline-offset-4 transition hover:text-white"
+                >
+                  Ukloni promo kod
+                </button>
+              ) : (
+                <>
+                  {!signedIn && (
+                    <a
+                      href="/prijava"
+                      className="flex min-h-[40px] items-start gap-2 rounded-[6px] border border-white/10 px-3 py-2.5 text-[12px] leading-5 text-white/60 transition hover:border-accent/40"
+                    >
+                      <Lock className="mt-[3px] h-3.5 w-3.5 shrink-0 text-accent" strokeWidth={1.75} />
+                      <span>
+                        <b className="font-semibold text-accent">Prijavi se</b> za besplatnu dostavu iznad 60&nbsp;€ i popuste.
+                      </span>
+                    </a>
+                  )}
+                  {showPromoField ? (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        aria-label="Promo kod"
+                        autoComplete="off"
+                        autoCapitalize="characters"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        enterKeyHint="done"
+                        autoFocus={promoOpen && !promoInput}
+                        value={promoInput}
+                        onChange={(e) => setPromoInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          // Enter u polju za kod primjenjuje kod, ne šalje narudžbu.
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            void applyPromo();
+                          }
+                        }}
+                        placeholder="Promo kod"
+                        className="h-11 min-w-0 flex-1 rounded-[6px] border border-white/10 bg-[#0d0d0d] px-3 text-sm uppercase tracking-[0.12em] text-white placeholder:normal-case placeholder:tracking-normal placeholder:text-white/25 outline-none focus:border-accent/50"
+                      />
+                      <button
+                        type="button"
+                        onClick={applyPromo}
+                        className="h-11 shrink-0 rounded-[6px] border border-accent/40 bg-accent/10 px-4 text-xs font-semibold uppercase tracking-[0.14em] text-accent transition hover:bg-accent/20"
+                      >
+                        Primijeni
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setPromoOpen(true)}
+                      className="inline-flex min-h-[40px] items-center gap-1.5 text-[12px] text-white/55 transition hover:text-white"
+                    >
+                      <Tag className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} />
+                      Imaš kod?
+                    </button>
+                  )}
+                </>
+              )}
+              {promoMessage ? (
+                <p className={`text-[12px] ${rewardActive ? "text-accent" : "text-white/45"}`}>
+                  {promoMessage}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="button-primary mt-6 hidden w-full xl:inline-flex"
+            className={`${submitClass} mt-6 hidden w-full xl:inline-flex`}
           >
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <span className="inline-flex items-center gap-2">
-                {t.contactForm.submit} <ArrowRight className="h-4 w-4" />
-              </span>
-            )}
+            {submitInner}
           </button>
 
           <div className="mt-4 hidden items-start gap-2 rounded-[8px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2.5 xl:flex">
             <Truck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
             <span className="text-xs leading-5 text-white/75">{shipTrust}</span>
           </div>
-
-          <p className="mt-4 text-center text-[11px] leading-5 text-white/25">
-            {t.contactForm.confirmNote}
-          </p>
         </div>
       </aside>
+
+      {/* Mobile submit — ispod sažetka, pa kupac vidi ukupni iznos prije klika */}
+      <div className="min-w-0 space-y-3 xl:hidden">
+        {error && (
+          <div role="alert" className="flex items-start gap-3 rounded-[8px] border border-red-500/25 bg-red-500/8 px-4 py-3 text-sm text-red-400">
+            <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
+            <span>{error}</span>
+          </div>
+        )}
+        <button type="submit" disabled={loading} className={`${submitClass} w-full`}>
+          {submitInner}
+        </button>
+        <div className="flex items-start gap-2 rounded-[8px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2.5">
+          <Truck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+          <span className="text-xs leading-5 text-white/75">{shipTrust}</span>
+        </div>
+      </div>
     </form>
   );
 }

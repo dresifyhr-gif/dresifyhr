@@ -170,7 +170,7 @@ export default function KontaktPage() {
             viewport={{ once: true }}
             className="mt-10 text-center text-sm text-white/30"
           >
-            ⚡ Prosječno vrijeme odgovora: <span className="text-white/60 font-semibold">manje od sat vremena</span>
+            Prosječno vrijeme odgovora: <span className="text-white/60 font-semibold">manje od sat vremena</span>
           </motion.div>
         </div>
       </section>

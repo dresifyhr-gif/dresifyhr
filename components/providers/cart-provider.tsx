@@ -1,7 +1,7 @@
 "use client";
 
 import type { MixAddons } from "@/lib/mix";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { JERSEY_PRICE_EUR } from "@/lib/site";
 import { fbTrack } from "@/lib/fbpixel";
@@ -46,6 +46,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [recentlyAddedItem, setRecentlyAddedItem] = useState<CartItem | null>(null);
   const subtotal = items.reduce((sum, item) => sum + item.price, 0);
+  const loadedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -68,6 +69,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Prvi prolaz ima početni [] — ne smije prepisati spremljenu košaricu prije učitavanja.
+    if (!loadedRef.current) { loadedRef.current = true; return; }
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 

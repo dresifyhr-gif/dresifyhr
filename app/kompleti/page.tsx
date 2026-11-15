@@ -27,9 +27,9 @@ export default async function KompletiPage() {
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: t.productPage.breadcrumb.home, path: "/" },
-    { name: "Komplete", path: "/kompleti" }
+    { name: "Kompleti", path: "/kompleti" }
   ]);
-  const itemListSchema = buildItemListSchema("Komplete u ponudi", "/kompleti", kompleti);
+  const itemListSchema = buildItemListSchema("Kompleti u ponudi", "/kompleti", kompleti);
 
   return (
     <section className="bg-[#0a0a0a] py-6 sm:py-8 lg:py-10">
@@ -46,16 +46,16 @@ export default async function KompletiPage() {
         <Breadcrumbs
           items={[
             { label: t.productPage.breadcrumb.home, href: "/" },
-            { label: "Komplete" }
+            { label: "Kompleti" }
           ]}
         />
 
         <CatalogBrowser
           showMixPromo
           products={forCards(kompleti)}
-          headingLabel="Komplete"
-          headingTitle="Komplete — Dres + Hlačice + Lopta + Kapa. 40€."
-          headingDesc="Nogometni komplete za djecu i odrasle — dres, hlačice, lopta i kapa u jednom paketu. Fiksna cijena 40€, dostava pouzećem po cijeloj Hrvatskoj za 2–5 radnih dana."
+          headingLabel="Kompleti"
+          headingTitle="Kompleti — Dres + Hlačice + Lopta + Kapa. Od 40 €."
+          headingDesc="Nogometni kompleti za djecu i odrasle — dres, hlačice, lopta i kapa u jednom paketu. Od 40 €, dostava pouzećem po cijeloj Hrvatskoj za 2–5 radnih dana."
         />
 
         {/* SEO sadržaj — stranica je imala 409 riječi, pretanko za rangiranje.
@@ -94,7 +94,7 @@ export default async function KompletiPage() {
             <p>
               Kompleti su dostupni za najtraženije klubove i reprezentacije — Hrvatska, Barcelona,
               Real Madrid, Bayern, Inter Miami i drugi. Ako tražiš samo dres bez lopte i kape,
-              pogledaj <Link href="/dresovi" className="font-semibold text-accent hover:underline">katalog dresova po 20 €</Link>.
+              pogledaj <Link href="/dresovi" className="font-semibold text-accent hover:underline">katalog dresova od 20 €</Link>.
             </p>
           </div>
         </section>

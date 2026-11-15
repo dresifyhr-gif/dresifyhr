@@ -31,3 +31,8 @@ export function deadlineLabel(deadline: string) {
 export function daysLeft(deadline: string, now = Date.now()) {
   return Math.max(0, Math.ceil((deadlineEnd(deadline) - now) / 86400000));
 }
+
+/** Je li zadnji dan za dostavu do Božića prošao (tema i dalje radi do 26.12.). */
+export function deadlinePassed(deadline: string, now = Date.now()) {
+  return now > deadlineEnd(deadline);
+}

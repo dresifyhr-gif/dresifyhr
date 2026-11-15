@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Instagram, MessageCircle, Mail } from "lucide-react";
+import { Heart, Instagram, MessageCircle, Mail } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, INSTAGRAM_HANDLE, NAV_LINKS } from "@/lib/site";
 
@@ -20,11 +20,13 @@ export function Footer() {
 
   // Na korisničkom računu footer se skriva — profil je "app-like", bez footera.
   if (pathname?.startsWith("/racun")) return null;
+  // Na košarici i narudžbi bez "Pronašao si dres?" — ne odvlačimo s plaćanja.
+  const hideCta = /^\/(kosarica|checkout)/.test(pathname || "");
 
   return (
     <footer className="border-t border-white/10 bg-[#0a0a0a]">
       {/* Top CTA strip */}
-      <div className="border-b border-white/8 bg-[#111111]">
+      {!hideCta && <div className="border-b border-white/8 bg-[#111111]">
         <div className="page-shell flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
           <div>
             <p className="font-heading text-2xl uppercase text-white sm:text-3xl">{t.footer.cta}</p>
@@ -34,7 +36,7 @@ export function Footer() {
             {t.footer.ctaBtn}
           </Link>
         </div>
-      </div>
+      </div>}
 
       {/* Main footer grid */}
       <div className="page-shell grid gap-10 py-12 md:grid-cols-[1.4fr_0.6fr_0.7fr_0.9fr]">
@@ -129,7 +131,7 @@ export function Footer() {
           <p className="text-[11px] uppercase tracking-[0.28em] text-white/30">{t.footer.copyright}</p>
           <div className="flex items-center gap-1">
             <span className="text-[11px] uppercase tracking-[0.2em] text-white/20">{t.footer.madeWith}</span>
-            <span className="text-accent/60 text-[11px]">♥</span>
+            <Heart aria-hidden className="h-3 w-3 text-accent/60" strokeWidth={1.75} />
             <span className="text-[11px] uppercase tracking-[0.2em] text-white/20">{t.footer.inCroatia}</span>
           </div>
         </div>

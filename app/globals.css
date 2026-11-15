@@ -487,13 +487,57 @@ body::before {
   .santa-hat { transform: rotate(-11deg); }
 }
 
-/* Plutajući gumbi (AI + WhatsApp): mali, u kutu, iznad trake proizvoda kad je ona vidljiva */
-.fab { transition: bottom 0.25s ease, transform 0.2s ease; }
-.fab-1 { bottom: calc(14px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); }
-.fab-2 { bottom: calc(72px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); }
-.fab-panel { bottom: calc(72px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); }
-@media (min-width: 640px) {
+/* ── Donja navigacija (mobitel) ─────────────────────────────────────────
+   components/site/bottom-nav.tsx postavlja html[data-bnav="1"] dok je vidljiva.
+   --bnav-h je samo visina trake (60px); safe-area se dodaje posebno. */
+:root { --bnav-h: 0px; }
+@media (max-width: 767.98px) {
+  html[data-bnav="1"] { --bnav-h: 60px; }
+  /* Podnožje ne smije završiti ispod trake. */
+  html[data-bnav="1"] body { padding-bottom: calc(var(--bnav-h) + env(safe-area-inset-bottom)); }
+}
+
+/* Obavijest o kolačićima (cookie-notice.tsx) — iznad crte za početni zaslon,
+   a dok je donja navigacija vidljiva, iznad nje. */
+.cookie-slot > div { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+@media (max-width: 767.98px) {
+  html[data-bnav="1"] .cookie-slot > div {
+    bottom: calc(var(--bnav-h) + env(safe-area-inset-bottom));
+    padding-bottom: 12px;
+  }
+}
+
+/* ── Plutajući gumb pomoći (WhatsApp + asistent u jednom) ──────────────────
+   --fab-lift postavlja traka "Dodaj" na stranici dresa, --bnav-h donja navigacija. */
+.fab,
+.fab-panel {
+  --fab-base: calc(env(safe-area-inset-bottom) + var(--fab-lift, 0px) + var(--bnav-h, 0px));
+}
+.fab { transition: bottom 0.25s ease, transform 0.25s ease, opacity 0.2s ease; }
+.fab-1 { bottom: calc(14px + var(--fab-base)); }
+.fab-panel {
+  bottom: calc(72px + var(--fab-base));
+  max-height: calc(100vh - 96px - var(--fab-base));
+  max-height: calc(100dvh - 96px - var(--fab-base));
+}
+@media (max-width: 767.98px) {
+  /* Dok kupac lista prema dolje, gumb se skloni (chat-widget.tsx). */
+  .fab-hide {
+    transform: translateY(12px);
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+@media (min-width: 768px) {
   .fab-1 { bottom: 24px; }
-  .fab-2 { bottom: 84px; }
-  .fab-panel { bottom: 84px; }
+  .fab-panel {
+    bottom: 84px;
+    max-height: calc(100vh - 120px);
+  }
+}
+
+/* Obavijest o novoj narudžbi (social-proof.tsx) — iznad donje navigacije. */
+.sp-toast { bottom: calc(12px + env(safe-area-inset-bottom) + var(--bnav-h, 0px)); }
+@media (min-width: 768px) {
+  .sp-toast { bottom: 24px; }
 }

@@ -12,7 +12,7 @@ export function TestimonialsSection({ items }: { items: Testimonial[] }) {
         <div className="mb-8 text-center">
           <p className="text-xs uppercase tracking-[0.28em] text-accent">Recenzije</p>
           <h2 className="mt-2 font-heading text-3xl uppercase text-white sm:text-4xl">Naši zadovoljni kupci</h2>
-          <p className="mt-2 text-sm text-white/55">Prave slike kupaca u našim dresovima — hvala na povjerenju! 🙏</p>
+          <p className="mt-2 text-sm text-white/55">Prave slike kupaca u našim dresovima — hvala na povjerenju.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">

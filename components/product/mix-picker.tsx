@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { Minus, Plus } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
 import type { Jersey } from "@/lib/data/jerseys";
@@ -10,21 +11,40 @@ import { repairText } from "@/lib/utils";
 
 type Props = {
   product: Jersey;
-  selectedSize: string;
-  segment: "adult" | "kid";
-  segmentLabel: string;
+  selectedSize?: string;
+  segment?: "adult" | "kid";
+  segmentLabel?: string;
   imageSrc?: string;
-  needsSize: boolean;
-  bare?: boolean; // u prozoru za brzo slaganje: uvijek otvoreno, bez zaglavlja
+  needsSize?: boolean;
+  // Kontrolirano (stranica dresa): izbor živi u roditelju, a u košaricu ga dodaje
+  // glavni gumb "Dodaj u košaricu" — jedan put dodavanja, dodatak se ne gubi.
+  addons?: MixAddons;
+  onChange?: (addons: MixAddons) => void;
+  bare?: boolean; // prozor za brzo slaganje (/slozi-mix): uvijek otvoreno, vlastiti gumb za dodavanje
   onAdded?: () => void;
 };
 
-// "⚽ Složi svoj mix" — uz dres kupac doda loptu i/ili kapu kluba po izboru.
-export function MixPicker({ product, selectedSize, segment, segmentLabel, imageSrc, needsSize, bare = false, onAdded }: Props) {
+// "Složi svoj mix" — uz dres kupac doda loptu i/ili kapu kluba po izboru.
+export function MixPicker({
+  product,
+  selectedSize = "",
+  segment = "adult",
+  segmentLabel = "",
+  imageSrc,
+  needsSize = false,
+  addons: controlledAddons,
+  onChange,
+  bare = false,
+  onAdded
+}: Props) {
   const { addItem } = useCart();
   const [open, setOpen] = useState(bare);
-  const [addons, setAddons] = useState<MixAddons>({});
+  const [ownAddons, setOwnAddons] = useState<MixAddons>({});
   const boxRef = useRef<HTMLDivElement>(null);
+
+  const controlled = !bare && !!onChange;
+  const addons = controlled ? controlledAddons ?? {} : ownAddons;
+  const setAddons = (next: MixAddons) => (controlled ? onChange?.(next) : setOwnAddons(next));
 
   // /dres/...?mix=1 (s artikla "Složi svoj mix") → izbor odmah otvoren.
   useEffect(() => {
@@ -40,9 +60,9 @@ export function MixPicker({ product, selectedSize, segment, segmentLabel, imageS
   const base = product.price ?? 20;
   const n = addonCount(addons);
   const total = base + n * MIX_ADDON_PRICE_EUR;
-  const toggle = (kind: MixKind, key: string) =>
-    setAddons((a) => ({ ...a, [kind]: a[kind] === key ? undefined : key }));
+  const toggle = (kind: MixKind, key: string) => setAddons({ ...addons, [kind]: addons[kind] === key ? undefined : key });
 
+  // Samo u "bare" prozoru — na stranici dresa dodaje glavni gumb.
   const add = () => {
     if (needsSize || !n) return;
     addItem({
@@ -57,7 +77,7 @@ export function MixPicker({ product, selectedSize, segment, segmentLabel, imageS
       category: product.category,
       addons: { ...addons }
     });
-    setAddons({});
+    setOwnAddons({});
     onAdded?.();
   };
 
@@ -88,21 +108,29 @@ export function MixPicker({ product, selectedSize, segment, segmentLabel, imageS
     </div>
   );
 
+  const chosen = addonsText(addons).replace(/^ \+ /, "");
+
   return (
-    <div ref={boxRef} className={bare ? "" : "mt-4 scroll-mt-24 rounded-[12px] border border-accent/30 bg-accent/[0.04]"}>
+    <div ref={boxRef} className={bare ? "" : "mt-6 scroll-mt-24 rounded-[12px] border border-accent/30 bg-accent/[0.04]"}>
       {!bare && (
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"
-      >
-        <span>
-          <span className="block text-sm font-bold uppercase tracking-wide text-accent">⚽ Složi svoj mix</span>
-          <span className="block text-xs text-white/55">Dodaj loptu i/ili kapu kluba po želji — +{MIX_ADDON_PRICE_EUR} € svaka</span>
-        </span>
-        <span className="text-lg text-accent">{open ? "−" : "+"}</span>
-      </button>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"
+        >
+          <span className="min-w-0">
+            <span className="block text-sm font-bold uppercase tracking-wide text-accent">Složi svoj mix</span>
+            <span className="block truncate text-xs text-white/55">
+              {n ? `Odabrano: ${chosen}` : `Dodaj loptu i/ili kapu kluba po želji — +${MIX_ADDON_PRICE_EUR} € svaka`}
+            </span>
+          </span>
+          {open ? (
+            <Minus className="h-5 w-5 shrink-0 text-accent" strokeWidth={1.5} />
+          ) : (
+            <Plus className="h-5 w-5 shrink-0 text-accent" strokeWidth={1.5} />
+          )}
+        </button>
       )}
 
       {open && (
@@ -117,15 +145,21 @@ export function MixPicker({ product, selectedSize, segment, segmentLabel, imageS
             <div className="flex justify-between border-t border-white/10 pt-2 text-base font-bold text-white"><span>Ukupno</span><span>{total} €</span></div>
           </div>
 
-          <button
-            type="button"
-            disabled={needsSize || !n}
-            onClick={add}
-            className="button-primary mt-4 w-full disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {n ? `Dodaj mix u košaricu — ${total} €` : "Odaberi loptu ili kapu"}
-          </button>
-          {needsSize && n > 0 && <p className="mt-2 text-center text-xs text-white/55">Prvo gore odaberi veličinu dresa.</p>}
+          {bare ? (
+            <>
+              <button
+                type="button"
+                disabled={needsSize || !n}
+                onClick={add}
+                className="button-primary mt-4 w-full disabled:cursor-not-allowed disabled:border disabled:border-[#333] disabled:bg-[#1a1a1a] disabled:text-[#737373]"
+              >
+                {n ? `Dodaj mix u košaricu — ${total} €` : "Odaberi loptu ili kapu"}
+              </button>
+              {needsSize && n > 0 && <p className="mt-2 text-center text-xs text-white/55">Prvo gore odaberi veličinu dresa.</p>}
+            </>
+          ) : (
+            n > 0 && <p className="mt-3 text-xs text-white/50">Ide u košaricu zajedno s dresom.</p>
+          )}
         </div>
       )}
     </div>

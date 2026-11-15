@@ -17,8 +17,8 @@ export function CatalogFaq({ locale = "hr" }: { locale?: "hr" | "en" }) {
         { q: "Are the jerseys good quality?", a: "Stitched player name and number, faithful to the original look, made of a light, breathable fabric." }
       ]
     : [
-        { q: "Koliko koštaju nogometni dresovi?", a: "Svaki dres je fiksno 20 €, a kompleti 40 € — ista cijena za sve klubove, igrače i reprezentacije, bez skrivenih troškova." },
-        { q: "Imate li jeftine nogometne dresove?", a: "Da — svi naši dresovi su 20 €, što je među najpovoljnijima u Hrvatskoj, uz istu fiksnu cijenu za dječje i odrasle veličine." },
+        { q: "Koliko koštaju nogometni dresovi?", a: "Dresovi su od 20 €, a kompleti od 40 € — cijena piše uz svaki proizvod, bez skrivenih troškova." },
+        { q: "Imate li jeftine nogometne dresove?", a: "Da — dresovi su od 20 €, što je među najpovoljnijima u Hrvatskoj, za dječje i odrasle veličine." },
         { q: "Imate li dječje nogometne dresove?", a: "Da, dječje veličine 104–176 (dres + hlačice) za sve klubove i reprezentacije, po istoj cijeni od 20 €." },
         { q: "Koje veličine dresova nudite?", a: "Dječje 104–176 i odrasle S–XL (reprezentacije S–XXL)." },
         { q: "Koliko traje dostava i kako plaćam?", a: "Dostava je 2–5 radnih dana po cijeloj Hrvatskoj, a plaćaš pouzećem pri preuzimanju — dostava 7 €, a registriranim kupcima besplatna od 60 €." },

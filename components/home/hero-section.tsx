@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 
 import { HeroKompletiCarousel } from "@/components/home/hero-kompleti-carousel";
@@ -15,7 +16,9 @@ const TICKER_ITEMS = [
   "Neymar", "Yamal", "Griezmann", "Musiala", "Raphinha", "Kvaratskhelia",
 ];
 
-export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
+// ps5Slot: PS5 traka koja se na mobitelu prikazuje ispod glavnog gumba (na
+// većim ekranima ista traka stoji iznad heroa — vidi app/page.tsx).
+export function HeroSection({ mysteryImage, ps5Slot }: { mysteryImage?: string; ps5Slot?: ReactNode }) {
   // Naslov/podnaslov iz Postavki; prazno = zadani tekst iz prijevoda.
   const { heroTitle, heroSubtitle, christmasOn } = useShopSettings();
   const customTitleLines = heroTitle ? heroTitle.split("\n").map((l) => l.trim()).filter(Boolean) : null;
@@ -50,9 +53,9 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
           {/* ── Left column ── */}
           <div className="max-w-[620px]">
 
-            {/* Eyebrow badge */}
+            {/* Eyebrow badge — jedan red, manji razmak slova nego globalni kicker */}
             <motion.div
-              className="section-kicker mb-6"
+              className="section-kicker mb-4 whitespace-nowrap tracking-[0.12em] sm:mb-6 sm:tracking-[0.16em]"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: "easeOut" }}
@@ -81,7 +84,7 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
             </motion.h1>
 
             <motion.p
-              className="mt-5 text-base leading-7 text-white/60 sm:text-lg sm:leading-8"
+              className="mt-4 text-[15px] font-medium leading-6 text-white sm:mt-5 sm:text-lg sm:leading-8"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.08, ease: "easeOut" }}
@@ -90,7 +93,7 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
             </motion.p>
 
             <motion.div
-              className="mt-8"
+              className="mt-6 sm:mt-8"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.16, ease: "easeOut" }}
@@ -100,6 +103,9 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
               </Link>
             </motion.div>
 
+            {/* PS5 traka — na mobitelu tek ispod glavnog gumba */}
+            {ps5Slot ? <div className="mt-5 sm:hidden">{ps5Slot}</div> : null}
+
             {/* Stats row — desktop only */}
             <motion.div
               className="mt-8 hidden flex-wrap gap-x-6 gap-y-3 md:flex"
@@ -108,8 +114,8 @@ export function HeroSection({ mysteryImage }: { mysteryImage?: string }) {
               transition={{ duration: 0.6, delay: 0.24, ease: "easeOut" }}
             >
               {[
-                { value: "100+", label: t.hero.stats.jerseys },
-                { value: "20€", label: t.hero.stats.price },
+                { value: "150+", label: t.hero.stats.jerseys },
+                { value: t.hero.stats.priceValue, label: t.hero.stats.price },
                 { value: "2–5", label: t.hero.stats.delivery },
               ].map((stat) => (
                 <div key={stat.label} className="flex items-baseline gap-2">

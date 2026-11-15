@@ -32,7 +32,7 @@ export default async function StreetwearPage() {
         />
         <div className="relative mx-auto w-full max-w-[1620px] px-4 py-14 sm:px-6 sm:py-20 lg:px-10">
           <span className="inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-orange-600">
-            🔥 Nova linija
+            Nova linija
           </span>
           <h1 className="mt-4 font-heading text-[clamp(2.6rem,9vw,6rem)] uppercase leading-[0.9] tracking-[0.02em] text-slate-900">
             Street<span className="text-orange-500">wear</span>
@@ -58,8 +58,7 @@ export default async function StreetwearPage() {
           </div>
         ) : (
           <div className="mt-10 flex flex-col items-center rounded-[14px] border border-orange-200 bg-orange-50/50 px-6 py-16 text-center">
-            <div className="text-4xl">🔥👕</div>
-            <h2 className="mt-4 font-heading text-2xl uppercase tracking-[0.04em] text-slate-900">Uskoro</h2>
+                        <h2 className="mt-4 font-heading text-2xl uppercase tracking-[0.04em] text-slate-900">Uskoro</h2>
             <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
               Nova streetwear kolekcija stiže — majice, hlačice i kompleti. U međuvremenu pogledaj dresove.
             </p>

@@ -5,7 +5,7 @@ import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 
 export const metadata = buildMetadata({
-  title: "Checkout i narudžba",
+  title: "Narudžba",
   description:
     "Dovrši narudžbu za dresove u nekoliko klikova. Dostava pouzećem po cijeloj Hrvatskoj za 7,00€.",
   path: "/checkout",
@@ -14,11 +14,17 @@ export const metadata = buildMetadata({
 });
 
 export default async function CheckoutPage() {
-  const { t } = await getServerTranslations();
+  const { t, locale } = await getServerTranslations();
+  // Vidljivi naziv je "Narudžba" (ruta ostaje /checkout).
+  const kicker = locale === "en" ? "Order" : "Narudžba";
+  const description =
+    locale === "en"
+      ? "Enter your delivery details. You pay on delivery, when the parcel arrives."
+      : "Upiši podatke za dostavu. Plaćaš pouzećem, tek kad ti paket stigne.";
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: t.productPage.breadcrumb.home, path: "/" },
-    { name: t.checkoutPage.kicker, path: "/checkout" }
+    { name: kicker, path: "/checkout" }
   ]);
 
   return (
@@ -32,14 +38,14 @@ export default async function CheckoutPage() {
         <Breadcrumbs
           items={[
             { label: t.productPage.breadcrumb.home, href: "/" },
-            { label: t.checkoutPage.kicker }
+            { label: kicker }
           ]}
         />
 
         <SectionHeading
-          kicker={t.checkoutPage.kicker}
+          kicker={kicker}
           title={t.checkoutPage.title}
-          description={t.checkoutPage.desc}
+          description={description}
         />
 
         <ContactForm />

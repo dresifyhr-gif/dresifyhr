@@ -3,6 +3,7 @@ import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { SectionHeading } from "@/components/site/section-heading";
 import { SeoLinkGrid } from "@/components/site/seo-link-grid";
 import type { JerseyCollection } from "@/lib/data/seo-collections";
+import { JERSEY_PRICE_EUR } from "@/lib/site";
 import { repairText } from "@/lib/utils";
 
 type BreadcrumbItem = {
@@ -29,6 +30,11 @@ export function CollectionLandingPage({
   schemas = [],
   linkGroups = []
 }: CollectionLandingPageProps) {
+  // Najniža stvarna cijena u kolekciji (dugi rukav i kompleti koštaju više od 20 €).
+  const minPrice = collection.products.length
+    ? Math.min(...collection.products.map((p) => p.price ?? JERSEY_PRICE_EUR))
+    : JERSEY_PRICE_EUR;
+
   return (
     <section className="section-pad bg-[#111111]">
       <div className="page-shell">
@@ -55,10 +61,10 @@ export function CollectionLandingPage({
               {collection.products.length} modela
             </span>
             <span className="border border-white/10 bg-[#111111] px-4 py-2 text-sm text-white">
-              Fiksna cijena 20€
+              Od {minPrice} €
             </span>
             <span className="border border-white/10 bg-[#111111] px-4 py-2 text-sm text-white">
-              Dostava 2-5 dana po Hrvatskoj
+              Dostava 2–5 dana po Hrvatskoj
             </span>
           </div>
           <p className="mt-5 max-w-4xl text-sm leading-8 text-white/60">{repairText(collection.intro)}</p>

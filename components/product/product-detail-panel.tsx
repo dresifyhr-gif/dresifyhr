@@ -17,6 +17,7 @@ import {
   getStockTone,
   type Jersey
 } from "@/lib/data/jerseys";
+import { MIX_ADDON_PRICE_EUR, addonCount, addonsText, type MixAddons } from "@/lib/mix";
 import { PAYMENT_METHOD_LABEL, SHIPPING_PRICE_LABEL } from "@/lib/site";
 import { createWhatsAppUrl, repairText } from "@/lib/utils";
 
@@ -32,6 +33,13 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   const stock = getJerseyStock(product);
   const { addItem } = useCart();
   const mainButtonRef = useRef<HTMLButtonElement>(null);
+  const sizeBoxRef = useRef<HTMLDivElement>(null);
+  const segmentRef = useRef<HTMLDivElement>(null);
+  const flashTimer = useRef<number | undefined>(undefined);
+  const [sizeFlash, setSizeFlash] = useState(false);
+  // Odabrani mix (lopta/kapa) živi ovdje — glavni gumb i sticky traka ga dodaju
+  // zajedno s dresom, pa se dodatak ne može "izgubiti" na drugom gumbu.
+  const [addons, setAddons] = useState<MixAddons>({});
   const firstAvailable = (arr: string[], segmentOut: boolean) =>
     segmentOut ? "" : (arr.find((s) => !sizeOptions.soldOutSizes.includes(s)) ?? "");
   const defaultAdultSize = firstAvailable(sizeOptions.adults, sizeOptions.adultsOutOfStock);
@@ -54,6 +62,12 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
     setSegment(nextSegment);
     setSelectedSize(""); // bez predodabira — kupac bira svjesno; ne vuče se ni veličina prethodnog proizvoda
   }, [product.slug, sizeOptions.hasAdults, defaultAdultSize, defaultKidSize]);
+
+  useEffect(() => {
+    setAddons({});
+  }, [product.slug]);
+
+  useEffect(() => () => window.clearTimeout(flashTimer.current), []);
 
   useEffect(() => {
     fbTrack("ViewContent", {
@@ -89,8 +103,43 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
     setSelectedSize(""); // promjena Odrasli/Djeca — očisti odabir, veličine se razlikuju
   };
 
+  const addonsN = addonCount(addons);
+  const total = productPrice + addonsN * MIX_ADDON_PRICE_EUR;
+
+  // Klik na neaktivan gumb: odvedi kupca do veličina i kratko ih istakni.
+  const promptSize = () => {
+    // Ako je odabrani segment (npr. Odrasli) rasprodan, nema popisa veličina —
+    // tada vodi na prekidač Odrasli/Djeca.
+    (sizeBoxRef.current ?? segmentRef.current)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setSizeFlash(true);
+    window.clearTimeout(flashTimer.current);
+    flashTimer.current = window.setTimeout(() => setSizeFlash(false), 1200);
+  };
+
+  // JEDINI put dodavanja na stranici dresa (glavni gumb + sticky traka).
+  // S mixom: isti oblik stavke kao u MixPickeru (server ionako sam preračuna dodatke).
+  const handleAdd = () => {
+    if (allSoldOut) return;
+    if (needsSize) return promptSize(); // pojas i tregeri — bez veličine ne ide u košaricu
+    const base = {
+      slug: product.slug,
+      klub: repairText(product.klub),
+      igrac: repairText(product.igrac),
+      size: selectedSize,
+      segment,
+      imageSrc: frontImage,
+      category: product.category
+    };
+    if (addonsN > 0) {
+      addItem({ ...base, segmentLabel: `${segmentLabel}${addonsText(addons)}`, price: total, addons: { ...addons } });
+    } else {
+      addItem({ ...base, segmentLabel, price: product.price });
+    }
+    setAddons({});
+  };
+
   return (
-    <div className="border border-white/10 bg-[#111111] p-5 sm:p-8">
+    <div className="min-w-0 border border-white/10 bg-[#111111] p-5 sm:p-8">
       <div className="flex flex-wrap items-center gap-3">
         <span className="border border-accent bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-black">
           {product.category === "streetwear" ? "Streetwear" : repairText(product.liga)}
@@ -114,31 +163,34 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
       </p>
 
       {sizeOptions.hasAdults && sizeOptions.hasKids ? (
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => handleSegmentChange("adult")}
-            className={`border p-4 text-left transition duration-200 ease-out ${
-              segment === "adult"
-                ? "border-accent bg-accent/10"
-                : "border-white/10 bg-[#0a0a0a] hover:border-accent/40"
-            }`}
-          >
-            <p className="text-xs uppercase tracking-[0.3em] text-white/45">{t.product.adults}</p>
-            <p className="mt-3 text-2xl uppercase leading-none text-white">{t.product.jersey}</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSegmentChange("kid")}
-            className={`border p-4 text-left transition duration-200 ease-out ${
-              segment === "kid"
-                ? "border-accent bg-accent/10"
-                : "border-white/10 bg-[#0a0a0a] hover:border-accent/40"
-            }`}
-          >
-            <p className="text-xs uppercase tracking-[0.3em] text-white/45">{t.product.kids}</p>
-            <p className="mt-3 text-2xl uppercase leading-none text-white">{isLongSleeve ? t.product.jersey : t.product.jerseyAndShorts}</p>
-          </button>
+        <div
+          ref={segmentRef}
+          role="radiogroup"
+          aria-label={`${t.product.adults} / ${t.product.kids}`}
+          className={`mt-8 grid grid-cols-2 gap-1 rounded-[6px] border bg-[#0a0a0a] p-1 transition-[border-color] duration-300 ${
+            sizeFlash && availableSizes.length === 0 ? "border-accent" : "border-white/10"
+          }`}
+        >
+          {(["adult", "kid"] as const).map((s) => {
+            const on = segment === s;
+            return (
+              <button
+                key={s}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => handleSegmentChange(s)}
+                className={`flex h-11 min-w-0 items-center justify-center gap-2 rounded-[4px] px-2 transition duration-200 ease-out ${
+                  on ? "bg-accent text-black" : "text-white/70 hover:text-white"
+                }`}
+              >
+                <span className="text-xs font-semibold uppercase tracking-[0.2em]">{s === "adult" ? t.product.adults : t.product.kids}</span>
+                <span className={`truncate text-[11px] ${on ? "text-black/60" : "text-white/40"}`}>
+                  {s === "adult" || isLongSleeve ? t.product.jersey : t.product.jerseyAndShorts}
+                </span>
+              </button>
+            );
+          })}
         </div>
       ) : null}
 
@@ -150,7 +202,12 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
           <p className="mt-1 text-xs text-white/40">Trenutno nema veličina na stanju.</p>
         </div>
       ) : (
-        <div className="mt-8">
+        <div
+          ref={sizeBoxRef}
+          className={`mt-8 rounded-[6px] outline outline-1 outline-offset-[6px] transition-[outline-color] duration-300 ${
+            sizeFlash ? "outline-accent" : "outline-transparent"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/70">{t.product.selectSize}</p>
             <SizeGuide showXXL={sizeOptions.adults.includes("XXL")} />
@@ -172,42 +229,38 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
               </button>
             ))}
           </div>
+          <p className="mt-3 text-xs text-white/45">
+            {locale === "en"
+              ? "Wrong size? We'll exchange it — just let us know within 14 days."
+              : "Kriva veličina? Mijenjamo je — javi se unutar 14 dana."}
+          </p>
         </div>
+      )}
+
+      {!allSoldOut && (
+        <MixPicker product={product} addons={addons} onChange={setAddons} />
       )}
 
       <button
         ref={mainButtonRef}
         type="button"
-        disabled={needsSize}
-        onClick={() => {
-          if (needsSize) return; // pojas i tregeri — bez veličine ne ide u košaricu
-          addItem({
-            slug: product.slug,
-            klub: repairText(product.klub),
-            igrac: repairText(product.igrac),
-            size: selectedSize,
-            segment,
-            segmentLabel,
-            imageSrc: frontImage,
-            price: product.price,
-            category: product.category
-          });
-        }}
-        className="button-primary mt-8 w-full disabled:cursor-not-allowed disabled:opacity-40"
+        disabled={allSoldOut}
+        aria-disabled={needsSize || allSoldOut}
+        onClick={handleAdd}
+        className={`button-primary mt-6 w-full ${
+          needsSize || allSoldOut
+            ? "border border-[#333] bg-[#1a1a1a] text-[#737373] hover:bg-[#1a1a1a] disabled:cursor-not-allowed"
+            : ""
+        }`}
       >
-        {allSoldOut ? "Trenutno rasprodano" : t.product.addToCart}
+        {allSoldOut
+          ? "Trenutno rasprodano"
+          : needsSize
+            ? t.product.selectSize
+            : addonsN > 0
+              ? `${t.product.addToCart} — ${total} €`
+              : t.product.addToCart}
       </button>
-
-      {!allSoldOut && (
-        <MixPicker
-          product={product}
-          selectedSize={selectedSize}
-          segment={segment}
-          segmentLabel={segmentLabel}
-          imageSrc={frontImage}
-          needsSize={needsSize}
-        />
-      )}
 
       {/* Reassurance u trenutku odluke — najveći strah kod pouzeća je "što ako
           platim pa ne stigne". Zato baš ispod gumba potvrdimo: platiš TEK kad
@@ -225,19 +278,13 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
 
       {/* Bez ovoga je kupac klikao rasprodane veličine, ništa se nije događalo i
           mislio je da stranica ne radi — pa je odustao ili naručio bez veličine. */}
-      {needsSize && (
+      {allSoldOut && (
         <p className="mt-3 text-sm text-white/60">
-          {allSoldOut ? (
-            <>
-              Sve veličine su trenutno rasprodane.{" "}
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-4">
-                Javi se na WhatsApp
-              </a>{" "}
-              i javimo ti čim stigne.
-            </>
-          ) : (
-            "Odaberi veličinu da nastaviš."
-          )}
+          Sve veličine su trenutno rasprodane.{" "}
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-4">
+            Javi se na WhatsApp
+          </a>{" "}
+          i javimo ti čim stigne.
         </p>
       )}
 
@@ -259,14 +306,19 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         ))}
       </div>
 
-      <StickyAddToCart
-        product={product}
-        selectedSize={selectedSize}
-        segment={segment}
-        segmentLabel={segmentLabel}
-        imageSrc={frontImage}
-        mainButtonRef={mainButtonRef}
-      />
+      {!allSoldOut && (
+        <StickyAddToCart
+          product={product}
+          selectedSize={selectedSize}
+          hasSizePicker={hasSizePicker}
+          needsSize={needsSize}
+          addons={addons}
+          total={total}
+          mainButtonRef={mainButtonRef}
+          onAdd={handleAdd}
+          onNeedSize={promptSize}
+        />
+      )}
     </div>
   );
 }

@@ -24,6 +24,16 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
   const sizeOptions = getJerseySizeOptions(product);
   const { addItem } = useCart();
 
+  // Najviše JEDNA oznaka po kartici. Limeta = promo (Bestseller, Novo),
+  // tamna s tankim rubom = svojstvo (Retro, Dugi rukav, Trenirka).
+  const badge: { label: string; promo: boolean } | null =
+    product.badge === "bestseller" ? { label: "Bestseller", promo: true }
+    : product.badge === "novo" ? { label: "Novo", promo: true }
+    : product.retro ? { label: "Retro", promo: false }
+    : product.category === "dugi-rukav" ? { label: "Dugi rukav", promo: false }
+    : product.category === "trenirka" && !tr ? { label: "Trenirka", promo: false }
+    : null;
+
   const firstAvailable = (arr: string[], segmentOut: boolean) =>
     segmentOut ? "" : (arr.find((s) => !sizeOptions.soldOutSizes.includes(s)) ?? "");
   const availAdult = firstAvailable(sizeOptions.adults, sizeOptions.adultsOutOfStock);
@@ -95,26 +105,16 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
 
         <div className="relative">
           <JerseyVisual product={product} priority={priority} />
-          <WishlistButton slug={product.slug} klub={product.klub} igrac={product.igrac} className="absolute right-2.5 top-2.5 z-20" />
-          {(product.badge || product.retro) && (
-            <span className={`absolute left-2.5 top-2.5 z-20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] ${
-              product.badge === "bestseller"
-                ? light ? `${acBg} text-white` : "bg-accent text-black"
-                : product.badge === "novo"
-                ? "bg-[#3b82f6] text-white"
-                : "bg-black/70 border border-white/25 text-white/90"
-            }`}>
-              {product.badge === "bestseller" ? "★ Bestseller" : product.badge === "novo" ? "● Novo" : "Retro"}
-            </span>
-          )}
-          {product.category === "dugi-rukav" && (
-            <span className="absolute bottom-2.5 left-2.5 z-20 rounded-[6px] bg-sky-600 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white">
-              🧥 Dugi rukav
-            </span>
-          )}
-          {product.category === "trenirka" && (
-            <span className="absolute bottom-2.5 left-2.5 z-20 rounded-[6px] bg-teal-600 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white">
-              🏃 Trenirka
+          <WishlistButton slug={product.slug} klub={product.klub} igrac={product.igrac} className="absolute right-1.5 top-1.5 z-20" />
+          {badge && (
+            <span
+              className={`absolute left-2.5 top-2.5 z-20 inline-flex h-[22px] items-center rounded-[2px] px-2 text-[10px] font-semibold uppercase leading-none tracking-[0.12em] ${
+                badge.promo
+                  ? light ? `${acBg} text-white` : "bg-accent text-black"
+                  : "border border-white/20 bg-black/75 text-white/85"
+              }`}
+            >
+              {badge.label}
             </span>
           )}
         </div>
@@ -148,11 +148,13 @@ export function ProductCard({ product, priority = false, theme = "jersey" }: { p
             <button
               type="button"
               onClick={handleMobileToggle}
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[6px] transition-all duration-200 md:hidden ${
+              aria-label={isOpen ? "Zatvori odabir veličine" : "Brzo dodaj u košaricu"}
+              aria-expanded={isOpen}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] transition-all duration-200 md:hidden ${
                 isOpen ? (light ? "bg-slate-100 text-slate-600" : "bg-white/10 text-white") : (light ? `${acBg} text-white` : "bg-accent text-black")
               }`}
             >
-              {isOpen ? <X className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
+              {isOpen ? <X strokeWidth={1.75} className="h-4 w-4" /> : <ShoppingBag strokeWidth={1.75} className="h-4 w-4" />}
             </button>
           </div>
 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { useShopSettings } from "@/contexts/shop-settings-context";
-import { deadlineEnd, deadlineLabel } from "@/lib/christmas";
+import { daysLeft, deadlineLabel, deadlinePassed } from "@/lib/christmas";
 
 const GOLD = "#E3B85C";
 const CARDS = [
@@ -14,23 +14,18 @@ const CARDS = [
   { price: "Do 55 €", text: "Trenirka ili dugi rukav + lopta i kapa", img: "/bozic/pk-trenirka.webp", w: 700, h: 595, href: "/slozi-mix?vrsta=trenirka", pos: "right-[-2%] bottom-[-4%] w-[58%]" }
 ];
 
-function Countdown({ deadline }: { deadline: string }) {
-  const [txt, setTxt] = useState("");
+// Jedan tihi podsjetnik na rok (bez sekundi) — glavno odbrojavanje je u gornjoj traci.
+// Rok dolazi iz Postavki; nakon roka se ne prikazuje ništa.
+function DeadlineNote({ deadline }: { deadline: string }) {
+  const [left, setLeft] = useState<number | null>(null);
   useEffect(() => {
-    const tick = () => {
-      const left = Math.max(0, Math.floor((deadlineEnd(deadline) - Date.now()) / 1000));
-      const d = Math.floor(left / 86400), h = Math.floor((left % 86400) / 3600), m = Math.floor((left % 3600) / 60), s = left % 60;
-      setTxt(left ? `${d} d  ${String(h).padStart(2, "0")} h  ${String(m).padStart(2, "0")} min  ${String(s).padStart(2, "0")} s` : "");
-    };
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
+    setLeft(deadlinePassed(deadline) ? 0 : daysLeft(deadline));
   }, [deadline]);
-  if (!txt) return null;
+  if (!left) return null;
   return (
-    <div className="mb-6 inline-flex items-center gap-3 rounded-full border px-4 py-2.5 text-[13px] font-semibold text-white sm:mb-7" style={{ borderColor: "rgba(227,184,92,.35)" }}>
-      <span className="text-[10.5px] font-extrabold tracking-[0.2em]" style={{ color: GOLD }}>ZADNJI ROK {deadlineLabel(deadline)}</span>
-      <span className="tabular-nums tracking-[0.04em]">{txt}</span>
+    <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border px-3.5 py-2 text-[13px] font-semibold text-white sm:mb-7" style={{ borderColor: "rgba(227,184,92,.35)" }}>
+      <span className="text-[10.5px] font-extrabold tracking-[0.16em]" style={{ color: GOLD }}>ROK {deadlineLabel(deadline)}</span>
+      <span>još {left} {left === 1 ? "dan" : "dana"}</span>
     </div>
   );
 }
@@ -40,7 +35,7 @@ export function GiftsByBudget() {
   const { christmasOn, christmasDeadline } = useShopSettings();
   if (!christmasOn) return null;
   return (
-    <section className="bg-black">
+    <section id="pokloni" className="scroll-mt-20 bg-black">
       <div className="page-shell py-9 md:py-14">
         <div className="flex items-center gap-3 text-[11px] font-extrabold tracking-[0.28em]" style={{ color: GOLD }}>
           <span className="h-px w-7" style={{ background: GOLD }} />
@@ -49,8 +44,8 @@ export function GiftsByBudget() {
         <h2 className="mt-3 font-heading text-[clamp(2.2rem,5vw,4rem)] uppercase leading-[0.95] text-white">
           Pokloni po <span className="text-accent">budžetu.</span>
         </h2>
-        <p className="mb-3.5 mt-2 text-[15px] text-white/60">Svaki poklon stiže u kutiji — plaćaš tek kad stigne.</p>
-        <Countdown deadline={christmasDeadline} />
+        <p className="mb-3.5 mt-2 text-[15px] text-white/60">Svaki poklon stiže u kutiji — plaćaš tek kad stigne. Cijene su bez dostave.</p>
+        <DeadlineNote deadline={christmasDeadline} />
         <div className="-mx-3 flex snap-x snap-mandatory scroll-px-3 gap-3 overflow-x-auto px-3 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden">
           {CARDS.map((c, i) => (
             <Link

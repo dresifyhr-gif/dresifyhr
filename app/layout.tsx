@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { christmasSeasonOpen, currentSeasonDeadline } from "@/lib/christmas";
 import { ClerkProvider } from "@clerk/nextjs";
 import { hrHR } from "@clerk/localizations";
@@ -18,10 +18,10 @@ import { SiteProviders } from "@/components/providers/site-providers";
 import { WishlistProvider } from "@/components/providers/wishlist-provider";
 import { AddToCartModal } from "@/components/site/add-to-cart-modal";
 import { AnnouncementBar } from "@/components/site/announcement-bar";
+import { BottomNav } from "@/components/site/bottom-nav";
 import { CartDrawer } from "@/components/site/cart-drawer";
 import { ContentProtection } from "@/components/site/content-protection";
 import { ChatWidget } from "@/components/site/chat-widget";
-import { FloatingWhatsAppButton } from "@/components/site/floating-whatsapp-button";
 import { Footer } from "@/components/site/footer";
 import { CookieNotice } from "@/components/site/cookie-notice";
 import { Navbar } from "@/components/site/navbar";
@@ -78,6 +78,13 @@ export const metadata: Metadata = {
   }
 };
 
+// viewport-fit=cover: bez toga iOS Safari vraća 0 za env(safe-area-inset-bottom),
+// pa donja navigacija i trake sjede na crti za povratak na početni zaslon.
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  themeColor: "#0a0a0a"
+};
+
 export default async function RootLayout({
   children
 }: Readonly<{
@@ -112,6 +119,14 @@ export default async function RootLayout({
     <ClerkProvider localization={hrHR} signInUrl="/prijava" signUpUrl="/registracija" signInFallbackRedirectUrl="/racun" signUpFallbackRedirectUrl="/racun">
     <html lang={locale} suppressHydrationWarning>
       <body className={`${bebas.variable} ${barlow.variable}`}>
+        {/* Donja navigacija (mobitel): oznaka na <html> prije prvog iscrtavanja, da plutajući
+            gumb i razmak na dnu ne "skoče" nakon učitavanja. Popis mora odgovarati
+            HIDDEN_PREFIXES u components/site/bottom-nav.tsx (ona ga dalje drži u skladu). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var p=location.pathname.replace(/\\/$/,"")||"/";var h=["/dres/","/kosarica","/checkout","/zahvala","/admin","/prijava","/registracija"];for(var i=0;i<h.length;i++){var x=h[i];if(x.slice(-1)==="/"?p.indexOf(x)===0:(p===x||p.indexOf(x+"/")===0))return}document.documentElement.setAttribute("data-bnav","1")}catch(e){}})();`
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -134,11 +149,11 @@ export default async function RootLayout({
               footer={
                 <>
                   <Footer />
+                  <BottomNav />
                   <CartDrawer />
                   <SocialProof />
                   <AddToCartModal />
                   <ContentProtection />
-                  <FloatingWhatsAppButton />
                   <ChatWidget />
                   <PromoCapture />
                 </>
@@ -151,7 +166,10 @@ export default async function RootLayout({
         </LanguageProvider>
         </ShopSettingsProvider>
         <MetaPixel />
-        <CookieNotice />
+        {/* Omotač samo kao CSS kuka: globals.css diže obavijest iznad donje navigacije. */}
+        <div className="cookie-slot">
+          <CookieNotice />
+        </div>
       </body>
       <SiteGoogleAnalytics gaId="G-NKPLWRWPN9" />
     </html>

@@ -84,7 +84,8 @@ export async function GET() {
         name: i.name,
         city: i.city,
         product: i.product,
-        agoHours: Math.max(0, Math.round((now - i.t) / 3_600_000))
+        agoHours: Math.max(0, Math.round((now - i.t) / 3_600_000)),
+        agoMin: Math.max(0, Math.round((now - i.t) / 60_000))
       }));
     return NextResponse.json({ items }, { headers: OK_HEADERS });
   } catch {

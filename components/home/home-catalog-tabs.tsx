@@ -49,17 +49,17 @@ export function HomeCatalogTabs({
         <div className="mb-6 flex justify-center sm:mb-8">
           <div className="grid w-full max-w-[460px] auto-cols-fr grid-flow-col rounded-full border border-white/10 bg-[#111111] p-1">
             {([
-              ["dresovi", "Dresovi", true, "bg-accent text-black"],
-              ["trenirka", "Trenirke", hasTrenirke, "bg-teal-500 text-white"],
-              ["streetwear", "Streetwear", hasStreetwear, "bg-orange-500 text-white"]
-            ] as const).filter(([, , show]) => show).map(([key, label, , active]) => (
+              ["dresovi", "Dresovi", true],
+              ["trenirka", "Trenirke", hasTrenirke],
+              ["streetwear", "Streetwear", hasStreetwear]
+            ] as const).filter(([, , show]) => show).map(([key, label]) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setTab(key)}
                 aria-pressed={tab === key}
-                className={`whitespace-nowrap rounded-full px-2 py-2.5 text-center text-[12.5px] font-bold uppercase tracking-[0.08em] transition sm:text-sm ${
-                  tab === key ? active : "text-white/60 hover:text-white"
+                className={`min-w-0 whitespace-nowrap rounded-full px-1 py-3 text-center text-[13px] font-bold uppercase tracking-[0.06em] transition sm:text-sm ${
+                  tab === key ? "bg-accent text-black" : "text-white/60 hover:text-white"
                 }`}
               >
                 {label}
@@ -76,7 +76,7 @@ export function HomeCatalogTabs({
       {tab === "trenirka" && (
         <div>
           <div className="mb-6 text-center">
-            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-teal-400/90">Trenirke</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-accent">Trenirke</span>
             <h2 className="mt-2 font-heading text-3xl uppercase leading-none text-white sm:text-4xl">Komplet trenirke</h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-white/55">
               Jakna + hlače u klupskom dizajnu. 35 €, dostava po cijeloj Hrvatskoj, plaćanje pouzećem.
@@ -93,7 +93,7 @@ export function HomeCatalogTabs({
       {tab === "streetwear" && (
         <div>
           <div className="mb-6 text-center">
-            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-orange-500/80">Streetwear</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-accent">Streetwear</span>
             <h2 className="mt-2 font-heading text-3xl uppercase leading-none text-white sm:text-4xl">Ulični kompleti</h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-white/55">
               Majica + hlačice u uličnom stilu. Veličine XS–L, plaćanje pouzećem, besplatna dostava od 60 € za registrirane.

@@ -541,14 +541,14 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           onClick={() => setLongSleeveOnly((current) => !current)}
           className={`flex w-full items-center justify-between rounded-[8px] border px-4 py-4 transition duration-200 ease-out ${
             longSleeveOnly
-              ? "border-sky-500 bg-sky-500/10"
-              : "border-white/10 bg-[#111111] hover:border-sky-500"
+              ? "border-accent bg-accent/10"
+              : "border-white/10 bg-[#111111] hover:border-accent"
           }`}
         >
-          <span className="text-sm font-medium text-white">🧥 Samo dugi rukav</span>
+          <span className="text-sm font-medium text-white">Samo dugi rukav</span>
           <span
             className={`relative inline-flex h-6 w-11 rounded-full transition ${
-              longSleeveOnly ? "bg-sky-500" : "bg-white/20"
+              longSleeveOnly ? "bg-accent" : "bg-white/20"
             }`}
           >
             <span

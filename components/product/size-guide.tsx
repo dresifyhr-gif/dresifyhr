@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Ruler, X } from "lucide-react";
+import { Lightbulb, Ruler, X } from "lucide-react";
 
 const KIDS = [
   { size: "104", height: "98–104 cm", age: "3–4 god." },
@@ -63,7 +63,7 @@ export function SizeGuide({ showXXL = true }: { showXXL?: boolean }) {
               </button>
             </div>
 
-            <div className="max-h-[70vh] overflow-y-auto px-5 py-5">
+            <div className="max-h-[70vh] overflow-y-auto px-5 pt-5" style={{ paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}>
               {/* Djeca */}
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Djeca</p>
               <table className="mt-3 w-full text-sm">
@@ -106,8 +106,9 @@ export function SizeGuide({ showXXL = true }: { showXXL?: boolean }) {
                 </tbody>
               </table>
 
-              <p className="mt-6 rounded-[8px] border border-white/10 bg-[#0a0a0a] p-3 text-[13px] leading-5 text-white/55">
-                💡 <span className="text-white/75">Savjet:</span> uzmi majicu koja trenutno dobro stoji, raširi je i izmjeri širinu ispod pazuha i dužinu. Ako si između dvije veličine, uzmi veću. Nisi siguran/na? Pošalji nam visinu na WhatsApp i predložit ćemo veličinu.
+              <p className="mt-6 flex gap-2.5 rounded-[8px] border border-white/10 bg-[#0a0a0a] p-3 text-[13px] leading-5 text-white/55">
+                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-accent/80" strokeWidth={1.5} />
+                <span><span className="text-white/75">Savjet:</span> uzmi majicu koja trenutno dobro stoji, raširi je i izmjeri širinu ispod pazuha i dužinu. Ako si između dvije veličine, uzmi veću. Nisi siguran/na? Pošalji nam visinu na WhatsApp i predložit ćemo veličinu.</span>
               </p>
             </div>
           </div>

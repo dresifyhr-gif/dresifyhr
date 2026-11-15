@@ -13,9 +13,9 @@ import { buildBreadcrumbSchema, buildItemListSchema, buildMetadata } from "@/lib
 import { getServerTranslations } from "@/lib/get-server-translations";
 
 export const metadata = buildMetadata({
-  title: "Nogometni dresovi — 70+ modela od 20€",
+  title: "Nogometni dresovi — 150+ modela od 20€",
   description:
-    "Kupi nogometni dres online u Hrvatskoj — 70+ modela. Klubovi, reprezentacije, retro i dječji dresovi. Fiksno 20€, dostava pouzećem za 2–5 dana.",
+    "Kupi nogometni dres online u Hrvatskoj — 150+ modela. Klubovi, reprezentacije, retro i dječji dresovi od 20€, dostava pouzećem za 2–5 dana.",
   path: "/dresovi",
   keywords: [
     "dresovi",

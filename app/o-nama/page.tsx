@@ -7,14 +7,14 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "O nama — Dresify | Nogometni dresovi iz Hrvatske",
   description:
-    "Dresify je hrvatska online trgovina nogometnih dresova. Više od 500 zadovoljnih kupaca, fiksna cijena 20€, dostava pouzećem po cijeloj Hrvatskoj.",
+    "Dresify je hrvatska online trgovina nogometnih dresova. Više od 500 zadovoljnih kupaca, dresovi od 20€, dostava pouzećem po cijeloj Hrvatskoj.",
   path: "/o-nama"
 });
 
 const stats = [
   { value: "500+", label: "zadovoljnih kupaca" },
-  { value: "100+", label: "dresova u katalogu" },
-  { value: "20€", label: "fiksna cijena" },
+  { value: "150+", label: "dresova u katalogu" },
+  { value: "od 20 €", label: "cijena dresa" },
   { value: "2–5 dana", label: "dostava po HR" }
 ];
 
@@ -54,7 +54,7 @@ export default function ONamaPage() {
           </h1>
           <p className="section-copy mx-auto mt-6">
             Dresify je nastao iz jednostavne ideje — da svaki navijač može imati dres svog idola,
-            bez da troši cijelu plaću. Fiksna cijena, brza dostava, bez komplikacija.
+            bez da troši cijelu plaću. Dresovi od 20 €, brza dostava, bez komplikacija.
           </p>
         </div>
       </section>

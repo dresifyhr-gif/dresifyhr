@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Instagram } from "lucide-react";
+import { ArrowRight, CheckCircle2, Gift, Instagram, Star } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { GiveawayEntryForm } from "@/components/site/giveaway-entry-form";
@@ -45,7 +45,7 @@ export default async function ThankYouPage() {
           ]}
         />
 
-        <div className="panel mt-6 overflow-hidden p-8 text-center sm:p-12">
+        <div className="panel mt-6 overflow-hidden p-6 text-center sm:p-12">
           <div className="mx-auto inline-flex h-24 w-24 items-center justify-center rounded-[8px] border border-white/10 bg-accent text-black shadow-[0_0_40px_rgba(232,255,60,0.18)]">
             <CheckCircle2 className="h-12 w-12" />
           </div>
@@ -60,7 +60,7 @@ export default async function ThankYouPage() {
 
           <Link
             href="/dresovi"
-            className="button-primary mt-10 inline-flex min-h-[58px] items-center justify-center gap-2 px-8"
+            className="button-primary mt-10 inline-flex min-h-[58px] w-full items-center justify-center gap-2 whitespace-nowrap px-5 text-[18px] tracking-[0.12em] sm:w-auto sm:px-8 sm:text-xl sm:tracking-[0.16em]"
           >
             {t.thankYouPage.cta}
             <ArrowRight className="h-4 w-4" />
@@ -74,15 +74,19 @@ export default async function ThankYouPage() {
           rel="noopener noreferrer"
           className="mt-6 flex items-center justify-center gap-3 rounded-[16px] border border-white/10 bg-white/[0.03] px-6 py-5 text-center transition hover:border-accent/40 hover:bg-white/[0.05]"
         >
-          <span className="text-2xl">⭐</span>
+          <Star className="h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} />
           <span className="text-sm text-white/80 sm:text-base">
-            <b className="text-white">Zadovoljan kupnjom?</b> Ostavi recenziju na Googleu — pomažeš drugima i nama! →
+            <b className="text-white">Zadovoljan kupnjom?</b> Ostavi recenziju na Googleu — pomažeš drugima i nama.
           </span>
+          <ArrowRight className="h-4 w-4 shrink-0 text-white/50" />
         </a>
 
         {/* PS5 nagradna igra — zaprati + upiši Instagram da uđeš (kupnja već donosi +5 bodova) */}
         <div className="mt-6 rounded-[16px] border border-accent/30 bg-accent/[0.05] p-6 text-center sm:p-8">
-          <div className="text-sm font-bold uppercase tracking-[0.14em] text-accent">🎁 Osvoji PS5 + EA SPORTS FC 27</div>
+          <div className="inline-flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-accent">
+            <Gift className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            Osvoji PS5 + EA SPORTS FC 27
+          </div>
           <p className="mx-auto mt-2 max-w-xl text-sm text-white/60">
             Tvoja narudžba ti nosi <b className="text-accent">+5 bodova</b>! Uđi u nagradnu igru u 2 koraka:
           </p>

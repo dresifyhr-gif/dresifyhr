@@ -6,9 +6,9 @@ import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { absoluteUrl } from "@/lib/utils";
 import {
   CONTACT_PHONE_DISPLAY,
-  CURRENCY_LABEL,
   DEFAULT_OG_IMAGE,
   INSTAGRAM_URL,
+  JERSEY_PRICE_EUR,
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_URL,
@@ -96,7 +96,8 @@ export function buildProductSchema(product: Jersey, stock: number) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: `${product.klub} - ${product.igrac}`,
-    description: `${product.klub} ${product.igrac} nogometni dres za ${CURRENCY_LABEL}. Dostava po cijeloj Hrvatskoj.`,
+    // Stvarna cijena proizvoda (dugi rukav, kompleti itd. nisu 20 €).
+    description: `${product.klub} ${product.igrac} nogometni dres za ${product.price ?? JERSEY_PRICE_EUR}€. Dostava po cijeloj Hrvatskoj.`,
     // Prava slika proizvoda. Prije je ovdje bilo `/dresovi/{slug}.jpg` — putanja
     // koja NE POSTOJI (slike su u /dresovi/{slug}/front.jpg, a custom proizvodi
     // imaju URL-ove u product.images). Google je zbog 404 slike odbijao većinu
@@ -122,7 +123,7 @@ export function buildProductSchema(product: Jersey, stock: number) {
     offers: {
       "@type": "Offer",
       priceCurrency: "EUR",
-      price: String(product.price ?? 20),
+      price: String(product.price ?? JERSEY_PRICE_EUR),
       availability: stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       url: absoluteUrl(`/dres/${product.slug}`),
       itemCondition: "https://schema.org/NewCondition"

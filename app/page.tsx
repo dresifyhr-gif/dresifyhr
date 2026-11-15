@@ -15,6 +15,7 @@ import { jerseys } from "@/lib/data/jerseys";
 import { forCards, getFeaturedProducts, getCatalogProducts, getStreetwearProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { getVisibleTestimonials } from "@/lib/testimonials";
 import { getSettings } from "@/lib/settings";
+import { getFollowerCount } from "@/lib/ig-stats";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import { buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
@@ -23,7 +24,7 @@ import { getServerTranslations } from "@/lib/get-server-translations";
 export const metadata = buildMetadata({
   title: "Dresify — Nogometni dresovi za djecu i odrasle | Od 20€",
   description:
-    "Nogometni dresovi za djecu i odrasle — Barcelona, Real Madrid, Hrvatska i retro klasici. Vrhunska izrada, fiksna cijena 20€, dostava pouzećem po cijeloj Hrvatskoj.",
+    "Nogometni dresovi za djecu i odrasle — Barcelona, Real Madrid, Hrvatska i retro klasici. Vrhunska izrada, dresovi od 20€, dostava pouzećem po cijeloj Hrvatskoj.",
   path: "/",
   keywords: [
     "dresovi",
@@ -61,13 +62,17 @@ export default async function HomePage() {
   const streetwear = await getStreetwearProducts();
   const trenirke = await getTrenirkaProducts();
   const testimonials = await getVisibleTestimonials();
+  const followers = await getFollowerCount();
   // Mystery box slika za hero rotaciju (ako je proizvod dodan i ima sliku).
   const mysteryImage = dresovi.find((p) => p.slug?.includes("mystery"))?.images?.[0]?.src;
 
   return (
     <>
-      <Ps5HomeBanner />
-      <HeroSection mysteryImage={mysteryImage} />
+      {/* PS5 traka: iznad heroa od tableta naviše; na mobitelu ide ispod glavnog gumba (ps5Slot). */}
+      <div className="hidden sm:block">
+        <Ps5HomeBanner followers={followers} />
+      </div>
+      <HeroSection mysteryImage={mysteryImage} ps5Slot={<Ps5HomeBanner followers={followers} variant="card" />} />
       <GiftsByBudget />
       {show("trust") && <TrustStrip />}
       {show("streetwear") && streetwear.length > 0 && (

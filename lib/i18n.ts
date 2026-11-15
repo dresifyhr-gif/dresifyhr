@@ -9,10 +9,10 @@ export const HR_COUNTRIES = new Set(["HR", "BA", "RS", "SI", "ME", "MK"]);
 
 const hr = {
   announcement: [
-    "🏆 SP 2026 je tu — navijaj u svom dresu! Reprezentacije od 20€",
-    "📦 Dostava pouzećem po cijeloj Hrvatskoj — 7,00€",
-    "⚡ Novo svaki tjedan — provjeri katalog",
-    "💬 Naruči na WhatsApp — odgovaramo u sat vremena",
+    "SP 2026 je tu — navijaj u svom dresu. Reprezentacije od 20 €",
+    "Dostava pouzećem po cijeloj Hrvatskoj — 7,00 €",
+    "Novo svaki tjedan — provjeri katalog",
+    "Naruči na WhatsApp — odgovaramo unutar sat vremena",
   ],
 
   nav: {
@@ -69,7 +69,7 @@ const hr = {
       `Plaćanje: ${payment} • Dostava: ${shipping}`,
     benefits: {
       delivery: "Dostava 2–5 dana",
-      response: "Odgovor u sat vremena",
+      response: "Odgovor unutar sat vremena",
       returns: "Jednostavna zamjena",
       orderToday: "Naruči danas — šaljemo sutra",
     },
@@ -78,18 +78,18 @@ const hr = {
   },
 
   hero: {
-    badge: "100+ nogometnih dresova · Klubovi & reprezentacije",
+    badge: "150+ dresova · dostava 2–5 dana",
     line1: "NOGOMETNI DRESOVI.",
     line2: "KLUBOVI & REPREZENTACIJE.",
     line3: "ZA DJECU I ODRASLE.",
-    subtitle: "Dostava po cijeloj Hrvatskoj • Plaćanje pouzećem",
+    subtitle: "Dresovi od 20\u00a0€ · plaćaš pri\u00a0preuzimanju · zamjena\u00a0veličine",
     cta: "POGLEDAJ DRESOVE",
     seoTitle: "Nogometni dresovi za djecu i odrasle",
     seoText: "Dresify je mjesto za ljubitelje nogometa i nogometne dresove. Istraži dresove najpoznatijih klubova i reprezentacija, pronađi svoj omiljeni model i upotpuni svoju kolekciju — dječji i za odrasle, klupski i reprezentativni, uz brzu dostavu i plaćanje pouzećem.",
-    stats: { jerseys: "dresova", price: "fiksna cijena", delivery: "dana dostava" },
+    stats: { jerseys: "dresova", priceValue: "od 20 €", price: "po dresu", delivery: "dana dostava" },
     trust: {
       delivery: "Dostava 2–5 dana",
-      response: "Odgovor u sat vremena",
+      response: "Odgovor unutar sat vremena",
       returns: "Jednostavna zamjena",
       newWeekly: "Novo svaki tjedan",
     },
@@ -99,13 +99,13 @@ const hr = {
     catalogKicker: "Drop",
     catalogTitle: "Odaberi svoj sljedeći dres",
     catalogDesc:
-      "Jedna cijena, jasan izbor i katalog koji kombinira najtraženije aktualne modele i retro favorite.",
+      "Dresovi od 20 € — najtraženiji aktualni modeli i retro favoriti na jednom mjestu.",
   },
 
   catalog: {
     label: "Katalog",
-    title: "Dresovi — Klubovi & Reprezentacije. 20€.",
-    desc: "Nogometni dresovi za djecu i odrasle — Barcelona, Real Madrid, Bayern, Hrvatska reprezentacija i retro klasici. Fiksna cijena 20€, dostava pouzećem po cijeloj Hrvatskoj za 2–5 radnih dana.",
+    title: "Dresovi — Klubovi & Reprezentacije. Od 20 €.",
+    desc: "Nogometni dresovi za djecu i odrasle — Barcelona, Real Madrid, Bayern, Hrvatska reprezentacija i retro klasici. Cijene od 20 €, dostava pouzećem po cijeloj Hrvatskoj za 2–5 radnih dana.",
     filters: "Filteri",
     filterTitle: "Filtriraj katalog",
     filterDesc: "Liga, klub, igrač i veličina.",
@@ -131,30 +131,30 @@ const hr = {
     topClubs: "Najtraženiji klubovi",
     popularPlayers: "Popularni igrači",
     byCategoryDesc:
-      "Brzi ulaz za dječje komplete, dresove za odrasle, retro favorite i reprezentativne modele.",
+      "Dječji kompleti, dresovi za odrasle, retro favoriti i reprezentacije.",
     topClubsDesc:
-      "Otvaraj zasebne stranice za klubove koji nose najveći interes i najbolje pokrivaju ključne Google upite.",
+      "Dresovi klubova koje navijači najčešće traže.",
     popularPlayersDesc:
-      "Messi, Ronaldo, Neymar, Yamal i drugi jaki igrači sada imaju vlastite landing stranice.",
+      "Messi, Ronaldo, Yamal, Modrić i ostali — svi modeli na jednom mjestu.",
   },
 
   footer: {
     cta: "Pronašao si dres?",
     ctaSub: "Naruči odmah — šaljemo sutra.",
     ctaBtn: "POGLEDAJ KATALOG",
-    desc: "Premium nogometni online shop s fiksnom cijenom 20€, dostavom po cijeloj Hrvatskoj i novim modelima svaki tjedan.",
+    desc: "Nogometni dresovi od 20 €, dostava po cijeloj Hrvatskoj i novi modeli svaki tjedan.",
     nav: "Navigacija",
     popular: "Popularno",
     contact: "Kontakt",
-    response: "Odgovaramo u roku sat vremena",
+    response: "Odgovaramo unutar sat vremena",
     copyright: "© 2026 DRESIFY — Sva prava pridržana",
     madeWith: "Izrađeno s",
     inCroatia: "u Hrvatskoj",
   },
 
   trust: {
-    delivery: "Dostava po cijeloj HR (2-5 dana)",
-    response: "Odgovaramo u roku sat vremena",
+    delivery: "Dostava 2–5\u00a0dana",
+    response: "Odgovaramo unutar sat vremena",
     returns: "Jednostavna zamjena",
     newWeekly: "Novo svaki tjedan",
   },
@@ -281,10 +281,10 @@ const hr = {
 
 const en: typeof hr = {
   announcement: [
-    "🏆 World Cup 2026 is here — cheer in your jersey! National teams from €20",
-    "📦 Cash on delivery across Croatia — 7.00€",
-    "⚡ New drops every week — check the catalog",
-    "💬 Order on WhatsApp — we reply within the hour",
+    "World Cup 2026 is here — cheer in your jersey. National teams from €20",
+    "Cash on delivery across Croatia — €7.00",
+    "New drops every week — check the catalog",
+    "Order on WhatsApp — we reply within the hour",
   ],
 
   nav: {
@@ -351,15 +351,15 @@ const en: typeof hr = {
   },
 
   hero: {
-    badge: "100+ football jerseys · Clubs & national teams",
+    badge: "150+ jerseys · delivery in 2–5 days",
     line1: "FOOTBALL JERSEYS.",
     line2: "CLUBS & NATIONAL TEAMS.",
     line3: "FOR KIDS & ADULTS.",
-    subtitle: "Delivery across Croatia • Cash on delivery",
+    subtitle: "Jerseys from €20 · pay on delivery · size exchange",
     cta: "BROWSE JERSEYS",
     seoTitle: "Football jerseys for kids and adults",
     seoText: "Dresify is the place for football fans and football jerseys. Explore jerseys of the most famous clubs and national teams, find your favourite and complete your collection — for kids and adults, club and national, with fast delivery and cash on delivery.",
-    stats: { jerseys: "jerseys", price: "fixed price", delivery: "day delivery" },
+    stats: { jerseys: "jerseys", priceValue: "from €20", price: "per jersey", delivery: "day delivery" },
     trust: {
       delivery: "Delivery 2–5 days",
       response: "Reply within the hour",
@@ -372,13 +372,13 @@ const en: typeof hr = {
     catalogKicker: "Drop",
     catalogTitle: "Pick your next jersey",
     catalogDesc:
-      "One price, a clear choice and a catalog that combines the most-wanted current models and retro favourites.",
+      "Jerseys from €20 — the most-wanted current models and retro favourites in one place.",
   },
 
   catalog: {
     label: "Catalog",
-    title: "Jerseys — Clubs & National Teams. 20€.",
-    desc: "Football jerseys for kids and adults — Barcelona, Real Madrid, Bayern, Croatia national team and retro classics. Fixed price 20€, cash on delivery across Croatia in 2–5 business days.",
+    title: "Jerseys — Clubs & National Teams. From €20.",
+    desc: "Football jerseys for kids and adults — Barcelona, Real Madrid, Bayern, Croatia national team and retro classics. Jerseys from €20, cash on delivery across Croatia in 2–5 business days.",
     filters: "Filters",
     filterTitle: "Filter catalog",
     filterDesc: "League, club, player and size.",
@@ -403,15 +403,15 @@ const en: typeof hr = {
     topClubs: "Top clubs",
     popularPlayers: "Popular players",
     byCategoryDesc: "Quick access for kids' sets, adults' jerseys, retro favourites and national team models.",
-    topClubsDesc: "Dedicated pages for the most-searched clubs.",
-    popularPlayersDesc: "Messi, Ronaldo, Neymar, Yamal and more — each with their own landing page.",
+    topClubsDesc: "Jerseys of the clubs fans ask for most.",
+    popularPlayersDesc: "Messi, Ronaldo, Yamal, Modrić and more — every model in one place.",
   },
 
   footer: {
     cta: "Found your jersey?",
     ctaSub: "Order now — we ship tomorrow.",
     ctaBtn: "BROWSE CATALOG",
-    desc: "Premium football shop with a fixed 20€ price, delivery across Croatia and new models every week.",
+    desc: "Football jerseys from €20, delivery across Croatia and new models every week.",
     nav: "Navigation",
     popular: "Popular",
     contact: "Contact",
@@ -422,7 +422,7 @@ const en: typeof hr = {
   },
 
   trust: {
-    delivery: "Delivery across HR (2-5 days)",
+    delivery: "Delivery 2–5\u00a0days",
     response: "We reply within the hour",
     returns: "Easy size exchange",
     newWeekly: "New every week",

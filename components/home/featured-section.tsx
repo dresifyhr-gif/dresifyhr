@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ShoppingBag } from "lucide-react";
 
 import type { Jersey } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
@@ -16,7 +17,7 @@ export function FeaturedSection({ products }: { products: Jersey[] }) {
       <div className="page-shell">
         <div className="mb-6 flex items-center justify-between sm:mb-8">
           <h2 className="font-heading text-2xl uppercase tracking-[0.04em] text-white sm:text-3xl">
-            Najprodavanije 🔥
+            Najprodavanije
           </h2>
           <Link
             href="/dresovi"
@@ -43,13 +44,11 @@ export function FeaturedSection({ products }: { products: Jersey[] }) {
                   {/* Badge */}
                   {badge && (
                     <span className={`absolute left-2 top-2 z-10 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.18em] ${
-                      badge === "bestseller"
+                      badge === "bestseller" || badge === "novo"
                         ? "bg-accent text-black"
-                        : badge === "novo"
-                        ? "bg-[#3b82f6] text-white"
                         : "bg-black/50 border border-white/25 text-white/90"
                     }`}>
-                      {badge === "bestseller" ? "★ Bestseller" : badge === "novo" ? "● Novo" : "Retro"}
+                      {badge === "bestseller" ? "Bestseller" : badge === "novo" ? "Novo" : "Retro"}
                     </span>
                   )}
 
@@ -85,8 +84,8 @@ export function FeaturedSection({ products }: { products: Jersey[] }) {
                       <span className="font-heading text-lg leading-none text-accent">
                         {formatPrice(product.price)}
                       </span>
-                      <span className="flex h-7 w-7 items-center justify-center rounded-[5px] bg-accent text-black text-xs font-bold">
-                        🛒
+                      <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-[5px] bg-accent text-black">
+                        <ShoppingBag className="h-3.5 w-3.5" strokeWidth={1.75} />
                       </span>
                     </div>
                   </div>

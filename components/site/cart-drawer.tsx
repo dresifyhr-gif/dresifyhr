@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, ShoppingBag, Trash2, X } from "lucide-react";
+import { ArrowRight, Check, Lock, ShoppingBag, Trash2, X } from "lucide-react";
 
 import { useUser } from "@clerk/nextjs";
 
@@ -15,7 +15,11 @@ import { formatEuroAmount, repairText } from "@/lib/utils";
 
 export function CartDrawer() {
   const { items, subtotal, isDrawerOpen, closeDrawer, removeItem, clearCart } = useCart();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const handleClear = () => {
+    const msg = locale === "en" ? "Empty the cart? All items will be removed." : "Isprazniti košaricu? Svi artikli bit će uklonjeni.";
+    if (window.confirm(msg)) clearCart();
+  };
   // Besplatna dostava od 60 € SAMO za prijavljene kupce — isto pravilo kao blagajna i server.
   const { isSignedIn } = useUser();
   const signedIn = isSignedIn === true;
@@ -34,7 +38,7 @@ export function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             type="button"
-            className="fixed inset-0 z-50 bg-black/72 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/75"
             onClick={closeDrawer}
             aria-label={t.cart.closeOverlay}
           />
@@ -68,17 +72,17 @@ export function CartDrawer() {
                 items.map((item) => (
                   <div key={item.id} className="border border-white/10 bg-[#111111] p-4">
                     <div className="flex items-start gap-3">
-                      <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-[4px] border border-white/10 bg-[#0a0a0a]">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-[8px] bg-[#fbfbfb]">
                         {item.imageSrc ? (
                           <Image
                             src={item.imageSrc}
                             alt={`${repairText(item.klub)} ${repairText(item.igrac)}`}
                             fill
                             sizes="80px"
-                            className="object-contain p-2"
+                            className="object-contain p-1.5"
                           />
                         ) : (
-                          <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.18em] text-white/35">
+                          <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.18em] text-black/35">
                             DRESIFY
                           </div>
                         )}
@@ -108,18 +112,25 @@ export function CartDrawer() {
                   </div>
                 ))
               ) : (
-                <div className="border border-dashed border-white/10 bg-[#111111] p-8 text-center text-sm leading-7 text-white/50">
-                  {t.cart.empty}
+                <div className="flex flex-col items-center px-4 py-12 text-center">
+                  <span className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-[#111111] text-accent">
+                    <ShoppingBag className="h-6 w-6" strokeWidth={1.5} />
+                  </span>
+                  <p className="mt-4 max-w-[260px] text-sm leading-6 text-white/55">{t.cart.empty}</p>
                 </div>
               )}
               {items.length ? (
                 <div className="mt-4 rounded-[6px] border border-accent/25 bg-accent/5 px-3 py-2.5">
                   <p className="text-center text-[12px] leading-5 text-white/75">
                     {freeShipping ? (
-                      <span className="font-semibold text-accent">🎉 Ostvario si besplatnu dostavu!</span>
+                      <span className="inline-flex items-center gap-1.5 font-semibold text-accent">
+                        <Check className="h-3.5 w-3.5" strokeWidth={2} />
+                        Ostvario si besplatnu dostavu
+                      </span>
                     ) : reachedThreshold ? (
                       <>
-                        🔒 <Link href="/prijava/" onClick={closeDrawer} className="font-semibold text-accent underline">Prijavi se ili registriraj (besplatno)</Link> i dostava je <span className="font-semibold text-white">besplatna</span> — uštediš {SHIPPING_PRICE_LABEL}
+                        <Lock className="mr-1 inline h-3 w-3 -translate-y-px text-accent" strokeWidth={1.75} />
+                        <Link href="/prijava/" onClick={closeDrawer} className="font-semibold text-accent underline">Prijavi se ili registriraj (besplatno)</Link> i dostava je <span className="font-semibold text-white">besplatna</span> — uštediš {SHIPPING_PRICE_LABEL}
                       </>
                     ) : (
                       <>
@@ -140,44 +151,64 @@ export function CartDrawer() {
                   <CartUpsell onNavigate={closeDrawer} />
                 </div>
               ) : null}
+              {items.length ? (
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    className="inline-flex h-11 items-center gap-1.5 px-1 text-xs uppercase tracking-[0.16em] text-white/35 transition-colors hover:text-red-400"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    {t.cart.clear}
+                  </button>
+                </div>
+              ) : null}
             </div>
 
             <div className="shrink-0 border-t border-white/10 bg-[#0a0a0a] pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
-              <div className="space-y-2 text-sm text-white">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium uppercase tracking-[0.2em] text-white/50">{t.cart.items}</span>
-                  <span className="font-semibold">{formatEuroAmount(subtotal)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium uppercase tracking-[0.2em] text-white/50">{t.cart.shipping}</span>
-                  <span className={`font-semibold ${freeShipping ? "text-accent" : ""}`}>
-                    {!items.length ? "—" : freeShipping ? "Besplatno" : SHIPPING_PRICE_LABEL}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between border-t border-white/10 pt-3">
-                  <span className="font-medium uppercase tracking-[0.28em] text-white/50">{t.cart.total}</span>
-                  <span className="text-2xl font-bold text-accent">{formatEuroAmount(total)}</span>
-                </div>
-              </div>
+              {items.length ? (
+                <>
+                  <div className="space-y-2 text-sm text-white">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium uppercase tracking-[0.2em] text-white/50">{t.cart.items}</span>
+                      <span className="font-semibold">{formatEuroAmount(subtotal)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium uppercase tracking-[0.2em] text-white/50">{t.cart.shipping}</span>
+                      <span className={`font-semibold ${freeShipping ? "text-accent" : ""}`}>
+                        {freeShipping ? "Besplatno" : SHIPPING_PRICE_LABEL}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-white/10 pt-3">
+                      <span className="font-medium uppercase tracking-[0.28em] text-white/50">{t.cart.total}</span>
+                      <span className="text-2xl font-bold text-accent">{formatEuroAmount(total)}</span>
+                    </div>
+                  </div>
 
-              <div className="mt-3 grid gap-2">
-                <Link href="/checkout" onClick={closeDrawer} className="button-primary w-full">
+                  <div className="mt-3">
+                    <Link href="/checkout" onClick={closeDrawer} className="button-primary w-full px-4">
+                      <span className="inline-flex items-center gap-2">
+                        {t.cart.checkout}
+                        <ArrowRight className="h-4 w-4" />
+                      </span>
+                    </Link>
+                    <Link
+                      href="/kosarica"
+                      onClick={closeDrawer}
+                      className="mt-1 flex h-11 w-full items-center justify-center text-xs font-semibold uppercase tracking-[0.18em] text-white/60 underline-offset-4 transition-colors hover:text-white hover:underline"
+                    >
+                      {t.cart.viewCart}
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <Link href="/dresovi" onClick={closeDrawer} className="button-primary w-full px-4">
                   <span className="inline-flex items-center gap-2">
-                    {t.cart.checkout}
+                    {t.cartPage.viewJerseys}
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 </Link>
-                <div className="flex items-center justify-between px-1 pt-1 text-xs">
-                  <Link href="/kosarica" onClick={closeDrawer} className="font-semibold uppercase tracking-[0.18em] text-white/70 underline-offset-4 hover:text-white hover:underline">
-                    {t.cart.viewCart}
-                  </Link>
-                  {items.length ? (
-                    <button type="button" onClick={clearCart} className="uppercase tracking-[0.18em] text-white/40 hover:text-white/70">
-                      {t.cart.clear}
-                    </button>
-                  ) : null}
-                </div>
-              </div>
+              )}
             </div>
           </motion.aside>
         </>

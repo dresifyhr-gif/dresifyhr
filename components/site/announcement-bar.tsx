@@ -6,10 +6,9 @@ import { X } from "lucide-react";
 
 import { useLanguage } from "@/contexts/language-context";
 import { useShopSettings } from "@/contexts/shop-settings-context";
-import { daysLeft, deadlineLabel } from "@/lib/christmas";
+import { daysLeft, deadlineLabel, deadlinePassed } from "@/lib/christmas";
 
 const STORAGE_KEY = "dresify_announcement_hidden_until";
-const ANNOUNCEMENT_OFFSET = "40px";
 
 function getEndOfDayTimestamp() {
   const now = new Date();
@@ -36,14 +35,6 @@ export function AnnouncementBar() {
     const nextVisible = (christmasOn || announcementActive) && (!hiddenUntil || Date.now() > hiddenUntil);
 
     setIsVisible(nextVisible);
-    document.documentElement.style.setProperty(
-      "--announcement-offset",
-      nextVisible ? ANNOUNCEMENT_OFFSET : "0px"
-    );
-
-    return () => {
-      document.documentElement.style.setProperty("--announcement-offset", "0px");
-    };
   }, [announcementActive, christmasOn]);
 
   useEffect(() => {
@@ -60,15 +51,22 @@ export function AnnouncementBar() {
 
   const currentMessage = useMemo(() => messages[messageIndex % messages.length], [messageIndex, messages]);
   // Dani do roka računaju se tek u pregledniku (server nema "danas" kupca).
+  // Rok dolazi iz Postavki (christmasDeadline); nakon njega traka samo kaže da šaljemo dalje.
   const [left, setLeft] = useState<number | null>(null);
-  useEffect(() => { if (christmasOn) setLeft(daysLeft(christmasDeadline)); }, [christmasOn, christmasDeadline]);
+  const [passed, setPassed] = useState(false);
+  useEffect(() => {
+    if (!christmasOn) return;
+    setLeft(daysLeft(christmasDeadline));
+    setPassed(deadlinePassed(christmasDeadline));
+  }, [christmasOn, christmasDeadline]);
 
   const handleDismiss = () => {
     window.localStorage.setItem(STORAGE_KEY, String(getEndOfDayTimestamp()));
     setIsVisible(false);
-    document.documentElement.style.setProperty("--announcement-offset", "0px");
   };
 
+  // Traka se NE lijepi uz vrh (relative, ne sticky) — odlista se s ekrana, pa pri
+  // skrolanju ostaje samo zaglavlje i više mjesta za proizvode.
   return (
     <AnimatePresence initial={false}>
       {isVisible ? (
@@ -76,23 +74,27 @@ export function AnnouncementBar() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          className={christmasOn ? "xmas-bar sticky top-0 z-50 text-white" : "sticky top-0 z-50 border-b border-black/10 bg-accent text-black"}
+          className={christmasOn ? "xmas-bar relative z-50 text-white" : "relative z-50 border-b border-black/10 bg-accent text-black"}
         >
-          <div className="page-shell relative flex h-10 items-center justify-center pr-10 sm:h-11 sm:pr-12">
+          <div className="page-shell relative flex h-8 items-center justify-center pr-9 sm:h-10 sm:pr-12">
             {christmasOn ? (
-              <p className="flex items-center gap-2.5 whitespace-nowrap text-[12px] font-semibold sm:gap-3 sm:text-[13px]">
+              // Tekst ostaje nevidljiv dok preglednik ne izračuna rok (left === null), da nakon
+              // roka ne bljesne stara poruka "Naruči do…" prije poruke "Šaljemo i dalje".
+              <p className={`flex min-w-0 items-center gap-2 whitespace-nowrap text-[12px] font-semibold leading-none sm:gap-3 sm:text-[13px] ${left === null ? "invisible" : ""}`}>
                 <span className="hidden text-[10.5px] font-extrabold tracking-[0.22em] text-[#E3B85C] sm:inline">BOŽIĆ S DRESIFYJEM</span>
                 <span className="hidden opacity-30 sm:inline">|</span>
-                {left === 0 ? (
-                  <span>Narudžbe sada stižu nakon Božića · plaćaš pouzećem</span>
+                {passed ? (
+                  <span className="truncate text-[11px] sm:text-[13px]">Šaljemo i dalje — dostava do Božića više nije zajamčena</span>
                 ) : (
-                  <span>Naruči do <b>{deadlineLabel(christmasDeadline)}</b> — stiže pod bor</span>
+                  <>
+                    <span>Naruči do <b>{deadlineLabel(christmasDeadline)}</b> — stiže pod bor</span>
+                    {left ? (
+                      <span className="rounded-full border border-[#E3B85C] px-1.5 py-[3px] text-[10px] font-extrabold leading-none text-[#E3B85C] sm:px-2 sm:text-[10.5px]">
+                        još {left} {left === 1 ? "dan" : "dana"}
+                      </span>
+                    ) : null}
+                  </>
                 )}
-                {left ? (
-                  <span className="rounded-full border border-[#E3B85C] px-2 py-0.5 text-[10.5px] font-extrabold text-[#E3B85C]">
-                    još {left} {left === 1 ? "dan" : "dana"}
-                  </span>
-                ) : null}
               </p>
             ) : (
             <AnimatePresence mode="wait">
@@ -112,7 +114,7 @@ export function AnnouncementBar() {
             <button
               type="button"
               onClick={handleDismiss}
-              className={`absolute right-3 inline-flex h-8 w-8 items-center justify-center transition-all duration-200 ease-out sm:right-6 ${christmasOn ? "text-white/60 hover:text-white" : "text-black/70 hover:text-black"}`}
+              className={`absolute right-1 inline-flex h-8 w-8 items-center justify-center transition-all duration-200 ease-out sm:right-6 ${christmasOn ? "text-white/60 hover:text-white" : "text-black/70 hover:text-black"}`}
               aria-label="Zatvori obavijest"
             >
               <X className="h-4 w-4" />
