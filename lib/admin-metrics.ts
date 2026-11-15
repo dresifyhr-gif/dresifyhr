@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { jerseys } from "@/lib/data/jerseys";
 import { getSettingsFresh } from "@/lib/settings";
 import { phoneKey } from "@/lib/utils";
-import { mixAddonsInText } from "@/lib/mix";
+import { mixAddonPhrases, mixAddonsInText } from "@/lib/mix";
 import { COST_KAPA_EUR, COST_LOPTA_EUR } from "@/lib/site";
 
 const DAY = 86_400_000;
@@ -131,8 +131,8 @@ export async function getDashboardMetrics() {
       ts.length ? prisma.orderItem.count({ where: { order: orderWhere, slug: { in: ts } } }) : Promise.resolve(0),
       prisma.order.aggregate({ _sum: { discount: true }, where: orderWhere }),
       // "Složi svoj mix": lopta/kapa zapisane u igrac stavke ("+ lopta X", "+ kapa Y").
-      prisma.orderItem.count({ where: { order: orderWhere, igrac: { contains: "+ lopta ", mode: "insensitive" } } }),
-      prisma.orderItem.count({ where: { order: orderWhere, igrac: { contains: "+ kapa ", mode: "insensitive" } } })
+      prisma.orderItem.count({ where: { order: orderWhere, OR: mixAddonPhrases("lopta").map((ph) => ({ igrac: { contains: ph, mode: "insensitive" as const } })) } }),
+      prisma.orderItem.count({ where: { order: orderWhere, OR: mixAddonPhrases("kapa").map((ph) => ({ igrac: { contains: ph, mode: "insensitive" as const } })) } })
     ]);
     const count = all._count;
     const revenue = all._sum.unitPrice ?? 0;

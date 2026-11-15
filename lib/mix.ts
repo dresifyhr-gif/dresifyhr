@@ -47,17 +47,29 @@ export function addonsText(a?: MixAddons) {
   return s;
 }
 
+// Točan zapis dodatka ("+ lopta Barcelona") — vezan uz NAZIV KLUBA, da se ne
+// poklopi s nazivima kompleta "(dres + hlačice + lopta + kapa)".
+const LABELS = MIX_CLUBS.map((c) => c.label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+const ADDON_RE = { lopta: new RegExp(`\\+ lopta (?:${LABELS})`, "i"), kapa: new RegExp(`\\+ kapa (?:${LABELS})`, "i") };
+const ADDON_STRIP_RE = new RegExp(`\\s*\\+ (?:lopta|kapa) (?:${LABELS})`, "gi");
+
+// Svi točni zapisi za upit u bazi (Prisma contains), npr. "+ lopta Barcelona".
+export const mixAddonPhrases = (kind: MixKind) => MIX_CLUBS.map((c) => `+ ${kind} ${c.label}`);
+
 // Za obračun nabave iz spremljenih stavki (igrac tekst).
 export function mixAddonsInText(text?: string | null) {
   const t = text || "";
-  return { lopta: /\+ lopta /i.test(t) ? 1 : 0, kapa: /\+ kapa /i.test(t) ? 1 : 0 };
+  return { lopta: ADDON_RE.lopta.test(t) ? 1 : 0, kapa: ADDON_RE.kapa.test(t) ? 1 : 0 };
 }
 
-// Mix ide samo uz obične dresove i dugi rukav — ne uz komplete (već imaju
-// loptu i kapu), trenirke, streetwear ni mystery.
+// Ukloni zapis dodataka koji je došao od klijenta (server ga dodaje sam, samo naplaćen).
+export const stripAddonText = (text: string) => text.replace(ADDON_STRIP_RE, "");
+
+// Mix ide uz obične dresove, dugi rukav i trenirke — ne uz komplete (već imaju
+// loptu i kapu), streetwear ni mystery.
 export function isMixEligible(p: { slug: string; liga?: string; category?: string }) {
   if (p.liga === "Komplet") return false;
-  if (p.category === "trenirka" || p.category === "streetwear") return false;
+  if (p.category === "streetwear") return false;
   if (/mystery/i.test(p.slug)) return false;
   return true;
 }

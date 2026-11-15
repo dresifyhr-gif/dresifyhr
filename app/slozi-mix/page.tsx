@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { MixJerseyChooser, type MixJersey } from "@/components/site/mix-jersey-chooser";
-import { jerseys } from "@/lib/data/jerseys";
+import { getJerseySizeOptions, jerseys } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { getCatalogProducts } from "@/lib/data/product-overrides";
 import { MIX_ADDON_PRICE_EUR, MIX_CLUBS, isMixEligible, mixImage } from "@/lib/mix";
@@ -12,13 +12,19 @@ import { repairText } from "@/lib/utils";
 export const metadata = buildMetadata({
   title: "Složi svoj mix — dres + lopta + kapa po izboru",
   description:
-    "Složi svoj nogometni mix: odaberi dres, pa dodaj loptu i/ili kapu kluba po želji. Dres + lopta ili kapa 30 €, dres + oboje 40 €. Plaćanje pouzećem, dostava po cijeloj Hrvatskoj.",
+    "Složi svoj nogometni mix: odaberi dres ili trenirku, pa dodaj loptu i/ili kapu kluba po želji. Dres + lopta ili kapa 30 €, dres + oboje 40 €. Plaćanje pouzećem, dostava po cijeloj Hrvatskoj.",
   path: "/slozi-mix",
   keywords: ["dres i lopta", "dres lopta kapa", "nogometni set", "poklon za nogometaša", "složi svoj mix"]
 });
 
 export default async function SloziMixPage() {
-  const products = (await getCatalogProducts(jerseys)).filter(isMixEligible);
+  // Samo dresovi kojima je ostala barem jedna veličina (rasprodani nemaju mix izbor).
+  const hasStock = (p: Parameters<typeof getJerseySizeOptions>[0]) => {
+    const o = getJerseySizeOptions(p);
+    const sizes = [...(o.adultsOutOfStock ? [] : o.adults), ...(o.kidsOutOfStock ? [] : o.kids)];
+    return sizes.some((s) => !o.soldOutSizes.includes(s));
+  };
+  const products = (await getCatalogProducts(jerseys)).filter((p) => isMixEligible(p) && hasStock(p));
   const list: MixJersey[] = products.map((p) => ({
     slug: p.slug,
     klub: repairText(p.klub),
@@ -38,14 +44,16 @@ export default async function SloziMixPage() {
               Složi svoj <span className="text-accent">mix</span>
             </h1>
             <p className="mt-4 text-base leading-7 text-white/65">
-              Odaberi bilo koji dres, pa mu dodaj loptu i/ili kapu — klub biraš sam. Savršen poklon za malog ili velikog navijača.
+              Odaberi bilo koji dres ili trenirku, pa dodaj loptu i/ili kapu — klub biraš sam. Savršen poklon za malog ili velikog navijača.
             </p>
             <div className="mt-5 grid max-w-md grid-cols-2 gap-2 text-sm">
               {[
                 ["Dres + lopta ili kapa", "30 €"],
                 ["Dres + lopta + kapa", "40 €"],
                 ["Dugi rukav + jedno", "40 €"],
-                ["Dugi rukav + oboje", "50 €"]
+                ["Dugi rukav + oboje", "50 €"],
+                ["Trenirka + jedno", "45 €"],
+                ["Trenirka + oboje", "55 €"]
               ].map(([l, p]) => (
                 <div key={l} className="rounded-[10px] border border-white/10 bg-[#0d0d0d] px-3 py-2.5">
                   <p className="text-white/60">{l}</p>
@@ -73,7 +81,7 @@ export default async function SloziMixPage() {
           ))}
         </div>
 
-        <h2 className="mt-10 font-heading text-2xl uppercase text-white">1. Odaberi dres</h2>
+        <h2 className="mt-10 font-heading text-2xl uppercase text-white">1. Odaberi dres ili trenirku</h2>
         <p className="mb-4 mt-1 text-sm text-white/55">Klikni dres → odaberi veličinu → dodaj loptu i/ili kapu.</p>
         <MixJerseyChooser jerseys={list} />
       </div>

@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { parseOrderPayload } from "@/lib/orders";
 import { lookupPromo } from "@/lib/promo-db";
 import { phoneKey } from "@/lib/utils";
-import { SHIPPING_PRICE_EUR, FREE_SHIPPING_THRESHOLD_EUR } from "@/lib/site";
+import { SHIPPING_PRICE_EUR, FREE_SHIPPING_THRESHOLD_EUR, JERSEY_PRICE_EUR } from "@/lib/site";
 import { sendOrderNotifications, sendAdminTelegramText } from "@/lib/notifications";
 import { sendNewOrderPush } from "@/lib/push";
 import { logOrderToSheet } from "@/lib/sheets";
@@ -15,7 +15,7 @@ import { normalizeIgHandle, autoEnterGiveaway } from "@/lib/giveaway";
 import { sendCapiPurchase } from "@/lib/meta-capi";
 import { decrementSizeStock } from "@/lib/stock";
 import { bustCache } from "@/lib/cache-tags";
-import { MIX_ADDON_PRICE_EUR, addonCount, addonsText, isMixEligible, type MixAddons } from "@/lib/mix";
+import { MIX_ADDON_PRICE_EUR, addonCount, addonsText, isMixEligible, stripAddonText, type MixAddons } from "@/lib/mix";
 
 export const runtime = "nodejs";
 
@@ -47,7 +47,11 @@ function repriceItems(items: { slug: string; unitPrice: number; addons?: MixAddo
   for (const it of items) {
     const p = it.slug ? products.get(it.slug) : undefined;
     // Mix: lopta/kapa +10 € svaka — cijena kataloga + dodaci (applyMixAddons ih je već provjerio).
-    const price = typeof p?.price === "number" ? p.price + addonCount(it.addons) * MIX_ADDON_PRICE_EUR : undefined;
+    // Većina dresova nema upisanu cijenu (= zadanih 20 €), pa za mix stavke uzimamo
+    // zadanu — inače bi klijentska cijena prošla bez provjere dodataka.
+    const n = addonCount(it.addons);
+    const base = typeof p?.price === "number" ? p.price : p && n ? JERSEY_PRICE_EUR : undefined;
+    const price = typeof base === "number" ? base + n * MIX_ADDON_PRICE_EUR : undefined;
     if (typeof price === "number" && price > 0 && price !== it.unitPrice) {
       it.unitPrice = price;
       changed = true;
@@ -61,6 +65,7 @@ function repriceItems(items: { slug: string; unitPrice: number; addons?: MixAddo
 // pa ga vide admin, mailovi, Sheets i obračun nabave (mixAddonsInText).
 function applyMixAddons(items: { slug: string; igrac: string; addons?: MixAddons }[], products: FreshProducts) {
   for (const it of items) {
+    it.igrac = stripAddonText(it.igrac || ""); // dodatke upisuje SAMO server (i naplati ih)
     if (!addonCount(it.addons)) { it.addons = undefined; continue; }
     const p = (it.slug ? products.get(it.slug) : undefined) ?? (it.slug ? getJerseyBySlug(it.slug) : undefined);
     if (!p || !isMixEligible(p)) { it.addons = undefined; continue; }

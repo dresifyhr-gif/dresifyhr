@@ -37,7 +37,7 @@ export function MixJerseyChooser({ jerseys }: { jerseys: MixJersey[] }) {
             <div className="p-3">
               <p className="truncate text-xs uppercase tracking-wide text-white/50">{j.klub}</p>
               <p className="truncate text-sm font-semibold text-white">{j.igrac}</p>
-              <p className="mt-1 text-xs text-accent">Dres {j.price} € → mix od {j.price + 10} €</p>
+              <p className="mt-1 text-xs text-accent">Mix {j.price + 10}–{j.price + 20} € · dres {j.price} €</p>
             </div>
           </Link>
         ))}

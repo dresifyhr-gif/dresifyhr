@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 
 import { CURRENCY_LABEL, JERSEY_PRICE_EUR, SITE_URL, WHATSAPP_URL } from "@/lib/site";
+import { addonsText, type MixAddons } from "@/lib/mix";
 
 export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
@@ -159,14 +160,14 @@ export function createCartInquiryMessage(
 }
 
 // Što je zapravo artikl — po kategoriji, ne po "segmentu" (trenirka nije dres).
-export function cartItemTypeLabel(item: { segmentLabel: string; category?: string }) {
-  if (item.category === "trenirka") return "trenirka (jakna + hlače)";
+export function cartItemTypeLabel(item: { segmentLabel: string; category?: string; addons?: MixAddons }) {
+  if (item.category === "trenirka") return `trenirka (jakna + hlače)${addonsText(item.addons)}`;
   if (item.category === "streetwear") return "streetwear";
   return item.segmentLabel.toLowerCase();
 }
 
 export function createCartOrderSummary(
-  items: Array<{ klub: string; igrac: string; size: string; segmentLabel: string; category?: string; price?: number }>
+  items: Array<{ klub: string; igrac: string; size: string; segmentLabel: string; category?: string; price?: number; addons?: MixAddons }>
 ) {
   if (!items.length) {
     return "";

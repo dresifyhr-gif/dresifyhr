@@ -101,7 +101,7 @@ export function MixPicker({ product, selectedSize, segment, segmentLabel, imageS
           {row("kapa", "Kapa")}
 
           <div className="mt-4 space-y-1 text-sm text-white/70">
-            <div className="flex justify-between"><span>Dres</span><span>{base} €</span></div>
+            <div className="flex justify-between"><span>{product.category === "trenirka" ? "Trenirka" : "Dres"}</span><span>{base} €</span></div>
             {addons.lopta && <div className="flex justify-between"><span>Lopta {MIX_CLUBS.find((c) => c.key === addons.lopta)?.label}</span><span>+{MIX_ADDON_PRICE_EUR} €</span></div>}
             {addons.kapa && <div className="flex justify-between"><span>Kapa {MIX_CLUBS.find((c) => c.key === addons.kapa)?.label}</span><span>+{MIX_ADDON_PRICE_EUR} €</span></div>}
             <div className="flex justify-between border-t border-white/10 pt-2 text-base font-bold text-white"><span>Ukupno</span><span>{total} €</span></div>

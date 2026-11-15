@@ -22,8 +22,8 @@ export function MixPromoCard() {
       <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">Novo</p>
         <h3 className="text-sm font-semibold uppercase leading-tight text-white sm:text-base">Složi svoj mix</h3>
-        <p className="text-xs text-white/55">Dres + lopta i/ili kapa — klub po izboru</p>
-        <p className="mt-auto pt-2 font-heading text-lg text-accent">od 30 €</p>
+        <p className="text-xs text-white/55">Dres + lopta i/ili kapa — klub po izboru. Jedno 30 €, oboje 40 €.</p>
+        <p className="mt-auto pt-2 font-heading text-lg text-accent">30–40 €</p>
       </div>
     </Link>
   );
