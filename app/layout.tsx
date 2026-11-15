@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { christmasSeasonOpen, currentSeasonDeadline } from "@/lib/christmas";
 import { ClerkProvider } from "@clerk/nextjs";
 import { hrHR } from "@clerk/localizations";
 import { Barlow, Bebas_Neue } from "next/font/google";
@@ -99,8 +100,8 @@ export default async function RootLayout({
     heroTitle: s.heroTitle,
     heroSubtitle: s.heroSubtitle,
     // Sama se gasi 27.12. (godina iz roka narudžbe), da nitko ne mora pamtiti.
-    christmasOn: (s.christmasActive || (process.env.NODE_ENV !== "production" && process.env.XMAS_PREVIEW === "1")) && Date.now() < Date.parse(`${s.christmasDeadline.slice(0, 4)}-12-27T00:00:00+01:00`),
-    christmasDeadline: s.christmasDeadline
+    christmasOn: (s.christmasActive || (process.env.NODE_ENV !== "production" && process.env.XMAS_PREVIEW === "1")) && christmasSeasonOpen(),
+    christmasDeadline: currentSeasonDeadline(s.christmasDeadline)
   };
 
   const cookieStore = await cookies();

@@ -110,7 +110,7 @@ const DEFAULTS: ShopSettings = {
   accentColor: "#e8ff3c",
   koloActive: false,          // kolo sreće — pali se u Postavkama
   christmasActive: false,     // božićna tema — prekidač u Postavkama
-  christmasDeadline: "2026-12-19",
+  christmasDeadline: `${new Date().getFullYear()}-12-19`,
   klubActive: false,          // pali se u Postavkama kad Gazda želi
   klubTarget: 3,              // 3 preuzete narudžbe
   klubRewardKind: "amount",   // fiksni popust = gratis dres

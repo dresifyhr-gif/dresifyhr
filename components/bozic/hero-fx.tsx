@@ -66,12 +66,15 @@ export function ChristmasHeroFx() {
     };
 
     const start = performance.now();
-    const loop = (now: number) => { if (visible) draw((now - start) / 1000); raf = requestAnimationFrame(loop); };
+    const loop = (now: number) => { draw((now - start) / 1000); raf = visible ? requestAnimationFrame(loop) : 0; };
     resize();
     if (reduce) draw(8); else raf = requestAnimationFrame(loop);
     const ro = new ResizeObserver(() => { resize(); if (reduce) draw(8); });
     ro.observe(c);
-    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; });
+    const io = new IntersectionObserver(([e]) => {
+      const was = visible; visible = e.isIntersecting;
+      if (!reduce && visible && !was && !raf) raf = requestAnimationFrame(loop);
+    });
     io.observe(c);
     return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); };
   }, []);
@@ -83,7 +86,7 @@ export function ChristmasHeroFx() {
       <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay" style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")" }} />
       {/* iscrtani DRESIFY */}
       <div className="xmas-ghost absolute left-0 top-[34%] whitespace-nowrap font-heading uppercase leading-[0.8] text-[62vw] lg:top-1/2 lg:text-[30vw]">
-        DRESIFY DRESIFY DRESIFY
+        <span>DRESIFY</span><span>DRESIFY</span><span>DRESIFY</span><span>DRESIFY</span>
       </div>
     </div>
   );

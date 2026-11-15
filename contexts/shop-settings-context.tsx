@@ -32,7 +32,7 @@ const FALLBACK: PublicShopSettings = {
   heroTitle: "",
   heroSubtitle: "",
   christmasOn: false,
-  christmasDeadline: "2026-12-19"
+  christmasDeadline: `${new Date().getFullYear()}-12-19`
 };
 
 const Ctx = createContext<PublicShopSettings>(FALLBACK);
