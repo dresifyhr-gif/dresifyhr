@@ -3,9 +3,10 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gamepad2, House, Shirt, User } from "lucide-react";
+import { House, Shirt, ShoppingBag, User } from "lucide-react";
 
 import { useWhatsAppUrl } from "@/contexts/shop-settings-context";
+import { useCart } from "@/components/providers/cart-provider";
 
 // Donja navigacija u stilu aplikacije — samo mobitel (md:hidden).
 // Puna crna pozadina, bez blura (vidi pravila brzine). Visinu javlja kroz
@@ -14,9 +15,6 @@ import { useWhatsAppUrl } from "@/contexts/shop-settings-context";
 
 // Stranice s vlastitom donjom trakom ili tokom kupnje — tu je nema.
 const HIDDEN_PREFIXES = ["/dres/", "/kosarica", "/checkout", "/zahvala", "/admin", "/prijava", "/registracija"];
-
-// Pojedinačne igre (/igra, /kolo, /kviz …) — tab "Igrice" ostaje označen.
-const GAME_PREFIXES = ["/igra", "/flappy", "/gadaj", "/kolo", "/kviz", "/spojnica", "/trkac", "/uhvati", "/zmija"];
 
 const CATALOG_PREFIXES = ["/dresovi", "/kompleti", "/trenirke", "/streetwear"];
 
@@ -37,13 +35,13 @@ const WA_PATH = "M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2
 const ITEMS: Item[] = [
   { href: "/", label: "Početna", icon: House, match: (p) => p === "/" },
   { href: "/dresovi/", label: "Dresovi", icon: Shirt, match: (p) => CATALOG_PREFIXES.some((c) => p === c || p.startsWith(`${c}/`)) },
-  { href: "/igre/", label: "Igrice", icon: Gamepad2, match: (p) => p === "/igre" || GAME_PREFIXES.some((g) => p === g || p.startsWith(`${g}/`)) },
   { href: "/racun/", label: "Račun", icon: User, match: (p) => p === "/racun" || p.startsWith("/racun/") }
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
   const whatsappUrl = useWhatsAppUrl();
+  const { itemCount, openDrawer } = useCart();
   const hidden = isBottomNavHidden(pathname);
   const p = normalize(pathname);
 
@@ -81,7 +79,27 @@ export function BottomNav() {
               </a>
             </li>
           ) : null;
-          return [wa, (
+          const cart = idx === 2 ? (
+            <li key="kosarica" className="min-w-0">
+              <button
+                type="button"
+                onClick={openDrawer}
+                aria-label={`Košarica (${itemCount})`}
+                className="flex h-full w-full flex-col items-center justify-center gap-1 text-[10px] font-medium leading-none tracking-[0.02em] text-white/55 active:text-white"
+              >
+                <span className="relative flex h-8 items-center justify-center">
+                  <ShoppingBag strokeWidth={1.5} className="h-[22px] w-[22px]" />
+                  {itemCount > 0 ? (
+                    <span className="absolute -right-2.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold leading-none text-black">
+                      {itemCount > 99 ? "99+" : itemCount}
+                    </span>
+                  ) : null}
+                </span>
+                <span className="max-w-full truncate px-0.5">Košarica</span>
+              </button>
+            </li>
+          ) : null;
+          return [wa, cart, (
             <li key={item.href} className="min-w-0">
               <Link
                 href={item.href}

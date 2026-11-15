@@ -13,12 +13,14 @@ import { useWishlist } from "@/components/providers/wishlist-provider";
 import { useLanguage } from "@/contexts/language-context";
 import { useShopSettings } from "@/contexts/shop-settings-context";
 import { SearchOverlay } from "@/components/site/search-overlay";
+import { isBottomNavHidden } from "@/components/site/bottom-nav";
 import type { Locale } from "@/lib/i18n";
 
 export function Navbar() {
   const pathname = usePathname();
   const { itemCount, openDrawer } = useCart();
   const { count: favCount } = useWishlist();
+  const navHidden = isBottomNavHidden(pathname);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { t, locale, setLocale } = useLanguage();
   const { christmasOn } = useShopSettings();
@@ -63,7 +65,7 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0a0a0a]">
-        {/* MOBILE (60px): izbornik + pretraga lijevo · logo u sredini · favoriti + košarica desno (račun je u donjoj traci) */}
+        {/* MOBILE (60px): izbornik + pretraga lijevo · logo u sredini · favoriti desno (košarica i račun su u donjoj traci) */}
         <div className="page-shell grid h-[60px] grid-cols-[1fr_auto_1fr] items-center gap-2 md:hidden">
           <div className="flex items-center gap-1 justify-self-start">
             <button
@@ -95,17 +97,20 @@ export function Navbar() {
                 </span>
               ) : null}
             </Link>
-            <button
-              type="button"
-              onClick={openDrawer}
-              className="relative inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
-              aria-label={t.nav.openCart}
-            >
-              <ShoppingBag className="h-[18px] w-[18px]" />
-              <span className="absolute -right-2 -top-2 min-w-6 rounded-full bg-accent px-1.5 py-1 text-[11px] font-bold leading-none text-black">
-                {itemCount}
-              </span>
-            </button>
+            {/* Košarica je u donjoj traci; gore samo gdje trake nema (dres, košarica, narudžba). */}
+            {navHidden && (
+              <button
+                type="button"
+                onClick={openDrawer}
+                className="relative inline-flex h-11 w-11 items-center justify-center text-white transition-all duration-200 ease-out hover:text-accent"
+                aria-label={t.nav.openCart}
+              >
+                <ShoppingBag className="h-[18px] w-[18px]" />
+                <span className="absolute -right-2 -top-2 min-w-6 rounded-full bg-accent px-1.5 py-1 text-[11px] font-bold leading-none text-black">
+                  {itemCount}
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
