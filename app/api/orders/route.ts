@@ -15,6 +15,7 @@ import { normalizeIgHandle, autoEnterGiveaway } from "@/lib/giveaway";
 import { sendCapiPurchase } from "@/lib/meta-capi";
 import { decrementSizeStock } from "@/lib/stock";
 import { bustCache } from "@/lib/cache-tags";
+import { MIX_ADDON_PRICE_EUR, addonCount, addonsText, isMixEligible, type MixAddons } from "@/lib/mix";
 
 export const runtime = "nodejs";
 
@@ -41,17 +42,30 @@ async function loadFreshProducts(items: { slug: string }[]): Promise<FreshProduc
 
 // SIGURNOST NOVCA: cijena svakog artikla uzima se iz kataloga (baze), ne od klijenta.
 // Ručne/nepoznate stavke zadržavaju klijentsku cijenu. Vraća novi subtotal.
-function repriceItems(items: { slug: string; unitPrice: number }[], products: FreshProducts) {
+function repriceItems(items: { slug: string; unitPrice: number; addons?: MixAddons }[], products: FreshProducts) {
   let changed = false;
   for (const it of items) {
     const p = it.slug ? products.get(it.slug) : undefined;
-    const price = p?.price;
+    // Mix: lopta/kapa +10 € svaka — cijena kataloga + dodaci (applyMixAddons ih je već provjerio).
+    const price = typeof p?.price === "number" ? p.price + addonCount(it.addons) * MIX_ADDON_PRICE_EUR : undefined;
     if (typeof price === "number" && price > 0 && price !== it.unitPrice) {
       it.unitPrice = price;
       changed = true;
     }
   }
   return { changed, subtotal: items.reduce((sum, it) => sum + (it.unitPrice || 0), 0) };
+}
+
+// "Složi svoj mix": dodaci samo uz dresove koji ih smiju imati; inače se odbacuju
+// (repriceItems tada vrati cijenu na katalošku). Tekst dodataka ide u igrac stavke,
+// pa ga vide admin, mailovi, Sheets i obračun nabave (mixAddonsInText).
+function applyMixAddons(items: { slug: string; igrac: string; addons?: MixAddons }[], products: FreshProducts) {
+  for (const it of items) {
+    if (!addonCount(it.addons)) { it.addons = undefined; continue; }
+    const p = (it.slug ? products.get(it.slug) : undefined) ?? (it.slug ? getJerseyBySlug(it.slug) : undefined);
+    if (!p || !isMixEligible(p)) { it.addons = undefined; continue; }
+    it.igrac = `${it.igrac}${addonsText(it.addons)}`;
+  }
 }
 
 async function findUnavailableItems(
@@ -117,6 +131,7 @@ export async function POST(request: Request) {
     // vidio (stara stranica ili podvala), vrijedi katalog + napomena za admina.
     const freshProducts = await loadFreshProducts(payload!.items ?? []);
     const items = payload!.items ?? [];
+    applyMixAddons(items, freshProducts);
     // Samo kad je SVAKA stavka u košarici imala cijenu — inače klijentski subtotal ostaje.
     if (items.length && items.every((it) => it.unitPrice > 0)) {
       const clientSubtotal = payload!.subtotal;

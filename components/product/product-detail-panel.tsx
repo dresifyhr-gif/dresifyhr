@@ -7,6 +7,7 @@ import { useCart } from "@/components/providers/cart-provider";
 import { useLanguage } from "@/contexts/language-context";
 import { StickyAddToCart } from "@/components/product/sticky-add-to-cart";
 import { SizeGuide } from "@/components/product/size-guide";
+import { MixPicker } from "@/components/product/mix-picker";
 import { Stars } from "@/components/site/stars";
 import { fbTrack } from "@/lib/fbpixel";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
@@ -196,6 +197,17 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
       >
         {allSoldOut ? "Trenutno rasprodano" : t.product.addToCart}
       </button>
+
+      {!allSoldOut && (
+        <MixPicker
+          product={product}
+          selectedSize={selectedSize}
+          segment={segment}
+          segmentLabel={segmentLabel}
+          imageSrc={frontImage}
+          needsSize={needsSize}
+        />
+      )}
 
       {/* Reassurance u trenutku odluke — najveći strah kod pouzeća je "što ako
           platim pa ne stigne". Zato baš ispod gumba potvrdimo: platiš TEK kad

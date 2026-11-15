@@ -1,4 +1,5 @@
 import { FREE_SHIPPING_THRESHOLD_EUR, SHIPPING_PRICE_EUR } from "@/lib/site";
+import { cleanAddons, type MixAddons } from "@/lib/mix";
 
 export type FulfillmentType = "delivery";
 export type ContactChannelType = "web" | "whatsapp" | "instagram";
@@ -10,6 +11,7 @@ export type OrderLineInput = {
   size: string;
   segment: string;
   unitPrice: number;
+  addons?: MixAddons; // "Složi svoj mix" — provjerava i naplaćuje server
 };
 
 export type OrderPayload = {
@@ -126,7 +128,8 @@ export function parseOrderPayload(body: unknown): { payload?: OrderPayload; erro
         igrac: normalizeText(it.igrac),
         size: normalizeText(it.size),
         segment: normalizeText(it.segment),
-        unitPrice: parseMoney(it.unitPrice)
+        unitPrice: parseMoney(it.unitPrice),
+        addons: cleanAddons(it.addons)
       };
     })
   };

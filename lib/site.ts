@@ -24,6 +24,9 @@ export const COST_STREETWEAR_EUR = 25;
 export const COST_LONGSLEEVE_EUR = 10;
 // Trenirka (komplet jakna + hlače, prodaja 35 €) — nabava 16 € → profit 19 € po komadu.
 export const COST_TRENIRKA_EUR = 16;
+// "Složi svoj mix" dodaci (prodaja +10 € svaki) — nabava 5 € lopta, 5 € kapa.
+export const COST_LOPTA_EUR = 5;
+export const COST_KAPA_EUR = 5;
 
 export const META_PIXEL_ID = "1621563625577336";
 export const HOME_DELIVERY_PRICE_EUR = 6;

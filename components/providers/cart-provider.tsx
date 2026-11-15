@@ -1,5 +1,6 @@
 "use client";
 
+import type { MixAddons } from "@/lib/mix";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 import { JERSEY_PRICE_EUR } from "@/lib/site";
@@ -16,6 +17,7 @@ export type CartItem = {
   price: number;
   imageSrc?: string;
   category?: string; // "streetwear" → besplatna dostava
+  addons?: MixAddons; // "Složi svoj mix": lopta/kapa po klubu (cijena već uključena u price)
 };
 
 export type CartInput = Omit<CartItem, "id" | "price"> & { price?: number };
@@ -84,7 +86,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = (item: CartInput) => {
     const nextItem = {
       ...item,
-      id: `${item.slug}-${item.segment}-${item.size}-${Date.now()}`,
+      id: `${item.slug}-${item.segment}-${item.size}${item.addons?.lopta ? `-l${item.addons.lopta}` : ""}${item.addons?.kapa ? `-k${item.addons.kapa}` : ""}-${Date.now()}`,
       price: item.price ?? JERSEY_PRICE_EUR
     };
 

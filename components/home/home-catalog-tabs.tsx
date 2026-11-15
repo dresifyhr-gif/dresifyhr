@@ -84,7 +84,7 @@ export function HomeCatalogTabs({
       )}
 
       {tab === "dresovi" && (
-        <CatalogBrowser products={dresovi} compactHeader headingLabel={headingLabel} headingTitle={headingTitle} headingDesc={headingDesc} />
+        <CatalogBrowser products={dresovi} compactHeader showMixPromo headingLabel={headingLabel} headingTitle={headingTitle} headingDesc={headingDesc} />
       )}
 
       {tab === "trenirka" && (

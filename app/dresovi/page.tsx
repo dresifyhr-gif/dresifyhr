@@ -59,7 +59,7 @@ export default async function JerseysPage() {
           ]}
         />
 
-        <CatalogBrowser products={forCards(dresovi)} />
+        <CatalogBrowser products={forCards(dresovi)} showMixPromo />
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <SeoLinkGrid

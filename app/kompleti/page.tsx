@@ -51,6 +51,7 @@ export default async function KompletiPage() {
         />
 
         <CatalogBrowser
+          showMixPromo
           products={forCards(kompleti)}
           headingLabel="Komplete"
           headingTitle="Komplete — Dres + Hlačice + Lopta + Kapa. 40€."

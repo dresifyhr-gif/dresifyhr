@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/site/product-card";
+import { MixPromoCard } from "@/components/site/mix-promo-card";
 import { useLanguage } from "@/contexts/language-context";
 import { hasJerseyGallery } from "@/lib/data/jersey-media";
 import {
@@ -25,6 +26,7 @@ type CatalogBrowserProps = {
   headingLabel?: string;
   headingTitle?: string;
   headingDesc?: string;
+  showMixPromo?: boolean; // prva kartica "Složi svoj mix"
 };
 
 type FilterSectionKey = "liga" | "klub" | "igrac" | "velicina" | "retro" | "dugirukav";
@@ -118,7 +120,7 @@ function FilterSection({
   );
 }
 
-export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc }: CatalogBrowserProps) {
+export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc, showMixPromo = false }: CatalogBrowserProps) {
   const { t, locale } = useLanguage();
   // Klubovi za filter se grade iz STVARNIH proizvoda (uključujući ručno dodane/custom),
   // ne iz statičnog kataloga — inače novi klub/repka (npr. Palestina) nema svoj filter/grupu.
@@ -701,6 +703,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           ) : null}
 
           <div className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-3 2xl:grid-cols-3">
+            {showMixPromo && <MixPromoCard />}
             {filteredProducts.slice(0, visibleCount).map((product, index) => (
               // Na naslovnici je katalog ispod hero slike → bez priority da ne krade hero sliku.
               <ProductCard key={product.slug} product={product} priority={!compactHeader && index < 4} />

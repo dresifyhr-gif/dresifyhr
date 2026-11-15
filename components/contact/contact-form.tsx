@@ -342,7 +342,8 @@ export function ContactForm() {
               igrac: repairText(item.igrac),
               size: item.size,
               segment: item.segment,
-              unitPrice: item.price
+              unitPrice: item.price,
+              ...(item.addons ? { addons: item.addons } : {})
             }))
           : undefined,
         createdAt: new Date().toISOString(),
