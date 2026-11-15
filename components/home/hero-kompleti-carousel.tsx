@@ -30,7 +30,17 @@ const KOMPLET_SLIDES: Slide[] = [
   { key: "portugal-ronaldo-komplet", alt: "Portugal Ronaldo komplet — dres, hlačice, lopta i kapa" },
 ].map((s) => ({ ...s, src: `/dresovi/${s.key}/komplet.png`, href: "/kompleti", cta: "Pogledaj komplete →" }));
 
-// Božićna tema: prvi slajd (Postavke → Božićna tema).
+// Božićna tema: Mihaelova božićna reklama (kvadrat, bez zvuka) umjesto obične.
+const XMAS_VIDEO_SLIDE: Slide = {
+  key: "video-bozic",
+  alt: "Dresify — božićna reklama",
+  video: "/hero/reklama-bozic.mp4",
+  poster: "/hero/reklama-bozic-poster.jpg",
+  href: "/slozi-mix",
+  cta: "Složi svoj mix →"
+};
+
+// Božićna tema: slajd sa slikom (Postavke → Božićna tema).
 const XMAS_SLIDE: Slide = {
   key: "bozic",
   alt: "Božićna kolekcija — dres, lopta i kapa, složi svoj mix",
@@ -57,8 +67,7 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
   const { christmasOn } = useShopSettings();
   const SLIDES: Slide[] = useMemo(
     () => [
-      ...(christmasOn ? [XMAS_SLIDE] : []),
-      VIDEO_SLIDE,
+      ...(christmasOn ? [XMAS_VIDEO_SLIDE, XMAS_SLIDE] : [VIDEO_SLIDE]),
       PS5_SLIDE,
       ...(mysteryImage
         ? [{ key: "mystery", alt: "Mystery Box — nasumičan dres, iznenađenje", src: mysteryImage, href: "/dres/dresify-mystery-3-pack", cta: "Naruči Mystery Box →" } as Slide]
