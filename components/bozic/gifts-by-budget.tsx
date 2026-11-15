@@ -41,7 +41,7 @@ export function GiftsByBudget() {
   if (!christmasOn) return null;
   return (
     <section className="bg-black">
-      <div className="page-shell py-12 sm:py-14">
+      <div className="page-shell py-9 md:py-14">
         <div className="flex items-center gap-3 text-[11px] font-extrabold tracking-[0.28em]" style={{ color: GOLD }}>
           <span className="h-px w-7" style={{ background: GOLD }} />
           BOŽIĆNI VODIČ ZA POKLONE
@@ -51,12 +51,12 @@ export function GiftsByBudget() {
         </h2>
         <p className="mb-3.5 mt-2 text-[15px] text-white/60">Svaki poklon stiže u kutiji — plaćaš tek kad stigne.</p>
         <Countdown deadline={christmasDeadline} />
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden">
           {CARDS.map((c, i) => (
             <Link
               key={c.price}
               href={c.href}
-              className="group relative block h-[320px] overflow-hidden rounded-[20px] border sm:h-[360px]"
+              className="group relative block h-[220px] w-[78%] shrink-0 snap-start overflow-hidden rounded-[18px] border md:h-[360px] md:w-auto md:rounded-[20px]"
               style={{ borderColor: "rgba(227,184,92,.22)", background: "radial-gradient(ellipse 90% 75% at 75% 85%,#1f5a43,#0E2A20 58%,#07170f)" }}
             >
               <span className="absolute inset-x-0 top-0 h-[2px] opacity-70" style={{ background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
@@ -68,12 +68,12 @@ export function GiftsByBudget() {
                 sizes="(max-width: 768px) 70vw, 25vw"
                 className={`absolute object-contain drop-shadow-[0_22px_30px_rgba(0,0,0,.45)] transition-transform duration-500 ease-out group-hover:-translate-y-1.5 group-hover:scale-[1.03] ${c.pos}`}
               />
-              <div className="relative z-[2] max-w-[48%] p-6">
+              <div className="relative z-[2] max-w-[52%] p-4 md:max-w-[48%] md:p-6">
                 <div className="text-[11px] font-extrabold tracking-[0.24em]" style={{ color: GOLD }}>POKLON {i + 1}</div>
-                <div className="mt-2 whitespace-nowrap font-heading text-[46px] uppercase leading-[0.95] text-white sm:text-[56px]">{c.price}</div>
-                <div className="mt-2 text-[14px] leading-snug text-white/70">{c.text}</div>
+                <div className="mt-2 whitespace-nowrap font-heading text-[36px] uppercase leading-[0.95] text-white md:text-[56px]">{c.price}</div>
+                <div className="mt-1.5 text-[12.5px] leading-snug text-white/70 md:mt-2 md:text-[14px]">{c.text}</div>
               </div>
-              <span className="absolute bottom-[22px] left-6 z-[3] rounded-full bg-accent px-[18px] py-2.5 text-[13px] font-extrabold text-black">
+              <span className="absolute bottom-4 left-4 z-[3] rounded-full bg-accent px-3.5 py-2 text-[12px] font-extrabold text-black md:bottom-[22px] md:left-6 md:px-[18px] md:py-2.5 md:text-[13px]">
                 Složi poklon →
               </span>
             </Link>
