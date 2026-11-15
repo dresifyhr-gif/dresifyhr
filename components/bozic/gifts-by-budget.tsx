@@ -51,7 +51,7 @@ export function GiftsByBudget() {
         </h2>
         <p className="mb-3.5 mt-2 text-[15px] text-white/60">Svaki poklon stiže u kutiji — plaćaš tek kad stigne.</p>
         <Countdown deadline={christmasDeadline} />
-        <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-3 flex snap-x snap-mandatory scroll-px-3 gap-3 overflow-x-auto px-3 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden">
           {CARDS.map((c, i) => (
             <Link
               key={c.price}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import { useCart } from "@/components/providers/cart-provider";
@@ -15,18 +15,25 @@ type Props = {
   segmentLabel: string;
   imageSrc?: string;
   needsSize: boolean;
+  bare?: boolean; // u prozoru za brzo slaganje: uvijek otvoreno, bez zaglavlja
+  onAdded?: () => void;
 };
 
 // "⚽ Složi svoj mix" — uz dres kupac doda loptu i/ili kapu kluba po izboru.
-export function MixPicker({ product, selectedSize, segment, segmentLabel, imageSrc, needsSize }: Props) {
+export function MixPicker({ product, selectedSize, segment, segmentLabel, imageSrc, needsSize, bare = false, onAdded }: Props) {
   const { addItem } = useCart();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(bare);
   const [addons, setAddons] = useState<MixAddons>({});
+  const boxRef = useRef<HTMLDivElement>(null);
 
   // /dres/...?mix=1 (s artikla "Složi svoj mix") → izbor odmah otvoren.
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("mix") === "1") setOpen(true);
-  }, []);
+    if (!bare && new URLSearchParams(window.location.search).get("mix") === "1") {
+      setOpen(true);
+      // dovedi izbor veličine i mixa u ekran, bez skrolanja kupca
+      window.setTimeout(() => boxRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 350);
+    }
+  }, [bare]);
 
   if (!isMixEligible(product)) return null;
 
@@ -51,6 +58,7 @@ export function MixPicker({ product, selectedSize, segment, segmentLabel, imageS
       addons: { ...addons }
     });
     setAddons({});
+    onAdded?.();
   };
 
   const row = (kind: MixKind, title: string) => (
@@ -81,7 +89,8 @@ export function MixPicker({ product, selectedSize, segment, segmentLabel, imageS
   );
 
   return (
-    <div className="mt-4 rounded-[12px] border border-accent/30 bg-accent/[0.04]">
+    <div ref={boxRef} className={bare ? "" : "mt-4 scroll-mt-24 rounded-[12px] border border-accent/30 bg-accent/[0.04]"}>
+      {!bare && (
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -94,9 +103,10 @@ export function MixPicker({ product, selectedSize, segment, segmentLabel, imageS
         </span>
         <span className="text-lg text-accent">{open ? "−" : "+"}</span>
       </button>
+      )}
 
       {open && (
-        <div className="border-t border-accent/20 px-4 pb-4">
+        <div className={bare ? "" : "border-t border-accent/20 px-4 pb-4"}>
           {row("lopta", "Lopta")}
           {row("kapa", "Kapa")}
 

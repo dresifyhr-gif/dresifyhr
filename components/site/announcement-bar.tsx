@@ -26,7 +26,8 @@ export function AnnouncementBar() {
     () => (announcementText ? [announcementText] : t.announcement),
     [announcementText, t.announcement]
   );
-  const [isVisible, setIsVisible] = useState(false);
+  // Vidljiva od prvog crtanja (bez skoka sadržaja); ako ju je kupac danas zatvorio, sakrije se nakon učitavanja.
+  const [isVisible, setIsVisible] = useState(christmasOn || announcementActive);
   const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {

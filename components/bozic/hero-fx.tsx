@@ -22,7 +22,10 @@ export function ChristmasHeroFx() {
     const g = c.getContext("2d");
     if (!g) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    const small = window.innerWidth < 700;
+    // Mobitel: manja rezolucija i ~30 fps — izgleda isto, troši puno manje.
+    const DPR = small ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
+    let last = 0;
     let W = 0, H = 0, raf = 0, visible = true;
     let stars: { x: number; y: number; r: number; p: number; s: number; gold: boolean }[] = [];
 
@@ -66,7 +69,10 @@ export function ChristmasHeroFx() {
     };
 
     const start = performance.now();
-    const loop = (now: number) => { draw((now - start) / 1000); raf = visible ? requestAnimationFrame(loop) : 0; };
+    const loop = (now: number) => {
+      if (!small || now - last > 32) { draw((now - start) / 1000); last = now; }
+      raf = visible ? requestAnimationFrame(loop) : 0;
+    };
     resize();
     if (reduce) draw(8); else raf = requestAnimationFrame(loop);
     const ro = new ResizeObserver(() => { resize(); if (reduce) draw(8); });

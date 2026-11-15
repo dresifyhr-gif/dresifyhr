@@ -47,38 +47,24 @@ export function HomeCatalogTabs({
       {/* Switch */}
       {(hasStreetwear || hasTrenirke) && (
         <div className="mb-6 flex justify-center sm:mb-8">
-          <div className="inline-flex flex-wrap justify-center rounded-full border border-white/10 bg-[#111111] p-1">
-            <button
-              type="button"
-              onClick={() => setTab("dresovi")}
-              className={`rounded-full px-5 py-2.5 text-sm font-bold uppercase tracking-wide transition sm:px-7 ${
-                tab === "dresovi" ? "bg-accent text-black" : "text-white/60 hover:text-white"
-              }`}
-            >
-              👕 Dresovi
-            </button>
-            {hasTrenirke && (
+          <div className="grid w-full max-w-[460px] auto-cols-fr grid-flow-col rounded-full border border-white/10 bg-[#111111] p-1">
+            {([
+              ["dresovi", "Dresovi", true, "bg-accent text-black"],
+              ["trenirka", "Trenirke", hasTrenirke, "bg-teal-500 text-white"],
+              ["streetwear", "Streetwear", hasStreetwear, "bg-orange-500 text-white"]
+            ] as const).filter(([, , show]) => show).map(([key, label, , active]) => (
               <button
+                key={key}
                 type="button"
-                onClick={() => setTab("trenirka")}
-                className={`rounded-full px-5 py-2.5 text-sm font-bold uppercase tracking-wide transition sm:px-7 ${
-                  tab === "trenirka" ? "bg-teal-500 text-white" : "text-white/60 hover:text-white"
+                onClick={() => setTab(key)}
+                aria-pressed={tab === key}
+                className={`whitespace-nowrap rounded-full px-2 py-2.5 text-center text-[12.5px] font-bold uppercase tracking-[0.08em] transition sm:text-sm ${
+                  tab === key ? active : "text-white/60 hover:text-white"
                 }`}
               >
-                🏃 Trenirke
+                {label}
               </button>
-            )}
-            {hasStreetwear && (
-              <button
-                type="button"
-                onClick={() => setTab("streetwear")}
-                className={`rounded-full px-5 py-2.5 text-sm font-bold uppercase tracking-wide transition sm:px-7 ${
-                  tab === "streetwear" ? "bg-orange-500 text-white" : "text-white/60 hover:text-white"
-                }`}
-              >
-                🔥 Streetwear
-              </button>
-            )}
+            ))}
           </div>
         </div>
       )}

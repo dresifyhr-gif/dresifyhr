@@ -21,7 +21,7 @@ export function InstagramSection() {
           description={t.instagram.desc}
         />
 
-        <Script src="https://w.behold.so/widget.js" strategy="lazyOnload" />
+        <Script type="module" src="https://w.behold.so/widget.js" strategy="lazyOnload" />
         {/* @ts-expect-error custom element */}
         <behold-widget feed-id={BEHOLD_FEED_ID} />
 

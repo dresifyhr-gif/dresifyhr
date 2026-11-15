@@ -43,12 +43,12 @@ export function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 220, damping: 28 }}
-            className="fixed right-0 top-0 z-[60] flex h-full w-full max-w-md flex-col border-l border-white/10 bg-[#0a0a0a] p-5 shadow-2xl"
+            className="fixed right-0 top-0 z-[60] flex h-[100dvh] w-full max-w-md flex-col border-l border-white/10 bg-[#0a0a0a] px-4 pt-4 shadow-2xl sm:px-5 sm:pt-5"
           >
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-4 flex shrink-0 items-center justify-between sm:mb-6">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-white/45">{t.cart.label}</p>
-                <h2 className="mt-2 flex items-center gap-3 text-4xl uppercase leading-none text-white">
+                <h2 className="mt-2 flex items-center gap-3 text-3xl uppercase leading-none text-white sm:text-4xl">
                   <ShoppingBag className="h-8 w-8 text-accent" />
                   {t.cart.title}
                 </h2>
@@ -63,7 +63,7 @@ export function CartDrawer() {
               </button>
             </div>
 
-            <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+            <div className="-mx-1 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1 pb-4">
               {items.length ? (
                 items.map((item) => (
                   <div key={item.id} className="border border-white/10 bg-[#111111] p-4">
@@ -112,11 +112,8 @@ export function CartDrawer() {
                   {t.cart.empty}
                 </div>
               )}
-            </div>
-
-            <div className="mt-6 border border-white/10 bg-[#111111] p-5">
               {items.length ? (
-                <div className="mb-4 rounded-[6px] border border-accent/25 bg-accent/5 px-3 py-2.5">
+                <div className="mt-4 rounded-[6px] border border-accent/25 bg-accent/5 px-3 py-2.5">
                   <p className="text-center text-[12px] leading-5 text-white/75">
                     {freeShipping ? (
                       <span className="font-semibold text-accent">🎉 Ostvario si besplatnu dostavu!</span>
@@ -139,11 +136,14 @@ export function CartDrawer() {
                 </div>
               ) : null}
               {items.length ? (
-                <div className="mb-4">
+                <div className="mt-4">
                   <CartUpsell onNavigate={closeDrawer} />
                 </div>
               ) : null}
-              <div className="space-y-3 text-sm text-white">
+            </div>
+
+            <div className="shrink-0 border-t border-white/10 bg-[#0a0a0a] pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+              <div className="space-y-2 text-sm text-white">
                 <div className="flex items-center justify-between">
                   <span className="font-medium uppercase tracking-[0.2em] text-white/50">{t.cart.items}</span>
                   <span className="font-semibold">{formatEuroAmount(subtotal)}</span>
@@ -160,21 +160,23 @@ export function CartDrawer() {
                 </div>
               </div>
 
-              <div className="mt-5 grid gap-3">
-                <Link href="/kosarica" onClick={closeDrawer} className="button-secondary w-full">
-                  {t.cart.viewCart}
-                </Link>
+              <div className="mt-3 grid gap-2">
                 <Link href="/checkout" onClick={closeDrawer} className="button-primary w-full">
                   <span className="inline-flex items-center gap-2">
                     {t.cart.checkout}
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 </Link>
-                {items.length ? (
-                  <button type="button" onClick={clearCart} className="button-secondary w-full">
-                    {t.cart.clear}
-                  </button>
-                ) : null}
+                <div className="flex items-center justify-between px-1 pt-1 text-xs">
+                  <Link href="/kosarica" onClick={closeDrawer} className="font-semibold uppercase tracking-[0.18em] text-white/70 underline-offset-4 hover:text-white hover:underline">
+                    {t.cart.viewCart}
+                  </Link>
+                  {items.length ? (
+                    <button type="button" onClick={clearCart} className="uppercase tracking-[0.18em] text-white/40 hover:text-white/70">
+                      {t.cart.clear}
+                    </button>
+                  ) : null}
+                </div>
               </div>
             </div>
           </motion.aside>
