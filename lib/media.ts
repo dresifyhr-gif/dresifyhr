@@ -4,7 +4,7 @@ import { createHash, timingSafeEqual } from "crypto";
 
 import type { MediaItem, Prisma } from "@prisma/client";
 
-import { publishCarousel, publishImage } from "@/lib/instagram";
+import { createReelContainer, finishReel, publishCarousel, publishImage } from "@/lib/instagram";
 import { prisma } from "@/lib/prisma";
 import { SITE_URL } from "@/lib/site";
 
@@ -20,7 +20,9 @@ export type MediaSlot = (typeof MEDIA_SLOTS)[number];
 export const MEDIA_TZ = "Europe/Zagreb";
 
 export const MEDIA_KINDS = ["BRIEF", "IDEA", "DRAFT"] as const;
-export const MEDIA_FORMATS = ["FEED_IMAGE", "CAROUSEL", "STORY_MANUAL"] as const;
+export const MEDIA_FORMATS = ["FEED_IMAGE", "CAROUSEL", "REEL", "STORY_MANUAL"] as const;
+export const VIDEO_PLATFORMS = ["INSTAGRAM", "TIKTOK"] as const;
+export const VIDEO_VARIANTS = ["KRATKA", "DUGA"] as const;
 export const MEDIA_STATUSES = ["NOVO", "ZAKAZANO", "OBJAVLJUJEM", "OBJAVLJENO", "ODBIJENO", "VRACENO", "NEUSPJELO"] as const;
 export const IMAGE_SOURCES = ["COMMONS", "AI", "DRESIFY", "UPLOAD", "NONE"] as const;
 export const VERIFICATIONS = ["POTVRĐENO", "DJELOMIČNO", "NEPOTVRĐENO", "GLASINA", "MIŠLJENJE"] as const;
@@ -31,6 +33,13 @@ export type MediaImage = {
   credit?: string;
   license?: string;
   link?: string;
+};
+export type MediaVideo = {
+  url: string;
+  platform: (typeof VIDEO_PLATFORMS)[number];
+  variant: (typeof VIDEO_VARIANTS)[number];
+  durationSec?: number;
+  caption?: string; // TikTok/Shorts opis (opušteniji ton, udica u prve 1-2 s)
 };
 export type MediaSource = { label: string; url?: string };
 export type MediaScores = { dijeljenje?: number; komentari?: number; emocija?: number; hr?: number; ukupno?: number };
@@ -133,12 +142,22 @@ const httpUrl = (v: unknown): string | undefined => {
   }
 };
 
-// Slike za objavu smiju biti SAMO s naše domene ili našeg Bloba.
+// Naš Blob store (iz BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_<storeId>_<tajna>").
+function ownBlobHost(): string | null {
+  const m = /^vercel_blob_rw_([a-z0-9]+)_/i.exec(process.env.BLOB_READ_WRITE_TOKEN || "");
+  return m ? `${m[1].toLowerCase()}.public.blob.vercel-storage.com` : null;
+}
+
+// Slike/videi za objavu smiju biti SAMO s naše domene ili NAŠEG Bloba.
 export function isOwnImageUrl(url: string): boolean {
   try {
-    const host = new URL(url).hostname;
+    const u = new URL(url);
+    if (u.protocol !== "https:") return false;
+    const host = u.hostname;
     const siteHost = new URL(SITE_URL).hostname;
-    return host === siteHost || host === `www.${siteHost}` || host.endsWith(".public.blob.vercel-storage.com");
+    if (host === siteHost || host === `www.${siteHost}`) return true;
+    const blob = ownBlobHost();
+    return blob ? host === blob : host.endsWith(".public.blob.vercel-storage.com");
   } catch {
     return false;
   }
@@ -160,6 +179,29 @@ function cleanImages(v: unknown): MediaImage[] {
     });
   }
   return out;
+}
+
+function cleanVideos(v: unknown): MediaVideo[] {
+  if (!Array.isArray(v)) return [];
+  const out: MediaVideo[] = [];
+  for (const raw of v.slice(0, 6)) {
+    const r = raw as Record<string, unknown>;
+    const url = httpUrl(r?.url);
+    if (!url || !isOwnImageUrl(url) || !/\.mp4($|\?)/i.test(url)) continue;
+    const dur = Number(r?.durationSec);
+    out.push({
+      url,
+      platform: oneOf(r?.platform, VIDEO_PLATFORMS) || "TIKTOK",
+      variant: oneOf(r?.variant, VIDEO_VARIANTS) || "KRATKA",
+      durationSec: Number.isFinite(dur) && dur > 0 ? Math.round(dur) : undefined,
+      caption: str(r?.caption, 2200) || undefined
+    });
+  }
+  return out;
+}
+
+export function itemVideos(item: { videos: unknown }): MediaVideo[] {
+  return Array.isArray(item.videos) ? (item.videos as MediaVideo[]).filter((v) => v && typeof v.url === "string") : [];
 }
 
 function cleanSources(v: unknown): MediaSource[] {
@@ -192,8 +234,10 @@ export function cleanIngestItem(raw: unknown): { ok: true; item: CleanIngestItem
   if (!kind) return { ok: false, error: `${extKey}: kind mora biti BRIEF, IDEA ili DRAFT` };
   if (!title) return { ok: false, error: `${extKey}: nedostaje title` };
   const format = oneOf(r.format, MEDIA_FORMATS);
-  if (kind === "DRAFT" && !format) return { ok: false, error: `${extKey}: nacrt treba format (FEED_IMAGE, CAROUSEL ili STORY_MANUAL)` };
+  if (kind === "DRAFT" && !format) return { ok: false, error: `${extKey}: nacrt treba format (FEED_IMAGE, CAROUSEL, REEL ili STORY_MANUAL)` };
   const slot = oneOf(r.suggestedSlot, MEDIA_SLOTS);
+  const dataJson = r.data && typeof r.data === "object" ? JSON.stringify(r.data) : null;
+  if (dataJson && dataJson.length > 20000) return { ok: false, error: `${extKey}: data je prevelik (najviše 20000 znakova)` };
   return {
     ok: true,
     item: {
@@ -208,9 +252,10 @@ export function cleanIngestItem(raw: unknown): { ok: true; item: CleanIngestItem
       scores: (cleanScores(r.scores) as Prisma.InputJsonValue) ?? undefined,
       sources: cleanSources(r.sources) as unknown as Prisma.InputJsonValue,
       images: cleanImages(r.images) as unknown as Prisma.InputJsonValue,
+      videos: cleanVideos(r.videos) as unknown as Prisma.InputJsonValue,
       notes: str(r.notes, 4000),
       manualSteps: str(r.manualSteps, 2000),
-      data: r.data && typeof r.data === "object" ? (JSON.parse(JSON.stringify(r.data).slice(0, 20000)) as Prisma.InputJsonValue) : undefined,
+      data: dataJson ? (JSON.parse(dataJson) as Prisma.InputJsonValue) : undefined,
       ideaKey: str(r.ideaKey, 120),
       suggestedSlot: slot
     }
@@ -224,21 +269,57 @@ export function itemImages(item: Pick<MediaItem, "images">): MediaImage[] {
   return Array.isArray(item.images) ? (item.images as unknown as MediaImage[]).filter((i) => i && typeof i.url === "string") : [];
 }
 
-export async function publishMediaItem(item: MediaItem): Promise<{ ok: true; id?: string; permalink?: string } | { ok: false; error: string }> {
-  if (item.kind !== "DRAFT") return { ok: false, error: "Objaviti se može samo nacrt." };
-  if (item.format === "STORY_MANUAL") return { ok: false, error: "Story s anketom/kvizom objavljuješ ručno u Instagramu." };
-  const caption = (item.caption || "").trim();
-  if (!caption) return { ok: false, error: "Nacrt nema opis (caption)." };
+// Može li se nacrt objaviti preko API-ja? (isto za "Objavi sada" i "Zakaži",
+// da greška ne izađe tek u terminu). null = može; inače poruka za Igora.
+export function publishProblem(item: MediaItem): string | null {
+  if (item.kind !== "DRAFT") return "Objaviti se može samo nacrt.";
+  if (item.format === "STORY_MANUAL") return "Story s anketom/kvizom objavljuješ ručno u Instagramu.";
+  if (!(item.caption || "").trim()) return "Nacrt nema opis (caption).";
+  if (item.format === "REEL") {
+    const v = itemVideos(item).find((x) => x.platform === "INSTAGRAM");
+    return v && isOwnImageUrl(v.url) ? null : "Reel nema Instagram video.";
+  }
   const imgs = itemImages(item).filter((i) => isOwnImageUrl(i.url));
-  if (imgs.length === 0) return { ok: false, error: "Nacrt nema sliku. Dodaj je gumbom „Učitaj svoju“." };
-  if (imgs.some((i) => !/\.jpe?g($|\?)/i.test(i.url))) return { ok: false, error: "Instagram prima samo JPEG slike." };
+  if (imgs.length === 0) return "Nacrt nema sliku. Dodaj je gumbom „Učitaj svoju“.";
+  if (imgs.some((i) => !/\.jpe?g($|\?)/i.test(i.url))) return "Instagram prima samo JPEG slike.";
+  return null;
+}
+
+// Greška u samom koraku objave (timeout, prekinuta veza) ne znači da objava nije izašla.
+function withPublishWarning(error: string) {
+  return /abort|timeout|timed out|fetch failed|network|ECONNRESET|socket/i.test(error)
+    ? `${error} Objava je možda ipak izašla: prije ponovne objave provjeri Instagram.`
+    : error;
+}
+
+export async function publishMediaItem(item: MediaItem): Promise<{ ok: true; id?: string; permalink?: string } | { ok: false; error: string }> {
+  const problem = publishProblem(item);
+  if (problem) return { ok: false, error: problem };
+  const caption = (item.caption || "").trim();
+
+  if (item.format === "REEL") {
+    const ig = itemVideos(item).find((v) => v.platform === "INSTAGRAM" && v.variant === "KRATKA") || itemVideos(item).find((v) => v.platform === "INSTAGRAM");
+    if (!ig || !isOwnImageUrl(ig.url)) return { ok: false, error: "Reel nema Instagram video." };
+    const c = await createReelContainer({ videoUrl: ig.url, caption });
+    if (!c.ok || !c.id) return { ok: false, error: c.error || "Instagram nije primio video." };
+    // Instagram obrađuje video 30 s – par minuta; čekamo do ~4 min (ruta ima maxDuration 300).
+    for (let i = 0; i < 48; i++) {
+      await new Promise((r) => setTimeout(r, 5000));
+      const f = await finishReel(c.id);
+      if (!f.ok) return { ok: false, error: withPublishWarning(f.error || "Objava reela nije uspjela.") };
+      if (f.status === "published") return { ok: true, permalink: f.permalink };
+    }
+    return { ok: false, error: "Instagram još obrađuje video. Provjeri na Instagramu za par minuta prije ponovne objave." };
+  }
+
+  const imgs = itemImages(item).filter((i) => isOwnImageUrl(i.url));
 
   if (item.format === "CAROUSEL" && imgs.length >= 2) {
     const r = await publishCarousel({ imageUrls: imgs.slice(0, 10).map((i) => i.url), caption });
-    return r.ok ? { ok: true, id: r.id, permalink: r.permalink } : { ok: false, error: r.error || "Objava nije uspjela." };
+    return r.ok ? { ok: true, id: r.id, permalink: r.permalink } : { ok: false, error: withPublishWarning(r.error || "Objava nije uspjela.") };
   }
   const r = await publishImage({ imageUrl: imgs[0].url, caption });
-  return r.ok ? { ok: true, id: r.id, permalink: r.permalink } : { ok: false, error: r.error || "Objava nije uspjela." };
+  return r.ok ? { ok: true, id: r.id, permalink: r.permalink } : { ok: false, error: withPublishWarning(r.error || "Objava nije uspjela.") };
 }
 
 // Objava koja je "zapela" (funkcija prekinuta usred objave) → NEUSPJELO, uz upozorenje

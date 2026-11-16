@@ -10,6 +10,7 @@ import { ReklameManager } from "@/components/admin/reklame-manager";
 
 type Img = { url: string; source: string; credit?: string; license?: string; link?: string };
 type Src = { label: string; url?: string };
+type Vid = { url: string; platform: "INSTAGRAM" | "TIKTOK"; variant: "KRATKA" | "DUGA"; durationSec?: number; caption?: string };
 type Scores = { dijeljenje?: number; komentari?: number; emocija?: number; hr?: number; ukupno?: number };
 type Item = {
   id: string;
@@ -18,7 +19,7 @@ type Item = {
   kind: "BRIEF" | "IDEA" | "DRAFT";
   status: string;
   series: string | null;
-  format: "FEED_IMAGE" | "CAROUSEL" | "STORY_MANUAL" | null;
+  format: "FEED_IMAGE" | "CAROUSEL" | "REEL" | "STORY_MANUAL" | null;
   title: string;
   summary: string | null;
   caption: string | null;
@@ -26,6 +27,7 @@ type Item = {
   scores: Scores | null;
   sources: Src[] | null;
   images: Img[] | null;
+  videos: Vid[] | null;
   notes: string | null;
   manualSteps: string | null;
   data: { kpi?: Record<string, number>; learned?: string[] } | null;
@@ -38,8 +40,9 @@ type Item = {
   permalink: string | null;
   error: string | null;
   createdAt: string;
+  updatedAt: string;
 };
-type Payload = { ok: boolean; today: string; slots: string[]; bestSlot: string | null; canDecide: boolean; items: Item[] };
+type Payload = { ok: boolean; today: string; slots: string[]; bestSlot: string | null; canDecide: boolean; tiktokHandle: string | null; items: Item[] };
 
 type TabId = "danas" | "nacrti" | "kalendar" | "arhiva" | "reklame";
 
@@ -60,7 +63,7 @@ const STATUS_LABEL: Record<string, string> = {
   VRACENO: "vraćeno agentu",
   NEUSPJELO: "nije uspjelo"
 };
-const FORMAT_LABEL: Record<string, string> = { FEED_IMAGE: "Objava · 1 slika", CAROUSEL: "Carousel", STORY_MANUAL: "Story · objavi ručno" };
+const FORMAT_LABEL: Record<string, string> = { FEED_IMAGE: "Objava · 1 slika", CAROUSEL: "Carousel", REEL: "Reel + TikTok", STORY_MANUAL: "Story · objavi ručno" };
 const SOURCE_LABEL: Record<string, string> = {
   COMMONS: "Wikimedia Commons",
   AI: "AI ilustracija (ChatGPT)",
@@ -111,6 +114,12 @@ export function MediaDesk({ initialTab = "danas" }: { initialTab?: TabId }) {
   }, []);
   useEffect(() => {
     load();
+    // Vrati li se Igor na otvorenu karticu, povuci svježe stanje (agent je možda poslao novu verziju).
+    const onVisible = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, [load]);
 
   const replace = useCallback((it: Item) => setData((d) => (d ? { ...d, items: d.items.map((x) => (x.id === it.id ? it : x)) } : d)), []);
@@ -153,18 +162,26 @@ export function MediaDesk({ initialTab = "danas" }: { initialTab?: TabId }) {
 
       {error && <div className="rounded-[10px] bg-[var(--a-bad-bg)] px-4 py-2 text-sm text-[var(--a-bad)]">{error}</div>}
 
+      {data && !data.tiktokHandle && tab !== "reklame" && (
+        <div className="a-card flex flex-wrap items-center justify-between gap-2 border-l-4 p-4 text-[13.5px]" style={{ borderLeftColor: "var(--a-warn)" }}>
+          <span className="text-[var(--a-text)]">
+            <b>Još nemaš TikTok račun?</b> Reelovi stižu i u verziji za TikTok i YouTube Shorts. Otvori račun (npr. @dresify.hr) i javi mi ime, pa ga upišem ovdje.
+          </span>
+        </div>
+      )}
+
       {tab === "reklame" ? (
         <ReklameManager />
       ) : !data ? (
         <div className="text-sm text-[var(--a-text-3)]">Učitavam…</div>
       ) : tab === "danas" ? (
-        <TodayView data={data} runDate={latestRun} onChange={replace} />
+        <TodayView data={data} runDate={latestRun} onChange={replace} onReload={load} />
       ) : tab === "nacrti" ? (
-        <DraftList data={data} items={waiting} onChange={replace} empty="Nema nacrta koji čekaju. Novi stižu svako jutro oko 6 h." />
+        <DraftList data={data} items={waiting} onChange={replace} onReload={load} empty="Nema nacrta koji čekaju. Novi stižu svako jutro oko 6 h." />
       ) : tab === "kalendar" ? (
         <CalendarView data={data} />
       ) : (
-        <ArchiveView data={data} onChange={replace} />
+        <ArchiveView data={data} onChange={replace} onReload={load} />
       )}
     </div>
   );
@@ -173,7 +190,7 @@ export function MediaDesk({ initialTab = "danas" }: { initialTab?: TabId }) {
 // ————————————————————————————————————————————————————————————————
 // Danas: jutarnji pregled + 3 ideje + nacrti
 // ————————————————————————————————————————————————————————————————
-function TodayView({ data, runDate, onChange }: { data: Payload; runDate: string | null; onChange: (i: Item) => void }) {
+function TodayView({ data, runDate, onChange, onReload }: { data: Payload; runDate: string | null; onChange: (i: Item) => void; onReload: () => void }) {
   if (!runDate)
     return (
       <div className="a-card p-6 text-sm text-[var(--a-text-2)]">
@@ -230,7 +247,7 @@ function TodayView({ data, runDate, onChange }: { data: Payload; runDate: string
         </div>
       )}
 
-      {drafts.length > 0 && <DraftList data={data} items={drafts} onChange={onChange} />}
+      {drafts.length > 0 && <DraftList data={data} items={drafts} onChange={onChange} onReload={onReload} />}
     </div>
   );
 }
@@ -321,24 +338,38 @@ function IdeaCard({ idea, rank, hasDraft }: { idea: Item; rank: number; hasDraft
 // ————————————————————————————————————————————————————————————————
 // Nacrti
 // ————————————————————————————————————————————————————————————————
-function DraftList({ data, items, onChange, empty }: { data: Payload; items: Item[]; onChange: (i: Item) => void; empty?: string }) {
+function DraftList({ data, items, onChange, onReload, empty }: { data: Payload; items: Item[]; onChange: (i: Item) => void; onReload: () => void; empty?: string }) {
   if (items.length === 0) return <div className="a-card p-6 text-sm text-[var(--a-text-3)]">{empty || "Nema nacrta."}</div>;
   return (
     <div className="space-y-4">
       {items.map((d, i) => (
-        <DraftCard key={d.id} item={d} index={i + 1} total={items.length} data={data} onChange={onChange} />
+        <DraftCard key={d.id} item={d} index={i + 1} total={items.length} data={data} onChange={onChange} onReload={onReload} />
       ))}
     </div>
   );
 }
 
-async function patch(id: string, body: Record<string, unknown>): Promise<{ ok: boolean; item?: Item; message?: string }> {
+async function patch(id: string, body: Record<string, unknown>): Promise<{ ok: boolean; item?: Item; message?: string; stale?: boolean }> {
   return fetch(`/api/admin/media/${id}/`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
     .then((r) => r.json())
     .catch(() => ({ ok: false, message: "Nema veze sa serverom." }));
 }
 
-function DraftCard({ item, index, total, data, onChange }: { item: Item; index: number; total: number; data: Payload; onChange: (i: Item) => void }) {
+function DraftCard({
+  item,
+  index,
+  total,
+  data,
+  onChange,
+  onReload
+}: {
+  item: Item;
+  index: number;
+  total: number;
+  data: Payload;
+  onChange: (i: Item) => void;
+  onReload: () => void;
+}) {
   const can = data.canDecide;
   const imgs = item.images || [];
   const [caption, setCaption] = useState(item.caption || "");
@@ -355,6 +386,9 @@ function DraftCard({ item, index, total, data, onChange }: { item: Item; index: 
   }, [item.caption]);
 
   const locked = item.status === "OBJAVLJENO" || item.status === "OBJAVLJUJEM";
+  const vids = item.videos || [];
+  const igVideo = vids.find((v) => v.platform === "INSTAGRAM" && v.variant === "KRATKA") || vids.find((v) => v.platform === "INSTAGRAM");
+  const tiktok = vids.filter((v) => v.platform === "TIKTOK");
   const manual = item.format === "STORY_MANUAL";
   const dirty = caption !== (item.caption || "");
   const emojis = emojiCount(caption);
@@ -362,9 +396,11 @@ function DraftCard({ item, index, total, data, onChange }: { item: Item; index: 
   async function act(action: string, extra: Record<string, unknown> = {}, label = action) {
     setBusy(label);
     setMsg(null);
-    const r = await patch(item.id, { action, ...extra });
+    // updatedAt = verzija koju Igor gleda; server odbije ako se u međuvremenu promijenila.
+    const r = await patch(item.id, { action, updatedAt: item.updatedAt, ...extra });
     setBusy("");
     if (r.item) onChange(r.item);
+    if (r.stale) onReload();
     setMsg({ ok: r.ok, text: r.ok ? doneText(action) : r.message || "Nije uspjelo." });
     if (r.ok) setPanel("");
   }
@@ -432,9 +468,15 @@ function DraftCard({ item, index, total, data, onChange }: { item: Item; index: 
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
-        {/* Slike */}
+        {/* Slike / video */}
         <div className="min-w-0 space-y-2">
-          {imgs.length === 0 ? (
+          {item.format === "REEL" ? (
+            igVideo ? (
+              <video src={igVideo.url} controls playsInline preload="metadata" className="aspect-[9/16] w-full rounded-[12px] bg-black object-contain" />
+            ) : (
+              <div className="grid aspect-[9/16] place-items-center rounded-[12px] bg-[var(--a-surface-2)] p-4 text-center text-[13px] text-[var(--a-text-3)]">Reel nema Instagram video.</div>
+            )
+          ) : imgs.length === 0 ? (
             <div className="grid aspect-[4/5] place-items-center rounded-[12px] bg-[var(--a-surface-2)] p-4 text-center text-[13px] text-[var(--a-text-3)]">
               Nema slike. Dodaj je gumbom „Učitaj svoju“.
             </div>
@@ -490,7 +532,7 @@ function DraftCard({ item, index, total, data, onChange }: { item: Item; index: 
                 Otvori sliku {imgs.length > 1 ? i + 1 : ""}
               </a>
             ))}
-            {can && !locked && (
+            {can && !locked && item.format !== "REEL" && !(item.format === "CAROUSEL" && imgs.length >= 10) && (
               <label className="a-btn-sm cursor-pointer px-2.5 py-1 text-[12px]">
                 {busy === "upload" ? "Šaljem…" : item.format === "CAROUSEL" ? "＋ Učitaj svoju" : "Učitaj svoju"}
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => upload(e.target.files?.[0])} disabled={Boolean(busy)} />
@@ -517,10 +559,45 @@ function DraftCard({ item, index, total, data, onChange }: { item: Item; index: 
             </div>
           )}
 
+          {tiktok.length > 0 && (
+            <div className="space-y-2 rounded-[12px] border border-[var(--a-line)] p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[13.5px] font-semibold text-[var(--a-text)]">TikTok i YouTube Shorts</span>
+                <Pill tone="warn">objavi ručno na TikTok</Pill>
+              </div>
+              <div className="text-[12.5px] text-[var(--a-text-2)]">
+                Čisti video bez Instagram vodenog žiga, 1080×1920. Trending zvuk dodaj u aplikaciji pri objavi.
+                {data.tiktokHandle ? ` Račun: ${data.tiktokHandle}.` : ""}
+              </div>
+              {tiktok.map((v, i) => (
+                <div key={v.url} className="space-y-1.5 rounded-[10px] bg-[var(--a-surface-2)] p-2.5">
+                  <div className="flex flex-wrap items-center gap-2 text-[12.5px]">
+                    <b className="text-[var(--a-text)]">{v.variant === "DUGA" ? "Duga verzija" : "Kratka verzija"}</b>
+                    {v.durationSec ? <span className="text-[var(--a-text-3)]">{v.durationSec} s</span> : null}
+                    <a href={`${v.url}${v.url.includes("?") ? "&" : "?"}download=1`} className="a-btn-sm px-2.5 py-1 text-[12px]">
+                      Preuzmi video
+                    </a>
+                    <a href={v.url} target="_blank" rel="noreferrer" className="a-btn-sm px-2.5 py-1 text-[12px]">
+                      Pogledaj
+                    </a>
+                  </div>
+                  {v.caption && (
+                    <>
+                      <div className="whitespace-pre-line text-[12.5px] text-[var(--a-text)]">{v.caption}</div>
+                      <button type="button" className="a-btn-sm px-2.5 py-1 text-[12px]" onClick={() => copy(v.caption || "")}>
+                        Kopiraj TikTok opis{tiktok.length > 1 ? ` ${i + 1}` : ""}
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           <div>
             <div className="mb-1 flex items-center justify-between">
               <label htmlFor={`cap-${item.id}`} className="a-label">
-                {manual ? "Tekst" : "Caption"}
+                {manual ? "Tekst" : item.format === "REEL" ? "Instagram caption" : "Caption"}
               </label>
               <span className={`text-[11px] ${emojis > 2 ? "font-bold text-[var(--a-warn)]" : "text-[var(--a-text-3)]"}`}>
                 {caption.length}/2200 · emojiji {emojis}
@@ -646,7 +723,7 @@ function DraftCard({ item, index, total, data, onChange }: { item: Item; index: 
               {panel === "publish" && (
                 <div className="flex flex-wrap items-center gap-2 rounded-[12px] bg-[var(--a-surface-2)] p-3 text-[13px]">
                   <span>
-                    Objaviti sada na @dresify.hr{item.format === "CAROUSEL" ? ` (${imgs.length} slika)` : ""}? Ovo se ne može poništiti iz admina.
+                    Objaviti sada na @dresify.hr{item.format === "CAROUSEL" ? ` (${imgs.length} slika)` : item.format === "REEL" ? " kao Reel (obrada traje do par minuta)" : ""}? Ovo se ne može poništiti iz admina.
                   </span>
                   {dirty && <span className="font-semibold text-[var(--a-warn)]">Prvo spremi izmijenjeni tekst.</span>}
                   <button
@@ -774,7 +851,7 @@ function CalendarView({ data }: { data: Payload }) {
 // ————————————————————————————————————————————————————————————————
 // Arhiva: sve teme (agenti je čitaju preko /api/media/feedback)
 // ————————————————————————————————————————————————————————————————
-function ArchiveView({ data, onChange }: { data: Payload; onChange: (i: Item) => void }) {
+function ArchiveView({ data, onChange, onReload }: { data: Payload; onChange: (i: Item) => void; onReload: () => void }) {
   const [open, setOpen] = useState<string | null>(null);
   const list = data.items.filter((i) => i.kind !== "BRIEF");
   if (list.length === 0) return <div className="a-card p-6 text-sm text-[var(--a-text-3)]">Arhiva je prazna.</div>;
@@ -794,7 +871,7 @@ function ArchiveView({ data, onChange }: { data: Payload; onChange: (i: Item) =>
           </button>
           {open === it.id && it.kind === "DRAFT" && (
             <div className="mt-3">
-              <DraftCard item={it} index={1} total={1} data={data} onChange={onChange} />
+              <DraftCard item={it} index={1} total={1} data={data} onChange={onChange} onReload={onReload} />
             </div>
           )}
         </div>

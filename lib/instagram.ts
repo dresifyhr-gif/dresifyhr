@@ -394,7 +394,7 @@ async function buildOnlineFollowers(slots: string[]): Promise<IgBestSlot> {
   if (!conn || !conn.igBusinessId) return null;
   const j = await graphGet(`${conn.igBusinessId}/insights`, { metric: "online_followers", period: "lifetime" }, conn.token);
   const values: { value?: Record<string, number> }[] = j?.data?.[0]?.values || [];
-  // Zbroji po satu (Graph vraća sate u UTC-u, po danu); prosjek po danima.
+  // Zbroji po satu (po danu); prosjek po danima.
   const sum: Record<number, number> = {};
   let days = 0;
   for (const v of values) {
@@ -404,10 +404,12 @@ async function buildOnlineFollowers(slots: string[]): Promise<IgBestSlot> {
     for (const [h, n] of Object.entries(hours)) sum[Number(h)] = (sum[Number(h)] || 0) + (Number(n) || 0);
   }
   if (days === 0) return null;
-  // UTC sat → Zagreb sat (današnji pomak, 1 zimi / 2 ljeti; za odabir termina dovoljno).
+  // Meta insights sate vraća po pacifičkom vremenu (end_time je ponoć u Kaliforniji,
+  // T07:00/T08:00 UTC). Pomak Zagreb − Los Angeles (obično 9 h) računamo za danas.
   const now = new Date();
-  const midnightUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0));
-  const off = Number(new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Zagreb", hour: "numeric", hourCycle: "h23" }).format(midnightUtc)) || 1;
+  const probe = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 12));
+  const hourAt = (tz: string) => Number(new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", hourCycle: "h23" }).format(probe));
+  const off = (((hourAt("Europe/Zagreb") - hourAt("America/Los_Angeles")) % 24) + 24) % 24 || 9;
   const hourlyAvg: Record<string, number> = {};
   for (const [h, n] of Object.entries(sum)) hourlyAvg[String((Number(h) + off) % 24)] = Math.round(n / days);
   let best: string | null = null;

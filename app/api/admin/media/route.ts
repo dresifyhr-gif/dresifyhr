@@ -31,6 +31,8 @@ export async function GET() {
     slots: MEDIA_SLOTS,
     bestSlot: bestSlot?.slot ?? null,
     canDecide: user.role === "OWNER",
+    // TikTok račun (env TIKTOK_HANDLE). Dok ga nema, Media podsjeća da se otvori.
+    tiktokHandle: (process.env.TIKTOK_HANDLE || "").trim() || null,
     items
   });
 }

@@ -27,7 +27,10 @@ export async function GET(request: Request) {
   });
 
   const results: { id: string; ok: boolean; error?: string }[] = [];
+  const started = Date.now();
   for (const item of due) {
+    // Reel može čekati obradu do ~4 min; ne započinji novu objavu ako nema vremena (ostaje za idući termin).
+    if (Date.now() - started > 45_000) break;
     const claimed = await prisma.mediaItem.updateMany({ where: { id: item.id, status: "ZAKAZANO" }, data: { status: "OBJAVLJUJEM" } });
     if (claimed.count === 0) continue;
     const r = await publishMediaItem(item);

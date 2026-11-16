@@ -424,7 +424,7 @@ model MediaItem {
   kind          String // BRIEF | IDEA | DRAFT
   status        String    @default("NOVO") // NOVO | ZAKAZANO | OBJAVLJUJEM | OBJAVLJENO | ODBIJENO | VRACENO | NEUSPJELO
   series        String? // Na današnji dan | Pogodi igrača | Zaboravljeni talent | Rasprava | Dres priče | …
-  format        String? // FEED_IMAGE | CAROUSEL | STORY_MANUAL
+  format        String? // FEED_IMAGE | CAROUSEL | REEL | STORY_MANUAL
   title         String
   summary       String?   @db.Text
   caption       String?   @db.Text
@@ -432,6 +432,7 @@ model MediaItem {
   scores        Json? // { dijeljenje, komentari, emocija, hr, ukupno }
   sources       Json? // [{ label, url }]
   images        Json? // [{ url, source: COMMONS|AI|DRESIFY|UPLOAD|NONE, credit?, license?, link? }]
+  videos        Json? // [{ url, platform: INSTAGRAM|TIKTOK, variant: KRATKA|DUGA, durationSec?, caption? }] — TikTok/Shorts = objavi ručno
   notes         String?   @db.Text // napomene provjeravatelja — NE idu u objavu
   manualSteps   String?   @db.Text // za STORY_MANUAL: upute za naljepnicu ankete/kviza
   data          Json? // BRIEF: { kpi, learned, … }

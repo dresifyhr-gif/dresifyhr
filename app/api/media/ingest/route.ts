@@ -39,16 +39,22 @@ export async function POST(request: Request) {
       continue;
     }
     const { extKey, ...fields } = c.item;
-    const existing = await prisma.mediaItem.findUnique({ where: { extKey }, select: { id: true, status: true } });
-    if (!existing) {
-      const created = await prisma.mediaItem.create({ data: { ...fields, extKey, runDate } });
-      saved.push({ extKey, id: created.id, action: "created" });
-    } else if (existing.status === "NOVO" || existing.status === "VRACENO") {
-      // Nova verzija nacrta (npr. nakon "Vrati agentu") — vraća se u NOVO, ocjena ostaje za povijest.
-      await prisma.mediaItem.update({ where: { id: existing.id }, data: { ...fields, runDate, status: "NOVO", error: null } });
-      saved.push({ extKey, id: existing.id, action: "updated" });
-    } else {
-      saved.push({ extKey, id: existing.id, action: "locked" });
+    try {
+      const existing = await prisma.mediaItem.findUnique({ where: { extKey }, select: { id: true, status: true, decidedBy: true, rating: true } });
+      if (!existing) {
+        const created = await prisma.mediaItem.create({ data: { ...fields, extKey, runDate } });
+        saved.push({ extKey, id: created.id, action: "created" });
+      } else if (existing.status === "VRACENO" || (existing.status === "NOVO" && !existing.decidedBy && !existing.rating)) {
+        // Nova verzija: nakon "Vrati agentu", ili nacrt koji Igor još nije ni ocijenio ni dirao.
+        // decidedBy se briše da nova verzija opet bude "neviđena"; ocjena ostaje za povijest.
+        await prisma.mediaItem.update({ where: { id: existing.id }, data: { ...fields, runDate, status: "NOVO", error: null, decidedBy: null } });
+        saved.push({ extKey, id: existing.id, action: "updated" });
+      } else {
+        // Igor ga je već ocijenio, uredio, zakazao ili objavio → agent ga ne smije mijenjati.
+        saved.push({ extKey, id: existing.id, action: "locked" });
+      }
+    } catch (e) {
+      errors.push(`${extKey}: spremanje nije uspjelo (${e instanceof Error ? e.message.slice(0, 120) : "greška"})`);
     }
   }
 
