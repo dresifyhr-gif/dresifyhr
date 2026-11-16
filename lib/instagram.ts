@@ -479,7 +479,7 @@ export type IgPostStat = {
   productType: string | null; // FEED | REELS
   caption: string;
   thumbnail: string | null;
-  likes: number;
+  likes: number | null; // null = Instagram ne daje (skriveni lajkovi)
   comments: number;
   views: number | null;
   reach: number | null;
@@ -501,26 +501,33 @@ async function fetchMediaInsights(id: string, token: string): Promise<Record<str
   };
   try {
     return read(await graphGet(`${id}/insights`, { metric: all.join(",") }, token));
-  } catch {
+  } catch (e) {
+    // Rate-limit: ne gomilaj još 4 poziva po objavi.
+    if (/limit|throttl|"code":\s*(4|17|32|613)\b/i.test(String(e))) return {};
     const parts = await Promise.all(all.map((m) => graphGet(`${id}/insights`, { metric: m }, token).then(read).catch(() => ({}))));
     return Object.assign({}, ...parts);
   }
 }
 
 async function buildPostStats(days: number): Promise<IgPostStat[]> {
+  // Greške se BACAJU (ne vraća se []), da unstable_cache ne zapamti "nema objava"
+  // na sat vremena zbog jednog prolaznog kvara; getRecentPostStats ih hvata.
   const conn = await ensureFreshIgToken();
-  if (!conn || !conn.igBusinessId) return [];
+  if (!conn || !conn.igBusinessId) throw new Error("ig-not-connected");
   const since = Date.now() - days * 86_400_000;
-  let arr: any[] = [];
-  try {
-    const j = await graphGet(`${conn.igBusinessId}/media`, {
-      fields: "id,caption,media_type,media_product_type,thumbnail_url,media_url,permalink,timestamp,like_count,comments_count",
-      limit: "40"
-    }, conn.token);
-    arr = (Array.isArray(j?.data) ? j.data : []).filter((m: any) => !m?.timestamp || new Date(m.timestamp).getTime() >= since);
-  } catch {
-    return [];
+  const fields = "id,caption,media_type,media_product_type,thumbnail_url,media_url,permalink,timestamp,like_count,comments_count";
+  const raw: any[] = [];
+  let after: string | undefined;
+  // Listaj stranice dok ne prođemo `since` (najviše 120 objava).
+  for (let page = 0; page < 3; page++) {
+    const j = await graphGet(`${conn.igBusinessId}/media`, { fields, limit: "40", ...(after ? { after } : {}) }, conn.token);
+    const data: any[] = Array.isArray(j?.data) ? j.data : [];
+    raw.push(...data);
+    const last = data.at(-1);
+    after = j?.paging?.cursors?.after;
+    if (!after || !j?.paging?.next || !last?.timestamp || new Date(last.timestamp).getTime() < since) break;
   }
+  const arr = raw.filter((m: any) => !m?.timestamp || new Date(m.timestamp).getTime() >= since);
   const out: IgPostStat[] = [];
   // Po 6 paralelno da ne udarimo u rate-limit.
   for (let i = 0; i < arr.length; i += 6) {
@@ -534,8 +541,9 @@ async function buildPostStats(days: number): Promise<IgPostStat[]> {
         mediaType: m.media_type || null,
         productType: m.media_product_type || null,
         caption: String(m.caption ?? "").slice(0, 300),
-        thumbnail: m.thumbnail_url || m.media_url || null,
-        likes: Number(m.like_count) || 0,
+        // media_url je kod videa .mp4 — kao sličica samo za slike.
+        thumbnail: m.thumbnail_url || (m.media_type === "IMAGE" || m.media_type === "CAROUSEL_ALBUM" ? (/\.mp4(\?|$)/i.test(String(m.media_url || "")) ? null : m.media_url || null) : null),
+        likes: num(m.like_count),
         comments: Number(m.comments_count) || 0,
         views: num(ins[k].views),
         reach: num(ins[k].reach),

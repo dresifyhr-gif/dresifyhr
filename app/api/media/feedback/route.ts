@@ -7,6 +7,11 @@ import { prisma } from "@/lib/prisma";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+export const maxDuration = 120; // hladno punjenje Instagram brojki može potrajati
+
+// Shortcode iz IG linka (/p/X/, /reel/X/, s www ili bez) — za spajanje objave s nacrtom.
+const igCode = (u?: string | null) => u?.match(/instagram\.com\/(?:[^/]+\/)?(?:p|reel|reels|tv)\/([^/?#]+)/)?.[1] ?? null;
+
 const RATING_LABEL: Record<number, string> = { 4: "Odlično", 3: "Dobro", 2: "Prosječno", 1: "Loše" };
 
 // Za jutarnju rutinu: Igorove ocjene/komentari + arhiva tema (da se ne ponavljaju).
@@ -32,7 +37,8 @@ export async function GET(request: Request) {
       ratingComment: true,
       scheduledAt: true,
       publishedAt: true,
-      permalink: true
+      permalink: true,
+      igMediaId: true
     },
     take: 600
   }),
@@ -68,7 +74,8 @@ export async function GET(request: Request) {
     })),
     // Uz svaku IG objavu: naš nacrt (ako je iz Media), da se vidi serija/format/sat.
     posts: posts.map((p) => {
-      const d = rows.find((r) => r.permalink && p.permalink && r.permalink.split("?")[0] === p.permalink.split("?")[0]);
+      const pc = igCode(p.permalink);
+      const d = rows.find((r) => (r.igMediaId && r.igMediaId === p.id) || (pc && igCode(r.permalink) === pc));
       return { ...p, series: d?.series ?? null, format: d?.format ?? null, title: d?.title ?? null, extKey: d?.extKey ?? null };
     })
   });

@@ -53,7 +53,7 @@ type Post = {
   productType: string | null;
   caption: string;
   thumbnail: string | null;
-  likes: number;
+  likes: number | null;
   comments: number;
   views: number | null;
   reach: number | null;
@@ -73,6 +73,7 @@ type Payload = {
   items: Item[];
   messages?: Msg[];
   posts?: Post[];
+  postsPending?: boolean;
 };
 
 type TabId = "danas" | "nacrti" | "kanal" | "kalendar" | "rezultati" | "arhiva" | "redakcija" | "reklame";
@@ -1586,7 +1587,8 @@ function ChatPanel({ member, messages, canWrite, onClose, onSent }: { member: st
 // ————————————————————————————————————————————————————————————————
 const fmtN = (n: number | null | undefined) => (n == null ? "—" : n >= 10000 ? `${(n / 1000).toFixed(n >= 100000 ? 0 : 1)}k` : n.toLocaleString("hr-HR"));
 const postKind = (p: Post) => (p.productType === "REELS" || p.mediaType === "VIDEO" ? "Reel" : p.mediaType === "CAROUSEL_ALBUM" ? "Carousel" : "Objava");
-const postScore = (p: Post) => (p.views ?? p.reach ?? 0) + 20 * (p.likes + 3 * p.comments + 4 * (p.saved ?? 0) + 5 * (p.shares ?? 0));
+const postScore = (p: Post) => (p.views ?? 0) + 20 * ((p.likes ?? 0) + 3 * p.comments + 4 * (p.saved ?? 0) + 5 * (p.shares ?? 0));
+const igCode = (u?: string | null) => u?.match(/instagram\.com\/(?:[^/]+\/)?(?:p|reel|reels|tv)\/([^/?#]+)/)?.[1] ?? null;
 
 function ResultsView({ data }: { data: Payload }) {
   const [sort, setSort] = useState<"novo" | "najbolje">("novo");
@@ -1594,14 +1596,17 @@ function ResultsView({ data }: { data: Payload }) {
   if (posts.length === 0)
     return (
       <div className="a-card p-6 text-sm text-[var(--a-text-2)]">
-        Još nema brojki s Instagrama. Ako ovo potraje, Instagram možda treba ponovno spojiti u Postavkama (dozvola za statistiku objava).
+        {data.postsPending
+          ? "Brojke s Instagrama se učitavaju. Osvježi za minutu."
+          : "Još nema brojki s Instagrama. Ako ovo potraje, Instagram možda treba ponovno spojiti u Postavkama (dozvola za statistiku objava)."}
       </div>
     );
-  const views = posts.map((p) => p.views ?? p.reach).filter((v): v is number => v != null);
+  const views = posts.map((p) => p.views).filter((v): v is number => v != null);
   const avgViews = views.length ? Math.round(views.reduce((a, b) => a + b, 0) / views.length) : null;
-  const avgLikes = Math.round(posts.reduce((a, p) => a + p.likes, 0) / posts.length);
+  const likeList = posts.map((p) => p.likes).filter((v): v is number => v != null);
+  const avgLikes = likeList.length ? Math.round(likeList.reduce((a, b) => a + b, 0) / likeList.length) : null;
   const list = [...posts].sort((a, b) => (sort === "novo" ? (b.timestamp || "").localeCompare(a.timestamp || "") : postScore(b) - postScore(a)));
-  const draftOf = (p: Post) => data.items.find((i) => (i.igMediaId && i.igMediaId === p.id) || (i.permalink && p.permalink && i.permalink.split("?")[0] === p.permalink.split("?")[0]));
+  const draftOf = (p: Post) => data.items.find((i) => (i.igMediaId && i.igMediaId === p.id) || (igCode(p.permalink) && igCode(i.permalink) === igCode(p.permalink)));
   return (
     <div className="space-y-4">
       <div className="a-card flex flex-wrap items-center gap-x-8 gap-y-3 p-4">
@@ -1635,7 +1640,7 @@ function ResultsView({ data }: { data: Payload }) {
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {list.map((p) => {
-          const v = p.views ?? p.reach;
+          const v = p.views;
           const tone = avgViews && v != null ? (v >= avgViews * 1.3 ? "good" : v <= avgViews * 0.6 ? "warn" : "neutral") : "neutral";
           const d = draftOf(p);
           return (

@@ -16,6 +16,7 @@ export async function GET() {
 
   await releaseStuckPublishing().catch(() => null);
   const since = new Date(Date.now() - 45 * 86400_000);
+  let postsPending = false;
   const [items, bestSlot, settings, messages, posts] = await Promise.all([
     prisma.mediaItem.findMany({
       where: { OR: [{ createdAt: { gte: since } }, { status: "ZAKAZANO" }] },
@@ -29,7 +30,18 @@ export async function GET() {
     prisma.mediaMessage.findMany({ where: { createdAt: { gte: new Date(Date.now() - 60 * 86400_000) } }, orderBy: { createdAt: "desc" }, take: 400 }).then((r) => r.reverse()),
     // Rezultati objava s Instagrama (keš 1 h, bez baze). Ne čekaj dulje od 6 s
     // da se stranica ne zablokira; keš se puni u pozadini za idući put.
-    Promise.race([getRecentPostStats(30), new Promise<[]>((r) => setTimeout(() => r([]), 6000))])
+    (() => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      return Promise.race([
+        getRecentPostStats(30),
+        new Promise<[]>((r) => {
+          timer = setTimeout(() => {
+            postsPending = true;
+            r([]);
+          }, 8000);
+        })
+      ]).finally(() => clearTimeout(timer));
+    })()
   ]);
 
   return NextResponse.json({
@@ -43,6 +55,7 @@ export async function GET() {
     tiktokHandle: (process.env.TIKTOK_HANDLE || "").trim() || null,
     items,
     messages,
-    posts
+    posts,
+    postsPending: postsPending && posts.length === 0
   });
 }
