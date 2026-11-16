@@ -85,6 +85,8 @@ type Payload = {
     daysLeft: number;
     perDayNeeded: number | null;
     perDayLast7: number | null;
+    netPerDay: number | null;
+    ended: boolean;
     onTrack: boolean | null;
   };
 };
@@ -323,7 +325,7 @@ function GoalBar({ goal }: { goal: NonNullable<Payload["goal"]> }) {
     <div className="relative mt-5 rounded-[16px] bg-white/[0.06] p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#e8ff3c]">{goal.name} · do {goal.deadline.slice(8, 10)}.{goal.deadline.slice(5, 7)}.</div>
-        <div className="text-[12px] text-white/55">još {goal.daysLeft} {goal.daysLeft === 1 ? "dan" : "dana"}</div>
+        <div className="text-[12px] text-white/55">{goal.ended ? (f >= goal.target ? "cilj ostvaren" : "rok je prošao") : `još ${goal.daysLeft} ${goal.daysLeft === 1 ? "dan" : "dana"}`}</div>
       </div>
       <div className="mt-1.5 flex items-baseline gap-2">
         <span className="text-[30px] font-black tabular-nums leading-none">{f.toLocaleString("hr-HR")}</span>
@@ -338,8 +340,11 @@ function GoalBar({ goal }: { goal: NonNullable<Payload["goal"]> }) {
           Treba <b className="text-white">{goal.perDayNeeded != null ? `+${goal.perDayNeeded}` : "—"}</b> dnevno
         </span>
         <span className={tone}>
-          Zadnjih 7 dana <b>{goal.perDayLast7 != null ? `+${goal.perDayLast7.toLocaleString("hr-HR")}` : "—"}</b> dnevno
+          Neto od {goal.startDate.slice(8, 10)}.{goal.startDate.slice(5, 7)}. <b>{goal.netPerDay != null ? `${goal.netPerDay >= 0 ? "+" : ""}${goal.netPerDay.toLocaleString("hr-HR")}` : "—"}</b> dnevno
           {goal.onTrack === false ? " · ubrzati" : goal.onTrack ? " · na putu" : ""}
+        </span>
+        <span className="text-white/45">
+          Novih praćenja 7 dana: {goal.newFollowers7d != null ? goal.newFollowers7d.toLocaleString("hr-HR") : "—"}
         </span>
         {goal.followers == null && <span className="text-white/45">Instagram trenutno ne vraća broj</span>}
       </div>

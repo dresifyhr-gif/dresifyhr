@@ -4,7 +4,7 @@ import { getAdminUser } from "@/lib/admin-auth";
 import { getBestSlotFromInstagram, getIgStats, getRecentPostStats } from "@/lib/instagram";
 import { MEDIA_SLOTS, goalStatus, releaseStuckPublishing, zagrebNow } from "@/lib/media";
 import { getMediaSettings } from "@/lib/media-autopilot";
-import { getFollowerCount } from "@/lib/ig-stats";
+import { IG_FOLLOWERS_FALLBACK, getFollowerCount } from "@/lib/ig-stats";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -60,6 +60,6 @@ export async function GET() {
     messages,
     posts,
     postsPending: postsPending && posts.length === 0,
-    goal: goalStatus(ig?.ok ? ig.followers : await getFollowerCount().catch(() => null), ig?.ok ? ig.newFollowers7d : null)
+    goal: goalStatus(ig?.ok ? ig.followers : await getFollowerCount().then((n) => (n === IG_FOLLOWERS_FALLBACK ? null : n)).catch(() => null), ig?.ok ? ig.newFollowers7d : null)
   });
 }

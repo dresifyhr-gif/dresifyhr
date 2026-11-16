@@ -362,7 +362,9 @@ export type GoalStatus = typeof MEDIA_GOAL & {
   newFollowers7d: number | null;
   daysLeft: number;
   perDayNeeded: number | null;
-  perDayLast7: number | null;
+  perDayLast7: number | null; // NOVA praćenja (Instagram ne oduzima otpraćivanja)
+  netPerDay: number | null; // stvarni neto rast od starta cilja
+  ended: boolean;
   onTrack: boolean | null;
 };
 
@@ -370,9 +372,13 @@ export function goalStatus(followers: number | null, newFollowers7d: number | nu
   const today = zagrebNow().date;
   const ms = (d: string) => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
   const daysLeft = Math.max(0, Math.round((ms(MEDIA_GOAL.deadline) - ms(today)) / 86_400_000) + 1);
+  const ended = daysLeft === 0;
   const left = followers != null ? Math.max(0, MEDIA_GOAL.target - followers) : null;
-  const perDayNeeded = left != null ? (daysLeft ? Math.ceil(left / daysLeft) : left) : null;
+  const perDayNeeded = left != null && !ended ? Math.ceil(left / daysLeft) : null;
   const perDayLast7 = newFollowers7d != null ? Math.round((newFollowers7d / 7) * 10) / 10 : null;
+  // Neto tempo (pratitelji sada − start) / dani od starta — jedino pošteno mjerilo "na putu".
+  const elapsed = Math.max(1, Math.round((ms(today) - ms(MEDIA_GOAL.startDate)) / 86_400_000));
+  const netPerDay = followers != null ? Math.round(((followers - MEDIA_GOAL.startFollowers) / elapsed) * 10) / 10 : null;
   return {
     ...MEDIA_GOAL,
     followers,
@@ -380,6 +386,8 @@ export function goalStatus(followers: number | null, newFollowers7d: number | nu
     daysLeft,
     perDayNeeded,
     perDayLast7,
-    onTrack: perDayNeeded != null && perDayLast7 != null ? perDayLast7 >= perDayNeeded : null
+    netPerDay,
+    ended,
+    onTrack: !ended && perDayNeeded != null && netPerDay != null ? netPerDay >= perDayNeeded : null
   };
 }

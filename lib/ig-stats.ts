@@ -12,6 +12,7 @@ import { GRAPH_VERSION } from "@/lib/meta-graph";
 //  - IG_GRAPH_TOKEN→ long-lived token s dozvolom instagram_basic + pages_read_engagement
 // Ako nije postavljeno ili padne → zadnja poznata vrijednost (FALLBACK).
 const FALLBACK = 2505;
+export const IG_FOLLOWERS_FALLBACK = FALLBACK; // da se ne prikaže kao stvaran broj (cilj Put do 10k)
 const API_VERSION = GRAPH_VERSION;
 
 // Keš 6 h (prije 10 min — svako osvježavanje čita token iz baze i budi Neon).

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getIgStats, getRecentPostStats } from "@/lib/instagram";
 import { goalStatus, verifyIngestKey } from "@/lib/media";
-import { getFollowerCount } from "@/lib/ig-stats";
+import { IG_FOLLOWERS_FALLBACK, getFollowerCount } from "@/lib/ig-stats";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -63,7 +63,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     ok: true,
     // Cilj rasta (Put do 10k): pratitelji sada, novi u 7 dana, koliko treba dnevno.
-    goal: goalStatus(ig?.ok ? ig.followers : await getFollowerCount().catch(() => null), ig?.ok ? ig.newFollowers7d : null),
+    goal: goalStatus(ig?.ok ? ig.followers : await getFollowerCount().then((n) => (n === IG_FOLLOWERS_FALLBACK ? null : n)).catch(() => null), ig?.ok ? ig.newFollowers7d : null),
     // Za VRACENO: agent treba poslati novu verziju s ISTIM extKey (komentar kaže što promijeniti).
     returned: ratings.filter((r) => r.status === "VRACENO"),
     ratings,
