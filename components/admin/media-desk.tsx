@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { ReklameManager } from "@/components/admin/reklame-manager";
-import { MEDIA_TEAM } from "@/lib/media-team";
+import { DEPTS, MEDIA_TEAM, avatarOf, crewFor, memberOf } from "@/lib/media-team";
 
 // DRESIFY MEDIA — redakcijski stol. Agenti (jutarnja rutina na Igorovom Macu)
 // šalju pregled, ideje i nacrte; ovdje Igor ocjenjuje, uređuje, odobrava i
@@ -147,32 +147,34 @@ export function MediaDesk({ initialTab = "danas", focusId }: { initialTab?: TabI
   const todayCount = latestRun ? items.filter((i) => i.runDate === latestRun && i.kind === "IDEA").length : 0;
 
   const TABS: { id: TabId; label: string; n?: number }[] = [
-    { id: "danas", label: "Danas", n: todayCount || undefined },
-    { id: "nacrti", label: "Nacrti", n: waiting.length || undefined },
+    { id: "danas", label: "Tvoj stol", n: waiting.length || undefined },
     { id: "kanal", label: "Kanal", n: channelNew || undefined },
     { id: "kalendar", label: "Kalendar" },
-    { id: "arhiva", label: "Arhiva" },
     { id: "redakcija", label: "Redakcija" },
+    { id: "arhiva", label: "Arhiva" },
     { id: "reklame", label: "Reklame" }
   ];
+  const activeTab: TabId = tab === "nacrti" ? "danas" : tab;
 
   return (
     <div className="space-y-5">
+      {data && <Hero data={data} runDate={latestRun} waiting={waiting.length} channelNew={channelNew} onTeam={() => setTab("redakcija")} />}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex max-w-full flex-wrap gap-1 rounded-[12px] bg-[var(--a-surface-2)] p-1" role="tablist" aria-label="Media">
+        <div className="inline-flex max-w-full flex-wrap gap-1 rounded-[14px] bg-[var(--a-surface-2)] p-1" role="tablist" aria-label="Media">
           {TABS.map((t) => (
             <button
               key={t.id}
               type="button"
               role="tab"
-              aria-selected={tab === t.id}
+              aria-selected={activeTab === t.id}
               onClick={() => setTab(t.id)}
-              className={`rounded-[10px] px-3.5 py-1.5 text-sm font-semibold transition ${
-                tab === t.id ? "bg-[var(--a-card)] text-[var(--a-text)] shadow-sm" : "text-[var(--a-text-3)] hover:text-[var(--a-text)]"
+              className={`rounded-[11px] px-4 py-2 text-[14px] font-semibold transition ${
+                activeTab === t.id ? "bg-[#0b0b0c] text-[#e8ff3c] shadow-sm" : "text-[var(--a-text-2)] hover:text-[var(--a-text)]"
               }`}
             >
               {t.label}
-              {t.n ? <span className="ml-1.5 rounded-md bg-accent px-1.5 text-[11px] text-[#1d1d1f]">{t.n}</span> : null}
+              {t.n ? <span className="ml-1.5 rounded-md bg-accent px-1.5 text-[11px] font-bold text-[#1d1d1f]">{t.n}</span> : null}
             </button>
           ))}
         </div>
@@ -181,34 +183,248 @@ export function MediaDesk({ initialTab = "danas", focusId }: { initialTab?: TabI
 
       {error && <div className="rounded-[10px] bg-[var(--a-bad-bg)] px-4 py-2 text-sm text-[var(--a-bad)]">{error}</div>}
 
-      {data && !data.tiktokHandle && tab !== "reklame" && (
+      {data && !data.tiktokHandle && activeTab !== "reklame" && (
         <div className="a-card flex flex-wrap items-center justify-between gap-2 border-l-4 p-4 text-[13.5px]" style={{ borderLeftColor: "var(--a-warn)" }}>
           <span className="text-[var(--a-text)]">
-            <b>Još nemaš TikTok račun?</b> Reelovi stižu i u verziji za TikTok i YouTube Shorts. Otvori račun (npr. @dresify.hr) i javi mi ime, pa ga upišem ovdje.
+            <b>Još nemaš TikTok račun?</b> Reelovi stižu i u verziji za TikTok i YouTube Shorts. Otvori račun i javi mi ime, pa ga upišem ovdje.
           </span>
         </div>
       )}
 
-      {data && tab !== "reklame" && <AutopilotCard data={data} onSaved={load} />}
-
-      {tab === "reklame" ? (
+      {activeTab === "reklame" ? (
         <ReklameManager />
       ) : !data ? (
         <div className="text-sm text-[var(--a-text-3)]">Učitavam…</div>
-      ) : tab === "danas" ? (
-        <TodayView data={data} runDate={latestRun} onChange={replace} onReload={load} />
-      ) : tab === "nacrti" ? (
-        <DraftList data={data} items={waiting} onChange={replace} onReload={load} empty="Nema nacrta koji čekaju. Novi stižu svako jutro oko 6 h." />
-      ) : tab === "kanal" ? (
+      ) : activeTab === "danas" ? (
+        <DeskView data={data} runDate={latestRun} waiting={waiting} onChange={replace} onReload={load} />
+      ) : activeTab === "kanal" ? (
         <ChannelView data={data} onChange={replace} />
-      ) : tab === "redakcija" ? (
+      ) : activeTab === "redakcija" ? (
         <TeamView data={data} runDate={latestRun} />
-      ) : tab === "kalendar" ? (
+      ) : activeTab === "kalendar" ? (
         <CalendarView data={data} onChange={replace} focusId={focusId} />
       ) : (
         <ArchiveView data={data} onChange={replace} onReload={load} />
       )}
     </div>
+  );
+}
+
+// ————————————————————————————————————————————————————————————————
+// Zaglavlje "newsrooma": uvijek tamno, tim na vrhu, stanje dana jednim pogledom.
+// ————————————————————————————————————————————————————————————————
+function Avatar({ id, size = 36, ring = true }: { id: string; size?: number; ring?: boolean }) {
+  const m = memberOf(id);
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={avatarOf(id)}
+      alt={m ? `${m.name}, ${m.role}` : id}
+      title={m ? `${m.name} · ${m.role}` : id}
+      width={size}
+      height={size}
+      loading="lazy"
+      className={`shrink-0 rounded-full object-cover ${ring ? "ring-2 ring-[#0b0b0c]" : ""}`}
+      style={{ width: size, height: size }}
+    />
+  );
+}
+
+function Hero({ data, runDate, waiting, channelNew, onTeam }: { data: Payload; runDate: string | null; waiting: number; channelNew: number; onTeam: () => void }) {
+  const brief = runDate ? data.items.find((i) => i.runDate === runDate && i.kind === "BRIEF") : undefined;
+  const ideas = runDate ? data.items.filter((i) => i.runDate === runDate && i.kind === "IDEA").length : 0;
+  const scheduled = data.items.filter((i) => i.status === "ZAKAZANO").length;
+  const active = MEDIA_TEAM.filter((m) => m.phase !== "uskoro");
+  const stats: [string, number, string][] = [
+    ["čeka tebe", waiting, "#e8ff3c"],
+    ["zakazano", scheduled, "#ffffff"],
+    ["za kanal", channelNew, "#ffffff"],
+    ["tema jutros", ideas, "#ffffff"]
+  ];
+  return (
+    <div className="relative overflow-hidden rounded-[22px] p-5 text-white sm:p-6" style={{ background: "radial-gradient(120% 140% at 100% 0%, #1f2a10 0%, #0b0b0c 55%)" }}>
+      <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full" style={{ background: "radial-gradient(circle, rgba(232,255,60,.22), transparent 70%)" }} />
+      <div className="relative flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="text-[11px] font-extrabold uppercase tracking-[0.24em] text-[#e8ff3c]">Dresify Media</div>
+          <div className="mt-1 text-[26px] font-black leading-tight tracking-tight sm:text-[30px]">Redakcija @dresify.hr</div>
+          <div className="mt-1 text-[13px] text-white/60">
+            {brief ? `Jutarnji pregled gotov ${fmtDay(brief.runDate)} u ${fmtWhen(brief.createdAt).split(" ").at(-1)}` : "Jutarnja rutina radi svako jutro u 6:00"}
+            {data.settings.autopilot ? " · autopilot uključen" : " · autopilot isključen"}
+          </div>
+        </div>
+        <button type="button" onClick={onTeam} className="group flex items-center gap-3 rounded-full bg-white/5 py-1.5 pl-1.5 pr-4 hover:bg-white/10">
+          <div className="flex -space-x-2.5">
+            {active.slice(0, 7).map((m) => (
+              <Avatar key={m.id} id={m.id} size={34} />
+            ))}
+          </div>
+          <span className="text-[12.5px] font-semibold text-white/80 group-hover:text-white">{active.length} u timu →</span>
+        </button>
+      </div>
+      <div className="relative mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {stats.map(([label, n, color]) => (
+          <div key={label} className="rounded-[14px] bg-white/[0.06] px-4 py-3">
+            <div className="text-[28px] font-black tabular-nums leading-none" style={{ color }}>
+              {n}
+            </div>
+            <div className="mt-1 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-white/55">{label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ————————————————————————————————————————————————————————————————
+// Tvoj stol: sve što čeka odluku, kompaktno, s odlukom u jedan klik.
+// ————————————————————————————————————————————————————————————————
+function nextSlotDate(today: string, slot: string): string {
+  const [h, m] = slot.split(":").map(Number);
+  const now = new Date();
+  const zg = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Zagreb", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(now);
+  const [nh, nm] = zg.split(":").map(Number);
+  return h * 60 + m - (nh * 60 + nm) > 30 ? today : addDays(today, 1);
+}
+
+function DeskView({ data, runDate, waiting, onChange, onReload }: { data: Payload; runDate: string | null; waiting: Item[]; onChange: (i: Item) => void; onReload: () => void }) {
+  const [open, setOpen] = useState<string | null>(null);
+  const [showBrief, setShowBrief] = useState(false);
+  const sorted = [...waiting].sort((a, b) => (a.format === "STORY_MANUAL" ? 1 : 0) - (b.format === "STORY_MANUAL" ? 1 : 0) || b.runDate.localeCompare(a.runDate));
+  return (
+    <div className="space-y-4">
+      {data.canDecide && <AutopilotCard data={data} onSaved={onReload} />}
+      {sorted.length === 0 ? (
+        <div className="a-card flex items-center gap-4 p-6">
+          <Avatar id="urednik" size={48} ring={false} />
+          <div className="text-[14px] text-[var(--a-text-2)]">
+            <b className="text-[var(--a-text)]">Luka:</b> stol je čist. Novi nacrti stižu sutra ujutro oko 6:00, a dobit ćeš obavijest na mobitel.
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {sorted.map((it) =>
+            open === it.id ? (
+              <div key={it.id} className="space-y-2">
+                <button type="button" className="text-[12.5px] font-semibold text-[var(--a-text-3)] hover:text-[var(--a-text)]" onClick={() => setOpen(null)}>
+                  ← Zatvori
+                </button>
+                <DraftCard item={it} index={1} total={1} data={data} onChange={onChange} onReload={onReload} />
+              </div>
+            ) : (
+              <DeskCard key={it.id} item={it} data={data} onOpen={() => setOpen(it.id)} onChange={onChange} onReload={onReload} />
+            )
+          )}
+        </div>
+      )}
+      {runDate && (
+        <div className="a-card p-4">
+          <button type="button" className="flex w-full items-center justify-between text-left" onClick={() => setShowBrief((v) => !v)}>
+            <span className="flex items-center gap-2.5">
+              <Avatar id="urednik" size={30} ring={false} />
+              <span className="text-[14px] font-semibold text-[var(--a-text)]">Jutarnji pregled i ideje · {fmtDay(runDate)}</span>
+            </span>
+            <span className="text-[12.5px] font-semibold text-[var(--a-text-3)]">{showBrief ? "Sakrij" : "Prikaži"}</span>
+          </button>
+          {showBrief && (
+            <div className="mt-4">
+              <TodayView data={{ ...data, items: data.items.filter((i) => i.kind !== "DRAFT") }} runDate={runDate} onChange={onChange} onReload={onReload} />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DeskCard({ item, data, onOpen, onChange, onReload }: { item: Item; data: Payload; onOpen: () => void; onChange: (i: Item) => void; onReload: () => void }) {
+  const [busy, setBusy] = useState("");
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [confirmPub, setConfirmPub] = useState(false);
+  const thumb = item.images?.[0]?.url;
+  const vid = (item.videos || []).find((v) => v.platform === "INSTAGRAM");
+  const manual = item.format === "STORY_MANUAL";
+  const slot = item.suggestedSlot || data.bestSlot || "19:30";
+  const date = nextSlotDate(data.today, slot);
+  const crew = crewFor(item);
+  async function act(action: string, extra: Record<string, unknown> = {}) {
+    setBusy(action);
+    setMsg(null);
+    const r = await patch(item.id, { action, updatedAt: item.updatedAt, ...extra });
+    setBusy("");
+    if (r.item) onChange(r.item);
+    if (r.stale) onReload();
+    setMsg({ ok: r.ok, text: r.ok ? (action === "publish" ? "Objavljeno na Instagram." : `Zakazano: ${date === data.today ? "danas" : "sutra"} u ${slot}.`) : r.message || "Nije uspjelo." });
+  }
+  return (
+    <article className="a-card overflow-hidden">
+      <div className="flex gap-4 p-3 sm:p-4">
+        <button type="button" onClick={onOpen} className="relative h-[124px] w-[100px] shrink-0 overflow-hidden rounded-[12px] bg-[#0b0b0c] sm:h-[150px] sm:w-[120px]" aria-label="Otvori nacrt">
+          {thumb ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
+          ) : (
+            <span className="grid h-full place-items-center text-[11px] text-white/50">bez slike</span>
+          )}
+          {vid && <span className="absolute bottom-1.5 left-1.5 rounded-md bg-black/70 px-1.5 text-[10.5px] font-bold text-white">▶ Reel</span>}
+          {(item.images?.length || 0) > 1 && !vid && (
+            <span className="absolute bottom-1.5 left-1.5 rounded-md bg-black/70 px-1.5 text-[10.5px] font-bold text-white">{item.images!.length} slajdova</span>
+          )}
+        </button>
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {item.series && <Pill>{item.series}</Pill>}
+            {item.format && <Pill tone={manual ? "warn" : "neutral"}>{FORMAT_LABEL[item.format]}</Pill>}
+            {item.verification === "POTVRĐENO" && <Pill tone="good">✓ provjereno</Pill>}
+            {item.status !== "NOVO" && <Pill tone={item.status === "NEUSPJELO" ? "bad" : "warn"}>{STATUS_LABEL[item.status]}</Pill>}
+          </div>
+          <button type="button" onClick={onOpen} className="text-left text-[15.5px] font-bold leading-snug text-[var(--a-text)] hover:underline">
+            {item.title}
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="flex -space-x-2">
+              {crew.map((c) => (
+                <Avatar key={c} id={c} size={26} />
+              ))}
+            </div>
+            <span className="truncate text-[12px] text-[var(--a-text-3)]">{crew.map((c) => memberOf(c)?.name).filter(Boolean).join(", ")}</span>
+          </div>
+          {data.canDecide && (
+            <div className="mt-auto flex flex-wrap gap-2">
+              {manual ? (
+                <button type="button" className="a-btn a-btn-primary px-3.5 py-2 text-[13px]" onClick={onOpen}>
+                  Otvori i objavi ručno
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="a-btn a-btn-primary px-3.5 py-2 text-[13px]"
+                    disabled={Boolean(busy)}
+                    onClick={() => act("schedule", { date, slot })}
+                  >
+                    {busy === "schedule" ? "Zakazujem…" : `Zakaži ${date === data.today ? "danas" : "sutra"} ${slot}`}
+                  </button>
+                  {confirmPub ? (
+                    <button type="button" className="a-btn rounded-[10px] bg-[#0b0b0c] px-3.5 py-2 text-[13px] text-[#e8ff3c]" disabled={Boolean(busy)} onClick={() => act("publish")}>
+                      {busy === "publish" ? "Objavljujem…" : "Da, objavi odmah"}
+                    </button>
+                  ) : (
+                    <button type="button" className="a-btn-sm px-3.5 py-2 text-[13px]" onClick={() => setConfirmPub(true)}>
+                      Objavi sada
+                    </button>
+                  )}
+                  <button type="button" className="a-btn-sm px-3.5 py-2 text-[13px]" onClick={onOpen}>
+                    Pregledaj
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+          {msg && <div className={`text-[12.5px] font-semibold ${msg.ok ? "text-[var(--a-good)]" : "text-[var(--a-bad)]"}`}>{msg.text}</div>}
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -1146,42 +1362,56 @@ function TeamView({ data, runDate }: { data: Payload; runDate: string | null }) 
           {brief ? `Zadnja rutina: ${fmtDay(brief.runDate)}, ${fmtWhen(brief.createdAt).split(" ").at(-1)}` : "Rutina još nije radila"}
         </div>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {MEDIA_TEAM.map((m) => {
-          const n = count[m.output];
-          return (
-            <article key={m.id} className={`a-card flex flex-col gap-2.5 p-4 ${m.phase === "uskoro" ? "opacity-60" : ""}`}>
-              <div className="flex items-center gap-3">
-                <div
-                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-[14px] font-extrabold"
-                  style={{ backgroundColor: m.color, color: "#0b0b0c" }}
-                  aria-hidden
-                >
-                  {m.initials}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[15px] font-bold leading-tight text-[var(--a-text)]">{m.name}</div>
-                  <div className="text-[12.5px] text-[var(--a-text-2)]">{m.role}</div>
-                </div>
-                <span className="ml-auto">{m.phase === "uskoro" ? <Pill>uskoro</Pill> : <Pill tone="good">aktivan</Pill>}</span>
-              </div>
-              <p className="text-[13px] leading-relaxed text-[var(--a-text-2)]">{m.does}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {m.rules.map((r) => (
-                  <span key={r} className="rounded-full bg-[var(--a-surface-2)] px-2 py-0.5 text-[11px] font-semibold text-[var(--a-text-2)]">
-                    {r}
-                  </span>
-                ))}
-              </div>
-              {m.output !== "none" && (
-                <div className="mt-auto border-t border-[var(--a-line)] pt-2 text-[12.5px] text-[var(--a-text-3)]">
-                  Danas: <b className="tabular-nums text-[var(--a-text)]">{n ?? 0}</b> {unit[m.output]}
-                </div>
-              )}
-            </article>
-          );
-        })}
+      <div className="a-card flex flex-wrap items-center gap-4 p-4">
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-[#0b0b0c] text-[18px] font-black text-[#e8ff3c]">IK</div>
+        <div>
+          <div className="text-[15px] font-bold text-[var(--a-text)]">Igor · vlasnik i glavni</div>
+          <div className="text-[12.5px] text-[var(--a-text-2)]">Ti odobravaš objave. Tim radi za tebe svako jutro i tijekom utakmica.</div>
+        </div>
       </div>
+      {DEPTS.map((dept) => {
+        const people = MEDIA_TEAM.filter((m) => m.dept === dept);
+        if (!people.length) return null;
+        return (
+          <section key={dept} className="space-y-2.5">
+            <div className="flex items-center gap-3">
+              <div className="a-label">{dept}</div>
+              <div className="h-px flex-1 bg-[var(--a-line)]" />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {people.map((m) => {
+                const n = count[m.output];
+                return (
+                  <article key={m.id} className={`a-card flex flex-col gap-3 p-4 ${m.phase === "uskoro" ? "opacity-60" : ""}`}>
+                    <div className="flex items-center gap-3.5">
+                      <Avatar id={m.id} size={64} ring={false} />
+                      <div className="min-w-0">
+                        <div className="text-[17px] font-black leading-tight text-[var(--a-text)]">{m.name}</div>
+                        <div className="text-[12.5px] font-semibold text-[var(--a-text-2)]">{m.role}</div>
+                        <div className="mt-1">{m.phase === "uskoro" ? <Pill>uskoro</Pill> : <Pill tone="good">● na poslu</Pill>}</div>
+                      </div>
+                    </div>
+                    <p className="text-[13px] leading-relaxed text-[var(--a-text-2)]">{m.does}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {m.rules.map((r) => (
+                        <span key={r} className="rounded-full bg-[var(--a-surface-2)] px-2 py-0.5 text-[11px] font-semibold text-[var(--a-text-2)]">
+                          {r}
+                        </span>
+                      ))}
+                    </div>
+                    {m.output !== "none" && (
+                      <div className="mt-auto flex items-baseline gap-1.5 border-t border-[var(--a-line)] pt-2.5">
+                        <span className="text-[22px] font-black tabular-nums leading-none text-[var(--a-text)]">{n ?? 0}</span>
+                        <span className="text-[12px] text-[var(--a-text-3)]">{unit[m.output]} danas</span>
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }

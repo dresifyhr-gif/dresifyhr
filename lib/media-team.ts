@@ -12,12 +12,14 @@ export type TeamMember = {
   does: string; // što radi, jednom rečenicom
   rules: string[]; // ključna pravila koja poštuje
   output: string; // što mjerimo danas (ključ u brojaču)
+  dept: "Vodstvo" | "Istraživanje" | "Produkcija" | "Distribucija" | "Analitika";
   phase?: "aktivan" | "uskoro";
 };
 
 export const MEDIA_TEAM: TeamMember[] = [
   {
     id: "urednik",
+    dept: "Vodstvo",
     name: "Luka",
     role: "Glavni urednik",
     initials: "LU",
@@ -28,6 +30,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "lovac",
+    dept: "Istraživanje",
     name: "Toni",
     role: "Lovac na teme",
     initials: "TO",
@@ -38,6 +41,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "dopisnik",
+    dept: "Istraživanje",
     name: "Matea",
     role: "Strana dopisnica",
     initials: "MA",
@@ -48,6 +52,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "retro",
+    dept: "Istraživanje",
     name: "Dino",
     role: "Retro istraživač",
     initials: "DI",
@@ -58,6 +63,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "provjera",
+    dept: "Istraživanje",
     name: "Iva",
     role: "Provjeravateljica činjenica",
     initials: "IV",
@@ -68,6 +74,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "strogi",
+    dept: "Vodstvo",
     name: "Vedran",
     role: "Strogi urednik (autopilot)",
     initials: "VE",
@@ -78,6 +85,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "pisac",
+    dept: "Produkcija",
     name: "Karla",
     role: "Autorica tekstova",
     initials: "KA",
@@ -88,6 +96,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "dizajn",
+    dept: "Produkcija",
     name: "Leon",
     role: "Kreativni direktor",
     initials: "LE",
@@ -98,6 +107,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "video",
+    dept: "Produkcija",
     name: "Bruno",
     role: "Video montažer (Reels, TikTok, Shorts)",
     initials: "BR",
@@ -108,6 +118,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "glas",
+    dept: "Produkcija",
     name: "Mihael",
     role: "Glas pripovjedača",
     initials: "MI",
@@ -118,6 +129,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "kanal",
+    dept: "Distribucija",
     name: "Petra",
     role: "Urednica kanala Dresify Svlačionica",
     initials: "PE",
@@ -128,6 +140,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "prodaja",
+    dept: "Distribucija",
     name: "Filip",
     role: "Prodaja (Dres priče)",
     initials: "FI",
@@ -138,6 +151,7 @@ export const MEDIA_TEAM: TeamMember[] = [
   },
   {
     id: "rast",
+    dept: "Analitika",
     name: "Ema",
     role: "Menadžerica rasta",
     initials: "EM",
@@ -148,3 +162,17 @@ export const MEDIA_TEAM: TeamMember[] = [
     phase: "uskoro"
   }
 ];
+
+export const avatarOf = (id: string) => `/admin/tim/${id}.webp`;
+export const memberOf = (id: string) => MEDIA_TEAM.find((m) => m.id === id);
+export const DEPTS = ["Vodstvo", "Istraživanje", "Produkcija", "Distribucija", "Analitika"] as const;
+
+// Tko je radio na nacrtu (za avatare na kartici). Čisto po formatu/seriji.
+export function crewFor(item: { format: string | null; series: string | null; kind: string }): string[] {
+  if (item.format === "CHANNEL") return ["kanal", "provjera"];
+  const c = ["pisac", "dizajn", "provjera"];
+  if (item.format === "REEL") c.push("video", "glas");
+  if (item.series === "Dres priče") c.unshift("prodaja");
+  if (item.series === "Utakmica") c.unshift("lovac");
+  return c;
+}
