@@ -410,3 +410,45 @@ model IgConnection {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 }
+
+// ————————————————————————————————————————————————————————————————
+// DRESIFY MEDIA — redakcijski stol. Jutarnja rutina (lokalni agenti na Igorovom
+// Macu) šalje pregled, ideje i nacrte preko /api/media/ingest (zaseban ključ
+// MEDIA_INGEST_SECRET). Igor ocjenjuje, uređuje, odobrava i objavljuje/zakazuje.
+// Jedna tablica za sve: kind = BRIEF (jutarnji pregled) | IDEA | DRAFT.
+// ————————————————————————————————————————————————————————————————
+model MediaItem {
+  id            String    @id @default(cuid())
+  extKey        String?   @unique // stabilan ključ od agenta (ponovno slanje = ažuriranje, ne duplikat)
+  runDate       String // "2026-11-17" — dan jutarnjeg pregleda (Zagreb)
+  kind          String // BRIEF | IDEA | DRAFT
+  status        String    @default("NOVO") // NOVO | ZAKAZANO | OBJAVLJUJEM | OBJAVLJENO | ODBIJENO | VRACENO | NEUSPJELO
+  series        String? // Na današnji dan | Pogodi igrača | Zaboravljeni talent | Rasprava | Dres priče | …
+  format        String? // FEED_IMAGE | CAROUSEL | STORY_MANUAL
+  title         String
+  summary       String?   @db.Text
+  caption       String?   @db.Text
+  verification  String? // POTVRĐENO | DJELOMIČNO | NEPOTVRĐENO | GLASINA | MIŠLJENJE
+  scores        Json? // { dijeljenje, komentari, emocija, hr, ukupno }
+  sources       Json? // [{ label, url }]
+  images        Json? // [{ url, source: COMMONS|AI|DRESIFY|UPLOAD|NONE, credit?, license?, link? }]
+  notes         String?   @db.Text // napomene provjeravatelja — NE idu u objavu
+  manualSteps   String?   @db.Text // za STORY_MANUAL: upute za naljepnicu ankete/kviza
+  data          Json? // BRIEF: { kpi, learned, … }
+  ideaKey       String? // DRAFT → extKey ideje
+  suggestedSlot String? // "19:30"
+  rating        Int? // 4 Odlično · 3 Dobro · 2 Prosječno · 1 Loše
+  ratingComment String?   @db.Text
+  ratedAt       DateTime?
+  scheduledAt   DateTime?
+  publishedAt   DateTime?
+  igMediaId     String?
+  permalink     String?
+  error         String?   @db.Text
+  decidedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([runDate])
+  @@index([status, scheduledAt])
+}

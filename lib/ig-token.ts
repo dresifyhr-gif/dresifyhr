@@ -4,6 +4,7 @@ import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypt
 
 import { dbQuery } from "@/lib/db-guard";
 import { prisma } from "@/lib/prisma";
+import { GRAPH_BASE } from "@/lib/meta-graph";
 
 // ————————————————————————————————————————————————————————————————
 // Instagram (Meta Graph API) token — pohrana + auto-osvježavanje.
@@ -17,7 +18,7 @@ import { prisma } from "@/lib/prisma";
 // Nikad se ne vraća klijentu. META_APP_ID/SECRET/IG_BUSINESS_ID su u env-u.
 // ————————————————————————————————————————————————————————————————
 
-const GRAPH = "https://graph.facebook.com/v21.0";
+const GRAPH = GRAPH_BASE;
 
 export const IG_PROVIDER_ID = "singleton";
 

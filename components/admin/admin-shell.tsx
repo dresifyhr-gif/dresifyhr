@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Wallet, Sun, Moon, Clapperboard } from "lucide-react";
+import { LayoutDashboard, Package, Users, BarChart3, Shirt, LogOut, Search, Settings, Wallet, Sun, Moon, Newspaper } from "lucide-react";
 
 import { AdminAiDock } from "@/components/admin/admin-ai-dock";
 import { CommandPalette } from "@/components/admin/command-palette";
@@ -16,7 +16,7 @@ const NAV = [
   { href: "/admin/kupci", label: "Kupci", hint: "Tko kupuje", icon: Users },
   { href: "/admin/novci", label: "Novci", hint: "Podjela i poravnanje", icon: Wallet },
   { href: "/admin/analitika", label: "Analitika", hint: "Brojke, Google i Instagram", icon: BarChart3 },
-  { href: "/admin/reklame", label: "Reklame", hint: "Videi i objava na Instagram", icon: Clapperboard }
+  { href: "/admin/media", label: "Media", hint: "Ideje, nacrti, objave, reklame", icon: Newspaper }
 ];
 
 function isActive(pathname: string, href: string) {

@@ -1,0 +1,508 @@
+<title>Dresify Media</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: plan na vrhu (uski stupac teksta), ispod mockup admin ekrana u okviru preglednika + mobitel s push obavijesti. Boje = tokeni iz Dresify admina. */
+:root{
+  --bg:#f5f5f7; --card:#ffffff; --s2:#eef0f2; --text:#1d1d1f; --t2:#6e6e73; --t3:#8e8e93;
+  --line:rgba(0,0,0,.07); --accent:#e8ff3c; --accent-ink:#1d1d1f;
+  --good:#12915a; --good-bg:#e4f6ec; --warn:#b37400; --warn-bg:#fbefd8; --bad:#c33a30; --bad-bg:#fbe5e3; --info:#2160e6; --info-bg:#e4ecfd;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px -14px rgba(0,0,0,.14);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b0b0c; --card:#151517; --s2:#1c1c20; --text:#f4f4f1; --t2:#b0b0aa; --t3:#8c8c86; --line:rgba(255,255,255,.10);
+  --good:#34d399; --good-bg:rgba(52,211,153,.14); --warn:#fbbf24; --warn-bg:rgba(251,191,36,.14); --bad:#f87171; --bad-bg:rgba(248,113,113,.14); --info:#60a5fa; --info-bg:rgba(96,165,250,.14);
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 40px -24px rgba(0,0,0,.7); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b0b0c; --card:#151517; --s2:#1c1c20; --text:#f4f4f1; --t2:#b0b0aa; --t3:#8c8c86; --line:rgba(255,255,255,.10);
+  --good:#34d399; --good-bg:rgba(52,211,153,.14); --warn:#fbbf24; --warn-bg:rgba(251,191,36,.14); --bad:#f87171; --bad-bg:rgba(248,113,113,.14); --info:#60a5fa; --info-bg:rgba(96,165,250,.14);
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 40px -24px rgba(0,0,0,.7); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+.prose{max-width:760px}
+h1{font-size:34px;letter-spacing:-.02em;line-height:1.1;margin:0 0 8px;text-wrap:balance}
+h2{font-size:22px;letter-spacing:-.01em;margin:0 0 12px;text-wrap:balance}
+h3{font-size:16px;margin:0 0 6px}
+p{margin:0 0 10px}
+.lead{color:var(--t2);font-size:17px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3)}
+.hl{background:var(--accent);color:var(--accent-ink);padding:0 4px;border-radius:4px}
+code{font-family:var(--mono);font-size:.88em;background:var(--s2);padding:1px 5px;border-radius:5px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.box{background:var(--card);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);min-width:0}
+.box ul,.box ol{margin:6px 0 0;padding-left:20px}
+.box li{margin:3px 0}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600}
+.arrow{color:var(--t3)}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.t-good{background:var(--good-bg);color:var(--good)} .t-warn{background:var(--warn-bg);color:var(--warn)} .t-bad{background:var(--bad-bg);color:var(--bad)} .t-info{background:var(--info-bg);color:var(--info)}
+.t-neutral{background:var(--s2);color:var(--t2)}
+.q{border-left:4px solid var(--accent);padding-left:14px}
+table.plain{border-collapse:collapse;width:100%;font-size:14px}
+table.plain td,table.plain th{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.plain th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.scroll{overflow-x:auto}
+
+/* ---------- mockup ---------- */
+.stage{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.browser{flex:1 1 760px;min-width:0;border-radius:16px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.35);border:1px solid var(--line);background:var(--bg)}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--line)}
+.dot{width:11px;height:11px;border-radius:50%;background:var(--s2)}
+.url{margin-left:10px;flex:1;background:var(--s2);border-radius:8px;padding:4px 10px;font-size:12px;color:var(--t2);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app{display:flex;min-height:760px}
+.side{width:210px;flex:none;background:var(--card);border-right:1px solid var(--line);padding:18px 10px;display:flex;flex-direction:column;gap:2px}
+.brand{display:flex;gap:10px;align-items:center;padding:0 8px 16px}
+.logo{width:34px;height:34px;border-radius:10px;background:#111;color:var(--accent);display:grid;place-items:center;font-weight:900}
+.nav{display:flex;flex-direction:column;padding:8px 10px;border-radius:12px;color:var(--t2)}
+.nav b{font-size:13.5px;color:inherit} .nav small{font-size:11px;color:var(--t3)}
+.nav.on{background:rgba(232,255,60,.6);color:var(--accent-ink)}
+.nav .new{font-size:9px;font-weight:800;background:#111;color:var(--accent);border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:2px}
+.main{flex:1;min-width:0;padding:22px 24px;display:flex;flex-direction:column;gap:16px}
+.head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.head h2{margin:0;font-size:24px}
+.tabs{display:flex;gap:4px;background:var(--s2);padding:4px;border-radius:12px;flex-wrap:wrap}
+.tab{border:0;background:transparent;font:inherit;font-size:13px;font-weight:600;color:var(--t2);padding:6px 12px;border-radius:9px;cursor:pointer}
+.tab.on{background:var(--card);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.tab:focus-visible,.btn:focus-visible,.rate button:focus-visible{outline:2px solid var(--info);outline-offset:2px}
+.tab .n{font-size:11px;background:var(--accent);color:var(--accent-ink);border-radius:6px;padding:0 5px;margin-left:4px}
+.card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px;min-width:0}
+.brief{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.kpi{background:var(--s2);border-radius:12px;padding:10px}
+.kpi b{display:block;font-size:22px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi span{font-size:11px;color:var(--t3);font-weight:600}
+.learn{font-size:13px;color:var(--t2)}
+.learn li{margin:4px 0}
+.ideas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.idea{display:flex;flex-direction:column;gap:8px}
+.idea .top{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.rank{font-size:12px;font-weight:800;color:var(--t3)}
+.idea h3{font-size:15px;line-height:1.3;margin:0}
+.idea p{font-size:13px;color:var(--t2);margin:0}
+.scores{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:11.5px;color:var(--t2)}
+.sc{display:flex;flex-direction:column;gap:3px}
+.sc .meter{height:5px;background:var(--s2);border-radius:3px;overflow:hidden}
+.sc .meter i{display:block;height:100%;background:var(--text);border-radius:3px}
+.sc .lbl{display:flex;justify-content:space-between}
+.sc .lbl b{font-variant-numeric:tabular-nums;color:var(--text)}
+.src{font-size:11.5px;color:var(--t3)}
+.draft{display:grid;grid-template-columns:300px 1fr;gap:20px}
+.post{aspect-ratio:4/5;max-width:100%;border-radius:12px;background:#0d0d0f;color:#f4f4f1;position:relative;overflow:hidden;padding:22px;display:flex;flex-direction:column;justify-content:space-between}
+.post .ser{font-size:11px;font-weight:800;letter-spacing:.16em;color:#e8ff3c}
+.post .big{font-size:34px;font-weight:900;line-height:.98;letter-spacing:-.03em;text-transform:uppercase}
+.post .big em{font-style:normal;color:#e8ff3c}
+.post .clues{font-size:13px;line-height:1.5;color:#d8d8d2}
+.post .clues div::before{content:"→ ";color:#e8ff3c}
+.post .foot{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#9a9a94}
+.post .num{position:absolute;right:-10px;top:40px;font-size:220px;font-weight:900;color:rgba(232,255,60,.08);line-height:1}
+.imgopts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.chip{font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:8px;background:var(--s2);color:var(--t2);border:1px solid transparent}
+.chip.on{border-color:var(--text);color:var(--text);background:var(--card)}
+.caption{background:var(--s2);border-radius:12px;padding:12px 14px;font-size:13.5px;white-space:pre-line;line-height:1.5}
+.meta-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--t2)}
+.rate{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.rate button{font:inherit;font-size:13px;font-weight:700;padding:9px 6px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+.rate button[aria-pressed="true"][data-v="4"]{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+.rate button[aria-pressed="true"][data-v="3"]{background:var(--info-bg);border-color:var(--info);color:var(--info)}
+.rate button[aria-pressed="true"][data-v="2"]{background:var(--warn-bg);border-color:var(--warn);color:var(--warn)}
+.rate button[aria-pressed="true"][data-v="1"]{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+textarea{width:100%;font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;padding:8px 10px;resize:vertical;min-height:54px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-size:13px;font-weight:700;border-radius:11px;padding:9px 14px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.dark{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn.ghost{background:transparent}
+.sched{display:none;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;background:var(--s2);border-radius:12px;padding:10px 12px}
+.sched.open{display:flex}
+.sched input{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:var(--card);color:var(--text)}
+.toast{font-size:13px;font-weight:600;color:var(--good);min-height:1.2em}
+.mock-label{position:relative}
+.mock-label::after{content:"PRIMJER";position:absolute;top:-9px;right:12px;font-size:9px;font-weight:800;letter-spacing:.14em;background:var(--text);color:var(--bg);padding:2px 6px;border-radius:5px}
+.panel[hidden]{display:none!important}
+.list .row{display:grid;grid-template-columns:110px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.list .row:last-child{border-bottom:0}
+.list .when{font-variant-numeric:tabular-nums;color:var(--t2);font-weight:600}
+
+.tpl{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;align-items:start}
+.tpl figure{margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.tpl img{width:100%;border-radius:12px;box-shadow:var(--shadow);display:block}
+.tpl figcaption{font-size:13px;color:var(--t2)}
+/* phone */
+.phone{flex:0 0 270px;max-width:100%;border-radius:40px;background:#0b0b0c;padding:12px;box-shadow:0 30px 60px -30px rgba(0,0,0,.5)}
+.screen{border-radius:30px;min-height:540px;background:linear-gradient(160deg,#1f2a44,#3b2b4a 55%,#5a3a3a);padding:46px 12px 12px;color:#fff;display:flex;flex-direction:column;gap:10px}
+.clock{text-align:center;font-size:58px;font-weight:300;letter-spacing:-.03em;line-height:1}
+.date{text-align:center;font-size:14px;opacity:.85;margin-bottom:14px}
+.notif{background:rgba(245,245,247,.82);color:#111;border-radius:18px;padding:10px 12px;display:grid;grid-template-columns:30px 1fr;gap:9px}
+.notif .ic{width:30px;height:30px;border-radius:8px;background:#111;color:#e8ff3c;display:grid;place-items:center;font-weight:900;font-size:13px}
+.notif .t{font-size:12.5px;font-weight:700;display:flex;justify-content:space-between}
+.notif .t span{font-weight:400;color:#555}
+.notif .b{font-size:12.5px;line-height:1.35;color:#222}
+
+@media (max-width:980px){.ideas{grid-template-columns:1fr}.brief{grid-template-columns:1fr}.draft{grid-template-columns:1fr}.post{max-width:340px}}
+@media (max-width:760px){.side{display:none}.main{padding:16px}.kpis{grid-template-columns:repeat(2,1fr)}.app{min-height:0}h1{font-size:28px}}
+@media (prefers-reduced-motion:no-preference){.btn,.tab,.rate button{transition:background .15s,border-color .15s}}
+</style>
+
+<div class="wrap">
+
+<header class="prose">
+  <div class="eyebrow">Dresify Media · Faza 0 + 1 · odobreno 16. 11.</div>
+  <h1>Redakcijski stol u adminu</h1>
+  <p class="lead">Agenti svako jutro u 6 h istraže vijesti i obljetnice, provjere ih, izaberu 3 teme i napišu 1–2 gotova nacrta. Sve stiže u novu karticu <b>Media</b> u adminu, a tebi push na mobitel. Ti ocijeniš, odobriš i objaviš ili zakažeš. Bez tvog klika ništa ne ide na Instagram.</p>
+</header>
+
+<section class="prose">
+  <h2>Kako dan izgleda</h2>
+  <div class="flow">
+    <span class="step">6:00 agenti krenu</span><span class="arrow">→</span>
+    <span class="step">pročitaju tvoje ocjene od jučer</span><span class="arrow">→</span>
+    <span class="step">istraže + provjere (2 izvora)</span><span class="arrow">→</span>
+    <span class="step">3 teme + 1–2 nacrta</span><span class="arrow">→</span>
+    <span class="step">pošalju u admin</span><span class="arrow">→</span>
+    <span class="step">push na mobitel</span><span class="arrow">→</span>
+    <span class="step" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">ti: ocjena → Odobri → Objavi / Zakaži</span>
+  </div>
+</section>
+
+<!-- ======================= MOCKUP ======================= -->
+<section>
+  <div class="prose" style="margin-bottom:14px">
+    <h2>Izgled kartice Media</h2>
+    <p style="color:var(--t2)">Klikaj tabove, ocjene i „Zakaži“, mockup reagira. Sadržaj je izmišljeni primjer kako bi izgledao jedan jutarnji pregled.</p>
+  </div>
+
+  <div class="stage">
+    <div class="browser">
+      <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">dresifyshop.com/admin/media</span></div>
+      <div class="app">
+        <aside class="side" aria-label="Izbornik admina">
+          <div class="brand"><div class="logo">D</div><div><b style="font-size:14px">Dresify</b><div class="eyebrow" style="font-size:9px">Admin</div></div></div>
+          <div class="nav"><b>Pregled</b><small>Početna</small></div>
+          <div class="nav"><b>Narudžbe</b><small>Traži i mijenjaj</small></div>
+          <div class="nav"><b>Proizvodi</b><small>Cijena i zaliha</small></div>
+          <div class="nav"><b>Kupci</b><small>Tko kupuje</small></div>
+          <div class="nav"><b>Novci</b><small>Podjela i poravnanje</small></div>
+          <div class="nav"><b>Analitika</b><small>Brojke, Google i Instagram</small></div>
+          <div class="nav on"><b>Media<span class="new">NOVO</span></b><small>Ideje, nacrti, objave, reklame</small></div>
+        </aside>
+
+        <main class="main">
+          <div class="head">
+            <div><div class="eyebrow">Ponedjeljak, 16. studenoga</div><h2>Media</h2></div>
+            <div class="tabs" role="tablist" aria-label="Media tabovi">
+              <button class="tab on" role="tab" aria-selected="true" data-p="danas">Danas<span class="n">3</span></button>
+              <button class="tab" role="tab" aria-selected="false" data-p="nacrti">Nacrti<span class="n">2</span></button>
+              <button class="tab" role="tab" aria-selected="false" data-p="kalendar">Kalendar</button>
+              <button class="tab" role="tab" aria-selected="false" data-p="arhiva">Arhiva</button>
+              <button class="tab" role="tab" aria-selected="false" data-p="reklame">Reklame</button>
+            </div>
+          </div>
+
+          <!-- DANAS -->
+          <div class="panel" id="p-danas">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div class="card brief mock-label">
+                <div>
+                  <div class="eyebrow">Jutarnji pregled · gotov u 6:18</div>
+                  <h3 style="font-size:18px;margin-top:4px">Mirno jutro za vijesti, jak dan za retro i kviz.</h3>
+                  <div class="kpis">
+                    <div class="kpi"><b>27</b><span>vijesti pregledano</span></div>
+                    <div class="kpi"><b>8</b><span>provjereno</span></div>
+                    <div class="kpi"><b>3</b><span>teme izabrane</span></div>
+                    <div class="kpi"><b>2</b><span>gotova nacrta</span></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="eyebrow">Što su naučili iz tvojih ocjena</div>
+                  <ul class="learn">
+                    <li>Retro i kvizovi dobivaju „Odlično“ → više ih predlažu.</li>
+                    <li>Transfer-glasine ocjenjuješ „Loše“ → samo ako su POTVRĐENE.</li>
+                    <li>Tvoj komentar „kraći opisi“ → opis do 6 redaka.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="ideas">
+                <article class="card idea mock-label">
+                  <div class="top"><span class="rank">#1 · 8,5</span><span class="tag t-good">✓ POTVRĐENO · 2 izvora</span></div>
+                  <span class="tag t-neutral" style="align-self:flex-start">Pogodi igrača</span>
+                  <h3>6 golova na SP-u 1998. i Zlatna kopačka. Tko je to?</h3>
+                  <p>Kviz u 3 traga, odgovor u komentarima. Lako za dijeljenje, starija i mlađa publika.</p>
+                  <div class="scores">
+                    <div class="sc"><div class="lbl">Dijeljenje <b>9</b></div><div class="meter"><i style="width:90%"></i></div></div>
+                    <div class="sc"><div class="lbl">Komentari <b>9</b></div><div class="meter"><i style="width:90%"></i></div></div>
+                    <div class="sc"><div class="lbl">Emocija <b>8</b></div><div class="meter"><i style="width:80%"></i></div></div>
+                    <div class="sc"><div class="lbl">HR relevantnost <b>10</b></div><div class="meter"><i style="width:100%"></i></div></div>
+                  </div>
+                  <div class="src">Izvori: FIFA.com · HNS.hr</div>
+                  <div class="meta-row"><span class="tag t-info">Nacrt spreman</span></div>
+                </article>
+
+                <article class="card idea mock-label">
+                  <div class="top"><span class="rank">#2 · 7,8</span><span class="tag t-good">✓ POTVRĐENO · 2 izvora</span></div>
+                  <span class="tag t-neutral" style="align-self:flex-start">Zaboravljeni talent</span>
+                  <h3>Alen Bokšić: Hrvat koji je s Marseilleom osvojio Ligu prvaka 1993.</h3>
+                  <p>Carousel od 5 slajdova: karijera, trofeji, zašto ga mlađi ne pamte.</p>
+                  <div class="scores">
+                    <div class="sc"><div class="lbl">Dijeljenje <b>7</b></div><div class="meter"><i style="width:70%"></i></div></div>
+                    <div class="sc"><div class="lbl">Komentari <b>7</b></div><div class="meter"><i style="width:70%"></i></div></div>
+                    <div class="sc"><div class="lbl">Emocija <b>8</b></div><div class="meter"><i style="width:80%"></i></div></div>
+                    <div class="sc"><div class="lbl">HR relevantnost <b>9</b></div><div class="meter"><i style="width:90%"></i></div></div>
+                  </div>
+                  <div class="src">Izvori: UEFA.com · Transfermarkt</div>
+                  <div class="meta-row"><span class="tag t-info">Nacrt spreman</span></div>
+                </article>
+
+                <article class="card idea mock-label">
+                  <div class="top"><span class="rank">#3 · 7,1</span><span class="tag t-neutral">Mišljenje · bez provjere</span></div>
+                  <span class="tag t-neutral" style="align-self:flex-start">Rasprava petkom</span>
+                  <h3>Najbolji hrvatski veznjak svih vremena? Izaberi jednog.</h3>
+                  <p>Anketa u storyju + objava. Bez huškanja klubova, samo igrači.</p>
+                  <div class="scores">
+                    <div class="sc"><div class="lbl">Dijeljenje <b>6</b></div><div class="meter"><i style="width:60%"></i></div></div>
+                    <div class="sc"><div class="lbl">Komentari <b>10</b></div><div class="meter"><i style="width:100%"></i></div></div>
+                    <div class="sc"><div class="lbl">Emocija <b>6</b></div><div class="meter"><i style="width:60%"></i></div></div>
+                    <div class="sc"><div class="lbl">HR relevantnost <b>9</b></div><div class="meter"><i style="width:90%"></i></div></div>
+                  </div>
+                  <div class="src">Za petak · ideja, nacrt na zahtjev</div>
+                  <div class="meta-row"><span class="tag t-warn">Story anketa · objavi ručno</span></div>
+                  <div class="src">Slika 1080×1920 + tekst pitanja i opcija za kopiranje. Naljepnicu ankete dodaješ u Instagramu; API to ne podržava pa ovdje nema gumba za objavu.</div>
+                </article>
+              </div>
+
+              <!-- NACRT -->
+              <article class="card mock-label">
+                <div class="eyebrow" style="margin-bottom:10px">Nacrt 1 od 2 · uz temu #1</div>
+                <div class="draft">
+                  <div>
+                    <div class="post" aria-label="Pregled slike objave">
+                      <div class="num">9</div>
+                      <div class="ser">POGODI IGRAČA · DRESIFY</div>
+                      <div class="big">Tko je<br><em>ovo?</em></div>
+                      <div class="clues">
+                        <div>Zlatna kopačka na SP-u 1998.</div>
+                        <div>6 golova u Francuskoj</div>
+                        <div>Nosio broj 9 za Hrvatsku</div>
+                      </div>
+                      <div class="foot"><span>@dresify.hr</span><span>Odgovor u komentarima ↓</span></div>
+                    </div>
+                    <div class="imgopts" role="group" aria-label="Izvor slike">
+                      <span class="chip on">Dresify grafika (bez fotke)</span><span class="chip">Wikimedia Commons</span><span class="chip">Unsplash / Pexels</span><span class="chip">Naš dres</span><span class="chip">Učitaj svoju</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+                    <div class="meta-row"><span class="tag t-good">✓ POTVRĐENO</span><span>FIFA.com (statistika SP 1998.) · HNS.hr (profil igrača)</span></div>
+                    <div class="meta-row"><span class="tag t-neutral">Slika: bez fotke</span><span>Kviz namjerno bez fotke igrača, da ne oda odgovor.</span></div>
+                    <div class="caption">Tri traga, jedan igrač.
+
+Najbolji strijelac SP-a 1998. u Francuskoj.
+6 golova na tom prvenstvu.
+Broj 9 na leđima Vatrenih.
+
+Znaš tko je? Napiši u komentar, odgovor stiže večeras ⚽
+
+#hrvatska #nogomet #vatreni #pogodiigraca #dresify</div>
+                    <div>
+                      <div class="eyebrow" style="margin-bottom:6px">Tvoja ocjena</div>
+                      <div class="rate" role="group" aria-label="Ocjena nacrta">
+                        <button data-v="4" aria-pressed="false">Odlično</button>
+                        <button data-v="3" aria-pressed="false">Dobro</button>
+                        <button data-v="2" aria-pressed="false">Prosječno</button>
+                        <button data-v="1" aria-pressed="false">Loše</button>
+                      </div>
+                      <label for="komentar" class="eyebrow" style="display:block;margin:10px 0 6px">Komentar agentima (čitaju ga sutra ujutro)</label>
+                      <textarea id="komentar" placeholder="npr. odlično, ali stavi odgovor u prvi komentar, ne u opis"></textarea>
+                    </div>
+                    <div class="actions">
+                      <button class="btn primary" id="b-pub">Odobri i objavi sada</button>
+                      <button class="btn dark" id="b-sch">Odobri i zakaži…</button>
+                      <button class="btn">Uredi tekst</button>
+                      <button class="btn ghost">Vrati agentu</button>
+                      <button class="btn ghost" style="color:var(--bad)">Odbij</button>
+                    </div>
+                    <div class="sched" id="sched">
+                      <span>Objavi</span>
+                      <label for="sd" class="eyebrow" style="font-size:10px">datum</label><input id="sd" type="date" value="2026-11-17">
+                      <label for="st" class="eyebrow" style="font-size:10px">termin</label>
+                      <select id="st" style="font:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:var(--card);color:var(--text)"><option>12:00</option><option>18:00</option><option selected>19:30</option><option>21:00</option></select>
+                      <span class="tag t-neutral">publika najaktivnija: prikazuje se tek kad Instagram da podatke</span>
+                      <button class="btn primary" id="b-ok" style="padding:6px 12px">Zakaži</button>
+                    </div>
+                    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <!-- NACRTI -->
+          <div class="panel card list" id="p-nacrti" hidden>
+            <div class="eyebrow" style="margin-bottom:6px">Svi nacrti koji čekaju tebe</div>
+            <div class="row"><span class="when">danas</span><span><b>Pogodi igrača</b> · 6 golova na SP-u 1998.</span><span class="tag t-info">čeka ocjenu</span></div>
+            <div class="row"><span class="when">danas</span><span><b>Zaboravljeni talent</b> · Alen Bokšić (5 slajdova)</span><span class="tag t-info">čeka ocjenu</span></div>
+            <div class="row"><span class="when">ned 15.11.</span><span><b>Dres priče</b> · zašto je hrvatski dres na kockice</span><span class="tag t-warn">vraćen agentu</span></div>
+          </div>
+
+          <!-- KALENDAR -->
+          <div class="panel card list" id="p-kalendar" hidden>
+            <div class="eyebrow" style="margin-bottom:6px">Zakazano · ovaj tjedan</div>
+            <div class="row"><span class="when">uto 17.11. 19:30</span><span><b>Pogodi igrača</b> · Zlatna kopačka 1998.</span><span class="tag t-good">zakazano</span></div>
+            <div class="row"><span class="when">čet 19.11. 18:00</span><span><b>Na današnji dan</b> · (čeka nacrt)</span><span class="tag t-neutral">rupa u planu</span></div>
+            <div class="row"><span class="when">pet 20.11. 20:00</span><span><b>Rasprava petkom</b> · najbolji veznjak</span><span class="tag t-neutral">ideja</span></div>
+          </div>
+
+          <!-- ARHIVA -->
+          <div class="panel card list" id="p-arhiva" hidden>
+            <div class="eyebrow" style="margin-bottom:6px">Arhiva tema · agenti je čitaju da se ne ponavljaju</div>
+            <div class="row"><span class="when">14.11.</span><span>Modrić Zlatna lopta 2018. · <span class="src">objavljeno · 1,2k lajkova</span></span><span class="tag t-good">Odlično</span></div>
+            <div class="row"><span class="when">13.11.</span><span>Transfer glasina (nepotvrđeno) · <span class="src">odbijeno</span></span><span class="tag t-bad">Loše</span></div>
+            <div class="row"><span class="when">12.11.</span><span>Dres priče: prvi dres Hrvatske · <span class="src">objavljeno</span></span><span class="tag t-info">Dobro</span></div>
+          </div>
+
+          <!-- REKLAME -->
+          <div class="panel card" id="p-reklame" hidden>
+            <div class="eyebrow">Reklame</div>
+            <p style="color:var(--t2);margin-top:6px">Postojeća biblioteka reklama (videi, objava reela) seli ovdje kao tab, ništa se u njoj ne mijenja. Stara adresa /admin/reklame preusmjerava ovamo.</p>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div class="phone" aria-label="Push obavijest na mobitelu">
+      <div class="screen">
+        <div class="clock">6:19</div>
+        <div class="date">ponedjeljak, 16. studenoga</div>
+        <div class="notif"><div class="ic">D</div><div><div class="t">Dresify Admin <span>sad</span></div><div class="b">☀️ Jutarnji pregled: 3 teme, 2 nacrta čekaju ocjenu. Top: „Pogodi igrača – SP 1998.“</div></div></div>
+        <div class="notif"><div class="ic">D</div><div><div class="t">Dresify Admin <span>uto 19:30</span></div><div class="b">✅ Objavljeno na Instagram: „Pogodi igrača“. Otvori objavu →</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="prose" style="margin-bottom:14px">
+    <h2>Predlošci grafika</h2>
+    <p style="color:var(--t2)">Pravi JPEG-ovi u punoj veličini, isti stil za sve serije. Sadržaj na njima je primjer. Klikni sliku za punu veličinu.</p>
+  </div>
+  <div class="tpl">
+    <figure><a href="predlosci/1-na-danasnji-dan.jpg" target="_blank"><img src="predlosci/1-na-danasnji-dan.jpg" alt="Predložak Na današnji dan"></a><figcaption><b>Na današnji dan</b> · 1080×1350</figcaption></figure>
+    <figure><a href="predlosci/2-pogodi-igraca.jpg" target="_blank"><img src="predlosci/2-pogodi-igraca.jpg" alt="Predložak Pogodi igrača"></a><figcaption><b>Pogodi igrača</b> · 1080×1350</figcaption></figure>
+    <figure><a href="predlosci/3a-zaboravljeni-talent-naslovnica.jpg" target="_blank"><img src="predlosci/3a-zaboravljeni-talent-naslovnica.jpg" alt="Predložak Zaboravljeni talent naslovnica"></a><figcaption><b>Zaboravljeni talent</b> · naslovnica carousela</figcaption></figure>
+    <figure><a href="predlosci/3b-zaboravljeni-talent-slajd.jpg" target="_blank"><img src="predlosci/3b-zaboravljeni-talent-slajd.jpg" alt="Predložak Zaboravljeni talent slajd"></a><figcaption><b>Zaboravljeni talent</b> · unutarnji slajd</figcaption></figure>
+    <figure><a href="predlosci/4-rasprava-story.jpg" target="_blank"><img src="predlosci/4-rasprava-story.jpg" alt="Predložak Rasprava story"></a><figcaption><b>Rasprava</b> · story 1080×1920 · objavi ručno</figcaption></figure>
+    <figure><a href="predlosci/5-dres-price.jpg" target="_blank"><img src="predlosci/5-dres-price.jpg" alt="Predložak Dres priče"></a><figcaption><b>Dres priče</b> · 1080×1080</figcaption></figure>
+  </div>
+</section>
+
+<!-- ======================= PLAN ======================= -->
+<section class="prose">
+  <h2>Što gradim</h2>
+  <p>Sve novo živi u adminu i u zasebnim datotekama. Webshop (naslovnica, proizvodi, košarica, narudžbe) se ne dira.</p>
+</section>
+
+<section class="grid2">
+  <div class="box">
+    <h3>1. Baza: jedna nova tablica</h3>
+    <p style="font-size:14px;color:var(--t2)"><code>MediaItem</code>: jutarnji pregled, ideje i nacrti u istoj tablici (vrsta, status, ocjene 4 kriterija, provjera i izvori, opis, slike, tvoja ocjena 1–4 + komentar, zakazano za, IG link). Migracija ide u bazu <b>prije</b> koda, da se admin ne sruši kao zadnji put.</p>
+  </div>
+  <div class="box">
+    <h3>2. Sigurna ulazna ruta za agente</h3>
+    <p style="font-size:14px;color:var(--t2)"><code>/api/media/ingest</code> sa zasebnim tajnim ključem <code>MEDIA_INGEST_SECRET</code> (provjera otporna na mjerenje vremena), provjerom oblika podataka i ograničenjem veličine. Ključ ne otvara ništa drugo u adminu. Druga ruta daje agentima samo tvoje ocjene i arhivu tema.</p>
+  </div>
+  <div class="box">
+    <h3>3. Kartica Media u adminu</h3>
+    <p style="font-size:14px;color:var(--t2)">Tabovi Danas · Nacrti · Kalendar · Arhiva · Reklame. Ocjena + komentar, uređivanje teksta, Odobri → objavi sada ili zakaži, Vrati agentu, Odbij. Odobravati i objavljivati možeš <b>samo ti</b>; ostali u obitelji vide, ali ne objavljuju.</p>
+  </div>
+  <div class="box">
+    <h3>4. Objava i zakazivanje</h3>
+    <p style="font-size:14px;color:var(--t2)">„Objavi sada“ koristi postojeću objavu na Instagram iz admina. Instagram nema svoje zakazivanje kroz API, pa biraš jedan od <b>fiksnih termina: 12:00, 18:00, 19:30, 21:00</b>. Cron se budi samo u tim terminima (baza ne radi bez potrebe), objavi dospjelo i javi push „Objavljeno“ ili „Nije uspjelo“. Carousel dodajem u istom koraku. Story ankete i kvizovi su <b>„objavi ručno“</b>: slika + tekst za kopiranje, bez gumba za objavu. „Publika najaktivnija u X h“ prikazujem samo iz stvarnih Instagram podataka.</p>
+  </div>
+  <div class="box">
+    <h3>5. Slike samo iz dopuštenih izvora</h3>
+    <p style="font-size:14px">Agent sam traži fotku za temu i složi je u grafiku, ali samo iz tri izvora: <b>Wikimedia Commons</b> (provjeri licencu, mali potpis autora i licence na grafici i u captionu), <b>Unsplash / Pexels</b> za atmosferu (stadioni, lopte, navijači) i <b>naše slike dresova</b> sa stranice. Nikad Getty, Pixsell, Reuters, portali ni Google slike. Uz svaki nacrt piše izvor i licenca slike. Ako slobodne fotke nema, grafika ide bez fotke s oznakom „bez fotke“. „Učitaj svoju“ ostaje.</p>
+    <p style="font-size:14px;color:var(--t2)">Dvije sitnice kod Commonsa: licence CC BY-SA traže potpis i napomenu „izmijenjeno“, pa ih agent uvijek dodaje. Fotke stvarnih igrača koristi samo u nogometnim pričama, ne u objavama koje prodaju dres.</p>
+  </div>
+  <div class="box">
+    <h3>6. Push ujutro</h3>
+    <p style="font-size:14px;color:var(--t2)">Postojeće PWA obavijesti, ali samo na tvoje uređaje: „☀️ Jutarnji pregled: 3 teme, 2 nacrta“. Klik otvara Media → Danas. Dnevni sažetak narudžbi u 18 h ostaje kakav je.</p>
+  </div>
+</section>
+
+<section class="prose">
+  <h2>Jutarnja rutina agenata</h2>
+  <div class="scroll">
+  <table class="plain">
+    <tr><th>Uloga</th><th>Što radi</th></tr>
+    <tr><td><b>Urednik</b></td><td>Vodi rutinu. Prvo pročita tvoje ocjene i komentare od jučer i arhivu tema, na kraju bira top 3 i šalje u admin.</td></tr>
+    <tr><td><b>Lovac na teme</b></td><td>Hrvatske i strane nogometne vijesti, što je viralno i u trendu. Razlikuje stvarne signale od svoje procjene.</td></tr>
+    <tr><td><b>Retro istraživač</b></td><td>Obljetnice i „na današnji dan“ za datum objave.</td></tr>
+    <tr><td><b>Provjeravatelj</b></td><td>Svaka činjenica: POTVRĐENO / DJELOMIČNO / NEPOTVRĐENO / GLASINA. Treba 2 <b>nezavisna</b> izvora; ista agencijska vijest prenesena na dva portala broji se kao jedan.</td></tr>
+    <tr><td><b>Pisac</b></td><td>1–2 nacrta vlastitim riječima, bira format (kviz, carousel, rasprava). Dinamo/Hajduk bez huškanja.</td></tr>
+    <tr><td><b>Kreativni direktor</b></td><td>Tekst za Dresify grafiku i izbor slike po pravilima.</td></tr>
+    <tr><td><b>Menadžer rasta</b></td><td>Uključuje se kad bude dovoljno objava s pravim IG brojkama (Faza 4).</td></tr>
+  </table>
+  </div>
+  <p style="margin-top:12px;font-size:14px;color:var(--t2)">Teme koje se izbjegavaju: <b>politika</b>. Odobrava: <b>samo Igor</b>. Ritam: oko 4 od 5 objava čisti nogometni sadržaj, 1 od 5 lagano vezan uz dresove.</p>
+</section>
+
+<section class="prose">
+  <h2>Redoslijed gradnje</h2>
+  <div class="scroll">
+  <table class="plain">
+    <tr><th>Korak</th><th>Što</th><th>Kako znam da radi</th></tr>
+    <tr><td>1</td><td>Tablica + migracija u bazu</td><td>Admin radi kao i prije</td></tr>
+    <tr><td>2</td><td>Ulazna ruta + ruta za ocjene</td><td>Probni nacrt s pravim ključem prođe, bez ključa odbijen</td></tr>
+    <tr><td>3</td><td>Kartica Media (tabovi, ocjene, uređivanje), Reklame kao tab</td><td>Lokalni pregled na mobitelu i računalu, svijetla i tamna tema</td></tr>
+    <tr><td>4</td><td>Dresify grafika (JPEG) + objava / carousel + zakazivanje (cron)</td><td>Probna objava tek uz tvoje odobrenje</td></tr>
+    <tr><td>5</td><td>Push ujutro (samo tebi)</td><td>Probni push na tvoj mobitel</td></tr>
+    <tr><td>6</td><td>Jutarnja rutina u 6 h</td><td>Jedno ručno pokretanje, rezultat u adminu</td></tr>
+  </table>
+  </div>
+</section>
+
+<section class="grid2">
+  <div class="box">
+    <h3>Instagram Graph API v21.0</h3>
+    <p style="font-size:14px">Nije hitno danas, ali ima rok: <b>v21.0 se gasi 21. 1. 2027.</b> (oko 2 mjeseca). Koriste ga <code>lib/instagram.ts</code>, <code>lib/ig-token.ts</code>, <code>lib/ig-stats.ts</code> i <code>lib/meta-capi.ts</code> (Meta piksel za webshop).</p>
+    <p style="font-size:14px;color:var(--t2)">Prijedlog: IG datoteke podignem na noviju verziju u sklopu ove gradnje jer ih ionako diram. <code>meta-capi.ts</code> je dio webshopa pa ga diram samo uz tvoje izričito odobrenje, u zasebnom malom koraku.</p>
+  </div>
+  <div class="box">
+    <h3>Odlučeno 16. 11.</h3>
+    <ul style="font-size:14px">
+      <li><b>Agenti rade na tvom Macu</b> kao lokalni zakazani zadatak u 6:00, bez ikakvih API-ja i dodatnih troškova. Ako je Mac ugašen, rutina se odradi čim ga upališ.</li>
+      <li><b>Slike:</b> Wikimedia Commons (stvarni igrači i povijest, uz licencu i potpis), ilustracije iz ChatGPT aplikacije na Macu (bez lica stvarnih igrača i bez grbova) i naši dresovi.</li>
+      <li><b>Reklame postaju tab</b> u Media.</li>
+      <li><b>meta-capi.ts</b> ide na noviju Graph verziju u zasebnom malom koraku.</li>
+      <li><b>Captioni:</b> najviše 1–2 emojija.</li>
+      <li><b>Objava tjedno: 7</b> (1 objava dnevno + storyji). Agenti svaki dan šalju 3 ideje i 1–2 nacrta, a Kalendar crveno označi dan bez zakazane objave.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var tabs=document.querySelectorAll('.tab');
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.classList.remove('on');x.setAttribute('aria-selected','false')});
+    t.classList.add('on');t.setAttribute('aria-selected','true');
+    document.querySelectorAll('.panel').forEach(function(p){p.hidden=p.id!=='p-'+t.dataset.p});
+  })});
+  var rb=document.querySelectorAll('.rate button');
+  rb.forEach(function(b){b.addEventListener('click',function(){
+    rb.forEach(function(x){x.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');
+  })});
+  var toast=document.getElementById('toast'),sched=document.getElementById('sched');
+  document.getElementById('b-sch').addEventListener('click',function(){sched.classList.toggle('open')});
+  document.getElementById('b-pub').addEventListener('click',function(){toast.textContent='U pravom adminu: objavljeno na Instagram + link na objavu.'});
+  document.getElementById('b-ok').addEventListener('click',function(){
+    var d=document.getElementById('sd').value.split('-'),t=document.getElementById('st').value;
+    sched.classList.remove('open');toast.textContent='Zakazano za '+(+d[2])+'. '+(+d[1])+'. u '+t+'. Push stiže kad se objavi.';
+  });
+})();
+</script>

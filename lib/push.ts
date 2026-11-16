@@ -159,3 +159,23 @@ export async function sendNewOrderPush(order: OrderPayload) {
     kind: "order"
   });
 }
+
+// Pošalji samo vlasniku/vlasnicima (OWNER profili) — za Media obavijesti
+// (jutarnji pregled, objavljeno/nije uspjelo). Ostali u obitelji ih ne dobivaju.
+export async function sendPushToOwners(msg: PushMessage) {
+  if (!configured) return { configured: false, sent: 0, failed: 0, pruned: 0 };
+  let subs: SubRow[] = [];
+  try {
+    const owners = await prisma.adminUser.findMany({ where: { role: "OWNER", active: true }, select: { username: true } });
+    // + "Igor": sintetički vlasnik stare zajedničke lozinke (lib/admin-auth getAdminUser).
+    const names = Array.from(new Set([...owners.map((o) => o.username), "Igor"]));
+    subs = await prisma.pushSubscription.findMany({
+      where: { username: { in: names } },
+      select: { id: true, endpoint: true, p256dh: true, auth: true }
+    });
+  } catch (e) {
+    console.error("[push] učitavanje vlasnikovih pretplata nije uspjelo:", e);
+    return { configured: true, sent: 0, failed: 0, pruned: 0 };
+  }
+  return sendToSubs(subs, msg);
+}

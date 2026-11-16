@@ -4,6 +4,7 @@ import { unstable_cache } from "next/cache";
 import { getSettings } from "@/lib/settings";
 import { getIgTokenStrict } from "@/lib/ig-token";
 import { withLastGood } from "@/lib/db-guard";
+import { GRAPH_VERSION } from "@/lib/meta-graph";
 
 // Broj Instagram pratitelja preko službenog Meta Instagram Graph API-ja (besplatno,
 // veliki limiti — za razliku od Beholda koji je puknuo na overage). Treba u Vercel:
@@ -11,7 +12,7 @@ import { withLastGood } from "@/lib/db-guard";
 //  - IG_GRAPH_TOKEN→ long-lived token s dozvolom instagram_basic + pages_read_engagement
 // Ako nije postavljeno ili padne → zadnja poznata vrijednost (FALLBACK).
 const FALLBACK = 2505;
-const API_VERSION = "v21.0";
+const API_VERSION = GRAPH_VERSION;
 
 // Keš 6 h (prije 10 min — svako osvježavanje čita token iz baze i budi Neon).
 // Neuspjeh (baza ili Instagram) BACA grešku umjesto da vrati FALLBACK, da se

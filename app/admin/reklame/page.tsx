@@ -1,20 +1,9 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { AdminShell } from "@/components/admin/admin-shell";
-import { ReklameManager } from "@/components/admin/reklame-manager";
-import { isAdmin } from "@/lib/admin-auth";
-
-export const metadata: Metadata = { title: "Reklame — Dresify Admin", robots: { index: false, follow: false } };
+// Reklame su sada TAB unutar Media (manje stavki u izborniku). Stara adresa
+// preusmjerava na taj tab, pa bookmarki i dalje rade.
 export const dynamic = "force-dynamic";
 
-export default async function ReklamePage() {
-  if (!(await isAdmin())) redirect("/admin/login/");
-  return (
-    <AdminShell title="Reklame" subtitle="Videi za Instagram i oglase">
-      <div className="max-w-6xl">
-        <ReklameManager />
-      </div>
-    </AdminShell>
-  );
+export default function ReklameRedirect() {
+  redirect("/admin/media/?tab=reklame");
 }

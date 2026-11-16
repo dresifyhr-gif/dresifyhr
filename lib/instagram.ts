@@ -3,13 +3,14 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 
 import { ensureFreshIgToken } from "@/lib/ig-token";
+import { GRAPH_BASE } from "@/lib/meta-graph";
 
-// Instagram statistika + objava dresova preko Meta Graph API-ja (v21.0).
+// Instagram statistika + objava dresova preko Meta Graph API-ja (verzija u lib/meta-graph.ts).
 // Sve je best-effort: bez spojenog tokena / na grešku vrati prazno (ok:false) —
 // stranica i dalje radi. Graph API metrike Meta zna deprecirati, pa se sve
 // parsira obranbeno (isti obrazac kao lib/ga.ts). Fiksirana verzija zbog stabilnosti.
 
-const GRAPH = "https://graph.facebook.com/v21.0";
+const GRAPH = GRAPH_BASE;
 const TIMEOUT = 8000;
 
 export type IgMedia = {
@@ -312,5 +313,125 @@ export async function finishReel(
     return { ok: true, status: "published", permalink };
   } catch (e) {
     return { ok: false, error: metaError(e) };
+  }
+}
+
+// ————————————————————————————————————————————————————————————————
+// Objava CAROUSELA (2–10 slika, sve JPEG s naše domene/Bloba).
+// Graph: za svaku sliku container (is_carousel_item) → roditelj CAROUSEL → publish.
+// ————————————————————————————————————————————————————————————————
+async function waitContainer(id: string, token: string, tries = 10) {
+  for (let i = 0; i < tries; i++) {
+    const st = await graphGet(id, { fields: "status_code" }, token).catch(() => null);
+    const code = String(st?.status_code || "");
+    if (code === "FINISHED") return;
+    if (code === "ERROR" || code === "EXPIRED") throw new Error(`Instagram nije mogao obraditi sliku (${code}).`);
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  throw new Error("Instagram predugo obrađuje slike. Pokušaj ponovno za minutu.");
+}
+
+async function graphPost(path: string, params: Record<string, string>, token: string) {
+  const res = await fetch(`${GRAPH}/${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ ...params, access_token: token }),
+    signal: AbortSignal.timeout(20_000)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function publishCarousel(input: { imageUrls: string[]; caption: string }): Promise<{ ok: boolean; id?: string; permalink?: string; error?: string }> {
+  const conn = await ensureFreshIgToken();
+  if (!conn || !conn.igBusinessId) return { ok: false, error: "Instagram nije spojen." };
+  const { token, igBusinessId: ig } = conn;
+  const urls = input.imageUrls.slice(0, 10);
+  if (urls.length < 2) return { ok: false, error: "Carousel treba barem 2 slike." };
+  try {
+    // 1) Djeca (paralelno — IG ih obrađuje neovisno).
+    const children = await Promise.all(
+      urls.map(async (u) => {
+        const c = await graphPost(`${ig}/media`, { image_url: u, is_carousel_item: "true" }, token);
+        const id = String(c?.id || "");
+        if (!id) throw new Error("Nema id za sliku carousela.");
+        return id;
+      })
+    );
+    await Promise.all(children.map((id) => waitContainer(id, token)));
+
+    // 2) Roditelj.
+    const parent = await graphPost(`${ig}/media`, { media_type: "CAROUSEL", children: children.join(","), caption: input.caption }, token);
+    const parentId = String(parent?.id || "");
+    if (!parentId) throw new Error("Nema id za carousel.");
+    await waitContainer(parentId, token);
+
+    // 3) Objava.
+    const pub = await graphPost(`${ig}/media_publish`, { creation_id: parentId }, token);
+    const mediaId = String(pub?.id || "");
+    let permalink: string | undefined;
+    try {
+      const info = await graphGet(mediaId, { fields: "permalink" }, token);
+      if (info?.permalink) permalink = String(info.permalink);
+    } catch {
+      /* bonus */
+    }
+    return { ok: true, id: mediaId, permalink };
+  } catch (e) {
+    return { ok: false, error: metaError(e) };
+  }
+}
+
+// ————————————————————————————————————————————————————————————————
+// Kad je publika online (stvarni Instagram podaci, metrika online_followers).
+// Vrati najbolji od naših termina samo ako Instagram stvarno da brojke; inače
+// null (i tada se u adminu NIŠTA ne prikazuje). Keš 12 h.
+// ————————————————————————————————————————————————————————————————
+export type IgBestSlot = { slot: string; hourlyAvg: Record<string, number> } | null;
+
+async function buildOnlineFollowers(slots: string[]): Promise<IgBestSlot> {
+  const conn = await ensureFreshIgToken();
+  if (!conn || !conn.igBusinessId) return null;
+  const j = await graphGet(`${conn.igBusinessId}/insights`, { metric: "online_followers", period: "lifetime" }, conn.token);
+  const values: { value?: Record<string, number> }[] = j?.data?.[0]?.values || [];
+  // Zbroji po satu (Graph vraća sate u UTC-u, po danu); prosjek po danima.
+  const sum: Record<number, number> = {};
+  let days = 0;
+  for (const v of values) {
+    const hours = v?.value;
+    if (!hours || typeof hours !== "object" || Object.keys(hours).length === 0) continue;
+    days++;
+    for (const [h, n] of Object.entries(hours)) sum[Number(h)] = (sum[Number(h)] || 0) + (Number(n) || 0);
+  }
+  if (days === 0) return null;
+  // UTC sat → Zagreb sat (današnji pomak, 1 zimi / 2 ljeti; za odabir termina dovoljno).
+  const now = new Date();
+  const midnightUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0));
+  const off = Number(new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Zagreb", hour: "numeric", hourCycle: "h23" }).format(midnightUtc)) || 1;
+  const hourlyAvg: Record<string, number> = {};
+  for (const [h, n] of Object.entries(sum)) hourlyAvg[String((Number(h) + off) % 24)] = Math.round(n / days);
+  let best: string | null = null;
+  let bestVal = -1;
+  for (const s of slots) {
+    const h = String(Number(s.split(":")[0]));
+    const val = hourlyAvg[h] ?? -1;
+    if (val > bestVal) {
+      bestVal = val;
+      best = s;
+    }
+  }
+  return best && bestVal > 0 ? { slot: best, hourlyAvg } : null;
+}
+
+const cachedOnline = unstable_cache((slotsKey: string) => buildOnlineFollowers(slotsKey.split(",")), ["ig-online-followers-v1"], {
+  revalidate: 43200,
+  tags: ["ig-stats"]
+});
+
+export async function getBestSlotFromInstagram(slots: readonly string[]): Promise<IgBestSlot> {
+  try {
+    return await cachedOnline(slots.join(","));
+  } catch {
+    return null;
   }
 }
