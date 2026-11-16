@@ -5,7 +5,7 @@ import { cache } from "react";
 
 import { dbQuery, withLastGood } from "@/lib/db-guard";
 import { prisma } from "@/lib/prisma";
-import type { Jersey } from "@/lib/data/jerseys";
+import { REDIRECTED_PRODUCT_SLUGS, type Jersey } from "@/lib/data/jerseys";
 
 // ── Keširani DB dohvati ───────────────────────────────────────────────────────
 // Stranice su dinamičke (i18n cookie), pa bi bez keša svaki posjet i svaki bot
@@ -55,7 +55,10 @@ const fetchSoldSlugsCached = unstable_cache(
 );
 
 const fetchOverrideRows = () => withLastGood("overrides", [] as Awaited<ReturnType<typeof fetchOverrideRowsCached>>, fetchOverrideRowsCached);
-const fetchCustomRows = () => withLastGood("custom", [] as CustomRow[], fetchCustomRowsCached);
+// Custom proizvodi čiji /dres/* URL preusmjerava (duplikati) ne idu u kartice,
+// ItemList, sitemap ni feedove — isti set kao za statični katalog. Bez pisanja u bazu.
+const notRedirected = (rows: CustomRow[]) => rows.filter((r) => !REDIRECTED_PRODUCT_SLUGS.has(r.slug));
+const fetchCustomRows = async () => notRedirected(await withLastGood("custom", [] as CustomRow[], fetchCustomRowsCached));
 const fetchSoldSlugs = () => withLastGood("sold", [] as string[], fetchSoldSlugsCached);
 
 // Podaci za sitemap iz ISTOG keša (bez zasebnih upita koji bude bazu).
@@ -70,7 +73,7 @@ export async function getSitemapProductData(): Promise<{ customSlugs: string[]; 
     const d = new Date(r.updatedAt);
     if (!Number.isNaN(d.getTime())) lastMod.set(r.slug, d);
   }
-  return { customSlugs: cu.map((r) => r.slug), lastMod };
+  return { customSlugs: notRedirected(cu).map((r) => r.slug), lastMod };
 }
 
 // Admin-managed overrides (price / stock) merged onto the static catalog. Best-effort:

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { OstaleIgre } from "@/components/game/v2/game-shell";
 import { PenaltyKarijera } from "@/components/game/v2/penalty/penalty-cup";
 import { buildMetadata } from "@/lib/seo";
 
@@ -18,7 +19,7 @@ export default function IgraPage() {
   return (
     <>
       <PenaltyKarijera />
-      <section className="page-shell max-w-2xl pb-16 pt-10 md:pt-4">
+      <section className="page-shell max-w-2xl pb-10 pt-10 md:pt-4">
         <span className="section-kicker">Penalty Karijera</span>
         <h1 className="mt-2 font-heading text-[clamp(2.1rem,6vw,3.2rem)] uppercase leading-[0.95] tracking-[0.04em] text-white">
           Od prvog penala do bossa
@@ -37,6 +38,7 @@ export default function IgraPage() {
           lopte. Za kratku pauzu tu je i brza partija od pet penala.
         </p>
       </section>
+      <OstaleIgre current="igra" />
     </>
   );
 }

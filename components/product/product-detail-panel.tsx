@@ -171,6 +171,7 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         </div>
       )}
       <p className="mt-4 text-4xl font-semibold text-accent">{productPrice}€</p>
+      {/* Samo stvarna, niska zaliha (1–5) — getJerseyStock vraća 0 kad broj nije poznat. */}
       {stock > 0 ? (
         <p className={`mt-4 text-sm font-semibold uppercase tracking-[0.2em] ${getStockTone(stock)}`}>
           {t.product.stockWarning(stock)}

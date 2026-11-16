@@ -57,7 +57,7 @@ const hr = {
   },
 
   product: {
-    stockWarning: (n: number) => `Ostalo samo ${n} komada!`,
+    stockWarning: (n: number) => (n === 1 ? "Ostao samo 1 komad!" : `Ostalo samo ${n} komada!`),
     adults: "Odrasli",
     jersey: "Dres",
     kids: "Djeca",

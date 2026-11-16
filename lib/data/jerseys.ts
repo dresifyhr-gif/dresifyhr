@@ -121,7 +121,10 @@ const allJerseys: Jersey[] = [
 // MORA odgovarati /dres/* izvorima tamo: dok redirect postoji, proizvod ne smije
 // biti u karticama, ItemList schemi, sitemapu ni feedovima (Google bi dobio URL
 // koji preusmjerava). Ako se dres vrati u prodaju — makni ga odavde I iz redirecta.
-export const REDIRECTED_PRODUCT_SLUGS = new Set<string>(["milan-ibrahimovic"]);
+// Vrijedi i za custom proizvode iz admina (product-overrides ih filtrira istim setom).
+// manutd-sesko: isti dres kao custom "manchester-united-sesko" (ista slika, cijena,
+// veličine) → 308 na njega, da Google ne vidi dvije stranice istog proizvoda.
+export const REDIRECTED_PRODUCT_SLUGS = new Set<string>(["milan-ibrahimovic", "manutd-sesko"]);
 
 // Katalog za izlistavanje (kartice, ItemList, sitemap, feedovi).
 export const jerseys: Jersey[] = allJerseys.filter((j) => !REDIRECTED_PRODUCT_SLUGS.has(j.slug));
@@ -230,21 +233,29 @@ export function getJerseyBySlug(slug: string) {
   return allJerseys.find((jersey) => jersey.slug === slug);
 }
 
-// Zaliha = zbroj SAMO izričito praćenih veličina (ključevi u sizeStock). Veličine
-// kojih nema u sizeStock nisu "0 komada" nego nepraćene. Ako je zbroj praćenih 0,
-// a proizvod se i dalje može kupiti u nekoj nepraćenoj veličini (isPurchasable),
-// broj komada nije poznat → ručna/automatska zaliha ispod (nepromijenjena), umjesto
-// lažnog "Ostalo samo 0 komada". Za dostupnost (in/out of stock) koristi isPurchasable().
-export function getJerseyStock(product: { id: number; stock?: number | null; sizeStock?: Record<string, number> | null }) {
-  if (product.sizeStock && Object.keys(product.sizeStock).length > 0) {
-    const tracked = Object.values(product.sizeStock).reduce((sum, n) => sum + (Number.isFinite(n) ? Math.max(0, n) : 0), 0);
-    if (tracked > 0) return tracked;
-    const full = product as Partial<Jersey>;
-    const hasUntrackedBuyable = typeof full.vel === "string" && isPurchasable(full as Jersey);
-    if (!hasUntrackedBuyable) return 0;
+// Broj za crtu "Ostalo samo N komada" (stranica proizvoda i kartice).
+// Prikazuje se SAMO kad je N STVARAN (upisan u adminu) i nizak: 1–5. Inače 0 =
+// bez crte. Ranije se, kad zaliha nije upisana, izmišljalo 2–6 komada — to je
+// lažna oskudica, pa je izbačeno. Za dostupnost (in/out of stock) koristi isPurchasable().
+export function getJerseyStock(product: Jersey): number {
+  const known = getKnownStock(product);
+  return known != null && known >= 1 && known <= 5 ? known : 0;
+}
+
+// Stvarna zaliha u komadima, ili null kad nije poznata.
+// - Broji samo veličine koje se STVARNO mogu kupiti (iste kao izbornik veličina).
+// - Po veličinama (sizeStock) samo ako je SVAKA kupiva veličina upisana; inače bi
+//   zbroj podcijenio zalihu (nepraćena veličina se i dalje prodaje).
+// - Inače ručno upisana ukupna količina (stock) iz admina.
+function getKnownStock(product: Jersey): number | null {
+  const sizes = getPurchasableSizes(product);
+  if (!sizes.length) return 0;
+  const bySize = product.sizeStock;
+  if (bySize && sizes.every((s) => Number.isFinite(bySize[s]))) {
+    return sizes.reduce((sum, s) => sum + Math.max(0, bySize[s]), 0);
   }
-  if (product.stock != null) return product.stock;
-  return 2 + ((product.id * 7) % 5);
+  if (typeof product.stock === "number" && Number.isFinite(product.stock)) return Math.max(0, product.stock);
+  return null;
 }
 
 export function getStockTone(stock: number) {
@@ -346,12 +357,15 @@ export function getJerseySizeOptions(product: Jersey) {
 // sizeStock <= 0). Koristi se za schema.org availability i feedove, da Google
 // vidi isto što i kupac.
 export function isPurchasable(product: Jersey): boolean {
-  if (product.outOfStock === "all") return false;
+  return getPurchasableSizes(product).length > 0;
+}
+
+// Veličine koje kupac stvarno može odabrati (nisu rasprodane ni u rasprodanom segmentu).
+function getPurchasableSizes(product: Jersey): string[] {
+  if (product.outOfStock === "all") return [];
   const o = getJerseySizeOptions(product);
   const soldOut = new Set(o.soldOutSizes);
-  const adultOk = !o.adultsOutOfStock && o.adults.some((s) => !soldOut.has(s));
-  const kidOk = !o.kidsOutOfStock && o.kids.some((s) => !soldOut.has(s));
-  return adultOk || kidOk;
+  return [...(o.adultsOutOfStock ? [] : o.adults), ...(o.kidsOutOfStock ? [] : o.kids)].filter((s) => !soldOut.has(s));
 }
 
 export function productSupportsSize(product: Jersey, size: string) {

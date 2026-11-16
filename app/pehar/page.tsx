@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { OstaleIgre } from "@/components/game/v2/game-shell";
 import { PEHAR_NAZIV, PEHAR_PUTANJA } from "@/components/game/v2/pehar/config";
 import { PeharIgra } from "@/components/game/v2/pehar/pehar-igra";
 import { buildMetadata } from "@/lib/seo";
@@ -30,7 +31,7 @@ export default function PeharPage() {
   return (
     <>
       <PeharIgra />
-      <section className="section-pad">
+      <section className="pb-10 pt-10 sm:pt-14 lg:pt-20">
         <div className="page-shell max-w-2xl">
           <h1 className="font-heading text-[clamp(2.2rem,8vw,3.2rem)] uppercase leading-[0.95] text-white">
             {PEHAR_NAZIV}: nogometni kviz
@@ -63,6 +64,7 @@ export default function PeharPage() {
           </ul>
         </div>
       </section>
+      <OstaleIgre current="pehar" />
     </>
   );
 }

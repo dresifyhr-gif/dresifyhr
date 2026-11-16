@@ -1217,3 +1217,62 @@ export function GameShell(props: GameShellProps) {
     </GameStage>
   );
 }
+
+// ── Ostale igre (ispod pozornice) ────────────────────────────────────────
+// Blok s linkovima na ostale mini igre + hub /igre. Ide na stranicu ISPOD
+// igre (ne u pozornicu), pa ne dira visinu ni kontrole igre. Bez riječi o
+// nagradama (GAME_REWARDS_ENABLED = false). Linkovi imaju završnu kosu crtu
+// (trailingSlash: true), da nema preusmjeravanja.
+export type OstalaIgraId = "igra" | "pehar" | "kviz" | "zongliranje";
+
+const OSTALE_IGRE: { id: OstalaIgraId; href: string; naziv: string; opis: string }[] = [
+  { id: "igra", href: "/igra/", naziv: "Penalty Karijera", opis: "Penali level po level, sve do boss golmana." },
+  { id: "pehar", href: "/pehar/", naziv: "15 do pehara", opis: "Petnaest pitanja zaredom. Jedan krivi i ispadaš." },
+  { id: "kviz", href: "/kviz/", naziv: "Kviz dana", opis: "Deset novih pitanja svaki dan, ista za sve." },
+  { id: "zongliranje", href: "/zongliranje/", naziv: "Žongliranje", opis: "Drži loptu u zraku što dulje možeš." }
+];
+
+export function OstaleIgre({ current, className = "" }: { current: OstalaIgraId; className?: string }) {
+  const igre = OSTALE_IGRE.filter((g) => g.id !== current);
+  return (
+    <nav aria-labelledby="ostale-igre-naslov" className={`page-shell max-w-2xl pb-16 ${className}`}>
+      <div className="border-t border-white/[0.07] pt-8">
+        <h2
+          id="ostale-igre-naslov"
+          className="font-heading text-[22px] uppercase leading-none tracking-[0.04em] text-white"
+        >
+          Ostale igre
+        </h2>
+        <ul className="mt-4 grid gap-2.5 sm:grid-cols-3">
+          {igre.map((g) => (
+            <li key={g.id}>
+              <Link
+                href={g.href}
+                className="group flex h-full items-start justify-between gap-3 rounded-[14px] border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-accent/40 hover:bg-white/[0.05]"
+              >
+                <span>
+                  <span className="block font-heading text-[17px] uppercase leading-tight tracking-[0.03em] text-white">
+                    {g.naziv}
+                  </span>
+                  <span className="mt-1 block text-[13px] leading-snug text-white/55">{g.opis}</span>
+                </span>
+                <ArrowRight
+                  aria-hidden
+                  className="mt-0.5 h-4 w-4 shrink-0 text-white/35 transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
+                />
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[14px]">
+          <Link href="/igre/" className="text-accent underline-offset-4 hover:underline">
+            Sve mini igre
+          </Link>
+          <Link href="/dresovi/" className="text-white/60 underline-offset-4 hover:text-white hover:underline">
+            Pogledaj dresove
+          </Link>
+        </div>
+      </div>
+    </nav>
+  );
+}

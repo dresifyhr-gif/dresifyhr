@@ -49,7 +49,7 @@ export default async function BlogPage() {
           {blogPosts.map((post) => (
             <Link
               key={post.slug}
-              href={`/blog/${post.slug}`}
+              href={`/blog/${post.slug}/`}
               className="group relative overflow-hidden border border-white/10 bg-[#111111] p-6 transition duration-200 ease-out hover:border-accent"
             >
               <div className="absolute inset-x-0 top-0 h-1 bg-accent" />

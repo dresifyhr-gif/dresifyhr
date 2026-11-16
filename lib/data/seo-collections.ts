@@ -168,6 +168,7 @@ const categoryDefinitions: CollectionDefinition[] = [
       "Nogometni dresovi za odrasle u veličinama S–XL, reprezentacije do XXL. Novi modeli i retro klasici od 20 €, plaćanje pouzećem, dostava 2–5 dana.",
     intro:
       "Ako kupuješ za sebe, ovdje su skupljeni modeli za odrasle koje je najlakše filtrirati po klubu, ligi i igraču. To je dobar ulaz za kupce koji žele brzo usporediti aktualne i retro komade bez pretraživanja cijelog kataloga.",
+    relatedPosts: ["gdje-kupiti-nogometni-dres-online-hrvatska", "kako-prepoznati-kvalitetan-nogometni-dres"],
     filter: (product) => hasAdults(product) && !isKidsOnlyByName(product)
   },
   {
@@ -233,6 +234,7 @@ const categoryDefinitions: CollectionDefinition[] = [
       "Ako znaš da želiš klub, a ne reprezentaciju, ovdje su svi klupski dresovi na jednom mjestu: najpopularniji europski klubovi, posebna izdanja i modeli koji se najbrže rasprodaju.",
     // Ne gleda samo ligu: kompleti reprezentacija imaju ligu "Komplet", pa se
     // reprezentacija prepoznaje i po nazivu (NATIONAL_TEAMS + sve repke iz kataloga).
+    relatedPosts: ["real-madrid-dresovi-vodic", "barcelona-dresovi-koji-model-odabrati"],
     filter: (product, ctx) =>
       !isNationalTeam(product) && !ctx.nationalClubs.has(norm(product.klub))
   }
@@ -328,6 +330,7 @@ const clubDefinitions: CollectionDefinition[] = [
       "Brazil dresovi s Neymarom, Viníciusom, Ronaldinhom, Peléom, Kakáom i Robertom Carlosom — posebna i retro izdanja od 20 €, plaćanje pouzećem.",
     intro:
       "Brazil je stalni evergreen u katalogu jer prolazi i kod klinaca i kod kupaca koji biraju poklon. Na ovoj stranici su skupljeni svi žuti, crni, plavi i retro modeli koji imaju jak identitet i visoku traženost.",
+    relatedPosts: ["top-10-retro-dresova-2025"],
     filter: klubIs("Brazil")
   },
   {
@@ -413,6 +416,7 @@ const clubDefinitions: CollectionDefinition[] = [
       "Manchester United dresovi s Ronaldom u UCL i retro izdanjima te Šeškom — prepoznatljivi crveni i crni modeli od 20 €, plaćanje pouzećem.",
     intro:
       "Manchester United je prvi izbor kad netko želi Ronaldov dres s dozom nostalgije i europskih noći. Ovdje su sve varijante koje navijači najčešće biraju.",
+    relatedPosts: ["ronaldo-dres-koji-odabrati", "top-10-retro-dresova-2025"],
     filter: klubIs("Manchester United")
   },
   {
@@ -539,6 +543,7 @@ const playerDefinitions: CollectionDefinition[] = [
     description: "Mbappé dresovi za Real Madrid i Francusku — novi domaći, posebna izdanja i SP 2026. Dječje i odrasle veličine, od 20 €, plaćanje pouzećem.",
     intro:
       "Otkako je prešao u Real Madrid, Mbappé je jedan od najtraženijih igrača kod nas. Ova stranica skuplja i njegove madridske i reprezentativne varijante na jedno mjesto, pa ne moraš prelistavati cijeli katalog da usporediš boje i sezone.",
+    relatedPosts: ["real-madrid-dresovi-vodic"],
     filter: playerNameIncludes("mbappe", "mbappé")
   },
   {
@@ -559,6 +564,7 @@ const playerDefinitions: CollectionDefinition[] = [
     description: "Bellingham dresovi za Real Madrid i Englesku — domaći, gostujući i narančasti model. Dječje i odrasle veličine, od 20 €, plaćanje pouzećem.",
     intro:
       "Bellinghamov broj 5 postao je jedan od najprodavanijih u Madridu. Ako tražiš dres za dijete ili sebe, ovdje su sve njegove varijante koje trenutačno nudimo, s jasnim veličinama i stanjem.",
+    relatedPosts: ["real-madrid-dresovi-vodic"],
     filter: playerNameIncludes("bellingham")
   },
   {
@@ -579,6 +585,7 @@ const playerDefinitions: CollectionDefinition[] = [
     description: "Raphinha dresovi za Barcelonu — domaći CL, crni i zeleni SE model s brojem 11. Dječje i odrasle veličine, od 20 €, plaćanje pouzećem.",
     intro:
       "Raphinha je u zadnjim sezonama izbio u prvi plan Barcelone i njegov broj 11 sve se češće traži. Skupili smo crne, zelene i domaće varijante da lakše usporediš prije narudžbe.",
+    relatedPosts: ["barcelona-dresovi-koji-model-odabrati"],
     filter: playerNameIncludes("raphinha")
   },
   {
@@ -660,7 +667,7 @@ const playerDefinitions: CollectionDefinition[] = [
       "Messi dresovi iz Argentine, Barcelone i Inter Miamija za kupce koji traže najprepoznatljiviji igrački katalog na jednom mjestu.",
     intro:
       "Messi je jedan od najtraženijih igrača, pa su ovdje svi njegovi modeli na jednom mjestu: Argentina, Barcelona klasici i rozi Inter Miami dres.",
-    relatedPosts: ["messi-dres-koji-odabrati"],
+    relatedPosts: ["messi-dres-koji-odabrati", "barcelona-dresovi-koji-model-odabrati"],
     filter: playerNameIncludes("messi")
   },
   {
@@ -672,7 +679,7 @@ const playerDefinitions: CollectionDefinition[] = [
       "Ronaldo dres iz Al-Nassra, Reala, Manchester Uniteda i Portugala — dječje i odrasle veličine, od 20 €, dostava pouzećem 2–5 dana.",
     intro:
       "Kad biraš Ronaldov dres, obično želiš usporediti klubove i reprezentaciju. Zato su ovdje sve njegove najpoznatije varijante na jednom mjestu.",
-    relatedPosts: ["ronaldo-dres-koji-odabrati"],
+    relatedPosts: ["ronaldo-dres-koji-odabrati", "real-madrid-dresovi-vodic"],
     filter: playerNameIncludes("ronaldo")
   },
   {
@@ -695,7 +702,7 @@ const playerDefinitions: CollectionDefinition[] = [
       "Lamine Yamal dres — FC Barcelona i Španjolska, domaće, šarene i posebne varijante. Dječje i odrasle veličine, od 20 €, dostava 2–5 dana.",
     intro:
       "Yamal je jedan od najtraženijih novih igrača, posebno kod djece i mlađih navijača. Ovdje su svi njegovi modeli, od domaćeg do posebnih boja.",
-    relatedPosts: ["sp-2026-spanjolska-prvak-dresovi", "barcelona-dresovi-koji-model-odabrati"],
+    relatedPosts: ["barcelona-dresovi-koji-model-odabrati", "sp-2026-spanjolska-prvak-dresovi"],
     filter: playerNameIncludes("yamal")
   },
   {
@@ -707,7 +714,7 @@ const playerDefinitions: CollectionDefinition[] = [
       "Modrić dresovi Hrvatske i AC Milana — kockasti domaći, plavi 2026 i komplet. Dječje i odrasle veličine, od 20 €, plaćanje pouzećem.",
     intro:
       "Modrić je najtraženiji igrač kod nas i jedan od najdražih poklona za male i velike navijače. Ovdje su svi njegovi dostupni modeli na jednom mjestu.",
-    relatedPosts: ["dresovi-hrvatske-reprezentacije-kockasti-ponos"],
+    relatedPosts: ["dresovi-hrvatske-reprezentacije-kockasti-ponos", "real-madrid-dresovi-vodic"],
     filter: playerNameIncludes("modric")
   },
   {
@@ -719,6 +726,7 @@ const playerDefinitions: CollectionDefinition[] = [
       "Ronaldinho dresovi iz Barcelone, Brazila, PSG-a i Milana za sve koji vole retro i dres koji se nosi i van terena. Od 20 €, plaćanje pouzećem.",
     intro:
       "Ronaldinho komadi spajaju retro nogometnu kulturu i jak modni karakter. Zato su svi njegovi modeli ovdje, na jednom mjestu.",
+    relatedPosts: ["top-10-retro-dresova-2025", "barcelona-dresovi-koji-model-odabrati"],
     filter: playerNameIncludes("ronaldinho")
   }
 ];

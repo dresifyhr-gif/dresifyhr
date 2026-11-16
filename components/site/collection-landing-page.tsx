@@ -115,21 +115,29 @@ export function CollectionLandingPage({
         ) : null}
 
         {relatedPosts.length ? (
-          <div className="mt-8 border border-white/10 bg-[#0a0a0a] p-6">
-            <p className="text-xs uppercase tracking-[0.32em] text-white/50">Pročitaj na blogu</p>
-            <ul className="mt-4 space-y-2">
+          <section className="mt-10">
+            <h2 className="font-heading text-2xl uppercase leading-none text-white sm:text-3xl">Iz bloga</h2>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {relatedPosts.map((post) => (
-                <li key={post.slug}>
-                  <Link
-                    href={`/blog/${post.slug}/`}
-                    className="text-sm font-semibold text-white underline-offset-4 transition hover:text-accent hover:underline"
-                  >
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}/`}
+                  className="group flex flex-col border border-white/10 bg-[#0a0a0a] p-5 transition duration-200 ease-out hover:border-accent"
+                >
+                  <span className="text-[11px] uppercase tracking-[0.28em] text-white/45">Članak</span>
+                  <span className="mt-3 text-lg font-semibold leading-snug text-white transition group-hover:text-accent">
                     {repairText(post.title)}
-                  </Link>
-                </li>
+                  </span>
+                  <span className="mt-2 line-clamp-3 text-sm leading-6 text-white/55">
+                    {repairText(post.description)}
+                  </span>
+                  <span className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+                    Pročitaj članak →
+                  </span>
+                </Link>
               ))}
-            </ul>
-          </div>
+            </div>
+          </section>
         ) : null}
 
         {linkGroups.length ? (

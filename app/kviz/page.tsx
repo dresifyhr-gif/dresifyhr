@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { OstaleIgre } from "@/components/game/v2/game-shell";
 import { KvizDana } from "@/components/game/v2/kviz/kviz-dana";
 import { buildMetadata } from "@/lib/seo";
 
@@ -34,7 +35,7 @@ export default function KvizPage() {
   return (
     <>
       <KvizDana />
-      <section className="section-pad">
+      <section className="pb-10 pt-10 sm:pt-14 lg:pt-20">
         <div className="page-shell max-w-2xl">
           <h1 className="font-heading text-[clamp(2.2rem,8vw,3.2rem)] uppercase leading-[0.95] text-white">
             Nogometni kviz dana
@@ -63,6 +64,7 @@ export default function KvizPage() {
           </ul>
         </div>
       </section>
+      <OstaleIgre current="kviz" />
     </>
   );
 }

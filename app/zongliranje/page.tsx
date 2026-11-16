@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
+import { OstaleIgre } from "@/components/game/v2/game-shell";
 import { ZongliranjeGame } from "@/components/game/v2/zongliranje/zongliranje-game";
 import { buildMetadata } from "@/lib/seo";
 
@@ -17,7 +17,7 @@ export default function ZongliranjePage() {
     <>
       <ZongliranjeGame />
 
-      <section className="page-shell max-w-2xl pb-16 pt-10 sm:pt-6">
+      <section className="page-shell max-w-2xl pb-10 pt-10 sm:pt-6">
         <span className="section-kicker">Mini igra</span>
         <h1 className="font-heading text-[clamp(2.1rem,6vw,3.2rem)] uppercase leading-[0.95] tracking-[0.03em] text-white">
           Žongliranje loptom — koliko dodira možeš?
@@ -40,15 +40,8 @@ export default function ZongliranjePage() {
             Ciljevi su 25, 50 i 100 dodira u jednoj igri. Odaberi loptu svog kluba, obori rekord i podijeli rezultat u story.
           </p>
         </div>
-        <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-[14px]">
-          <Link href="/igre" className="text-accent underline-offset-4 hover:underline">
-            Sve mini igre
-          </Link>
-          <Link href="/dresovi" className="text-white/60 underline-offset-4 hover:text-white hover:underline">
-            Pogledaj dresove
-          </Link>
-        </div>
       </section>
+      <OstaleIgre current="zongliranje" />
     </>
   );
 }

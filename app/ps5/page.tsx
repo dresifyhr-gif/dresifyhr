@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Gift, UserPlus, ShoppingCart, Send, Gamepad2, Calendar, Trophy, Shield, Instagram, Heart } from "lucide-react";
+import Link from "next/link";
+import { Gift, UserPlus, ShoppingCart, Send, Gamepad2, Calendar, Trophy, Shield, Instagram, Heart, Shirt, ArrowRight } from "lucide-react";
 
 import { Ps5Counter } from "@/components/site/ps5-counter";
 import { GiveawayEntryForm } from "@/components/site/giveaway-entry-form";
@@ -222,6 +223,37 @@ export default async function Ps5Page() {
           <p className="mt-3 text-center text-xs text-white/35">
             Nagradna igra nije sponzorirana ni povezana s Instagramom. Kupnja nije obavezna za sudjelovanje.
           </p>
+        </div>
+      </section>
+
+      {/* DOK ČEKAMO: interni linkovi na igre i dresove */}
+      <section className="border-t border-white/5 py-12">
+        <div className="mx-auto max-w-4xl px-5">
+          <h2 className="text-center text-xl font-black uppercase tracking-tight sm:text-2xl">Dok čekamo 10.000</h2>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <Link
+              href="/igre/"
+              className="group flex items-center gap-4 rounded-[16px] border border-white/8 bg-[#111] p-5 transition-colors hover:border-accent/40"
+            >
+              <Gamepad2 className="h-7 w-7 shrink-0 text-accent" />
+              <div className="flex-1">
+                <div className="font-bold uppercase">Mini igre</div>
+                <p className="mt-0.5 text-sm text-white/55">Penali, nogometni kvizovi i žongliranje. Igra se odmah, na mobitelu.</p>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-white/35 transition-transform group-hover:translate-x-0.5 group-hover:text-accent" />
+            </Link>
+            <Link
+              href="/dresovi/"
+              className="group flex items-center gap-4 rounded-[16px] border border-white/8 bg-[#111] p-5 transition-colors hover:border-accent/40"
+            >
+              <Shirt className="h-7 w-7 shrink-0 text-accent" />
+              <div className="flex-1">
+                <div className="font-bold uppercase">Dresovi</div>
+                <p className="mt-0.5 text-sm text-white/55">Klubovi i reprezentacije od 20 €, plaćanje pouzećem.</p>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-white/35 transition-transform group-hover:translate-x-0.5 group-hover:text-accent" />
+            </Link>
+          </div>
         </div>
       </section>
 
