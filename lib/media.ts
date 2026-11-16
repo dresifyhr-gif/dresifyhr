@@ -350,3 +350,36 @@ export async function releaseStuckPublishing() {
     data: { status: "NEUSPJELO", error: "Objava je prekinuta. Prije ponovne objave provjeri na Instagramu je li ipak izašla." }
   });
 }
+
+// ————————————————————————————————————————————————————————————————
+// Cilj rasta (Igor 16.11.): 10.000 pratitelja do Nove godine. Config, ne kod —
+// novi cilj = promijeni ovdje. Start je zabilježen da se vidi napredak.
+// ————————————————————————————————————————————————————————————————
+export const MEDIA_GOAL = { name: "Put do 10k", target: 10_000, deadline: "2026-12-31", startDate: "2026-11-16", startFollowers: 2569 };
+
+export type GoalStatus = typeof MEDIA_GOAL & {
+  followers: number | null;
+  newFollowers7d: number | null;
+  daysLeft: number;
+  perDayNeeded: number | null;
+  perDayLast7: number | null;
+  onTrack: boolean | null;
+};
+
+export function goalStatus(followers: number | null, newFollowers7d: number | null): GoalStatus {
+  const today = zagrebNow().date;
+  const ms = (d: string) => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
+  const daysLeft = Math.max(0, Math.round((ms(MEDIA_GOAL.deadline) - ms(today)) / 86_400_000) + 1);
+  const left = followers != null ? Math.max(0, MEDIA_GOAL.target - followers) : null;
+  const perDayNeeded = left != null ? (daysLeft ? Math.ceil(left / daysLeft) : left) : null;
+  const perDayLast7 = newFollowers7d != null ? Math.round((newFollowers7d / 7) * 10) / 10 : null;
+  return {
+    ...MEDIA_GOAL,
+    followers,
+    newFollowers7d,
+    daysLeft,
+    perDayNeeded,
+    perDayLast7,
+    onTrack: perDayNeeded != null && perDayLast7 != null ? perDayLast7 >= perDayNeeded : null
+  };
+}

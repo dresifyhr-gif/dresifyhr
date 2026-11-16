@@ -74,6 +74,19 @@ type Payload = {
   messages?: Msg[];
   posts?: Post[];
   postsPending?: boolean;
+  goal?: {
+    name: string;
+    target: number;
+    deadline: string;
+    startDate: string;
+    startFollowers: number;
+    followers: number | null;
+    newFollowers7d: number | null;
+    daysLeft: number;
+    perDayNeeded: number | null;
+    perDayLast7: number | null;
+    onTrack: boolean | null;
+  };
 };
 
 type TabId = "danas" | "nacrti" | "kanal" | "kalendar" | "rezultati" | "arhiva" | "redakcija" | "reklame";
@@ -285,6 +298,7 @@ function Hero({ data, runDate, waiting, channelNew, onTeam }: { data: Payload; r
           <span className="text-[12.5px] font-semibold text-white/80 group-hover:text-white">{active.length} u timu →</span>
         </button>
       </div>
+      {data.goal && <GoalBar goal={data.goal} />}
       <div className="relative mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {stats.map(([label, n, color]) => (
           <div key={label} className="rounded-[14px] bg-white/[0.06] px-4 py-3">
@@ -294,6 +308,40 @@ function Hero({ data, runDate, waiting, channelNew, onTeam }: { data: Payload; r
             <div className="mt-1 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-white/55">{label}</div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// Cilj rasta (config u lib/media.ts MEDIA_GOAL): napredak, potrebno dnevno, stvarno zadnjih 7 dana.
+function GoalBar({ goal }: { goal: NonNullable<Payload["goal"]> }) {
+  const f = goal.followers ?? goal.startFollowers;
+  const pct = Math.max(0, Math.min(100, (f / goal.target) * 100));
+  const startPct = (goal.startFollowers / goal.target) * 100;
+  const tone = goal.onTrack == null ? "text-white/70" : goal.onTrack ? "text-[#e8ff3c]" : "text-[#ff8a7a]";
+  return (
+    <div className="relative mt-5 rounded-[16px] bg-white/[0.06] p-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#e8ff3c]">{goal.name} · do {goal.deadline.slice(8, 10)}.{goal.deadline.slice(5, 7)}.</div>
+        <div className="text-[12px] text-white/55">još {goal.daysLeft} {goal.daysLeft === 1 ? "dan" : "dana"}</div>
+      </div>
+      <div className="mt-1.5 flex items-baseline gap-2">
+        <span className="text-[30px] font-black tabular-nums leading-none">{f.toLocaleString("hr-HR")}</span>
+        <span className="text-[14px] font-semibold text-white/50">/ {goal.target.toLocaleString("hr-HR")} pratitelja</span>
+      </div>
+      <div className="relative mt-3 h-2.5 overflow-hidden rounded-full bg-white/10">
+        <div className="absolute inset-y-0 left-0 rounded-full bg-[#e8ff3c]" style={{ width: `${pct}%` }} />
+        <div className="absolute inset-y-0 w-0.5 bg-white/50" style={{ left: `${startPct}%` }} title={`Start ${goal.startDate}: ${goal.startFollowers}`} />
+      </div>
+      <div className="mt-2.5 flex flex-wrap gap-x-6 gap-y-1 text-[12.5px]">
+        <span className="text-white/70">
+          Treba <b className="text-white">{goal.perDayNeeded != null ? `+${goal.perDayNeeded}` : "—"}</b> dnevno
+        </span>
+        <span className={tone}>
+          Zadnjih 7 dana <b>{goal.perDayLast7 != null ? `+${goal.perDayLast7.toLocaleString("hr-HR")}` : "—"}</b> dnevno
+          {goal.onTrack === false ? " · ubrzati" : goal.onTrack ? " · na putu" : ""}
+        </span>
+        {goal.followers == null && <span className="text-white/45">Instagram trenutno ne vraća broj</span>}
       </div>
     </div>
   );

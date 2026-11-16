@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { getAdminUser } from "@/lib/admin-auth";
-import { getBestSlotFromInstagram, getRecentPostStats } from "@/lib/instagram";
-import { MEDIA_SLOTS, releaseStuckPublishing, zagrebNow } from "@/lib/media";
+import { getBestSlotFromInstagram, getIgStats, getRecentPostStats } from "@/lib/instagram";
+import { MEDIA_SLOTS, goalStatus, releaseStuckPublishing, zagrebNow } from "@/lib/media";
 import { getMediaSettings } from "@/lib/media-autopilot";
+import { getFollowerCount } from "@/lib/ig-stats";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -17,7 +18,7 @@ export async function GET() {
   await releaseStuckPublishing().catch(() => null);
   const since = new Date(Date.now() - 45 * 86400_000);
   let postsPending = false;
-  const [items, bestSlot, settings, messages, posts] = await Promise.all([
+  const [items, bestSlot, settings, messages, posts, ig] = await Promise.all([
     prisma.mediaItem.findMany({
       where: { OR: [{ createdAt: { gte: since } }, { status: "ZAKAZANO" }] },
       orderBy: [{ runDate: "desc" }, { createdAt: "asc" }],
@@ -41,7 +42,9 @@ export async function GET() {
           }, 8000);
         })
       ]).finally(() => clearTimeout(timer));
-    })()
+    })(),
+    // Pratitelji za cilj "Put do 10k" (keš 10 min).
+    getIgStats().catch(() => null)
   ]);
 
   return NextResponse.json({
@@ -56,6 +59,7 @@ export async function GET() {
     items,
     messages,
     posts,
-    postsPending: postsPending && posts.length === 0
+    postsPending: postsPending && posts.length === 0,
+    goal: goalStatus(ig?.ok ? ig.followers : await getFollowerCount().catch(() => null), ig?.ok ? ig.newFollowers7d : null)
   });
 }

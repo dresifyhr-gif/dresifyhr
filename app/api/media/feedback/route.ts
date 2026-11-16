@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { getRecentPostStats } from "@/lib/instagram";
-import { verifyIngestKey } from "@/lib/media";
+import { getIgStats, getRecentPostStats } from "@/lib/instagram";
+import { goalStatus, verifyIngestKey } from "@/lib/media";
+import { getFollowerCount } from "@/lib/ig-stats";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
   const days = Math.max(1, Math.min(365, Number(new URL(request.url).searchParams.get("days")) || 90));
   const since = new Date(Date.now() - days * 86400_000);
 
-  const [rows, posts] = await Promise.all([prisma.mediaItem.findMany({
+  const [rows, posts, ig] = await Promise.all([prisma.mediaItem.findMany({
     where: { createdAt: { gte: since }, kind: { in: ["IDEA", "DRAFT"] } },
     orderBy: { createdAt: "desc" },
     select: {
@@ -43,7 +44,8 @@ export async function GET(request: Request) {
     take: 600
   }),
   // Stvarni rezultati objava s Instagrama (zadnjih 30 dana, i ručne objave) — za Emu.
-  getRecentPostStats(30)]);
+  getRecentPostStats(30),
+  getIgStats().catch(() => null)]);
 
   const ratings = rows
     .filter((r) => r.rating || r.ratingComment || r.status === "VRACENO" || r.status === "ODBIJENO")
@@ -60,6 +62,8 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
+    // Cilj rasta (Put do 10k): pratitelji sada, novi u 7 dana, koliko treba dnevno.
+    goal: goalStatus(ig?.ok ? ig.followers : await getFollowerCount().catch(() => null), ig?.ok ? ig.newFollowers7d : null),
     // Za VRACENO: agent treba poslati novu verziju s ISTIM extKey (komentar kaže što promijeniti).
     returned: ratings.filter((r) => r.status === "VRACENO"),
     ratings,
