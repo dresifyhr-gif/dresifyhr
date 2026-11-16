@@ -2,6 +2,7 @@ import "server-only";
 
 import crypto from "node:crypto";
 
+import { GRAPH_VERSION } from "@/lib/meta-graph";
 import { META_PIXEL_ID } from "@/lib/site";
 
 // Meta Conversions API (server-side Purchase). Šalje kupnju IZRAVNO sa servera
@@ -15,7 +16,7 @@ import { META_PIXEL_ID } from "@/lib/site";
 // API → Generiraj pristupni token. Bez tokena funkcija tiho ne radi ništa.
 
 const CAPI_TOKEN = process.env.META_CAPI_TOKEN;
-const API_VERSION = "v21.0";
+const API_VERSION = GRAPH_VERSION; // v21.0 se gasi 21. 1. 2027.; verzija je u lib/meta-graph.ts
 
 // Meta traži SHA-256 hash (lowercase, trimano) za osobne podatke (email/telefon).
 const hash = (v?: string | null) => {
