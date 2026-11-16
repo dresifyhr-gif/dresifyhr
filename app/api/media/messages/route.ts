@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   const since = new Date(Date.now() - 30 * 86400_000);
   const [unread, history] = await Promise.all([
     prisma.mediaMessage.findMany({ where: { fromIgor: true, readAt: null }, orderBy: { createdAt: "asc" }, take: 100 }),
-    prisma.mediaMessage.findMany({ where: { createdAt: { gte: since } }, orderBy: { createdAt: "asc" }, take: 400 })
+    prisma.mediaMessage.findMany({ where: { createdAt: { gte: since } }, orderBy: { createdAt: "desc" }, take: 400 }).then((r) => r.reverse())
   ]);
   return NextResponse.json({ ok: true, unread, history });
 }
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const read = (Array.isArray(b.read) ? b.read : []).filter((x): x is string => typeof x === "string").slice(0, 200);
 
   const errors: string[] = [];
-  let saved = 0;
+  const rows: { member: string; fromIgor: boolean; author: string; body: string }[] = [];
   const who = new Set<string>();
   for (const r of replies) {
     const member = String(r?.member || "");
@@ -40,11 +40,15 @@ export async function POST(request: Request) {
       continue;
     }
     const author = String(r.author || memberOf(member)?.name || "Luka").slice(0, 40);
-    await prisma.mediaMessage.create({ data: { member, fromIgor: false, author, body: text } });
+    rows.push({ member, fromIgor: false, author, body: text });
     who.add(author);
-    saved++;
   }
-  if (read.length) await prisma.mediaMessage.updateMany({ where: { id: { in: read }, fromIgor: true, readAt: null }, data: { readAt: new Date() } });
+  // Sve ili ništa: odgovori + "pročitano" u jednoj transakciji (ponovni pokušaj ne duplicira).
+  await prisma.$transaction([
+    prisma.mediaMessage.createMany({ data: rows }),
+    prisma.mediaMessage.updateMany({ where: { id: { in: read }, fromIgor: true, readAt: null }, data: { readAt: new Date() } })
+  ]);
+  const saved = rows.length;
 
   if (saved) {
     const names = Array.from(who);

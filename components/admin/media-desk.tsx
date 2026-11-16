@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { ReklameManager } from "@/components/admin/reklame-manager";
 import { DEPTS, MEDIA_TEAM, avatarOf, crewFor, memberOf } from "@/lib/media-team";
@@ -1381,7 +1381,7 @@ function TeamView({ data, runDate, onReload }: { data: Payload; runDate: string 
           </button>
         )}
       </div>
-      {chat && <ChatPanel member={chat} messages={msgs.filter((m) => m.member === chat)} canWrite={data.canDecide} onClose={() => setChat(null)} onSent={onReload} />}
+      {chat && <ChatPanel key={chat} member={chat} messages={msgs.filter((m) => m.member === chat)} canWrite={data.canDecide} onClose={() => setChat(null)} onSent={onReload} />}
       {DEPTS.map((dept) => {
         const people = MEDIA_TEAM.filter((m) => m.dept === dept);
         if (!people.length) return null;
@@ -1453,7 +1453,14 @@ function ChatPanel({ member, messages, canWrite, onClose, onSent }: { member: st
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const sending = useRef(false);
+  const listRef = useRef<HTMLDivElement>(null);
   const unread = messages.some((x) => !x.fromIgor && !x.readAt);
+
+  useEffect(() => {
+    // Otvori na najnovijoj poruci.
+    if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+  }, [messages.length]);
 
   useEffect(() => {
     document.getElementById("media-chat")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1469,12 +1476,14 @@ function ChatPanel({ member, messages, canWrite, onClose, onSent }: { member: st
 
   async function send() {
     const body = text.trim();
-    if (!body) return;
+    if (!body || sending.current) return;
+    sending.current = true;
     setBusy(true);
     setErr("");
     const r = await fetch("/api/admin/media/messages/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ member, body }) })
       .then((x) => x.json())
       .catch(() => null);
+    sending.current = false;
     setBusy(false);
     if (r?.ok) {
       setText("");
@@ -1503,7 +1512,7 @@ function ChatPanel({ member, messages, canWrite, onClose, onSent }: { member: st
           Zatvori
         </button>
       </div>
-      <div className="max-h-[420px] space-y-2.5 overflow-y-auto bg-[var(--a-surface-2)] p-4">
+      <div ref={listRef} className="max-h-[420px] space-y-2.5 overflow-y-auto bg-[var(--a-surface-2)] p-4">
         {messages.length === 0 && (
           <div className="py-6 text-center text-[13px] text-[var(--a-text-3)]">
             {member === "tim" ? "Napiši nešto cijelom timu, npr. „Ovaj tjedan više Reelsa o Ligi prvaka.“" : `Napiši ${m?.name || "članu"} što da radi drukčije ili više.`}

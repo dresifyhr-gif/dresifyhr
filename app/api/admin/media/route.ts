@@ -26,7 +26,7 @@ export async function GET() {
     getBestSlotFromInstagram(MEDIA_SLOTS),
     getMediaSettings(),
     // Razgovori s timom (Redakcija → Piši): zadnjih 60 dana.
-    prisma.mediaMessage.findMany({ where: { createdAt: { gte: new Date(Date.now() - 60 * 86400_000) } }, orderBy: { createdAt: "asc" }, take: 400 })
+    prisma.mediaMessage.findMany({ where: { createdAt: { gte: new Date(Date.now() - 60 * 86400_000) } }, orderBy: { createdAt: "desc" }, take: 400 }).then((r) => r.reverse())
   ]);
 
   return NextResponse.json({
