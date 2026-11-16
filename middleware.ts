@@ -19,6 +19,14 @@ export default clerkMiddleware((auth, request) => {
     return NextResponse.redirect(url, 308);
   }
 
+  // Botovi (Google, Bing, pregledi linkova) uvijek dobivaju HR i NE dobivaju kolačić:
+  // bez kolačića layout iscrtava HR — isto što vidi svaki posjetitelj iz HR (nije cloaking).
+  // Inače bi Googlebot s američke IP adrese dobio dresify_locale=en i engleski sadržaj.
+  const ua = request.headers.get("user-agent") ?? "";
+  if (/bot|crawl|spider|slurp|Googlebot|Google-InspectionTool|Storebot-Google|GoogleOther|AdsBot-Google|Mediapartners-Google|bingbot|facebookexternalhit|WhatsApp|Twitterbot|Slackbot|TelegramBot|LinkedInBot/i.test(ua)) {
+    return NextResponse.next();
+  }
+
   // If user already has a locale cookie, respect it
   const existingLocale = request.cookies.get(LOCALE_COOKIE)?.value as Locale | undefined;
   if (existingLocale === "hr" || existingLocale === "en") {

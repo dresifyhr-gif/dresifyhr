@@ -9,7 +9,7 @@ import { getServerTranslations } from "@/lib/get-server-translations";
 export const metadata = buildMetadata({
   title: "Dječji nogometni komplet — dres, hlačice, lopta, kapa",
   description:
-    "Nogometni komplet za djecu — dres, hlačice, lopta i kapa u jednom paketu za 40€. Barcelona, Real Madrid, Bayern, Hrvatska i više. Dostava pouzećem po cijeloj Hrvatskoj.",
+    "Nogometni komplet za djecu — dres, hlačice, lopta i kapa u paketu za 40€. Barcelona, Real Madrid, Bayern, Hrvatska i više. Dostava pouzećem po Hrvatskoj.",
   path: "/kompleti",
   keywords: [
     "komplet dres lopta kapa",
@@ -52,6 +52,7 @@ export default async function KompletiPage() {
 
         <CatalogBrowser
           showMixPromo
+          countKind="kits"
           products={forCards(kompleti)}
           headingLabel="Kompleti"
           headingTitle="Kompleti — Dres + Hlačice + Lopta + Kapa. Od 40 €."

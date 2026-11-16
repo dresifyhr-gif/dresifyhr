@@ -119,7 +119,10 @@ const hr = {
     kids: "Djeca",
     retro: "Retro",
     retroToggle: "Prikaži samo retro modele",
-    count: (n: number) => `${n} dresova`,
+    // Hrvatska množina: 1/21/31 dres, 2–4/22–24 dresa, ostalo dresova (11–14 dresova).
+    count: (n: number) =>
+      `${n} ${n % 10 === 1 && n % 100 !== 11 ? "dres" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "dresa" : "dresova"}`,
+    countKits: (n: number) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? "komplet" : "kompleta"}`,
     searchPlaceholder: "Pretraži klub, igrača ili ligu",
     noResults:
       "Nema rezultata za odabrane filtere. Probaj proširiti pretragu ili poništiti dio filtera.",
@@ -392,7 +395,8 @@ const en: typeof hr = {
     kids: "Kids",
     retro: "Retro",
     retroToggle: "Show retro only",
-    count: (n: number) => `${n} jerseys`,
+    count: (n: number) => `${n} ${n === 1 ? "jersey" : "jerseys"}`,
+    countKits: (n: number) => `${n} ${n === 1 ? "kit" : "kits"}`,
     searchPlaceholder: "Search club, player or league",
     noResults: "No results for selected filters. Try broadening your search or clearing some filters.",
     closeFilters: "Close filters",

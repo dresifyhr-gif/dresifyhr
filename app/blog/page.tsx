@@ -16,7 +16,7 @@ export const metadata = buildMetadata({
 });
 
 export default async function BlogPage() {
-  const { t } = await getServerTranslations();
+  const { t, locale } = await getServerTranslations();
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: t.productPage.breadcrumb.home, path: "/" },
@@ -41,7 +41,7 @@ export default async function BlogPage() {
         <SectionHeading
           as="h1"
           kicker={t.blog.kicker}
-          title={t.blog.listingTitle}
+          title={locale === "en" ? "Football jersey blog" : "Blog o nogometnim dresovima"}
           description={t.blog.listingDesc}
         />
 

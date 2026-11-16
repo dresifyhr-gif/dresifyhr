@@ -8,11 +8,24 @@ const nextConfig = {
     // (kartice od 112px do 3840w) i naduvavao HTML. Dovoljno za HR mobilnu publiku.
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [64, 128, 256, 384],
+    // Optimizirane slike (/_next/image) drže se 30 dana u cacheu (prije max-age=0).
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" }
     ]
   },
   reactStrictMode: true,
+  // Statični mediji (hero reklame, posteri, božićne slike) godinu dana u cacheu
+  // preglednika. VAŽNO: datoteku u /public/hero ili /public/bozic NIKAD ne mijenjaj
+  // pod istim imenom — kod promjene sadržaja daj NOVO ime (npr. reklama-v5.mp4,
+  // kapica-v2.webp) i ažuriraj putanju u kodu, inače posjetitelji godinu dana vide staru.
+  async headers() {
+    const immutable = [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }];
+    return [
+      { source: "/hero/:path*", headers: immutable },
+      { source: "/bozic/:path*", headers: immutable }
+    ];
+  },
   // 301 za obrisane proizvode (GSC 404) → najbliža relevantna stranica, da se ne
   // gubi SEO vrijednost i da nema 404 u indexu. Ronaldo/Ronaldinho na njihove landinge.
   async redirects() {

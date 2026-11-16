@@ -1,7 +1,7 @@
-import { jerseys, isNationalTeam } from "@/lib/data/jerseys";
+import { REDIRECTED_PRODUCT_SLUGS, jerseys, isNationalTeam, isPurchasable } from "@/lib/data/jerseys";
 import { getCatalogProducts, getStreetwearProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
-import { JERSEY_PRICE_EUR, SITE_NAME, SITE_URL } from "@/lib/site";
+import { JERSEY_PRICE_EUR, SHIPPING_PRICE_EUR, SITE_NAME, SITE_URL } from "@/lib/site";
 import { repairText } from "@/lib/utils";
 
 // Google Merchant Center product feed (RSS 2.0 / Google Shopping XML).
@@ -25,7 +25,8 @@ export async function GET() {
   // Trenirke imaju svoju stranicu (/trenirke) pa nisu u getCatalogProducts — dodaj ih
   // izričito, inače ih katalog (Meta / Google Shopping) nikad ne vidi.
   const [catalog, streetwear, trenirke] = await Promise.all([getCatalogProducts(jerseys), getStreetwearProducts(), getTrenirkaProducts()]);
-  const allProducts = [...catalog, ...streetwear, ...trenirke];
+  // Bez slugova čiji URL preusmjerava (Merchant Center odbija stavke s redirectom).
+  const allProducts = [...catalog, ...streetwear, ...trenirke].filter((p) => !REDIRECTED_PRODUCT_SLUGS.has(p.slug));
   const items = allProducts
     .map((product) => {
       const klub = repairText(product.klub);
@@ -60,9 +61,13 @@ export async function GET() {
       <g:description>${xmlEscape(description)}</g:description>
       <g:link>${SITE_URL}/dres/${xmlEscape(product.slug)}/</g:link>
       <g:image_link>${xmlEscape(image)}</g:image_link>
-      <g:availability>in_stock</g:availability>
+      <g:availability>${isPurchasable(product) ? "in_stock" : "out_of_stock"}</g:availability>
       <g:condition>new</g:condition>
       <g:price>${price.toFixed(2)} EUR</g:price>
+      <g:shipping>
+        <g:country>HR</g:country>
+        <g:price>${SHIPPING_PRICE_EUR.toFixed(2)} EUR</g:price>
+      </g:shipping>
       <g:brand>${xmlEscape(SITE_NAME)}</g:brand>
       <g:identifier_exists>no</g:identifier_exists>
       <g:product_type>${xmlEscape(liga)}</g:product_type>

@@ -5,8 +5,8 @@ import { Mail, Phone, MessageCircle, Instagram, Facebook, Music2 } from "lucide-
 import Link from "next/link";
 
 import { useShopSettings, useWhatsAppUrl, useInstagram } from "@/contexts/shop-settings-context";
+import { FACEBOOK_URL } from "@/lib/site";
 
-const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61574349353574";
 const TIKTOK_URL = "https://tiktok.com/@dresify.shop";
 
 const buildChannels = (WHATSAPP_URL: string, INSTAGRAM_URL: string, CONTACT_EMAIL: string, CONTACT_PHONE_DISPLAY: string) => [

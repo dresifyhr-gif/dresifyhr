@@ -33,18 +33,27 @@ import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const bebas = Bebas_Neue({
   weight: "400",
-  subsets: ["latin"],
+  // latin-ext: hrvatski č/ć/š/ž/đ — inače se ti glifovi učitavaju naknadno.
+  subsets: ["latin", "latin-ext"],
   variable: "--font-bebas"
 });
 
 const barlow = Barlow({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
+  // Bez preloada: s latin-ext bi Barlow (4 težine × 2 podskupa) preloadao 8 datoteka.
+  // display:swap drži tekst vidljivim; preloada se samo Bebas (naslovi iznad pregiba).
+  preload: false,
   weight: ["400", "500", "600", "700"],
   variable: "--font-barlow"
 });
 
+// Bez alternates iz defaultMetadata: inače svaka stranica bez vlastitih metapodataka
+// (404, /prijava, /kontakt…) naslijedi canonical na naslovnicu. Naslovnica ga
+// postavlja sama (app/page.tsx → buildMetadata path "/").
+const { alternates: _omitAlternates, ...baseMeta } = defaultMetadata;
+
 export const metadata: Metadata = {
-  ...defaultMetadata,
+  ...baseMeta,
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_NAME,
   title: {

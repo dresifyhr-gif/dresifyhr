@@ -52,6 +52,7 @@ export function Footer() {
           <div className="mt-6 flex gap-3">
             <a
               href={`https://instagram.com/${INSTAGRAM_HANDLE.replace("@", "")}`}
+              aria-label="Instagram"
               target="_blank"
               rel="noreferrer"
               className="flex h-10 w-10 items-center justify-center rounded-[6px] border border-white/10 text-white/50 transition-all duration-200 hover:border-accent hover:text-accent"
@@ -60,6 +61,7 @@ export function Footer() {
             </a>
             <a
               href={`https://wa.me/${CONTACT_PHONE_DISPLAY.replace(/\D/g, "")}`}
+              aria-label="WhatsApp"
               target="_blank"
               rel="noreferrer"
               className="flex h-10 w-10 items-center justify-center rounded-[6px] border border-white/10 text-white/50 transition-all duration-200 hover:border-accent hover:text-accent"
@@ -68,6 +70,7 @@ export function Footer() {
             </a>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
+              aria-label="Pošalji e-mail"
               className="flex h-10 w-10 items-center justify-center rounded-[6px] border border-white/10 text-white/50 transition-all duration-200 hover:border-accent hover:text-accent"
             >
               <Mail className="h-4 w-4" />
@@ -77,7 +80,7 @@ export function Footer() {
 
         {/* Nav */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">{t.footer.nav}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">{t.footer.nav}</p>
           <div className="mt-5 flex flex-col gap-3">
             {NAV_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
@@ -98,7 +101,7 @@ export function Footer() {
 
         {/* Popular */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">{t.footer.popular}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">{t.footer.popular}</p>
           <div className="mt-5 flex flex-col gap-3">
             {seoFooterLinks.map((link) => (
               <Link key={link.href} href={link.href} className="text-sm text-white/60 transition-all duration-200 hover:text-accent">
@@ -110,17 +113,17 @@ export function Footer() {
 
         {/* Contact */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35">{t.footer.contact}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">{t.footer.contact}</p>
           <div className="mt-5 space-y-4">
             <div className="rounded-[8px] border border-white/8 bg-[#111111] p-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">WhatsApp</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/55">WhatsApp</p>
               <p className="mt-1 text-sm font-medium text-white">{CONTACT_PHONE_DISPLAY}</p>
             </div>
             <div className="rounded-[8px] border border-white/8 bg-[#111111] p-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">Instagram</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/55">Instagram</p>
               <p className="mt-1 text-sm font-medium text-white">{INSTAGRAM_HANDLE}</p>
             </div>
-            <p className="text-xs text-white/35">{t.footer.response}</p>
+            <p className="text-xs text-white/55">{t.footer.response}</p>
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { AllProductsIndex } from "@/components/site/all-products-index";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { CatalogFaq } from "@/components/site/catalog-faq";
@@ -39,6 +40,7 @@ export default async function JerseysPage() {
     { name: t.productPage.breadcrumb.jerseys, path: "/dresovi" }
   ]);
   const itemListSchema = buildItemListSchema("Svi dresovi u ponudi", "/dresovi", dresovi);
+  const clubCollections = await getJerseyClubCollections();
 
   return (
     <section className="bg-[#0a0a0a] py-6 sm:py-8 lg:py-10">
@@ -59,7 +61,11 @@ export default async function JerseysPage() {
           ]}
         />
 
-        <CatalogBrowser products={forCards(dresovi)} showMixPromo={["dres", "dugi-rukav"]} />
+        <CatalogBrowser
+          products={forCards(dresovi)}
+          showMixPromo={["dres", "dugi-rukav"]}
+          moreHref="/dresovi/#svi-dresovi"
+        />
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <SeoLinkGrid
@@ -70,7 +76,7 @@ export default async function JerseysPage() {
           <SeoLinkGrid
             title={t.catalog.topClubs}
             description={t.catalog.topClubsDesc}
-            collections={await getJerseyClubCollections()}
+            collections={clubCollections}
           />
           <SeoLinkGrid
             title={t.catalog.popularPlayers}
@@ -80,6 +86,8 @@ export default async function JerseysPage() {
         </div>
 
         <CatalogFaq locale={locale} />
+
+        <AllProductsIndex products={dresovi} clubCollections={clubCollections} locale={locale} />
       </div>
     </section>
   );

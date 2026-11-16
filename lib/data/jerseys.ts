@@ -33,7 +33,9 @@ export type Jersey = {
   sizeStock?: Record<string, number>;
 };
 
-export const jerseys: Jersey[] = [
+// Puni statični katalog (uključuje i proizvode koji su preusmjereni). Za izlistavanje
+// koristi `jerseys` ispod — on izbacuje REDIRECTED_PRODUCT_SLUGS.
+const allJerseys: Jersey[] = [
   { id: 1, slug: "francuska-zidane-sp1998", klub: "Francuska", igrac: "Zidane nr10", liga: "Reprezentacija", retro: true, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 11, slug: "barcelona-yamal-rozo", klub: "FC Barcelona", igrac: "Yamal nr10 — rozo/plavi", liga: "La Liga", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
   { id: 22, slug: "santos-neymar-bijeli", klub: "Santos", igrac: "Neymar Jr. nr10 — bijeli", liga: "Brazil", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL" },
@@ -113,6 +115,15 @@ export const jerseys: Jersey[] = [
   { id: 68, slug: "njemacka-wirtz-komplet", klub: "Njemačka", igrac: "Wirtz nr17 — komplet (dres + hlačice + lopta + kapa)", liga: "Komplet", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL", price: 40 },
   { id: 69, slug: "milan-modric-komplet", klub: "AC Milan", igrac: "Modrić nr14 — komplet (dres + hlačice + lopta + kapa)", liga: "Komplet", retro: false, vel: "Djeca: 104-176 · Odrasli: S-XXL", price: 40 },
 ];
+
+// Slugovi čiji /dres/* URL ima 301/308 u next.config.mjs → redirects().
+// MORA odgovarati /dres/* izvorima tamo: dok redirect postoji, proizvod ne smije
+// biti u karticama, ItemList schemi, sitemapu ni feedovima (Google bi dobio URL
+// koji preusmjerava). Ako se dres vrati u prodaju — makni ga odavde I iz redirecta.
+export const REDIRECTED_PRODUCT_SLUGS = new Set<string>(["milan-ibrahimovic"]);
+
+// Katalog za izlistavanje (kartice, ItemList, sitemap, feedovi).
+export const jerseys: Jersey[] = allJerseys.filter((j) => !REDIRECTED_PRODUCT_SLUGS.has(j.slug));
 
 // Flagship product — always shown first across the site
 export const FLAGSHIP_SLUG = "hrvatska-modric-2026";
@@ -212,13 +223,24 @@ export function normalizeText(value: string) {
     .toLowerCase();
 }
 
+// Traži po PUNOM katalogu (i preusmjerene), da stare narudžbe i admin i dalje
+// razriješe ime/cijenu. Sam /dres/<slug> URL preusmjerava prije renderiranja.
 export function getJerseyBySlug(slug: string) {
-  return jerseys.find((jersey) => jersey.slug === slug);
+  return allJerseys.find((jersey) => jersey.slug === slug);
 }
 
+// Zaliha = zbroj SAMO izričito praćenih veličina (ključevi u sizeStock). Veličine
+// kojih nema u sizeStock nisu "0 komada" nego nepraćene. Ako je zbroj praćenih 0,
+// a proizvod se i dalje može kupiti u nekoj nepraćenoj veličini (isPurchasable),
+// broj komada nije poznat → ručna/automatska zaliha ispod (nepromijenjena), umjesto
+// lažnog "Ostalo samo 0 komada". Za dostupnost (in/out of stock) koristi isPurchasable().
 export function getJerseyStock(product: { id: number; stock?: number | null; sizeStock?: Record<string, number> | null }) {
   if (product.sizeStock && Object.keys(product.sizeStock).length > 0) {
-    return Object.values(product.sizeStock).reduce((sum, n) => sum + (Number.isFinite(n) ? Math.max(0, n) : 0), 0);
+    const tracked = Object.values(product.sizeStock).reduce((sum, n) => sum + (Number.isFinite(n) ? Math.max(0, n) : 0), 0);
+    if (tracked > 0) return tracked;
+    const full = product as Partial<Jersey>;
+    const hasUntrackedBuyable = typeof full.vel === "string" && isPurchasable(full as Jersey);
+    if (!hasUntrackedBuyable) return 0;
   }
   if (product.stock != null) return product.stock;
   return 2 + ((product.id * 7) % 5);
@@ -316,6 +338,19 @@ export function getJerseySizeOptions(product: Jersey) {
       ...(product.sizeStock ? Object.entries(product.sizeStock).filter(([, n]) => (n ?? 0) <= 0).map(([s]) => s) : [])
     ])),
   };
+}
+
+// Može li se proizvod kupiti u barem jednoj veličini? Isti izvor kao izbornik
+// veličina na stranici (getJerseySizeOptions; soldOutSizes već uključuje
+// sizeStock <= 0). Koristi se za schema.org availability i feedove, da Google
+// vidi isto što i kupac.
+export function isPurchasable(product: Jersey): boolean {
+  if (product.outOfStock === "all") return false;
+  const o = getJerseySizeOptions(product);
+  const soldOut = new Set(o.soldOutSizes);
+  const adultOk = !o.adultsOutOfStock && o.adults.some((s) => !soldOut.has(s));
+  const kidOk = !o.kidsOutOfStock && o.kids.some((s) => !soldOut.has(s));
+  return adultOk || kidOk;
 }
 
 export function productSupportsSize(product: Jersey, size: string) {

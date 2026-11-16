@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { FaqSection } from "@/components/home/faq-section";
 import { FeaturedSection } from "@/components/home/featured-section";
 import { GamesCta } from "@/components/home/games-cta";
@@ -52,8 +54,18 @@ export const metadata = buildMetadata({
 
 export const revalidate = 120;
 
+// Server-renderirani interni linkovi s naslovnice prema glavnim landing stranicama
+// (Google ih vidi u HTML-u bez JS-a). URL-ovi završavaju s "/" (trailingSlash).
+const CATEGORY_LINKS = [
+  { href: "/dresovi/kategorija/djecji-dresovi/", hr: "Dječji dresovi", en: "Kids jerseys" },
+  { href: "/dresovi/klub/hrvatska/", hr: "Dres Hrvatska", en: "Croatia jersey" },
+  { href: "/dresovi/kategorija/reprezentativni-dresovi/", hr: "Reprezentacije", en: "National teams" },
+  { href: "/dresovi/kategorija/retro-dresovi/", hr: "Retro", en: "Retro" },
+  { href: "/kompleti/", hr: "Kompleti", en: "Kits" }
+];
+
 export default async function HomePage() {
-  const { t } = await getServerTranslations();
+  const { t, locale } = await getServerTranslations();
 
   // Sekcije se pale/gase u Postavkama (Izgled). Hero i katalog su uvijek tu.
   const { hiddenSections } = await getSettings();
@@ -90,6 +102,23 @@ export default async function HomePage() {
 
       <section className="section-pad bg-[#0a0a0a]">
         <div className="page-shell">
+          <nav aria-label={locale === "en" ? "Shop by category" : "Kupuj po kategoriji"} className="mb-8">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">
+              {locale === "en" ? "Shop by category" : "Kupuj po kategoriji"}
+            </p>
+            <ul className="flex flex-wrap gap-2">
+              {CATEGORY_LINKS.map((c) => (
+                <li key={c.href}>
+                  <Link
+                    href={c.href}
+                    className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-accent/60 hover:text-accent"
+                  >
+                    {locale === "en" ? c.en : c.hr}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
           <HomeCatalogTabs
             dresovi={forCards(dresovi)}
             streetwear={forCards(streetwear)}

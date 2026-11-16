@@ -9,7 +9,7 @@ import { GamesHub } from "./games-hub";
 // GAME_REWARDS_ENABLED = false), pa ovdje NE spominjemo popuste ni nagrade.
 // Motivacija: osobni rekord, dnevni kviz i dijeljenje rezultata.
 export const metadata: Metadata = buildMetadata({
-  title: "Mini igre — Penalty Karijera, 15 do pehara, Kviz dana i Žongliranje",
+  title: "Nogometne mini igre — penali, kviz, žongliranje",
   description:
     "Kratke nogometne igre za mobitel: penali level po level, 15 pitanja do pehara, Kviz dana od 10 pitanja i žongliranje. Ruši svoje rekorde i podijeli rezultat.",
   path: "/igre"

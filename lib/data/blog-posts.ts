@@ -5,6 +5,10 @@ export type BlogPost = {
   title: string;
   description: string;
   publishedAt: string;
+  // Datum zadnje stvarne izmjene sadržaja (YYYY-MM-DD) → dateModified i sitemap lastmod.
+  updatedAt?: string;
+  // Slika članka (lokalna putanja ili apsolutni URL) za schema.org; zadano OG banner.
+  image?: string;
   paragraphs: string[];
   relatedSlugs: string[];
 };
@@ -40,17 +44,18 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "top-10-retro-dresova-2025",
-    title: "Top 10 retro dresova koje moraš imati u 2025.",
+    title: "Top 10 retro dresova koje moraš imati",
     description:
       "Pregled najlegendarnijih retro nogometnih dresova koji i dalje nose karakter, priču i ogroman streetwear potencijal.",
     publishedAt: "2025-01-14",
+    updatedAt: "2026-11-16",
     relatedSlugs: [
       "barcelona-messi-cl-berlin",
       "real-bellingham",
       "francuska-zidane-sp1998"
     ],
     paragraphs: [
-      "Retro dresovi odavno nisu samo navijački komad. Oni su dio nogometne kulture, streetwear scene i osobnog stava. U 2025. najjači modeli nisu nužno najnoviji, nego oni koji nose trenutak, priču i prepoznatljivu siluetu čim ih vidiš na ulici. Ako slažeš kolekciju koja izgleda ozbiljno, a ne nasumično, kreni od komada koji su obilježili eru: Barcelona 2006 s Ronaldinhom, Francuska 1998 sa Zidaneom i Brazil 2002 stil koji i danas izgleda jednako moćno kao na starim snimkama Svjetskog prvenstva.",
+      "Retro dresovi odavno nisu samo navijački komad. Oni su dio nogometne kulture, streetwear scene i osobnog stava. Danas najjači modeli nisu nužno najnoviji, nego oni koji nose trenutak, priču i prepoznatljivu siluetu čim ih vidiš na ulici. Ako slažeš kolekciju koja izgleda ozbiljno, a ne nasumično, kreni od komada koji su obilježili eru: Barcelona 2006 s Ronaldinhom, Francuska 1998 sa Zidaneom i Brazil 2002 stil koji i danas izgleda jednako moćno kao na starim snimkama Svjetskog prvenstva.",
       "Na vrhu liste su modeli koji spajaju emociju i dizajn. Real Madrid CL finale iz ere Ramosa i Ronalda donosi onu čistu, pobjedničku estetiku koja nikad ne izlazi iz mode. Barcelona Messi Berlin 2015 ima kultni status jer podsjeća na jedan od vrhunaca moderne tiki-take. Brazil Ronaldinho žuti SP i R.Carlos retro žuti imaju onu sirovu energiju reprezentacijskog nogometa iz vremena kada su dresovi izgledali odvažnije, a igrači imali upečatljiviji vizualni identitet nego danas.",
       "Vrijedi gledati i manje očekivane klasike. PSG Ronaldinho Thomson retro savršen je za nekoga tko želi nešto rjeđe, dok Manchester United Ronaldo UCL u crvenoj ili crnoj varijanti spaja kultnog igrača i europsku priču. FC Barcelona Kappa retro i Rivaldo retro nose staru školu s jačim modnim karakterom, pogotovo kada se nose uz cargo hlače, traper ili laganu jaknu. Dobar retro dres mora funkcionirati i na tribini i u gradu, a upravo ti modeli to rade najbolje.",
       "Ako biraš samo jedan komad, uzmi onaj koji ti i danas budi reakciju čim ga vidiš. Ako slažeš više njih, ciljaj ravnotežu: jedan reprezentativni klasik, jedan klupski europski komad i jedan statement dres koji se ne viđa stalno. Tako kolekcija ne izgleda kao da si kupovao po algoritmu, nego kao da stvarno znaš što nosiš. U našoj ponudi zato uvijek držimo mix sigurnih klasika i jačih retro komada koji se brzo rasprodaju čim nova tura stigne."

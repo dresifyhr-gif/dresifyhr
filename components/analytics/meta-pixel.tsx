@@ -32,16 +32,14 @@ export function MetaPixel() {
           fbq('track', 'PageView');
         `}
       </Script>
-      <noscript>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          height="1"
-          width="1"
-          style={{ display: "none" }}
-          src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
-          alt=""
-        />
-      </noscript>
+      {/* Sirovi HTML (ne JSX <img>): React inače od <img> u <noscript> napravi
+          <link rel="preload" as="image"> u <head>, pa bi preglednik slao noscript
+          PageView i posjetiteljima s JS-om (dupli PageView + zahtjev viška). */}
+      <noscript
+        dangerouslySetInnerHTML={{
+          __html: `<img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1"/>`
+        }}
+      />
     </>
   );
 }

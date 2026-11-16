@@ -108,10 +108,10 @@ export default async function Ps5Page() {
               I tvoje <b className="text-white">ranije kupnje vrijede</b>! Zaprati <b className="text-white">@dresify.hr</b>, napravi (ili se prijavi u) <b className="text-white">Dresify račun</b> s istim emailom/brojem s kojim si naručivao i upiši Instagram u profilu — <b className="text-accent">svaka tvoja ranija narudžba ti donosi +5 bodova</b>.
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2.5">
-              <a href="/registracija" className="rounded-[10px] bg-accent px-5 py-2.5 text-xs font-bold uppercase tracking-wide text-black transition hover:brightness-95">
+              <a href="/registracija/" className="rounded-[10px] bg-accent px-5 py-2.5 text-xs font-bold uppercase tracking-wide text-black transition hover:brightness-95">
                 Napravi račun
               </a>
-              <a href="/racun" className="rounded-[10px] border border-white/15 px-5 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-white/5">
+              <a href="/racun/" className="rounded-[10px] border border-white/15 px-5 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-white/5">
                 Već imaš račun? Prijavi se
               </a>
             </div>

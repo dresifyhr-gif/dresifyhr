@@ -67,12 +67,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       linkGroups={[
         {
           title: "Najtraženiji klubovi",
-          description: "Otvori klubove u kojima se ovaj tip modela najčešće traži i usporedi ponudu.",
+          description: "Dresovi najtraženijih klubova i reprezentacija.",
           collections: await getFeaturedClubCollections(8)
         },
         {
           title: "Kupuj po kategoriji",
-          description: "Skoči na retro, dječje i reprezentativne grupe koje dodatno šire long-tail pretrage.",
+          description: "Retro, dječji i reprezentativni dresovi.",
           collections: await getFeaturedCategoryCollections()
         }
       ]}

@@ -56,7 +56,7 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 
 export default async function AccountPage() {
   const user = await currentUser();
-  if (!user) redirect("/prijava");
+  if (!user) redirect("/prijava/");
 
   const email = (user.primaryEmailAddress?.emailAddress || "").toLowerCase();
   const clerkPhone = user.primaryPhoneNumber?.phoneNumber || "";

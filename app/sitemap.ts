@@ -6,8 +6,8 @@ import {
   getJerseyClubCollections,
   getJerseyPlayerCollections
 } from "@/lib/data/seo-collections";
-import { jerseys } from "@/lib/data/jerseys";
-import { getSitemapProductData } from "@/lib/data/product-overrides";
+import { REDIRECTED_PRODUCT_SLUGS, jerseys, type Jersey } from "@/lib/data/jerseys";
+import { getSitemapProductData, withOverrides } from "@/lib/data/product-overrides";
 import { absoluteUrl } from "@/lib/utils";
 
 // Custom proizvodi i datumi zadnje promjene (productOverride/customProduct
@@ -34,12 +34,30 @@ async function sitemapProductData(): Promise<{ customSlugs: string[]; lastMod: M
   }
 }
 
+// Najnoviji datum promjene među proizvodima landinga (undefined ako nijedan nema datum).
+function newestLastMod(products: Jersey[], lastMod: Map<string, Date>): Date | undefined {
+  let newest: Date | undefined;
+  for (const p of products) {
+    const d = lastMod.get(p.slug);
+    if (d && (!newest || d > newest)) newest = d;
+  }
+  return newest;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Statične stranice namjerno BEZ lastmod — nemamo točan datum promjene, a
+  // izmišljeni ("danas") Google nauči ignorirati.
   const staticRoutes = ["", "/dresovi", "/kompleti", "/slozi-mix", "/streetwear", "/trenirke", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/pravila-privatnosti", "/igre", "/igra", "/kviz", "/pehar", "/zongliranje"];
-  const categoryRoutes = (await getJerseyCategoryCollections()).map((collection) => collection.path);
-  const clubRoutes = (await getJerseyClubCollections()).map((collection) => collection.path);
-  const playerRoutes = (await getJerseyPlayerCollections()).map((collection) => collection.path);
   const { customSlugs, lastMod } = await sitemapProductData();
+  const landing = (collections: { path: string; products: Jersey[] }[]) =>
+    collections.map((collection) => ({ path: collection.path, lastModified: newestLastMod(collection.products, lastMod) }));
+  const categoryRoutes = landing(await getJerseyCategoryCollections());
+  const clubRoutes = landing(await getJerseyClubCollections());
+  const playerRoutes = landing(await getJerseyPlayerCollections());
+  // Isti filtar kao katalog: bez proizvoda skrivenih u adminu i bez slugova s
+  // 301/308 (jerseys ih već izbacuje; ovdje i za custom slugove).
+  const products = (await withOverrides(jerseys)).filter((p) => !REDIRECTED_PRODUCT_SLUGS.has(p.slug));
+  const customs = customSlugs.filter((slug) => !REDIRECTED_PRODUCT_SLUGS.has(slug));
 
   return [
     ...staticRoutes.map((route) => ({
@@ -48,27 +66,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: route === "" ? 1 : 0.85
     })),
     ...categoryRoutes.map((route) => ({
-      url: absoluteUrl(route),
+      url: absoluteUrl(route.path),
+      lastModified: route.lastModified,
       changeFrequency: "weekly" as const,
       priority: 0.82
     })),
     ...clubRoutes.map((route) => ({
-      url: absoluteUrl(route),
+      url: absoluteUrl(route.path),
+      lastModified: route.lastModified,
       changeFrequency: "weekly" as const,
       priority: 0.8
     })),
     ...playerRoutes.map((route) => ({
-      url: absoluteUrl(route),
+      url: absoluteUrl(route.path),
+      lastModified: route.lastModified,
       changeFrequency: "weekly" as const,
       priority: 0.78
     })),
-    ...jerseys.map((product) => ({
+    ...products.map((product) => ({
       url: absoluteUrl(`/dres/${product.slug}`),
       lastModified: lastMod.get(product.slug),
       changeFrequency: "weekly" as const,
       priority: 0.7
     })),
-    ...customSlugs.map((slug) => ({
+    ...customs.map((slug) => ({
       url: absoluteUrl(`/dres/${slug}`),
       lastModified: lastMod.get(slug),
       changeFrequency: "weekly" as const,
@@ -76,6 +97,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     ...blogPosts.map((post) => ({
       url: absoluteUrl(`/blog/${post.slug}`),
+      lastModified: post.updatedAt ?? post.publishedAt,
       changeFrequency: "monthly" as const,
       priority: 0.62
     })),

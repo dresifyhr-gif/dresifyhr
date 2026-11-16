@@ -13,6 +13,7 @@ import { hasJerseyGallery } from "@/lib/data/jersey-media";
 import {
   FLAGSHIP_SLUG,
   PLAYER_FILTER_OPTIONS,
+  getJerseySizeOptions,
   matchesPlayerFilter,
   normalizeText,
   productSupportsSize,
@@ -27,7 +28,20 @@ type CatalogBrowserProps = {
   headingTitle?: string;
   headingDesc?: string;
   showMixPromo?: boolean | MixVariant[]; // kartice "Složi svoj mix" na početku popisa
+  countKind?: "jerseys" | "kits"; // brojač u zaglavlju: "N dresova" ili "N kompleta"
+  soldOutLast?: boolean; // rasprodani modeli na kraj (landing stranice)
+  // Ako je zadan, "Prikaži još" je pravi <a href> (npr. na popis svih dresova za
+  // crawlere / bez JS-a); s JS-om se klik presretne i samo doda kartice.
+  moreHref?: string;
 };
+
+// Rasprodano = nijedna veličina nije dostupna (isto pravilo kao ProductCard).
+function isSoldOut(product: Jersey) {
+  const o = getJerseySizeOptions(product);
+  const anyAdult = !o.adultsOutOfStock && o.adults.some((s) => !o.soldOutSizes.includes(s));
+  const anyKid = !o.kidsOutOfStock && o.kids.some((s) => !o.soldOutSizes.includes(s));
+  return !anyAdult && !anyKid;
+}
 
 type FilterSectionKey = "liga" | "klub" | "igrac" | "velicina" | "retro" | "dugirukav";
 
@@ -120,7 +134,7 @@ function FilterSection({
   );
 }
 
-export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc, showMixPromo = false }: CatalogBrowserProps) {
+export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc, showMixPromo = false, countKind = "jerseys", soldOutLast = false, moreHref }: CatalogBrowserProps) {
   const { t, locale } = useLanguage();
   // Klubovi za filter se grade iz STVARNIH proizvoda (uključujući ručno dodane/custom),
   // ne iz statičnog kataloga — inače novi klub/repka (npr. Palestina) nema svoj filter/grupu.
@@ -239,6 +253,13 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
       })
       .sort((left, right) => {
         const recommended = () => {
+          // Landing stranice: rasprodani uvijek na kraj.
+          if (soldOutLast) {
+            const leftOut = isSoldOut(left);
+            const rightOut = isSoldOut(right);
+            if (leftOut !== rightOut) return leftOut ? 1 : -1;
+          }
+
           // Flagship product is always first
           if (left.slug === FLAGSHIP_SLUG) return -1;
           if (right.slug === FLAGSHIP_SLUG) return 1;
@@ -291,7 +312,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
     selectedLeagues,
     selectedPlayers,
     selectedSizes,
-    sortBy
+    sortBy,
+    soldOutLast
   ]);
 
   const activeTags = [
@@ -577,7 +599,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
             </p>
           </div>
           <span className="inline-flex w-fit rounded-[4px] bg-accent px-4 py-2 text-sm font-semibold text-black">
-            {t.catalog.count(filteredProducts.length)}
+            {countKind === "kits" ? t.catalog.countKits(filteredProducts.length) : t.catalog.count(filteredProducts.length)}
           </span>
         </div>
       )}
@@ -703,13 +725,26 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
 
           {filteredProducts.length > visibleCount ? (
             <div className="mt-6 flex justify-center sm:mt-8">
-              <button
-                type="button"
-                onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
-                className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 bg-[#111111] px-7 text-sm font-bold uppercase tracking-wide text-white transition hover:border-accent hover:text-accent"
-              >
-                Prikaži još ({filteredProducts.length - visibleCount})
-              </button>
+              {moreHref ? (
+                <a
+                  href={moreHref}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setVisibleCount((n) => n + PAGE_SIZE);
+                  }}
+                  className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 bg-[#111111] px-7 text-sm font-bold uppercase tracking-wide text-white transition hover:border-accent hover:text-accent"
+                >
+                  Prikaži još ({filteredProducts.length - visibleCount})
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                  className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 bg-[#111111] px-7 text-sm font-bold uppercase tracking-wide text-white transition hover:border-accent hover:text-accent"
+                >
+                  Prikaži još ({filteredProducts.length - visibleCount})
+                </button>
+              )}
             </div>
           ) : null}
 

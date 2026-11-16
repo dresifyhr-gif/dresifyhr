@@ -21,8 +21,9 @@ export function SeoLinkGrid({ title, description, collections }: SeoLinkGridProp
             href={collection.path}
             className="border border-white/10 bg-[#0a0a0a] px-4 py-3 text-sm font-semibold text-white transition duration-200 ease-out hover:border-accent hover:text-accent"
           >
+            {/* Bez broja modela: kolekcije uključuju i komplete pa se brojevi ne bi
+                slagali s brojačem kataloga na /dresovi (npr. "Dječji 160" vs "156 dresova"). */}
             {collection.label}
-            <span className="ml-2 text-white/45">{collection.products.length}</span>
           </Link>
         ))}
       </div>

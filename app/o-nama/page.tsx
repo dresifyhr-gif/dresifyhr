@@ -5,7 +5,7 @@ import { Heart, Package, Shirt, Truck, Zap, Shield } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "O nama — Dresify | Nogometni dresovi iz Hrvatske",
+  title: "O nama — nogometni dresovi iz Hrvatske",
   description:
     "Dresify je hrvatska online trgovina nogometnih dresova. Više od 500 zadovoljnih kupaca, dresovi od 20€, dostava pouzećem po cijeloj Hrvatskoj.",
   path: "/o-nama"

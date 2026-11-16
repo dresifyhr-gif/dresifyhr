@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ProductGallery } from "@/components/product/product-gallery";
 import { ProductDetailPanel } from "@/components/product/product-detail-panel";
-import { ProductFaq } from "@/components/product/product-faq";
+import { ProductFaq, displayIgrac } from "@/components/product/product-faq";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { ProductCard } from "@/components/site/product-card";
 import { SeoLinkGrid } from "@/components/site/seo-link-grid";
@@ -16,6 +16,7 @@ import { getJerseyBySlug, getJerseyDescription, getJerseyStock, getRelatedJersey
 import { getProductBySlug } from "@/lib/data/product-overrides";
 import { buildBreadcrumbSchema, buildMetadata, buildProductSchema, productMainImage } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
+import { productTypeDescription, productTypeWord } from "@/lib/product-type";
 import { repairText } from "@/lib/utils";
 
 type ProductPageProps = {
@@ -51,21 +52,36 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   // Opis za Google i dijeljenje linka (WhatsApp/IG/FB) — PRAVA cijena i vrsta proizvoda.
   const price = product.price ?? (isStreetwear ? 50 : 20);
-  const what =
-    isStreetwear ? "streetwear komplet"
-    : product.liga === "Komplet" ? "komplet (dres, hlačice, lopta i kapa)"
-    : product.category === "trenirka" ? "trenirka (jakna + hlače)"
-    : product.category === "dugi-rukav" ? "dres dugih rukava"
-    : "nogometni dres";
-  return buildMetadata({
-    title: isStreetwear ? `${klub} ${igrac} — Streetwear` : `${klub} ${igrac}`,
-    description: `${klub} ${igrac} ${what} za ${price}€. Dostava po cijeloj Hrvatskoj za 2-5 dana, plaćanje pouzećem.`,
+  const what = productTypeDescription(product);
+  // "Komplet (dres + hlačice …)" već je u imenu → ne ponavljaj vrstu u opisu.
+  const descName = [klub, displayIgrac(klub, igrac), /komplet/i.test(igrac) ? "" : what].filter(Boolean).join(" ");
+
+  // Naslov: <klub> <igrač> <vrsta> — <cijena> €. Ključna riječ ("dres", "trenirka",
+  // "komplet") mora biti u naslovu; degenerirana imena (Japan Japan, Italija Prazan)
+  // svode se na samo klub.
+  const typeWord = productTypeWord(product);
+  const igracPart = displayIgrac(klub, igrac);
+  // Vrsta se preskače ako je već u imenu; trenirka mora reći "trenirka" (ne samo "Komplet").
+  const typeContained = typeWord === "trenirka" ? /trenirka/i.test(igracPart) : /dres|komplet|trenirka/i.test(igracPart);
+  const typePart = typeContained ? "" : typeWord;
+  const baseTitle = isStreetwear
+    ? `${klub}${igracPart ? ` ${igracPart}` : ""} — streetwear komplet`
+    : [klub, igracPart, typePart].filter(Boolean).join(" ");
+  const withPrice = isStreetwear ? baseTitle : `${baseTitle} — ${price} €`;
+  // Template dodaje " | DRESIFY" (10 znakova); cilj je ≤ 60 ukupno.
+  const fitsWithBrand = (t: string) => t.length + 10 <= 60;
+  const title = fitsWithBrand(withPrice) ? withPrice : baseTitle;
+  const meta = buildMetadata({
+    title,
+    description: `${descName} za ${price}€. Dostava po cijeloj Hrvatskoj za 2-5 dana, plaćanje pouzećem.`,
     image: productMainImage(product), // og:image = prava slika proizvoda (ne generični banner)
     path: `/dres/${product.slug}`,
     keywords: isStreetwear
       ? [`${klub} streetwear`.toLowerCase(), `${igrac} komplet`.toLowerCase(), "streetwear hrvatska"]
       : [`${klub} dres`.toLowerCase(), `${igrac} dres`.toLowerCase(), "nogometni dres"]
   });
+  // Predugo i bez cijene → bez " | DRESIFY" sufiksa (title.absolute).
+  return fitsWithBrand(title) ? meta : { ...meta, title: { absolute: title } };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -80,14 +96,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const stock = getJerseyStock(product);
   const productSchema = buildProductSchema(product, stock);
   const isStreetwear = product.category === "streetwear";
-  const catLabel = isStreetwear ? "Streetwear" : t.productPage.breadcrumb.jerseys;
-  const catPath = isStreetwear ? "/streetwear" : "/dresovi";
+  const isTrenirka = product.category === "trenirka";
+  const catLabel = isStreetwear ? "Streetwear" : isTrenirka ? "Trenirke" : t.productPage.breadcrumb.jerseys;
+  const catPath = isStreetwear ? "/streetwear" : isTrenirka ? "/trenirke" : "/dresovi";
+  const clubCollection = await getClubCollectionForProduct(product);
+  const productName = [repairText(product.klub), displayIgrac(product.klub, product.igrac)].filter(Boolean).join(" ");
+  // Početna / Dresovi / <Klub hub> / Proizvod — klupski hub je međukorak.
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: t.productPage.breadcrumb.home, path: "/" },
     { name: catLabel, path: catPath },
-    { name: `${repairText(product.klub)} ${repairText(product.igrac)}`, path: `/dres/${product.slug}` }
+    ...(clubCollection ? [{ name: clubCollection.label, path: clubCollection.path }] : []),
+    { name: productName, path: `/dres/${product.slug}` }
   ]);
-  const clubCollection = await getClubCollectionForProduct(product);
   const playerCollection = await getPlayerCollectionForProduct(product);
   const categoryCollections = (await getCategoryCollectionsForProduct(product)).slice(0, 5);
 
@@ -107,7 +127,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
           items={[
             { label: t.productPage.breadcrumb.home, href: "/" },
             { label: catLabel, href: catPath },
-            { label: `${repairText(product.klub)} ${repairText(product.igrac)}` }
+            ...(clubCollection ? [{ label: clubCollection.label, href: clubCollection.path }] : []),
+            { label: productName }
           ]}
         />
 
@@ -118,7 +139,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <section className="mt-10 max-w-3xl">
           <h2 className="font-heading text-3xl uppercase leading-none text-white sm:text-4xl">
-            {locale === "en" ? "About" : "O proizvodu"} — {repairText(product.klub)} {repairText(product.igrac)}
+            {locale === "en" ? "About" : "O proizvodu"} — {productName}
           </h2>
           <div className="mt-5 space-y-4">
             {(product.descriptionOverride
@@ -138,7 +159,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           {clubCollection ? (
             <SeoLinkGrid
               title="Više iz istog kluba"
-              description="Otvori klupski hub i pregledaj sve povezane modele iz iste momčadi."
+              description="Svi dresovi ovog kluba na jednom mjestu."
               collections={[clubCollection]}
             />
           ) : null}
@@ -154,7 +175,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           {categoryCollections.length ? (
             <SeoLinkGrid
               title="Kupuj po kategoriji"
-              description="Pregledaj slične modele kroz retro, dječje ili reprezentativne landing stranice."
+              description="Pogledaj i retro, dječje i reprezentativne dresove."
               collections={categoryCollections}
             />
           ) : null}

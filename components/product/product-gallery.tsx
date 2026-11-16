@@ -3,10 +3,9 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import { JerseyVisual, WATERMARK } from "@/components/site/jersey-visual";
+import { JerseyVisual, WATERMARK, productImageAlt } from "@/components/site/jersey-visual";
 import { type Jersey } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
-import { repairText } from "@/lib/utils";
 
 type ProductGalleryProps = {
   product: Jersey;
@@ -29,7 +28,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
         <div className="absolute inset-x-[15%] bottom-[4%] h-10 rounded-full bg-black/10 blur-[24px]" />
         <Image
           src={activeImage.src}
-          alt={`${repairText(product.klub)} ${repairText(product.igrac)} ${activeImage.altLabel}`}
+          alt={productImageAlt(product, activeImage.altLabel)}
           fill
           priority
           sizes="(max-width: 1024px) 100vw, 45vw"
@@ -43,9 +42,10 @@ export function ProductGallery({ product }: ProductGalleryProps) {
           aria-hidden
         />
 
-        <span className="pointer-events-none absolute bottom-4 right-4 z-20 select-none font-heading text-xl tracking-[0.18em] text-black/30">
-          DRES<span className="text-accent/60">IFY</span>
-        </span>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-4 right-4 z-20 select-none font-heading text-xl tracking-[0.18em] text-black/30 before:content-['DRES'] after:text-accent/60 after:content-['IFY']"
+        />
 
         {product.retro ? (
           <span className="absolute left-5 top-5 border border-accent bg-accent px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-black">
@@ -73,7 +73,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
                 <div className="relative h-full w-full overflow-hidden rounded-[6px] bg-[#fbfbfb]">
                   <Image
                     src={image.src}
-                    alt={`${repairText(product.klub)} ${repairText(product.igrac)} ${image.altLabel}`}
+                    alt={productImageAlt(product, image.altLabel)}
                     fill
                     sizes="180px"
                     className="object-contain p-3"

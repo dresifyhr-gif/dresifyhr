@@ -1,7 +1,7 @@
-import { jerseys, isNationalTeam } from "@/lib/data/jerseys";
+import { REDIRECTED_PRODUCT_SLUGS, jerseys, isNationalTeam, isPurchasable } from "@/lib/data/jerseys";
 import { getCatalogProducts, getStreetwearProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
-import { JERSEY_PRICE_EUR, SITE_URL } from "@/lib/site";
+import { JERSEY_PRICE_EUR, SHIPPING_PRICE_EUR, SITE_URL } from "@/lib/site";
 import { repairText } from "@/lib/utils";
 
 // Meta (Facebook/Instagram) catalog data feed — CSV.
@@ -23,6 +23,7 @@ const HEADER = [
   "image_link",
   "brand",
   "product_type",
+  "shipping",
 ] as const;
 
 function csvCell(value: string) {
@@ -33,7 +34,8 @@ export async function GET() {
   // Trenirke imaju svoju stranicu (/trenirke) pa nisu u getCatalogProducts — dodaj ih
   // izričito, inače ih katalog (Meta / Google Shopping) nikad ne vidi.
   const [catalog, streetwear, trenirke] = await Promise.all([getCatalogProducts(jerseys), getStreetwearProducts(), getTrenirkaProducts()]);
-  const allProducts = [...catalog, ...streetwear, ...trenirke];
+  // Bez slugova čiji URL preusmjerava.
+  const allProducts = [...catalog, ...streetwear, ...trenirke].filter((p) => !REDIRECTED_PRODUCT_SLUGS.has(p.slug));
   const rows = allProducts.map((product) => {
     const klub = repairText(product.klub);
     const igrac = repairText(product.igrac);
@@ -65,13 +67,16 @@ export async function GET() {
       product.slug.slice(0, 50), // Google/Meta id max 50 znakova (dugi custom slugovi su bili odbijeni)
       title,
       description,
-      "in stock",
+      // Ista logika kao stranica proizvoda i schema.org (isPurchasable).
+      isPurchasable(product) ? "in stock" : "out of stock",
       "new",
       `${price.toFixed(2)} EUR`,
       `${SITE_URL}/dres/${product.slug}/`,
       image,
       "Dresify",
       liga,
+      // Meta format: ZEMLJA:REGIJA:USLUGA:CIJENA (GLS po cijeloj HR).
+      `HR::GLS:${SHIPPING_PRICE_EUR.toFixed(2)} EUR`,
     ]
       .map((cell) => csvCell(String(cell)))
       .join(",");

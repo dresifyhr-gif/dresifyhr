@@ -23,10 +23,10 @@ export function ChristmasHeroFx() {
     if (!g) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const small = window.innerWidth < 700;
-    // Mobitel: manja rezolucija i ~30 fps — izgleda isto, troši puno manje.
+    // Mobitel: manja rezolucija i ~15 fps — izgleda isto, troši puno manje.
     const DPR = small ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
     let last = 0;
-    let W = 0, H = 0, raf = 0, visible = true;
+    let W = 0, H = 0, raf = 0, visible = true, started = false;
     let stars: { x: number; y: number; r: number; p: number; s: number; gold: boolean }[] = [];
 
     const resize = () => {
@@ -68,21 +68,41 @@ export function ChristmasHeroFx() {
       g.fillStyle = vg; g.fillRect(0, 0, W, H);
     };
 
-    const start = performance.now();
+    let start = performance.now();
     const loop = (now: number) => {
-      if (!small || now - last > 32) { draw((now - start) / 1000); last = now; }
+      if (!small || now - last > 66) { draw((now - start) / 1000); last = now; }
       raf = visible ? requestAnimationFrame(loop) : 0;
     };
     resize();
-    if (reduce) draw(8); else raf = requestAnimationFrame(loop);
-    const ro = new ResizeObserver(() => { resize(); if (reduce) draw(8); });
+    // Prvi kadar odmah (statičan), a animacija kreće tek nakon "load" + idle,
+    // da ne otima glavnu nit dok se stranica učitava (LCP/INP).
+    const still = reduce ? 8 : 0;
+    draw(still);
+    let idleId: number | undefined, timer: ReturnType<typeof setTimeout> | undefined;
+    const begin = () => {
+      started = true;
+      start = performance.now(); // nastavlja glatko od mirnog kadra (t = 0)
+      if (!reduce && visible && !raf) raf = requestAnimationFrame(loop);
+    };
+    const onLoad = () => {
+      if ("requestIdleCallback" in window) idleId = window.requestIdleCallback(begin, { timeout: 2500 });
+      else timer = setTimeout(begin, 300);
+    };
+    if (document.readyState === "complete") onLoad();
+    else window.addEventListener("load", onLoad, { once: true });
+    const ro = new ResizeObserver(() => { resize(); if (reduce || !started) draw(still); });
     ro.observe(c);
     const io = new IntersectionObserver(([e]) => {
       const was = visible; visible = e.isIntersecting;
-      if (!reduce && visible && !was && !raf) raf = requestAnimationFrame(loop);
+      if (started && !reduce && visible && !was && !raf) raf = requestAnimationFrame(loop);
     });
     io.observe(c);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); };
+    return () => {
+      cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
+      window.removeEventListener("load", onLoad);
+      if (idleId !== undefined && "cancelIdleCallback" in window) window.cancelIdleCallback(idleId);
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
   return (

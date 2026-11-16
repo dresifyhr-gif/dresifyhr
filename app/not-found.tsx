@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { getServerTranslations } from "@/lib/get-server-translations";
+
+export const metadata: Metadata = {
+  title: "Stranica nije pronađena",
+  robots: { index: false, follow: true }
+};
 
 export default async function NotFound() {
   const { t } = await getServerTranslations();

@@ -125,7 +125,7 @@ function merge(j: Jersey, ov?: Override): Jersey {
     igrac,
     liga: ov.liga?.trim() || j.liga,
     // Uređene slike zamjenjuju originalne; prazno = ostaju originalne iz /public.
-    images: imgUrls ? imgUrls.map((src) => ({ src, altLabel: `${klub} ${igrac}` })) : j.images,
+    images: imgUrls ? imgUrls.map((src, i) => ({ src, altLabel: i === 0 ? "prednja strana" : i === 1 ? "stražnja strana" : `slika ${i + 1}` })) : j.images,
     price: ov.price != null ? ov.price : j.price,
     stock: ov.stock != null ? ov.stock : j.stock,
     sizeStock: parseSizeStock(ov.sizeStock) ?? j.sizeStock,
@@ -190,7 +190,7 @@ export function customToJersey(c: CustomRow): Jersey {
     soldOutSizes: c.soldOutSizes ? c.soldOutSizes.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
     customSizes: c.sizes ? c.sizes.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
     descriptionOverride: c.description || undefined,
-    images: urls.map((src) => ({ src, altLabel: `${c.klub} ${c.igrac}` })),
+    images: urls.map((src, i) => ({ src, altLabel: i === 0 ? "prednja strana" : i === 1 ? "stražnja strana" : `slika ${i + 1}` })),
     isCustom: true,
     category: c.category || "dres"
   };

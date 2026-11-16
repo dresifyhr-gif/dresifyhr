@@ -9,6 +9,7 @@ import { StickyAddToCart } from "@/components/product/sticky-add-to-cart";
 import { SizeGuide } from "@/components/product/size-guide";
 import { MixPicker } from "@/components/product/mix-picker";
 import { Stars } from "@/components/site/stars";
+import { displayIgracClient } from "@/components/site/jersey-visual";
 import { fbTrack } from "@/lib/fbpixel";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import {
@@ -18,6 +19,7 @@ import {
   type Jersey
 } from "@/lib/data/jerseys";
 import { MIX_ADDON_PRICE_EUR, addonCount, addonsText, type MixAddons } from "@/lib/mix";
+import { productTypeWord } from "@/lib/product-type";
 import { PAYMENT_METHOD_LABEL, SHIPPING_PRICE_LABEL } from "@/lib/site";
 import { createWhatsAppUrl, repairText } from "@/lib/utils";
 
@@ -88,6 +90,11 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
   const isLongSleeve = product.category === "dugi-rukav";
   const segmentLabel = product.category === "trenirka" ? "Trenirka" : product.category === "streetwear" ? "Streetwear" : segment === "adult" || isLongSleeve ? t.product.segmentAdult : t.product.segmentKid;
   const productPrice = product.price ?? 20;
+  // H1: degenerirana imena (igrač = klub, prazno, "Prazan"/"Away") svode se na klub.
+  const h1Klub = repairText(product.klub);
+  const h1Name = displayIgracClient(product.klub, product.igrac);
+  const typeWord = productTypeWord(product);
+  const h1Type = (typeWord === "trenirka" ? /trenirka/i.test(h1Name) : /dres|komplet|trenirka/i.test(h1Name)) ? "" : typeWord;
   const whatsappMessage = `Pozdrav, želim naručiti: ${repairText(product.klub)} ${repairText(
     product.igrac
   )}${selectedSize ? `, veličina: ${selectedSize}` : ""}. Cijena: ${productPrice}€.`;
@@ -144,13 +151,19 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         <span className="border border-accent bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-black">
           {product.category === "streetwear" ? "Streetwear" : repairText(product.liga)}
         </span>
-        <span className="border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
-          {repairText(product.klub)}
-        </span>
       </div>
 
-      <h1 className="mt-6 text-5xl uppercase leading-none text-white sm:text-6xl">
-        {repairText(product.igrac)}
+      {/* H1 = klub + igrač + vrsta (isti signal kao <title>). Klub je mali redak iznad
+          imena — zamjenjuje bivši zasebni badge kluba. */}
+      <h1 className="mt-6 uppercase leading-none text-white">
+        {h1Name ? (
+          <span className="block text-sm font-semibold tracking-[0.3em] text-white/70">{h1Klub}</span>
+        ) : null}
+        {h1Name ? " " : null}
+        <span className={`block text-5xl sm:text-6xl ${h1Name ? "mt-3" : ""}`}>
+          {h1Name || h1Klub}
+          {h1Type ? <span className="text-white/45"> {h1Type}</span> : null}
+        </span>
       </h1>
       {product.rating && (
         <div className="mt-3">
@@ -158,9 +171,11 @@ export function ProductDetailPanel({ product }: ProductDetailPanelProps) {
         </div>
       )}
       <p className="mt-4 text-4xl font-semibold text-accent">{productPrice}€</p>
-      <p className={`mt-4 text-sm font-semibold uppercase tracking-[0.2em] ${getStockTone(stock)}`}>
-        {t.product.stockWarning(stock)}
-      </p>
+      {stock > 0 ? (
+        <p className={`mt-4 text-sm font-semibold uppercase tracking-[0.2em] ${getStockTone(stock)}`}>
+          {t.product.stockWarning(stock)}
+        </p>
+      ) : null}
 
       {sizeOptions.hasAdults && sizeOptions.hasKids ? (
         <div

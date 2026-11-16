@@ -9,8 +9,8 @@ export function CatalogFaq({ locale = "hr" }: { locale?: "hr" | "en" }) {
 
   const items = en
     ? [
-        { q: "How much do football jerseys cost?", a: "Every jersey is a fixed €20 and full kits are €40 — the same price for all clubs, players and national teams, with no hidden costs." },
-        { q: "Do you have cheap football jerseys?", a: "Yes — all our jerseys are €20, among the most affordable in Croatia, with the same fixed price for kids' and adult sizes." },
+        { q: "How much do football jerseys cost?", a: "Jerseys start from €20 and full kits from €40 — the price is shown next to every product, with no hidden costs." },
+        { q: "Do you have cheap football jerseys?", a: "Yes — jerseys start from €20, among the most affordable in Croatia, for kids' and adult sizes." },
         { q: "Do you have kids' football jerseys?", a: "Yes, kids' sizes 104–176 (jersey + shorts) for all clubs and national teams, at the same €20 price." },
         { q: "What sizes do you offer?", a: "Kids' 104–176 and adult S–XL (national teams S–XXL)." },
         { q: "How long is delivery and how do I pay?", a: "Delivery is 2–5 business days across Croatia and you pay cash on delivery — €7 shipping, free from €60." },

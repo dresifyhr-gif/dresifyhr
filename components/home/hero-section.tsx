@@ -9,11 +9,31 @@ import { ChristmasHeroFx } from "@/components/bozic/hero-fx";
 import { useLanguage } from "@/contexts/language-context";
 import { useShopSettings } from "@/contexts/shop-settings-context";
 
-const TICKER_ITEMS = [
-  "Real Madrid", "Barcelona", "PSG", "Bayern München", "Man United",
-  "Atletico Madrid", "Dortmund", "Al-Nassr", "Inter Miami", "Santos",
-  "Brazil", "Italija", "Mbappe", "Ronaldo", "Messi", "Bellingham",
-  "Neymar", "Yamal", "Griezmann", "Musiala", "Raphinha", "Kvaratskhelia",
+// Ticker klubova/igrača — stavke s landing stranicom (lib/data/seo-collections.ts)
+// su linkovi (interni linkovi s naslovnice); ostale ostaju običan tekst.
+const TICKER_ITEMS: { name: string; href?: string }[] = [
+  { name: "Real Madrid", href: "/dresovi/klub/real-madrid/" },
+  { name: "Barcelona", href: "/dresovi/klub/fc-barcelona/" },
+  { name: "PSG", href: "/dresovi/klub/psg/" },
+  { name: "Bayern München", href: "/dresovi/klub/bayern-munchen/" },
+  { name: "Man United", href: "/dresovi/klub/manchester-united/" },
+  { name: "Atletico Madrid" },
+  { name: "Dortmund" },
+  { name: "Al-Nassr" },
+  { name: "Inter Miami", href: "/dresovi/klub/inter-miami/" },
+  { name: "Santos" },
+  { name: "Brazil", href: "/dresovi/klub/brazil/" },
+  { name: "Italija" },
+  { name: "Mbappe", href: "/dresovi/igrac/mbappe/" },
+  { name: "Ronaldo", href: "/dresovi/igrac/ronaldo/" },
+  { name: "Messi", href: "/dresovi/igrac/messi/" },
+  { name: "Bellingham", href: "/dresovi/igrac/bellingham/" },
+  { name: "Neymar", href: "/dresovi/igrac/neymar/" },
+  { name: "Yamal", href: "/dresovi/igrac/yamal/" },
+  { name: "Griezmann" },
+  { name: "Musiala" },
+  { name: "Raphinha", href: "/dresovi/igrac/raphinha/" },
+  { name: "Kvaratskhelia" },
 ];
 
 // ps5Slot: PS5 traka koja se na mobitelu prikazuje ispod glavnog gumba (na
@@ -56,8 +76,8 @@ export function HeroSection({ mysteryImage, ps5Slot }: { mysteryImage?: string; 
             {/* Eyebrow badge — jedan red, manji razmak slova nego globalni kicker */}
             <motion.div
               className="section-kicker mb-4 whitespace-nowrap tracking-[0.12em] sm:mb-6 sm:tracking-[0.16em]"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ y: 10 }}
+              animate={{ y: 0 }}
               transition={{ duration: 0.45, ease: "easeOut" }}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
@@ -66,8 +86,8 @@ export function HeroSection({ mysteryImage, ps5Slot }: { mysteryImage?: string; 
 
             <motion.h1
               className="font-heading text-[clamp(2.5rem,6vw,5.4rem)] uppercase leading-[0.86] tracking-[0.02em] text-white"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ y: 24 }}
+              animate={{ y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
               {customTitleLines ? (
@@ -85,8 +105,8 @@ export function HeroSection({ mysteryImage, ps5Slot }: { mysteryImage?: string; 
 
             <motion.p
               className="mt-4 text-[15px] font-medium leading-6 text-white sm:mt-5 sm:text-lg sm:leading-8"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ y: 18 }}
+              animate={{ y: 0 }}
               transition={{ duration: 0.6, delay: 0.08, ease: "easeOut" }}
             >
               {heroSubtitle || t.hero.subtitle}
@@ -95,8 +115,8 @@ export function HeroSection({ mysteryImage, ps5Slot }: { mysteryImage?: string; 
             {/* Glavni gumb samo od tableta naviše — na mobitelu se odmah lista do proizvoda. */}
             <motion.div
               className="mt-6 hidden sm:mt-8 sm:block"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ y: 18 }}
+              animate={{ y: 0 }}
               transition={{ duration: 0.6, delay: 0.16, ease: "easeOut" }}
             >
               <Link href="/dresovi" className="button-primary">
@@ -110,8 +130,8 @@ export function HeroSection({ mysteryImage, ps5Slot }: { mysteryImage?: string; 
             {/* Stats row — desktop only */}
             <motion.div
               className="mt-8 hidden flex-wrap gap-x-6 gap-y-3 md:flex"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ y: 18 }}
+              animate={{ y: 0 }}
               transition={{ duration: 0.6, delay: 0.24, ease: "easeOut" }}
             >
               {[
@@ -129,40 +149,45 @@ export function HeroSection({ mysteryImage, ps5Slot }: { mysteryImage?: string; 
           </div>
 
           {/* ── Right column — rotating kompleti promo ── */}
-          <motion.div
-            className="relative"
-            initial={{ opacity: 0, x: 28 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.12, ease: "easeOut" }}
-          >
+          {/* Bez ulazne animacije: poster je LCP slika i mora se iscrtati odmah,
+              na konačnom mjestu (inače kasniji video postane "veći" LCP). */}
+          <div className="relative">
             <HeroKompletiCarousel mysteryImage={mysteryImage} />
-          </motion.div>
+          </div>
         </div>
 
-        {/* ── Ticker strip ── */}
-        <motion.div
-          className="relative mt-10 hidden overflow-hidden border-t border-white/10 pt-6 sm:block"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-        >
+        {/* ── Ticker strip ── (bez opacity:0 na SSR-u; druga kopija je samo vizualna) */}
+        <div className="relative mt-10 hidden overflow-hidden border-t border-white/10 pt-6 sm:block">
           <div
             className="flex gap-0 whitespace-nowrap"
             style={{
               animation: "tickerScroll 28s linear infinite",
             }}
           >
-            {[...TICKER_ITEMS, ...TICKER_ITEMS].map((name, i) => (
-              <span
-                key={i}
-                className="inline-flex items-center gap-4 px-6 text-sm font-semibold uppercase tracking-[0.22em] text-white/25"
-              >
-                {name}
-                <span className="h-1 w-1 rounded-full bg-accent/40" />
-              </span>
-            ))}
+            {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => {
+              const dup = i >= TICKER_ITEMS.length;
+              const cls = "inline-flex items-center gap-4 px-6 text-sm font-semibold uppercase tracking-[0.22em] text-white/25";
+              const dot = <span aria-hidden className="h-1 w-1 rounded-full bg-accent/40" />;
+              return item.href ? (
+                <Link
+                  key={i}
+                  href={item.href}
+                  aria-hidden={dup || undefined}
+                  tabIndex={dup ? -1 : undefined}
+                  className={`${cls} transition-colors hover:text-white/70`}
+                >
+                  {item.name}
+                  {dot}
+                </Link>
+              ) : (
+                <span key={i} aria-hidden={dup || undefined} className={cls}>
+                  {item.name}
+                  {dot}
+                </span>
+              );
+            })}
           </div>
-        </motion.div>
+        </div>
 
       </div>
     </section>

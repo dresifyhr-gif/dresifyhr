@@ -6,9 +6,9 @@ import { getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
-  title: "Trenirke — dječje i klupske komplet trenirke | Dresify",
+  title: "Trenirke — dječje i klupske komplet trenirke",
   description:
-    "Dresify trenirke: kompletni set jakna + hlače u klupskim i reprezentativnim dizajnima (Brazil, Argentina, Barcelona, Portugal…). 35 €, dostava po cijeloj Hrvatskoj, plaćanje pouzećem.",
+    "Komplet trenirke jakna + hlače u klupskim i reprezentativnim dizajnima (Brazil, Argentina, Barcelona…). 35 €, dostava 2–5 dana po Hrvatskoj, plaćanje pouzećem.",
   path: "/trenirke",
   keywords: ["trenirke", "komplet trenirka", "dječja trenirka", "nogometna trenirka", "trenirka brazil", "trenirka messi", "trenirke hrvatska"]
 });

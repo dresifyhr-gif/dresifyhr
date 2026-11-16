@@ -5,7 +5,7 @@ import { getStreetwearProducts } from "@/lib/data/product-overrides";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
-  title: "Streetwear — tenisice, majice i hlačice | Dresify",
+  title: "Streetwear kompleti — majice i hlačice",
   description:
     "Dresify Streetwear: majice, hlačice i kompleti (Cotton Wreath, graffiti). Dostava po cijeloj Hrvatskoj, plaćanje pouzećem.",
   path: "/streetwear",

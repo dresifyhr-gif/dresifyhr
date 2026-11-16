@@ -253,3 +253,36 @@ export async function shareScoreCard(opts: ShareCardOptions): Promise<ShareResul
     return "failed";
   }
 }
+
+export type ShareLinkResult = "shared" | "whatsapp" | "cancelled" | "failed";
+
+/**
+ * Podijeli LINK na igru (tekst + URL s UTM oznakama). Odvojeno od shareFile namjerno:
+ * mnoge aplikacije odbace text/url kad je priložena datoteka, pa slika (za IG story)
+ * i link (WhatsApp/Viber/Messenger — primatelj ima što kliknuti) idu kao dvije akcije.
+ * Bez Web Share API-ja otvara WhatsApp s pripremljenom porukom.
+ * @param path npr. "/kviz/" (s kosom crtom na kraju — trailingSlash: true)
+ */
+export async function shareLink(text: string, path: string, title = "DRESIFY"): Promise<ShareLinkResult> {
+  const clean = path.startsWith("/") ? path : `/${path}`;
+  const url = `https://dresifyshop.com${clean}?utm_source=share&utm_medium=game`;
+  const nav = typeof navigator !== "undefined" ? navigator : null;
+  try {
+    if (nav?.share) {
+      await nav.share({ title, text, url });
+      return "shared";
+    }
+  } catch (err) {
+    const name = (err as { name?: string })?.name;
+    if (name === "AbortError") return "cancelled";
+    // Ostale greške (npr. NotAllowedError) → WhatsApp kao rezerva.
+  }
+  try {
+    const wa = `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`;
+    const win = window.open(wa, "_blank", "noopener,noreferrer");
+    if (!win) window.location.href = wa;
+    return "whatsapp";
+  } catch {
+    return "failed";
+  }
+}

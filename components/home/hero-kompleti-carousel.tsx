@@ -7,13 +7,35 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { useShopSettings } from "@/contexts/shop-settings-context";
 
-type Slide = { key: string; alt: string; src?: string; video?: string; poster?: string; href: string; cta: string };
+type Slide = { key: string; alt: string; src?: string; video?: string; videoMobile?: string; poster?: string; href: string; cta: string };
+
+// Video se ne učitava odmah: prvo se iscrta samo poster (LCP), a video src se
+// postavlja tek nakon window "load" + requestIdleCallback. Na mobitelu (<768px)
+// ide manja verzija (540px, bez zvuka); uz "štednju podataka" ili 2G/3G ostaje poster.
+type VideoMode = "pending" | "mobile" | "desktop" | "skip";
+
+function whenIdleAfterLoad(cb: () => void) {
+  let idleId: number | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const go = () => {
+    if ("requestIdleCallback" in window) idleId = window.requestIdleCallback(cb, { timeout: 2500 });
+    else timer = setTimeout(cb, 300);
+  };
+  if (document.readyState === "complete") go();
+  else window.addEventListener("load", go, { once: true });
+  return () => {
+    window.removeEventListener("load", go);
+    if (idleId !== undefined && "cancelIdleCallback" in window) window.cancelIdleCallback(idleId);
+    if (timer) clearTimeout(timer);
+  };
+}
 
 // Video promo — prvi slide u rotaciji.
 const VIDEO_SLIDE: Slide = {
   key: "video",
   alt: "Dresify — nogometni dresovi",
   video: "/hero/reklama-v4.mp4",
+  videoMobile: "/hero/reklama-v4-mobile.mp4",
   poster: "/hero/reklama-v4-poster.jpg",
   href: "/dresovi",
   cta: "Pogledaj dresove →"
@@ -35,7 +57,8 @@ const XMAS_VIDEO_SLIDE: Slide = {
   key: "video-bozic",
   alt: "Dresify — božićna reklama",
   video: "/hero/reklama-bozic-v2.mp4",
-  poster: "/hero/reklama-bozic-v2-poster.jpg",
+  videoMobile: "/hero/reklama-bozic-v2-mobile.mp4",
+  poster: "/hero/reklama-bozic-v2-poster.webp",
   href: "/slozi-mix",
   cta: "Složi svoj mix →"
 };
@@ -71,6 +94,19 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
   );
   const [index, setIndex] = useState(0);
   const pausedRef = useRef(false);
+  const [videoMode, setVideoMode] = useState<VideoMode>("pending");
+
+  useEffect(() => {
+    type Conn = { saveData?: boolean; effectiveType?: string };
+    const conn = (navigator as Navigator & { connection?: Conn }).connection;
+    if (conn?.saveData || ["slow-2g", "2g", "3g"].includes(conn?.effectiveType ?? "")) {
+      setVideoMode("skip");
+      return;
+    }
+    return whenIdleAfterLoad(() =>
+      setVideoMode(window.matchMedia("(max-width:767px)").matches ? "mobile" : "desktop")
+    );
+  }, []);
 
   const paginate = (dir: number) =>
     setIndex((current) => (current + dir + SLIDES.length) % SLIDES.length);
@@ -82,9 +118,14 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
       if (!pausedRef.current) {
         setIndex((current) => (current + 1) % SLIDES.length);
       }
-    }, active.video ? VIDEO_FALLBACK_MS : active.key === "bozic" ? 8000 : INTERVAL_MS);
+    }, active.video && videoMode !== "skip" ? VIDEO_FALLBACK_MS : active.key === "bozic" ? 8000 : INTERVAL_MS);
     return () => clearTimeout(timer);
-  }, [index, active.video, SLIDES.length]);
+  }, [index, active.video, SLIDES.length, videoMode]);
+
+  const videoSrc =
+    active.video && (videoMode === "mobile" || videoMode === "desktop")
+      ? videoMode === "mobile" ? active.videoMobile ?? active.video : active.video
+      : undefined;
 
   return (
     <div className="relative mx-auto max-w-[540px]">
@@ -98,7 +139,7 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
 
       <div className="relative overflow-hidden rounded-[14px] border border-white/10 bg-[#fbfbfb]">
         <div className="relative aspect-square">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={active.key}
               className="absolute inset-0 cursor-grab active:cursor-grabbing"
@@ -116,17 +157,34 @@ export function HeroKompletiCarousel({ mysteryImage }: { mysteryImage?: string }
               transition={{ duration: 0.35, ease: "easeInOut" }}
             >
               {active.video ? (
-                <video
-                  src={active.video}
-                  poster={active.poster}
-                  autoPlay
-                  muted
-                  playsInline
-                  preload="metadata"
-                  onEnded={() => { if (!pausedRef.current) paginate(1); }}
-                  draggable={false}
-                  className="pointer-events-none h-full w-full select-none object-cover"
-                />
+                <>
+                  {/* Prvi kadar: samo poster (jedina slika koja se preloada na naslovnici). */}
+                  <Image
+                    src={active.poster as string}
+                    alt={active.alt}
+                    fill
+                    priority
+                    sizes="(max-width: 767px) 100vw, 540px"
+                    draggable={false}
+                    className="pointer-events-none select-none object-cover"
+                  />
+                  {videoSrc ? (
+                    <video
+                      key={videoSrc}
+                      src={videoSrc}
+                      // poster i na videu: ako preglednik ne pusti autoplay (npr. iPhone u
+                      // štednji baterije), ostaje slika umjesto praznog okvira.
+                      poster={active.poster}
+                      autoPlay
+                      muted
+                      playsInline
+                      preload="metadata"
+                      onEnded={() => { if (!pausedRef.current) paginate(1); }}
+                      draggable={false}
+                      className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover"
+                    />
+                  ) : null}
+                </>
               ) : (
                 <Image
                   src={active.src as string}

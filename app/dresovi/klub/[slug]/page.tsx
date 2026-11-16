@@ -72,7 +72,7 @@ export default async function ClubPage({ params }: ClubPageProps) {
         },
         {
           title: "Povezani igrači",
-          description: "Usporedi modele po igračima koji najčešće privlače klik i pretragu.",
+          description: "Dresovi najpopularnijih igrača.",
           collections: await getFeaturedPlayerCollections(6)
         }
       ]}

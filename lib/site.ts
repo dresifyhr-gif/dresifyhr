@@ -5,14 +5,20 @@ export const SITE_DESCRIPTION =
 export const WHATSAPP_NUMBER = "385976047510";
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 export const INSTAGRAM_HANDLE = "@dresify.hr";
-export const INSTAGRAM_URL = "https://instagram.com/dresify.hr";
+// Kanonski oblik profila (www + kosa crta) — isti u linkovima i u schema.org sameAs.
+export const INSTAGRAM_URL = "https://www.instagram.com/dresify.hr/";
+export const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61574349353574";
 // Google recenzije (Business Profile) — kupci ostave ocjenu na Googleu.
 export const GOOGLE_REVIEW_URL = "https://g.page/r/CYyFuSQaXA_MEBM/review";
 export const CONTACT_PHONE_DISPLAY = "+385 97 604 7510";
 export const CONTACT_EMAIL = "dresify.hr@gmail.com";
 export const CURRENCY_LABEL = "20\u20ac";
 export const DELIVERY_LABEL = "Dostava 2-5 dana po HR";
-export const DEFAULT_OG_IMAGE = "/og-banner-v2.png"; // nova adresa = zaobilazi FB/CDN keš stare slike
+// JPEG 1200x630 (~160 KB) umjesto PNG-a od 750 KB — WhatsApp/FB pregledi se brže i
+// pouzdanije učitaju. Nova adresa ujedno zaobilazi FB/CDN keš stare slike.
+// Izvor: public/og-banner-v2.png (zadržan).
+export const DEFAULT_OG_IMAGE = "/og-banner.jpg";
+export const DEFAULT_OG_IMAGE_SIZE = { width: 1200, height: 630 } as const;
 export const JERSEY_PRICE_EUR = 20;
 
 // Zadane nabavne cijene (za profit/poravnanje) — mogu se prepisati u Postavkama.

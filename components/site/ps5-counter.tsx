@@ -5,13 +5,24 @@ import { useEffect, useRef, useState } from "react";
 // Premium animirani prsten pratitelja: broj broji 0 → current, luk se puni s glow-om,
 // svijetleća točka klizi po vrhu napretka, pulsirajući sjaj iza. Sve GPU-jeftino.
 export function Ps5Counter({ current, goal = 10000 }: { current: number; goal?: number }) {
-  const [value, setValue] = useState(0);
+  // SSR i prvi render prikazuju stvarni broj (ne 0) — inače HTML kaže "0 pratitelja"
+  // uz "fali još X", što se ne slaže (Google i pregledi linkova vide samo SSR).
+  const [value, setValue] = useState(current);
   const ref = useRef<HTMLDivElement>(null);
   const started = useRef(false);
 
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
+    setValue(current);
+    // Animacija 0 → current samo ako je brojač još ispod ekrana (korisnik ne vidi skok
+    // na 0) i ako korisnik nije isključio animacije.
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const rect = node.getBoundingClientRect();
+    const offscreen = rect.top >= window.innerHeight || rect.bottom <= 0;
+    if (reduce || !offscreen || started.current) return;
+    setValue(0);
+    let raf = 0;
     const io = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting && !started.current) {
@@ -22,15 +33,20 @@ export function Ps5Counter({ current, goal = 10000 }: { current: number; goal?: 
             if (!t0) t0 = ts;
             const p = Math.min((ts - t0) / dur, 1);
             setValue(Math.round(current * (1 - Math.pow(1 - p, 3))));
-            if (p < 1) requestAnimationFrame(step);
+            if (p < 1) raf = requestAnimationFrame(step);
           };
-          requestAnimationFrame(step);
+          raf = requestAnimationFrame(step);
         }
       },
       { threshold: 0.4 }
     );
     io.observe(node);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(raf);
+      // Prekinuta animacija (npr. promjena current) ne smije ostaviti broj na pola.
+      if (!started.current) setValue(current);
+    };
   }, [current]);
 
   const pct = Math.min(value / goal, 1);

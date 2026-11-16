@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { blogPosts, getBlogPostBySlug, getBlogReadingTime } from "@/lib/data/blog-posts";
 import { getJerseyBySlug } from "@/lib/data/jerseys";
 import { getProductBySlug } from "@/lib/data/product-overrides";
+import { getCollectionsForBlogPost } from "@/lib/data/seo-collections";
 import { buildArticleSchema, buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { formatCroatianDate, repairText } from "@/lib/utils";
 
@@ -57,6 +58,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     )
   ).filter((x): x is { slug: string; klub: string; igrac: string } => x !== null);
 
+  // Landinzi (klub / igrač / kategorija) koji ovaj članak navode u relatedPosts.
+  const landings = await getCollectionsForBlogPost(post.slug);
+
   const articleSchema = buildArticleSchema(post);
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Početna", path: "/" },
@@ -98,6 +102,23 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <p key={paragraph}>{repairText(paragraph)}</p>
             ))}
           </div>
+
+          {landings.length ? (
+            <div className="mt-10 border border-white/10 bg-[#0a0a0a] p-6">
+              <p className="text-xs uppercase tracking-[0.32em] text-white/45">Pogledaj dresove</p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                {landings.map((collection) => (
+                  <Link
+                    key={collection.path}
+                    href={`${collection.path}/`}
+                    className="border border-accent/60 bg-[#111111] px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition duration-200 ease-out hover:border-accent hover:text-accent"
+                  >
+                    {repairText(collection.heading)}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           <div className="mt-10 border border-white/10 bg-[#0a0a0a] p-6">
             <p className="text-xs uppercase tracking-[0.32em] text-white/45">Povezani proizvodi</p>
