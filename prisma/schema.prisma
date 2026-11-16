@@ -424,7 +424,7 @@ model MediaItem {
   kind          String // BRIEF | IDEA | DRAFT
   status        String    @default("NOVO") // NOVO | ZAKAZANO | OBJAVLJUJEM | OBJAVLJENO | ODBIJENO | VRACENO | NEUSPJELO
   series        String? // Na današnji dan | Pogodi igrača | Zaboravljeni talent | Rasprava | Dres priče | …
-  format        String? // FEED_IMAGE | CAROUSEL | REEL | STORY_MANUAL
+  format        String? // FEED_IMAGE | CAROUSEL | REEL | STORY_MANUAL | CHANNEL (kanal "Dresify Svlačionica", ručno)
   title         String
   summary       String?   @db.Text
   caption       String?   @db.Text

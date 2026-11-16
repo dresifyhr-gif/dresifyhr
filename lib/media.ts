@@ -20,7 +20,7 @@ export type MediaSlot = (typeof MEDIA_SLOTS)[number];
 export const MEDIA_TZ = "Europe/Zagreb";
 
 export const MEDIA_KINDS = ["BRIEF", "IDEA", "DRAFT"] as const;
-export const MEDIA_FORMATS = ["FEED_IMAGE", "CAROUSEL", "REEL", "STORY_MANUAL"] as const;
+export const MEDIA_FORMATS = ["FEED_IMAGE", "CAROUSEL", "REEL", "STORY_MANUAL", "CHANNEL"] as const;
 export const VIDEO_PLATFORMS = ["INSTAGRAM", "TIKTOK"] as const;
 export const VIDEO_VARIANTS = ["KRATKA", "DUGA"] as const;
 export const MEDIA_STATUSES = ["NOVO", "ZAKAZANO", "OBJAVLJUJEM", "OBJAVLJENO", "ODBIJENO", "VRACENO", "NEUSPJELO"] as const;
@@ -236,7 +236,7 @@ export function cleanIngestItem(raw: unknown): { ok: true; item: CleanIngestItem
   if (!kind) return { ok: false, error: `${extKey}: kind mora biti BRIEF, IDEA ili DRAFT` };
   if (!title) return { ok: false, error: `${extKey}: nedostaje title` };
   const format = oneOf(r.format, MEDIA_FORMATS);
-  if (kind === "DRAFT" && !format) return { ok: false, error: `${extKey}: nacrt treba format (FEED_IMAGE, CAROUSEL, REEL ili STORY_MANUAL)` };
+  if (kind === "DRAFT" && !format) return { ok: false, error: `${extKey}: nacrt treba format (FEED_IMAGE, CAROUSEL, REEL, STORY_MANUAL ili CHANNEL)` };
   const slot = oneOf(r.suggestedSlot, MEDIA_SLOTS);
   const dataJson = r.data && typeof r.data === "object" ? JSON.stringify(r.data) : null;
   if (dataJson && dataJson.length > 20000) return { ok: false, error: `${extKey}: data je prevelik (najviše 20000 znakova)` };
@@ -276,6 +276,7 @@ export function itemImages(item: Pick<MediaItem, "images">): MediaImage[] {
 export function publishProblem(item: MediaItem): string | null {
   if (item.kind !== "DRAFT") return "Objaviti se može samo nacrt.";
   if (item.format === "STORY_MANUAL") return "Story s anketom/kvizom objavljuješ ručno u Instagramu.";
+  if (item.format === "CHANNEL") return "Poruke za kanal Dresify Svlačionica objavljuješ ručno (API ne podržava kanale).";
   if (!(item.caption || "").trim()) return "Nacrt nema opis (caption).";
   if (item.format === "REEL") {
     const v = itemVideos(item).find((x) => x.platform === "INSTAGRAM");

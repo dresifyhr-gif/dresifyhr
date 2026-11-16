@@ -8,7 +8,7 @@ import { isAdmin } from "@/lib/admin-auth";
 export const metadata: Metadata = { title: "Media — Dresify Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
-const TABS = ["danas", "nacrti", "kalendar", "arhiva", "reklame"] as const;
+const TABS = ["danas", "nacrti", "kanal", "kalendar", "arhiva", "reklame"] as const;
 type Tab = (typeof TABS)[number];
 
 export default async function MediaPage({ searchParams }: { searchParams?: { tab?: string } }) {

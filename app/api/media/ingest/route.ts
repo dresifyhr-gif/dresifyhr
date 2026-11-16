@@ -60,12 +60,13 @@ export async function POST(request: Request) {
 
   // Jedan push po jutru (agent šalje notify:true samo u zadnjem pozivu).
   if (body.notify === true) {
-    const drafts = await prisma.mediaItem.count({ where: { runDate, kind: "DRAFT", status: "NOVO" } });
+    const drafts = await prisma.mediaItem.count({ where: { runDate, kind: "DRAFT", status: "NOVO", NOT: { format: "CHANNEL" } } });
+    const channel = await prisma.mediaItem.count({ where: { runDate, format: "CHANNEL" } });
     const ideas = await prisma.mediaItem.count({ where: { runDate, kind: "IDEA" } });
     const top = await prisma.mediaItem.findFirst({ where: { runDate, kind: "IDEA" }, orderBy: { createdAt: "asc" }, select: { title: true } });
     await sendPushToOwners({
       title: "☀️ Jutarnji pregled",
-      body: `${ideas} ${ideas === 1 ? "tema" : "teme"}, ${drafts} ${drafts === 1 ? "nacrt čeka" : "nacrta čekaju"} ocjenu${top ? `. Top: ${top.title.slice(0, 70)}` : ""}`,
+      body: `${ideas} ${ideas === 1 ? "tema" : "teme"}, ${drafts} ${drafts === 1 ? "nacrt čeka" : "nacrta čekaju"} ocjenu${channel ? `, ${channel} za kanal` : ""}${top ? `. Top: ${top.title.slice(0, 60)}` : ""}`,
       url: "/admin/media/",
       tag: `media-${runDate}`,
       kind: "media"

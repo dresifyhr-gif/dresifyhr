@@ -19,7 +19,7 @@ type Item = {
   kind: "BRIEF" | "IDEA" | "DRAFT";
   status: string;
   series: string | null;
-  format: "FEED_IMAGE" | "CAROUSEL" | "REEL" | "STORY_MANUAL" | null;
+  format: "FEED_IMAGE" | "CAROUSEL" | "REEL" | "STORY_MANUAL" | "CHANNEL" | null;
   title: string;
   summary: string | null;
   caption: string | null;
@@ -30,7 +30,7 @@ type Item = {
   videos: Vid[] | null;
   notes: string | null;
   manualSteps: string | null;
-  data: { kpi?: Record<string, number>; learned?: string[] } | null;
+  data: { kpi?: Record<string, number>; learned?: string[]; vrijeme?: string } | null;
   ideaKey: string | null;
   suggestedSlot: string | null;
   rating: number | null;
@@ -44,7 +44,7 @@ type Item = {
 };
 type Payload = { ok: boolean; today: string; slots: string[]; bestSlot: string | null; canDecide: boolean; tiktokHandle: string | null; items: Item[] };
 
-type TabId = "danas" | "nacrti" | "kalendar" | "arhiva" | "reklame";
+type TabId = "danas" | "nacrti" | "kanal" | "kalendar" | "arhiva" | "reklame";
 
 const RATINGS = [
   { v: 4, label: "Odlično", cls: "a-btn-ok" },
@@ -63,7 +63,8 @@ const STATUS_LABEL: Record<string, string> = {
   VRACENO: "vraćeno agentu",
   NEUSPJELO: "nije uspjelo"
 };
-const FORMAT_LABEL: Record<string, string> = { FEED_IMAGE: "Objava · 1 slika", CAROUSEL: "Carousel", REEL: "Reel + TikTok", STORY_MANUAL: "Story · objavi ručno" };
+const FORMAT_LABEL: Record<string, string> = {
+  CHANNEL: "Kanal · objavi ručno", FEED_IMAGE: "Objava · 1 slika", CAROUSEL: "Carousel", REEL: "Reel + TikTok", STORY_MANUAL: "Story · objavi ručno" };
 const SOURCE_LABEL: Record<string, string> = {
   COMMONS: "Wikimedia Commons",
   AI: "AI ilustracija (ChatGPT)",
@@ -126,12 +127,15 @@ export function MediaDesk({ initialTab = "danas" }: { initialTab?: TabId }) {
 
   const items = data?.items || [];
   const latestRun = useMemo(() => items.map((i) => i.runDate).sort().at(-1) || null, [items]);
-  const waiting = items.filter((i) => i.kind === "DRAFT" && ["NOVO", "VRACENO", "NEUSPJELO"].includes(i.status));
+  const isChannel = (i: Item) => i.format === "CHANNEL";
+  const waiting = items.filter((i) => i.kind === "DRAFT" && !isChannel(i) && ["NOVO", "VRACENO", "NEUSPJELO"].includes(i.status));
+  const channelNew = latestRun ? items.filter((i) => isChannel(i) && i.runDate === latestRun && i.status === "NOVO").length : 0;
   const todayCount = latestRun ? items.filter((i) => i.runDate === latestRun && i.kind === "IDEA").length : 0;
 
   const TABS: { id: TabId; label: string; n?: number }[] = [
     { id: "danas", label: "Danas", n: todayCount || undefined },
     { id: "nacrti", label: "Nacrti", n: waiting.length || undefined },
+    { id: "kanal", label: "Kanal", n: channelNew || undefined },
     { id: "kalendar", label: "Kalendar" },
     { id: "arhiva", label: "Arhiva" },
     { id: "reklame", label: "Reklame" }
@@ -178,6 +182,8 @@ export function MediaDesk({ initialTab = "danas" }: { initialTab?: TabId }) {
         <TodayView data={data} runDate={latestRun} onChange={replace} onReload={load} />
       ) : tab === "nacrti" ? (
         <DraftList data={data} items={waiting} onChange={replace} onReload={load} empty="Nema nacrta koji čekaju. Novi stižu svako jutro oko 6 h." />
+      ) : tab === "kanal" ? (
+        <ChannelView data={data} onChange={replace} />
       ) : tab === "kalendar" ? (
         <CalendarView data={data} />
       ) : (
@@ -200,7 +206,7 @@ function TodayView({ data, runDate, onChange, onReload }: { data: Payload; runDa
   const day = data.items.filter((i) => i.runDate === runDate);
   const brief = day.find((i) => i.kind === "BRIEF");
   const ideas = day.filter((i) => i.kind === "IDEA").sort((a, b) => (b.scores?.ukupno ?? 0) - (a.scores?.ukupno ?? 0));
-  const drafts = day.filter((i) => i.kind === "DRAFT");
+  const drafts = day.filter((i) => i.kind === "DRAFT" && i.format !== "CHANNEL");
   const kpi = brief?.data?.kpi || {};
   const kpiRows: [string, number | undefined][] = [
     ["vijesti pregledano", kpi.pregledano],
@@ -802,7 +808,7 @@ function DraftCard({
 // ————————————————————————————————————————————————————————————————
 function CalendarView({ data }: { data: Payload }) {
   const days = Array.from({ length: 14 }, (_, i) => addDays(data.today, i));
-  const planned = data.items.filter((i) => i.kind === "DRAFT" && (i.status === "ZAKAZANO" || i.status === "OBJAVLJENO") && (i.scheduledAt || i.publishedAt));
+  const planned = data.items.filter((i) => i.kind === "DRAFT" && i.format !== "CHANNEL" && (i.status === "ZAKAZANO" || i.status === "OBJAVLJENO") && (i.scheduledAt || i.publishedAt));
   const byDay = new Map<string, Item[]>();
   for (const it of planned) {
     const d = zagrebDateOf((it.status === "ZAKAZANO" ? it.scheduledAt : it.publishedAt) || it.createdAt);
@@ -877,5 +883,89 @@ function ArchiveView({ data, onChange, onReload }: { data: Payload; onChange: (i
         </div>
       ))}
     </div>
+  );
+}
+
+// ————————————————————————————————————————————————————————————————
+// Kanal "Dresify Svlačionica": 2-3 kratke poruke dnevno (anketa, kviz, pogodi
+// igrača, prognoza/reakcija na dan utakmice). Instagram API ne podržava kanale,
+// pa Igor kopira tekst i objavljuje ručno.
+// ————————————————————————————————————————————————————————————————
+function ChannelView({ data, onChange }: { data: Payload; onChange: (i: Item) => void }) {
+  const list = data.items.filter((i) => i.format === "CHANNEL");
+  const days = Array.from(new Set(list.map((i) => i.runDate))).sort().reverse().slice(0, 7);
+  if (list.length === 0)
+    return (
+      <div className="a-card p-6 text-sm text-[var(--a-text-2)]">
+        Još nema poruka za kanal. Jutarnja rutina svaki dan priprema 2-3 kratke poruke za Dresify Svlačionicu.
+      </div>
+    );
+  return (
+    <div className="space-y-5">
+      <div className="a-card p-4 text-[13px] text-[var(--a-text-2)]">
+        <b className="text-[var(--a-text)]">Dresify Svlačionica</b> · Instagram ne dopušta objavu u kanal preko API-ja. Klikni „Kopiraj“, zalijepi u kanal i označi „Objavio sam“.
+      </div>
+      {days.map((d) => (
+        <div key={d} className="space-y-3">
+          <div className="a-label">{fmtDay(d)}</div>
+          <div className="grid gap-3 lg:grid-cols-3">
+            {list
+              .filter((i) => i.runDate === d)
+              .map((it) => (
+                <ChannelCard key={it.id} item={it} canDecide={data.canDecide} onChange={onChange} />
+              ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ChannelCard({ item, canDecide, onChange }: { item: Item; canDecide: boolean; onChange: (i: Item) => void }) {
+  const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+  const text = item.caption || "";
+  const full = item.manualSteps ? `${text}\n\n${item.manualSteps}` : text;
+  const done = item.status === "OBJAVLJENO";
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(full);
+      setMsg("Kopirano.");
+    } catch {
+      setMsg("Kopiranje nije uspjelo, označi tekst ručno.");
+    }
+  }
+  async function markDone() {
+    setBusy(true);
+    const r = await patch(item.id, { action: "markPublished", updatedAt: item.updatedAt });
+    setBusy(false);
+    if (r.item) onChange(r.item);
+    setMsg(r.ok ? "Označeno kao objavljeno." : r.message || "Nije uspjelo.");
+  }
+  return (
+    <article className={`a-card flex flex-col gap-2.5 p-4 ${done ? "opacity-70" : ""}`}>
+      <div className="flex flex-wrap items-center gap-2">
+        {item.series && <Pill>{item.series}</Pill>}
+        {item.data?.vrijeme && <Pill tone="info">{item.data.vrijeme}</Pill>}
+        {done && <Pill tone="good">objavljeno</Pill>}
+        {item.verification && item.verification !== "MIŠLJENJE" && <VerificationPill v={item.verification} />}
+      </div>
+      <div className="whitespace-pre-line text-[14.5px] leading-relaxed text-[var(--a-text)]">{text}</div>
+      {item.manualSteps && (
+        <div className="whitespace-pre-line rounded-[10px] bg-[var(--a-surface-2)] p-2.5 text-[13px] text-[var(--a-text-2)]">{item.manualSteps}</div>
+      )}
+      <Sources list={item.sources} />
+      <div className="mt-auto flex flex-wrap gap-2 pt-1">
+        <button type="button" className="a-btn a-btn-primary px-3.5 py-1.5 text-[13px]" onClick={copy}>
+          Kopiraj
+        </button>
+        {canDecide && !done && (
+          <button type="button" className="a-btn-sm px-3 py-1.5 text-[13px]" disabled={busy} onClick={markDone}>
+            Objavio sam
+          </button>
+        )}
+      </div>
+      {msg && <div className="text-[12.5px] font-semibold text-[var(--a-good)]">{msg}</div>}
+    </article>
   );
 }

@@ -86,7 +86,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       break;
     }
     case "schedule": {
-      if (item.kind !== "DRAFT" || item.format === "STORY_MANUAL")
+      if (item.kind !== "DRAFT" || item.format === "STORY_MANUAL" || item.format === "CHANNEL")
         return NextResponse.json({ ok: false, message: "Zakazati se može samo nacrt za feed (story objavljuješ ručno)." }, { status: 400 });
       if (LOCKED.includes(item.status)) return NextResponse.json({ ok: false, message: "Već je objavljeno." }, { status: 409 });
       const slot = String(body.slot || "");
