@@ -4,6 +4,7 @@ import { GamesCta } from "@/components/home/games-cta";
 import { HeroSection } from "@/components/home/hero-section";
 import { GiftsByBudget } from "@/components/bozic/gifts-by-budget";
 import { HomeCatalogTabs } from "@/components/home/home-catalog-tabs";
+import { HomeSeoText } from "@/components/home/home-seo-text";
 import { InstagramSection } from "@/components/home/instagram-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Ps5HomeBanner } from "@/components/home/ps5-home-banner";
@@ -107,6 +108,7 @@ export default async function HomePage() {
       {show("instagram") && <InstagramSection />}
       {show("faq") && <FaqSection />}
       {show("newsletter") && <NewsletterSection />}
+      <HomeSeoText />
     </>
   );
 }

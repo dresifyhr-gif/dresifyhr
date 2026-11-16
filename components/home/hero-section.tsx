@@ -92,8 +92,9 @@ export function HeroSection({ mysteryImage, ps5Slot }: { mysteryImage?: string; 
               {heroSubtitle || t.hero.subtitle}
             </motion.p>
 
+            {/* Glavni gumb samo od tableta naviše — na mobitelu se odmah lista do proizvoda. */}
             <motion.div
-              className="mt-6 sm:mt-8"
+              className="mt-6 hidden sm:mt-8 sm:block"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.16, ease: "easeOut" }}
@@ -140,7 +141,7 @@ export function HeroSection({ mysteryImage, ps5Slot }: { mysteryImage?: string; 
 
         {/* ── Ticker strip ── */}
         <motion.div
-          className="relative mt-10 overflow-hidden border-t border-white/10 pt-6"
+          className="relative mt-10 hidden overflow-hidden border-t border-white/10 pt-6 sm:block"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
@@ -163,11 +164,6 @@ export function HeroSection({ mysteryImage, ps5Slot }: { mysteryImage?: string; 
           </div>
         </motion.div>
 
-        {/* SEO tekst — čist H2 + opis s ključnim pojmovima (Google long-tail). */}
-        <div className="mt-8 max-w-3xl border-t border-white/10 pt-6">
-          <h2 className="font-heading text-lg uppercase tracking-wide text-white/80 sm:text-xl">{t.hero.seoTitle}</h2>
-          <p className="mt-2 text-sm leading-6 text-white/45">{t.hero.seoText}</p>
-        </div>
       </div>
     </section>
   );
