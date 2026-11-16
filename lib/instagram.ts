@@ -282,7 +282,7 @@ export async function createReelContainer(input: { videoUrl: string; caption: st
 
 export async function finishReel(
   containerId: string
-): Promise<{ ok: boolean; status?: "processing" | "published"; permalink?: string; error?: string }> {
+): Promise<{ ok: boolean; status?: "processing" | "published"; id?: string; permalink?: string; error?: string }> {
   const conn = await ensureFreshIgToken();
   if (!conn || !conn.igBusinessId) return { ok: false, error: "Instagram nije spojen." };
   const { token, igBusinessId: ig } = conn;
@@ -310,7 +310,7 @@ export async function finishReel(
     } catch {
       /* bonus */
     }
-    return { ok: true, status: "published", permalink };
+    return { ok: true, status: "published", id: mediaId || undefined, permalink };
   } catch (e) {
     return { ok: false, error: metaError(e) };
   }
@@ -435,5 +435,32 @@ export async function getBestSlotFromInstagram(slots: readonly string[]): Promis
     return await cachedOnline(slots.join(","));
   } catch {
     return null;
+  }
+}
+
+// ————————————————————————————————————————————————————————————————
+// Brisanje objave s Instagrama (DELETE /{ig-media-id}). Meta to dopušta samo uz
+// Facebook Login token s dozvolom instagram_manage_contents; bez nje vrati jasnu poruku.
+// ————————————————————————————————————————————————————————————————
+export async function deleteIgMedia(mediaId: string): Promise<{ ok: boolean; error?: string; needsPermission?: boolean }> {
+  const conn = await ensureFreshIgToken();
+  if (!conn) return { ok: false, error: "Instagram nije spojen." };
+  try {
+    const res = await fetch(`${GRAPH}/${encodeURIComponent(mediaId)}?access_token=${encodeURIComponent(conn.token)}`, {
+      method: "DELETE",
+      signal: AbortSignal.timeout(20_000)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return { ok: true };
+  } catch (e) {
+    const msg = metaError(e);
+    const perm = /permission|manage_contents|\(#10\)|\(#200\)|not authorized/i.test(msg);
+    return {
+      ok: false,
+      needsPermission: perm,
+      error: perm
+        ? "Instagram veza nema dozvolu za brisanje (instagram_manage_contents). Obriši ručno u Instagramu ili ponovno spoji Instagram s tom dozvolom."
+        : msg
+    };
   }
 }

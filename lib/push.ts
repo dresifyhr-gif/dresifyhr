@@ -32,6 +32,7 @@ export type PushMessage = {
   url?: string; // odredište na klik (default /admin/)
   tag?: string; // grupiranje / zamjena iste obavijesti
   kind?: string; // "order" | "daily" | "test"
+  itemId?: string; // Media autopilot: za gumb "Zaustavi" u samoj obavijesti
 };
 
 type SubRow = { id: string; endpoint: string; p256dh: string; auth: string };
@@ -46,7 +47,8 @@ async function sendToSubs(subs: SubRow[], msg: PushMessage) {
     body: msg.body,
     url: msg.url || "/admin/",
     tag: msg.tag,
-    kind: msg.kind || "info"
+    kind: msg.kind || "info",
+    itemId: msg.itemId
   });
   const stale: string[] = [];
   let sent = 0;

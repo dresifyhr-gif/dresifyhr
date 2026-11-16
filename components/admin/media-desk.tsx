@@ -39,10 +39,22 @@ type Item = {
   publishedAt: string | null;
   permalink: string | null;
   error: string | null;
+  autopilot: boolean;
+  igMediaId: string | null;
   createdAt: string;
   updatedAt: string;
 };
-type Payload = { ok: boolean; today: string; slots: string[]; bestSlot: string | null; canDecide: boolean; tiktokHandle: string | null; items: Item[] };
+type Settings = { autopilot: boolean; maxPerDay: number; autoSlots: string[] };
+type Payload = {
+  ok: boolean;
+  today: string;
+  slots: string[];
+  bestSlot: string | null;
+  canDecide: boolean;
+  tiktokHandle: string | null;
+  settings: Settings;
+  items: Item[];
+};
 
 type TabId = "danas" | "nacrti" | "kanal" | "kalendar" | "arhiva" | "reklame";
 
@@ -59,6 +71,7 @@ const STATUS_LABEL: Record<string, string> = {
   ZAKAZANO: "zakazano",
   OBJAVLJUJEM: "objavljujem…",
   OBJAVLJENO: "objavljeno",
+  OBRISANO: "obrisano s Instagrama",
   ODBIJENO: "odbijeno",
   VRACENO: "vraćeno agentu",
   NEUSPJELO: "nije uspjelo"
@@ -99,7 +112,7 @@ const EMOJI_RE = new RegExp("\\p{Extended_Pictographic}", "gu");
 const emojiCount = (s: string) => (s.match(EMOJI_RE) || []).length;
 
 // ————————————————————————————————————————————————————————————————
-export function MediaDesk({ initialTab = "danas" }: { initialTab?: TabId }) {
+export function MediaDesk({ initialTab = "danas", focusId }: { initialTab?: TabId; focusId?: string }) {
   const [tab, setTab] = useState<TabId>(initialTab);
   const [data, setData] = useState<Payload | null>(null);
   const [error, setError] = useState("");
@@ -174,6 +187,8 @@ export function MediaDesk({ initialTab = "danas" }: { initialTab?: TabId }) {
         </div>
       )}
 
+      {data && tab !== "reklame" && <AutopilotCard data={data} onSaved={load} />}
+
       {tab === "reklame" ? (
         <ReklameManager />
       ) : !data ? (
@@ -185,7 +200,7 @@ export function MediaDesk({ initialTab = "danas" }: { initialTab?: TabId }) {
       ) : tab === "kanal" ? (
         <ChannelView data={data} onChange={replace} />
       ) : tab === "kalendar" ? (
-        <CalendarView data={data} />
+        <CalendarView data={data} onChange={replace} focusId={focusId} />
       ) : (
         <ArchiveView data={data} onChange={replace} onReload={load} />
       )}
@@ -382,7 +397,7 @@ function DraftCard({
   const [comment, setComment] = useState(item.ratingComment || "");
   const [busy, setBusy] = useState("");
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const [panel, setPanel] = useState<"" | "schedule" | "publish" | "return">("");
+  const [panel, setPanel] = useState<"" | "schedule" | "publish" | "return" | "delete">("");
   const [date, setDate] = useState(data.today);
   const [slot, setSlot] = useState(item.suggestedSlot || data.bestSlot || "19:30");
   const [showNotes, setShowNotes] = useState(false);
@@ -391,7 +406,7 @@ function DraftCard({
     setCaption(item.caption || "");
   }, [item.caption]);
 
-  const locked = item.status === "OBJAVLJENO" || item.status === "OBJAVLJUJEM";
+  const locked = item.status === "OBJAVLJENO" || item.status === "OBJAVLJUJEM" || item.status === "OBRISANO";
   const vids = item.videos || [];
   const igVideo = vids.find((v) => v.platform === "INSTAGRAM" && v.variant === "KRATKA") || vids.find((v) => v.platform === "INSTAGRAM");
   const tiktok = vids.filter((v) => v.platform === "TIKTOK");
@@ -423,7 +438,9 @@ function DraftCard({
         return: "Vraćeno agentu. Nova verzija stiže sutra ujutro.",
         reject: "Odbijeno.",
         restore: "Vraćeno u nacrte.",
-        images: "Slike spremljene."
+        images: "Slike spremljene.",
+        stop: "Zaustavljeno. Nacrt čeka tvoju odluku.",
+        deleteIg: "Obrisano s Instagrama."
       }[a] || "Spremljeno."
     );
   }
@@ -684,8 +701,13 @@ function DraftCard({
                       Odobri i objavi sada
                     </button>
                     {item.status === "ZAKAZANO" ? (
-                      <button type="button" className="a-btn-sm px-3.5 py-2 text-[13px]" disabled={Boolean(busy)} onClick={() => act("unschedule")}>
-                        Makni zakazivanje
+                      <button
+                        type="button"
+                        className={`a-btn-sm px-3.5 py-2 text-[13px] ${item.autopilot ? "a-btn-danger" : ""}`}
+                        disabled={Boolean(busy)}
+                        onClick={() => act(item.autopilot ? "stop" : "unschedule")}
+                      >
+                        {item.autopilot ? "Zaustavi autopilot objavu" : "Makni zakazivanje"}
                       </button>
                     ) : (
                       <button
@@ -717,6 +739,11 @@ function DraftCard({
                 {(item.status === "ODBIJENO" || item.status === "NEUSPJELO") && (
                   <button type="button" className="a-btn-sm px-3.5 py-2 text-[13px]" disabled={Boolean(busy)} onClick={() => act("restore")}>
                     Vrati u nacrte
+                  </button>
+                )}
+                {item.status === "OBJAVLJENO" && item.igMediaId && (
+                  <button type="button" className="a-btn-sm a-btn-danger px-3.5 py-2 text-[13px]" disabled={Boolean(busy)} onClick={() => setPanel(panel === "delete" ? "" : "delete")}>
+                    Obriši s Instagrama
                   </button>
                 )}
                 {item.permalink && (
@@ -780,6 +807,18 @@ function DraftCard({
                 </div>
               )}
 
+              {panel === "delete" && (
+                <div className="flex flex-wrap items-center gap-2 rounded-[12px] bg-[var(--a-bad-bg)] p-3 text-[13px] text-[var(--a-text)]">
+                  <span>Obrisati ovu objavu s @dresify.hr? Lajkovi i komentari nestaju zauvijek, ovo se ne može vratiti.</span>
+                  <button type="button" className="a-btn a-btn-danger px-3 py-1.5" disabled={Boolean(busy)} onClick={() => act("deleteIg", {}, "deleteIg")}>
+                    {busy === "deleteIg" ? "Brišem…" : "Da, obriši"}
+                  </button>
+                  <button type="button" className="a-btn-sm px-3 py-1.5" onClick={() => setPanel("")}>
+                    Odustani
+                  </button>
+                </div>
+              )}
+
               {panel === "return" && (
                 <div className="space-y-2 rounded-[12px] bg-[var(--a-surface-2)] p-3 text-[13px]">
                   <div>Napiši agentu što da promijeni. Novu verziju šalje sutra ujutro.</div>
@@ -806,7 +845,13 @@ function DraftCard({
 // ————————————————————————————————————————————————————————————————
 // Kalendar: idućih 14 dana, 1 feed objava dnevno (cilj 7 tjedno)
 // ————————————————————————————————————————————————————————————————
-function CalendarView({ data }: { data: Payload }) {
+function CalendarView({ data, onChange, focusId }: { data: Payload; onChange: (i: Item) => void; focusId?: string }) {
+  const [msg, setMsg] = useState("");
+  async function stop(it: Item) {
+    const r = await patch(it.id, { action: "stop" });
+    if (r.item) onChange(r.item);
+    setMsg(r.ok ? `Zaustavljeno: ${it.title}. Nacrt čeka tebe u Nacrtima.` : r.message || "Nije uspjelo.");
+  }
   const days = Array.from({ length: 14 }, (_, i) => addDays(data.today, i));
   const planned = data.items.filter((i) => i.kind === "DRAFT" && i.format !== "CHANNEL" && (i.status === "ZAKAZANO" || i.status === "OBJAVLJENO") && (i.scheduledAt || i.publishedAt));
   const byDay = new Map<string, Item[]>();
@@ -814,6 +859,7 @@ function CalendarView({ data }: { data: Payload }) {
     const d = zagrebDateOf((it.status === "ZAKAZANO" ? it.scheduledAt : it.publishedAt) || it.createdAt);
     byDay.set(d, [...(byDay.get(d) || []), it]);
   }
+  void msg;
   const weekCount = days.slice(0, 7).filter((d) => (byDay.get(d) || []).some((x) => x.format !== "STORY_MANUAL")).length;
 
   return (
@@ -824,6 +870,7 @@ function CalendarView({ data }: { data: Payload }) {
         </div>
         <div className="text-[12px] text-[var(--a-text-3)]">Cilj: 1 objava dnevno + storyji · termini 12:00 · 18:00 · 19:30 · 21:00</div>
       </div>
+      {msg && <div className="a-card p-3 text-[13px] font-semibold text-[var(--a-good)]">{msg}</div>}
       <div className="a-card divide-y divide-[var(--a-line)]">
         {days.map((d) => {
           const list = (byDay.get(d) || []).sort((a, b) => String(a.scheduledAt || a.publishedAt).localeCompare(String(b.scheduledAt || b.publishedAt)));
@@ -836,12 +883,21 @@ function CalendarView({ data }: { data: Payload }) {
               </div>
               <div className="min-w-0 space-y-1">
                 {list.map((it) => (
-                  <div key={it.id} className="flex flex-wrap items-center gap-2">
+                  <div
+                    key={it.id}
+                    className={`flex flex-wrap items-center gap-2 ${focusId === it.id ? "rounded-[10px] bg-[var(--a-warn-bg)] p-2" : ""}`}
+                  >
                     <span className="tabular-nums text-[var(--a-text-2)]">{fmtWhen((it.scheduledAt || it.publishedAt)!).split(" ").at(-1)}</span>
                     <span className="truncate text-[var(--a-text)]">
                       <b>{it.series || "Objava"}</b> · {it.title}
                     </span>
                     <Pill tone={it.status === "OBJAVLJENO" ? "good" : "info"}>{STATUS_LABEL[it.status]}</Pill>
+                    {it.autopilot && <Pill tone="warn">autopilot</Pill>}
+                    {data.canDecide && it.status === "ZAKAZANO" && (
+                      <button type="button" className="a-btn-sm a-btn-danger px-2.5 py-1 text-[12px]" onClick={() => stop(it)}>
+                        Zaustavi
+                      </button>
+                    )}
                   </div>
                 ))}
                 {!hasFeed && <Pill tone="warn">Nema zakazane objave</Pill>}
@@ -967,5 +1023,80 @@ function ChannelCard({ item, canDecide, onChange }: { item: Item; canDecide: boo
       </div>
       {msg && <div className="text-[12.5px] font-semibold text-[var(--a-good)]">{msg}</div>}
     </article>
+  );
+}
+
+// ————————————————————————————————————————————————————————————————
+// Glavni prekidač Autopilot (zadano ISKLJUČEN).
+// ————————————————————————————————————————————————————————————————
+function AutopilotCard({ data, onSaved }: { data: Payload; onSaved: () => void }) {
+  const st = data.settings;
+  const [busy, setBusy] = useState(false);
+  const [confirm, setConfirm] = useState(false);
+  const [msg, setMsg] = useState("");
+  async function save(body: Record<string, unknown>) {
+    setBusy(true);
+    setMsg("");
+    const r = await fetch("/api/admin/media/settings/", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      .then((x) => x.json())
+      .catch(() => null);
+    setBusy(false);
+    setConfirm(false);
+    if (!r?.ok) return setMsg(r?.message || "Nije uspjelo.");
+    if (body.autopilot === true) setMsg(`Autopilot uključen. Zakazano odmah: ${r.result?.scheduled?.length ?? 0}, čeka tebe: ${r.result?.held?.length ?? 0}.`);
+    else if (body.autopilot === false) setMsg(`Autopilot isključen.${r.released ? ` Vraćeno u nacrte: ${r.released}.` : ""}`);
+    else setMsg("Spremljeno.");
+    onSaved();
+  }
+  return (
+    <div className="a-card flex flex-wrap items-center justify-between gap-3 p-4">
+      <div className="min-w-0 max-w-2xl">
+        <div className="flex items-center gap-2">
+          <span className="text-[14.5px] font-semibold text-[var(--a-text)]">Autopilot</span>
+          <Pill tone={st.autopilot ? "good" : "neutral"}>{st.autopilot ? "UKLJUČEN" : "ISKLJUČEN"}</Pill>
+        </div>
+        <div className="mt-1 text-[12.5px] text-[var(--a-text-2)]">
+          Sam objavljuje do {st.maxPerDay} {st.maxPerDay === 1 ? "objavu" : "objave"} dnevno ({st.autoSlots.join(", ")}), samo Na današnji dan, Zaboravljeni talent, Pogodi igrača, kvizove,
+          rasprave i POTVRĐENE vijesti, nakon druge provjere strogog urednika. Glasine nikad. Ujutro push s gumbom Zaustavi. Reels, story, TikTok i kanal ostaju ručni.
+        </div>
+        {msg && <div className="mt-1 text-[12.5px] font-semibold text-[var(--a-good)]">{msg}</div>}
+      </div>
+      {data.canDecide && (
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex gap-1">
+            {[1, 2].map((n) => (
+              <button
+                key={n}
+                type="button"
+                disabled={busy}
+                onClick={() => save({ maxPerDay: n })}
+                className={`rounded-[8px] px-2.5 py-1 text-[12.5px] font-semibold ${st.maxPerDay === n ? "bg-[var(--a-text)] text-[var(--a-card)]" : "bg-[var(--a-surface-2)] text-[var(--a-text)]"}`}
+              >
+                {n}/dan
+              </button>
+            ))}
+          </div>
+          {st.autopilot ? (
+            <button type="button" className="a-btn a-btn-danger rounded-[10px] px-3.5 py-2 text-[13px]" disabled={busy} onClick={() => save({ autopilot: false })}>
+              Isključi autopilot
+            </button>
+          ) : confirm ? (
+            <>
+              <span className="text-[12.5px] text-[var(--a-text-2)]">Objave će izlaziti bez tvog klika.</span>
+              <button type="button" className="a-btn a-btn-primary px-3.5 py-2 text-[13px]" disabled={busy} onClick={() => save({ autopilot: true })}>
+                Da, uključi
+              </button>
+              <button type="button" className="a-btn-sm px-3 py-2 text-[13px]" onClick={() => setConfirm(false)}>
+                Odustani
+              </button>
+            </>
+          ) : (
+            <button type="button" className="a-btn a-btn-primary px-3.5 py-2 text-[13px]" disabled={busy} onClick={() => setConfirm(true)}>
+              Uključi autopilot
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

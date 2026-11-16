@@ -447,9 +447,22 @@ model MediaItem {
   permalink     String?
   error         String?   @db.Text
   decidedBy     String?
+  autoCheck     Json? // presuda strogog agenta-urednika: { passed, facts, license, tone, repeat, reasons[], checkedAt }
+  autopilot     Boolean   @default(false) // zakazao ga je autopilot (ne Igor)
+  deletedAt     DateTime? // obrisano s Instagrama iz admina
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@index([runDate])
   @@index([status, scheduledAt])
+}
+
+// Media postavke (jedan red). Autopilot je ISKLJUČEN dok ga Igor ne uključi.
+model MediaSettings {
+  id         String   @id @default("singleton")
+  autopilot  Boolean  @default(false)
+  maxPerDay  Int      @default(1) // 1 ili 2 automatske objave dnevno
+  autoSlots  String   @default("19:30,12:00") // termini za autopilot, redom prednosti
+  updatedBy  String?
+  updatedAt  DateTime @updatedAt
 }

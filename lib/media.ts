@@ -23,7 +23,7 @@ export const MEDIA_KINDS = ["BRIEF", "IDEA", "DRAFT"] as const;
 export const MEDIA_FORMATS = ["FEED_IMAGE", "CAROUSEL", "REEL", "STORY_MANUAL", "CHANNEL"] as const;
 export const VIDEO_PLATFORMS = ["INSTAGRAM", "TIKTOK"] as const;
 export const VIDEO_VARIANTS = ["KRATKA", "DUGA"] as const;
-export const MEDIA_STATUSES = ["NOVO", "ZAKAZANO", "OBJAVLJUJEM", "OBJAVLJENO", "ODBIJENO", "VRACENO", "NEUSPJELO"] as const;
+export const MEDIA_STATUSES = ["NOVO", "ZAKAZANO", "OBJAVLJUJEM", "OBJAVLJENO", "OBRISANO", "ODBIJENO", "VRACENO", "NEUSPJELO"] as const;
 export const IMAGE_SOURCES = ["COMMONS", "AI", "DRESIFY", "UPLOAD", "NONE"] as const;
 export const VERIFICATIONS = ["POTVRĐENO", "DJELOMIČNO", "NEPOTVRĐENO", "GLASINA", "MIŠLJENJE"] as const;
 
@@ -224,6 +224,22 @@ function cleanScores(v: unknown): MediaScores | undefined {
   return { dijeljenje: score(r.dijeljenje), komentari: score(r.komentari), emocija: score(r.emocija), hr: score(r.hr), ukupno: score(r.ukupno) };
 }
 
+// Presuda strogog agenta-urednika (za autopilot). Spremamo samo poznata polja.
+function cleanAutoCheck(v: unknown): Prisma.InputJsonValue | undefined {
+  if (!v || typeof v !== "object") return undefined;
+  const r = v as Record<string, unknown>;
+  const f = (x: unknown) => (typeof x === "string" ? x.slice(0, 300) : undefined);
+  return {
+    passed: r.passed === true,
+    facts: f(r.facts),
+    license: f(r.license),
+    tone: f(r.tone),
+    repeat: f(r.repeat),
+    reasons: Array.isArray(r.reasons) ? r.reasons.slice(0, 8).map((x) => String(x).slice(0, 200)) : [],
+    checkedAt: new Date().toISOString()
+  } as Prisma.InputJsonValue;
+}
+
 export type CleanIngestItem = Omit<Prisma.MediaItemCreateInput, "runDate"> & { extKey: string };
 
 // Vrati očišćenu stavku ili poruku greške.
@@ -259,7 +275,8 @@ export function cleanIngestItem(raw: unknown): { ok: true; item: CleanIngestItem
       manualSteps: str(r.manualSteps, 2000),
       data: dataJson ? (JSON.parse(dataJson) as Prisma.InputJsonValue) : undefined,
       ideaKey: str(r.ideaKey, 120),
-      suggestedSlot: slot
+      suggestedSlot: slot,
+      autoCheck: cleanAutoCheck(r.autoCheck)
     }
   };
 }
@@ -310,7 +327,7 @@ export async function publishMediaItem(item: MediaItem): Promise<{ ok: true; id?
       await new Promise((r) => setTimeout(r, 5000));
       const f = await finishReel(c.id);
       if (!f.ok) return { ok: false, error: withPublishWarning(f.error || "Objava reela nije uspjela.") };
-      if (f.status === "published") return { ok: true, permalink: f.permalink };
+      if (f.status === "published") return { ok: true, id: f.id, permalink: f.permalink };
     }
     return { ok: false, error: "Instagram još obrađuje video. Provjeri na Instagramu za par minuta prije ponovne objave." };
   }

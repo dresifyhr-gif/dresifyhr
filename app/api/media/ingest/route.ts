@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { cleanIngestItem, verifyIngestKey } from "@/lib/media";
+import { runAutopilot } from "@/lib/media-autopilot";
 import { prisma } from "@/lib/prisma";
 import { sendPushToOwners } from "@/lib/push";
 
@@ -58,6 +59,10 @@ export async function POST(request: Request) {
     }
   }
 
+  // Autopilot (ako ga je Igor uključio): rasporedi samo nacrte koji prođu sve provjere.
+  let autopilot: Awaited<ReturnType<typeof runAutopilot>> | null = null;
+  if (body.notify === true) autopilot = await runAutopilot(runDate).catch(() => null);
+
   // Jedan push po jutru (agent šalje notify:true samo u zadnjem pozivu).
   if (body.notify === true) {
     const drafts = await prisma.mediaItem.count({ where: { runDate, kind: "DRAFT", status: "NOVO", NOT: { format: "CHANNEL" } } });
@@ -73,5 +78,5 @@ export async function POST(request: Request) {
     }).catch(() => null);
   }
 
-  return NextResponse.json({ ok: errors.length === 0, saved, errors });
+  return NextResponse.json({ ok: errors.length === 0, saved, errors, autopilot });
 }

@@ -11,13 +11,13 @@ export const dynamic = "force-dynamic";
 const TABS = ["danas", "nacrti", "kanal", "kalendar", "arhiva", "reklame"] as const;
 type Tab = (typeof TABS)[number];
 
-export default async function MediaPage({ searchParams }: { searchParams?: { tab?: string } }) {
+export default async function MediaPage({ searchParams }: { searchParams?: { tab?: string; item?: string } }) {
   if (!(await isAdmin())) redirect("/admin/login/");
   const tab = (TABS as readonly string[]).includes(searchParams?.tab || "") ? (searchParams!.tab as Tab) : "danas";
   return (
     <AdminShell title="Media" subtitle="Ideje, nacrti i objave za @dresify.hr">
       <div className="max-w-6xl">
-        <MediaDesk initialTab={tab} />
+        <MediaDesk initialTab={tab} focusId={typeof searchParams?.item === "string" ? searchParams.item.slice(0, 40) : undefined} />
       </div>
     </AdminShell>
   );

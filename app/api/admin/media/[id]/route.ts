@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 
 import { requireAction } from "@/lib/admin-auth";
 import { MEDIA_SLOTS, isOwnImageUrl, publishMediaItem, publishProblem, zagrebSlotToDate, type MediaImage } from "@/lib/media";
+import { deleteIgMedia } from "@/lib/instagram";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -99,9 +100,23 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       data = { status: "ZAKAZANO", scheduledAt: at, decidedBy: by, error: null };
       break;
     }
+    case "stop": {
+      // "Zaustavi" iz autopilot obavijesti: makni iz rasporeda, nacrt čeka Igora.
+      if (item.status !== "ZAKAZANO") return NextResponse.json({ ok: false, message: "Nije zakazano." }, { status: 400 });
+      data = { status: "NOVO", scheduledAt: null, autopilot: false, decidedBy: by, error: "Zaustavio si automatsku objavu. Nacrt čeka tvoju odluku." };
+      break;
+    }
+    case "deleteIg": {
+      if (item.status !== "OBJAVLJENO" || !item.igMediaId)
+        return NextResponse.json({ ok: false, message: "Ovu objavu ne mogu obrisati iz admina (nema Instagram ID). Obriši je ručno u Instagramu." }, { status: 400 });
+      const r = await deleteIgMedia(item.igMediaId);
+      if (!r.ok) return NextResponse.json({ ok: false, message: r.error }, { status: 502 });
+      data = { status: "OBRISANO", deletedAt: new Date(), decidedBy: by };
+      break;
+    }
     case "unschedule": {
       if (item.status !== "ZAKAZANO") return NextResponse.json({ ok: false, message: "Nije zakazano." }, { status: 400 });
-      data = { status: "NOVO", scheduledAt: null };
+      data = { status: "NOVO", scheduledAt: null, autopilot: false };
       break;
     }
     case "publish": {

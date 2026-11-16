@@ -27,8 +27,16 @@ self.addEventListener("push", (event) => {
     renotify: Boolean(data.tag),
     requireInteraction: data.kind === "order",
     vibrate: [90, 40, 90],
-    data: { url: data.url || "/admin/", kind: data.kind || "info" }
+    data: { url: data.url || "/admin/", kind: data.kind || "info", itemId: data.itemId || null }
   };
+  // Media autopilot: gumbi Pogledaj / Zaustavi izravno u obavijesti.
+  if (data.kind === "autopilot" && data.itemId) {
+    options.actions = [
+      { action: "view", title: "Pogledaj" },
+      { action: "stop", title: "Zaustavi" }
+    ];
+    options.requireInteraction = true;
+  }
 
   event.waitUntil(
     (async () => {
@@ -50,7 +58,33 @@ self.addEventListener("push", (event) => {
 // Klik na obavijest → fokusiraj postojeći admin tab (i idi na URL) ili otvori novi.
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || "/admin/";
+  const nd = event.notification.data || {};
+  // "Zaustavi" bez otvaranja admina: maknemo objavu iz rasporeda (kolačić prijave ide sam).
+  if (event.action === "stop" && nd.itemId) {
+    event.waitUntil(
+      (async () => {
+        let ok = false;
+        try {
+          const r = await fetch("/api/admin/media/" + encodeURIComponent(nd.itemId) + "/", {
+            method: "PATCH",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "stop" })
+          });
+          ok = r.ok;
+        } catch (e) {
+          ok = false;
+        }
+        await self.registration.showNotification(ok ? "⏸ Objava zaustavljena" : "Zaustavljanje nije uspjelo", {
+          body: ok ? "Nacrt čeka tvoju odluku u Media." : "Otvori Media → Kalendar i zaustavi ručno.",
+          icon: "/icons/icon-192.png",
+          data: { url: "/admin/media/?tab=kalendar", kind: "info" }
+        });
+      })()
+    );
+    return;
+  }
+  const url = nd.url || "/admin/";
   event.waitUntil(
     (async () => {
       const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
