@@ -16,7 +16,7 @@ export async function GET() {
 
   await releaseStuckPublishing().catch(() => null);
   const since = new Date(Date.now() - 45 * 86400_000);
-  const [items, bestSlot, settings] = await Promise.all([
+  const [items, bestSlot, settings, messages] = await Promise.all([
     prisma.mediaItem.findMany({
       where: { OR: [{ createdAt: { gte: since } }, { status: "ZAKAZANO" }] },
       orderBy: [{ runDate: "desc" }, { createdAt: "asc" }],
@@ -24,7 +24,9 @@ export async function GET() {
     }),
     // Samo stvarni Instagram podaci (online_followers); null → u adminu se ne prikazuje.
     getBestSlotFromInstagram(MEDIA_SLOTS),
-    getMediaSettings()
+    getMediaSettings(),
+    // Razgovori s timom (Redakcija → Piši): zadnjih 60 dana.
+    prisma.mediaMessage.findMany({ where: { createdAt: { gte: new Date(Date.now() - 60 * 86400_000) } }, orderBy: { createdAt: "asc" }, take: 400 })
   ]);
 
   return NextResponse.json({
@@ -36,6 +38,7 @@ export async function GET() {
     settings,
     // TikTok račun (env TIKTOK_HANDLE). Dok ga nema, Media podsjeća da se otvori.
     tiktokHandle: (process.env.TIKTOK_HANDLE || "").trim() || null,
-    items
+    items,
+    messages
   });
 }

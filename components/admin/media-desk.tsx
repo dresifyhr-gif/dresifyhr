@@ -45,6 +45,7 @@ type Item = {
   createdAt: string;
   updatedAt: string;
 };
+type Msg = { id: string; member: string; fromIgor: boolean; author: string; body: string; createdAt: string; readAt: string | null };
 type Settings = { autopilot: boolean; maxPerDay: number; autoSlots: string[] };
 type Payload = {
   ok: boolean;
@@ -55,6 +56,7 @@ type Payload = {
   tiktokHandle: string | null;
   settings: Settings;
   items: Item[];
+  messages?: Msg[];
 };
 
 type TabId = "danas" | "nacrti" | "kanal" | "kalendar" | "arhiva" | "redakcija" | "reklame";
@@ -144,13 +146,14 @@ export function MediaDesk({ initialTab = "danas", focusId }: { initialTab?: TabI
   const isChannel = (i: Item) => i.format === "CHANNEL";
   const waiting = items.filter((i) => i.kind === "DRAFT" && !isChannel(i) && ["NOVO", "VRACENO", "NEUSPJELO"].includes(i.status));
   const channelNew = latestRun ? items.filter((i) => isChannel(i) && i.runDate === latestRun && i.status === "NOVO").length : 0;
+  const unreadReplies = (data?.messages || []).filter((m) => !m.fromIgor && !m.readAt).length;
   const todayCount = latestRun ? items.filter((i) => i.runDate === latestRun && i.kind === "IDEA").length : 0;
 
   const TABS: { id: TabId; label: string; n?: number }[] = [
     { id: "danas", label: "Tvoj stol", n: waiting.length || undefined },
     { id: "kanal", label: "Kanal", n: channelNew || undefined },
     { id: "kalendar", label: "Kalendar" },
-    { id: "redakcija", label: "Redakcija" },
+    { id: "redakcija", label: "Redakcija", n: unreadReplies || undefined },
     { id: "arhiva", label: "Arhiva" },
     { id: "reklame", label: "Reklame" }
   ];
@@ -200,7 +203,7 @@ export function MediaDesk({ initialTab = "danas", focusId }: { initialTab?: TabI
       ) : activeTab === "kanal" ? (
         <ChannelView data={data} onChange={replace} />
       ) : activeTab === "redakcija" ? (
-        <TeamView data={data} runDate={latestRun} />
+        <TeamView data={data} runDate={latestRun} onReload={load} />
       ) : activeTab === "kalendar" ? (
         <CalendarView data={data} onChange={replace} focusId={focusId} />
       ) : (
@@ -1324,7 +1327,11 @@ function AutopilotCard({ data, onSaved }: { data: Payload; onSaved: () => void }
 // ————————————————————————————————————————————————————————————————
 // Redakcija: agenti jutarnje rutine kao tim (ime, pozicija, posao, današnji učinak).
 // ————————————————————————————————————————————————————————————————
-function TeamView({ data, runDate }: { data: Payload; runDate: string | null }) {
+function TeamView({ data, runDate, onReload }: { data: Payload; runDate: string | null; onReload: () => void }) {
+  const [chat, setChat] = useState<string | null>(null);
+  const msgs = data.messages || [];
+  const unreadOf = (id: string) => msgs.filter((m) => m.member === id && !m.fromIgor && !m.readAt).length;
+  const lastOf = (id: string) => msgs.filter((m) => m.member === id).at(-1);
   const day = runDate ? data.items.filter((i) => i.runDate === runDate) : [];
   const brief = day.find((i) => i.kind === "BRIEF");
   const drafts = day.filter((i) => i.kind === "DRAFT");
@@ -1368,7 +1375,13 @@ function TeamView({ data, runDate }: { data: Payload; runDate: string | null }) 
           <div className="text-[15px] font-bold text-[var(--a-text)]">Igor · vlasnik i glavni</div>
           <div className="text-[12.5px] text-[var(--a-text-2)]">Ti odobravaš objave. Tim radi za tebe svako jutro i tijekom utakmica.</div>
         </div>
+        {data.canDecide && (
+          <button type="button" onClick={() => setChat("tim")} className="ml-auto rounded-[11px] bg-[#0b0b0c] px-4 py-2 text-[13.5px] font-bold text-[#e8ff3c]">
+            Poruka cijelom timu{unreadOf("tim") ? ` · ${unreadOf("tim")} novo` : ""}
+          </button>
+        )}
       </div>
+      {chat && <ChatPanel member={chat} messages={msgs.filter((m) => m.member === chat)} canWrite={data.canDecide} onClose={() => setChat(null)} onSent={onReload} />}
       {DEPTS.map((dept) => {
         const people = MEDIA_TEAM.filter((m) => m.dept === dept);
         if (!people.length) return null;
@@ -1399,12 +1412,28 @@ function TeamView({ data, runDate }: { data: Payload; runDate: string | null }) 
                         </span>
                       ))}
                     </div>
-                    {m.output !== "none" && (
-                      <div className="mt-auto flex items-baseline gap-1.5 border-t border-[var(--a-line)] pt-2.5">
-                        <span className="text-[22px] font-black tabular-nums leading-none text-[var(--a-text)]">{n ?? 0}</span>
-                        <span className="text-[12px] text-[var(--a-text-3)]">{unit[m.output]} danas</span>
-                      </div>
+                    {lastOf(m.id) && (
+                      <button type="button" onClick={() => setChat(m.id)} className="rounded-[10px] bg-[var(--a-surface-2)] px-3 py-2 text-left text-[12.5px] text-[var(--a-text-2)]">
+                        <b className="text-[var(--a-text)]">{lastOf(m.id)!.fromIgor ? "Ti" : lastOf(m.id)!.author}:</b> {lastOf(m.id)!.body.slice(0, 90)}
+                        {lastOf(m.id)!.body.length > 90 ? "…" : ""}
+                      </button>
                     )}
+                    <div className="mt-auto flex items-center justify-between gap-2 border-t border-[var(--a-line)] pt-2.5">
+                      {m.output !== "none" ? (
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-[22px] font-black tabular-nums leading-none text-[var(--a-text)]">{n ?? 0}</span>
+                          <span className="text-[12px] text-[var(--a-text-3)]">{unit[m.output]} danas</span>
+                        </div>
+                      ) : (
+                        <span />
+                      )}
+                      {data.canDecide && m.phase !== "uskoro" && (
+                        <button type="button" onClick={() => setChat(m.id)} className="a-btn-sm px-3 py-1.5 text-[12.5px]">
+                          Piši
+                          {unreadOf(m.id) ? <span className="ml-1.5 rounded-md bg-accent px-1.5 text-[11px] font-bold text-[#1d1d1f]">{unreadOf(m.id)}</span> : null}
+                        </button>
+                      )}
+                    </div>
                   </article>
                 );
               })}
@@ -1412,6 +1441,111 @@ function TeamView({ data, runDate }: { data: Payload; runDate: string | null }) 
           </section>
         );
       })}
+    </div>
+  );
+}
+
+// ————————————————————————————————————————————————————————————————
+// Razgovor s članom tima (ili cijelim timom). Tim čita u 6:00 i odgovara ujutro.
+// ————————————————————————————————————————————————————————————————
+function ChatPanel({ member, messages, canWrite, onClose, onSent }: { member: string; messages: Msg[]; canWrite: boolean; onClose: () => void; onSent: () => void }) {
+  const m = memberOf(member);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const unread = messages.some((x) => !x.fromIgor && !x.readAt);
+
+  useEffect(() => {
+    document.getElementById("media-chat")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [member]);
+  useEffect(() => {
+    // Otvorio je razgovor → odgovori u njemu su pročitani.
+    if (unread && canWrite) {
+      fetch("/api/admin/media/messages/", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ member }) })
+        .then(() => onSent())
+        .catch(() => null);
+    }
+  }, [member, unread, canWrite, onSent]);
+
+  async function send() {
+    const body = text.trim();
+    if (!body) return;
+    setBusy(true);
+    setErr("");
+    const r = await fetch("/api/admin/media/messages/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ member, body }) })
+      .then((x) => x.json())
+      .catch(() => null);
+    setBusy(false);
+    if (r?.ok) {
+      setText("");
+      onSent();
+    } else setErr(r?.message || "Slanje nije uspjelo.");
+  }
+
+  const title = member === "tim" ? "Cijeli tim" : m ? `${m.name} · ${m.role}` : member;
+  return (
+    <div id="media-chat" className="a-card scroll-mt-4 overflow-hidden p-0">
+      <div className="flex items-center gap-3 bg-[#0b0b0c] px-4 py-3">
+        {member === "tim" ? (
+          <div className="flex -space-x-2">
+            {MEDIA_TEAM.filter((x) => x.phase !== "uskoro").slice(0, 5).map((x) => (
+              <Avatar key={x.id} id={x.id} size={30} />
+            ))}
+          </div>
+        ) : (
+          <Avatar id={member} size={40} />
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[15px] font-bold text-white">{title}</div>
+          <div className="text-[11.5px] text-white/60">Čitaju u 6:00 i odgovaraju ujutro · za hitno piši Claudeu</div>
+        </div>
+        <button type="button" onClick={onClose} className="rounded-lg px-2 py-1 text-[13px] font-semibold text-white/70 hover:text-white">
+          Zatvori
+        </button>
+      </div>
+      <div className="max-h-[420px] space-y-2.5 overflow-y-auto bg-[var(--a-surface-2)] p-4">
+        {messages.length === 0 && (
+          <div className="py-6 text-center text-[13px] text-[var(--a-text-3)]">
+            {member === "tim" ? "Napiši nešto cijelom timu, npr. „Ovaj tjedan više Reelsa o Ligi prvaka.“" : `Napiši ${m?.name || "članu"} što da radi drukčije ili više.`}
+          </div>
+        )}
+        {messages.map((x) => (
+          <div key={x.id} className={`flex items-end gap-2 ${x.fromIgor ? "justify-end" : ""}`}>
+            {!x.fromIgor && <Avatar id={MEDIA_TEAM.find((t) => t.name === x.author)?.id || (member === "tim" ? "urednik" : member)} size={28} ring={false} />}
+            <div
+              className={`max-w-[80%] rounded-[14px] px-3.5 py-2 text-[13.5px] leading-relaxed ${
+                x.fromIgor ? "bg-[#0b0b0c] text-white" : "bg-[var(--a-surface)] text-[var(--a-text)] shadow-sm"
+              }`}
+            >
+              {!x.fromIgor && member === "tim" && <div className="text-[11.5px] font-bold text-[var(--a-text-2)]">{x.author}</div>}
+              <div className="whitespace-pre-wrap">{x.body}</div>
+              <div className={`mt-1 text-[10.5px] ${x.fromIgor ? "text-white/50" : "text-[var(--a-text-3)]"}`}>
+                {fmtWhen(x.createdAt)}
+                {x.fromIgor ? (x.readAt ? " · pročitano" : " · čeka jutarnju rutinu") : ""}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {canWrite && (
+        <div className="flex items-end gap-2 border-t border-[var(--a-line)] p-3">
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) send();
+            }}
+            rows={2}
+            maxLength={2000}
+            placeholder={member === "tim" ? "Poruka cijelom timu…" : `Poruka za ${m?.name || member}…`}
+            className="a-input min-h-[44px] flex-1 resize-y text-[14px]"
+          />
+          <button type="button" disabled={busy || !text.trim()} onClick={send} className="a-btn a-btn-primary px-4 py-2.5 text-[14px] disabled:opacity-50">
+            {busy ? "Šaljem…" : "Pošalji"}
+          </button>
+        </div>
+      )}
+      {err && <div className="px-4 pb-3 text-[12.5px] text-[var(--a-bad)]">{err}</div>}
     </div>
   );
 }

@@ -466,3 +466,18 @@ model MediaSettings {
   updatedBy  String?
   updatedAt  DateTime @updatedAt
 }
+
+// Poruke Igor ↔ Media tim. Igor piše članu (ili cijelom timu) u Redakciji; jutarnja
+// rutina na Macu ih pročita, primijeni i odgovori (odgovor stiže idućeg jutra).
+model MediaMessage {
+  id        String    @id @default(cuid())
+  member    String // razgovor: id člana iz lib/media-team ili "tim"
+  fromIgor  Boolean // true = Igor piše, false = odgovor agenta
+  author    String // korisničko ime ili ime agenta
+  body      String
+  createdAt DateTime  @default(now())
+  readAt    DateTime? // Igorova: kad ju je rutina pročitala; agentova: kad ju je Igor vidio
+
+  @@index([member, createdAt])
+  @@index([fromIgor, readAt])
+}
