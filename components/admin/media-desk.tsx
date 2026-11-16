@@ -45,6 +45,21 @@ type Item = {
   createdAt: string;
   updatedAt: string;
 };
+type Post = {
+  id: string;
+  permalink: string | null;
+  timestamp: string | null;
+  mediaType: string | null;
+  productType: string | null;
+  caption: string;
+  thumbnail: string | null;
+  likes: number;
+  comments: number;
+  views: number | null;
+  reach: number | null;
+  saved: number | null;
+  shares: number | null;
+};
 type Msg = { id: string; member: string; fromIgor: boolean; author: string; body: string; createdAt: string; readAt: string | null };
 type Settings = { autopilot: boolean; maxPerDay: number; autoSlots: string[] };
 type Payload = {
@@ -57,9 +72,10 @@ type Payload = {
   settings: Settings;
   items: Item[];
   messages?: Msg[];
+  posts?: Post[];
 };
 
-type TabId = "danas" | "nacrti" | "kanal" | "kalendar" | "arhiva" | "redakcija" | "reklame";
+type TabId = "danas" | "nacrti" | "kanal" | "kalendar" | "rezultati" | "arhiva" | "redakcija" | "reklame";
 
 const RATINGS = [
   { v: 4, label: "Odlično", cls: "a-btn-ok" },
@@ -153,6 +169,7 @@ export function MediaDesk({ initialTab = "danas", focusId }: { initialTab?: TabI
     { id: "danas", label: "Tvoj stol", n: waiting.length || undefined },
     { id: "kanal", label: "Kanal", n: channelNew || undefined },
     { id: "kalendar", label: "Kalendar" },
+    { id: "rezultati", label: "Rezultati" },
     { id: "redakcija", label: "Redakcija", n: unreadReplies || undefined },
     { id: "arhiva", label: "Arhiva" },
     { id: "reklame", label: "Reklame" }
@@ -204,6 +221,8 @@ export function MediaDesk({ initialTab = "danas", focusId }: { initialTab?: TabI
         <ChannelView data={data} onChange={replace} />
       ) : activeTab === "redakcija" ? (
         <TeamView data={data} runDate={latestRun} onReload={load} />
+      ) : activeTab === "rezultati" ? (
+        <ResultsView data={data} />
       ) : activeTab === "kalendar" ? (
         <CalendarView data={data} onChange={replace} focusId={focusId} />
       ) : (
@@ -1343,7 +1362,8 @@ function TeamView({ data, runDate, onReload }: { data: Payload; runDate: string 
     images: drafts.reduce((n, i) => n + (i.images?.length || 0), 0),
     reels: drafts.filter((i) => i.format === "REEL").length,
     channel: drafts.filter((i) => i.format === "CHANNEL").length,
-    sales: drafts.filter((i) => i.series === "Dres priče").length
+    sales: drafts.filter((i) => i.series === "Dres priče" || i.series === "Prodajni plakat").length,
+    posts: (data.posts || []).length
   };
   const unit: Record<string, string> = {
     ideas: "tema",
@@ -1353,7 +1373,8 @@ function TeamView({ data, runDate, onReload }: { data: Payload; runDate: string 
     images: "slika",
     reels: "Reel",
     channel: "poruka za kanal",
-    sales: "prodajna objava"
+    sales: "prodajna objava",
+    posts: "objava praćeno"
   };
   const active = MEDIA_TEAM.filter((m) => m.phase !== "uskoro").length;
   return (
@@ -1422,7 +1443,7 @@ function TeamView({ data, runDate, onReload }: { data: Payload; runDate: string 
                       {m.output !== "none" ? (
                         <div className="flex items-baseline gap-1.5">
                           <span className="text-[22px] font-black tabular-nums leading-none text-[var(--a-text)]">{n ?? 0}</span>
-                          <span className="text-[12px] text-[var(--a-text-3)]">{unit[m.output]} danas</span>
+                          <span className="text-[12px] text-[var(--a-text-3)]">{unit[m.output]}{m.output === "posts" ? " (30 dana)" : " danas"}</span>
                         </div>
                       ) : (
                         <span />
@@ -1555,6 +1576,102 @@ function ChatPanel({ member, messages, canWrite, onClose, onSent }: { member: st
         </div>
       )}
       {err && <div className="px-4 pb-3 text-[12.5px] text-[var(--a-bad)]">{err}</div>}
+    </div>
+  );
+}
+
+// ————————————————————————————————————————————————————————————————
+// Rezultati: kako su prošle objave (zadnjih 30 dana, i ručne). Brojke stižu
+// uživo s Instagrama; ista lista ide timu ujutro (Ema iz nje uči).
+// ————————————————————————————————————————————————————————————————
+const fmtN = (n: number | null | undefined) => (n == null ? "—" : n >= 10000 ? `${(n / 1000).toFixed(n >= 100000 ? 0 : 1)}k` : n.toLocaleString("hr-HR"));
+const postKind = (p: Post) => (p.productType === "REELS" || p.mediaType === "VIDEO" ? "Reel" : p.mediaType === "CAROUSEL_ALBUM" ? "Carousel" : "Objava");
+const postScore = (p: Post) => (p.views ?? p.reach ?? 0) + 20 * (p.likes + 3 * p.comments + 4 * (p.saved ?? 0) + 5 * (p.shares ?? 0));
+
+function ResultsView({ data }: { data: Payload }) {
+  const [sort, setSort] = useState<"novo" | "najbolje">("novo");
+  const posts = data.posts || [];
+  if (posts.length === 0)
+    return (
+      <div className="a-card p-6 text-sm text-[var(--a-text-2)]">
+        Još nema brojki s Instagrama. Ako ovo potraje, Instagram možda treba ponovno spojiti u Postavkama (dozvola za statistiku objava).
+      </div>
+    );
+  const views = posts.map((p) => p.views ?? p.reach).filter((v): v is number => v != null);
+  const avgViews = views.length ? Math.round(views.reduce((a, b) => a + b, 0) / views.length) : null;
+  const avgLikes = Math.round(posts.reduce((a, p) => a + p.likes, 0) / posts.length);
+  const list = [...posts].sort((a, b) => (sort === "novo" ? (b.timestamp || "").localeCompare(a.timestamp || "") : postScore(b) - postScore(a)));
+  const draftOf = (p: Post) => data.items.find((i) => (i.igMediaId && i.igMediaId === p.id) || (i.permalink && p.permalink && i.permalink.split("?")[0] === p.permalink.split("?")[0]));
+  return (
+    <div className="space-y-4">
+      <div className="a-card flex flex-wrap items-center gap-x-8 gap-y-3 p-4">
+        <div className="flex items-center gap-3">
+          <Avatar id="rast" size={44} ring={false} />
+          <div>
+            <div className="text-[15px] font-bold text-[var(--a-text)]">Ema prati brojke</div>
+            <div className="text-[12.5px] text-[var(--a-text-2)]">Zadnjih 30 dana · {posts.length} {posts.length % 10 >= 2 && posts.length % 10 <= 4 && (posts.length % 100 < 12 || posts.length % 100 > 14) ? "objave" : "objava"} · tim iz ovoga uči svako jutro</div>
+          </div>
+        </div>
+        <div>
+          <div className="text-[22px] font-black tabular-nums text-[var(--a-text)]">{fmtN(avgViews)}</div>
+          <div className="text-[12px] text-[var(--a-text-3)]">prosječno pregleda</div>
+        </div>
+        <div>
+          <div className="text-[22px] font-black tabular-nums text-[var(--a-text)]">{fmtN(avgLikes)}</div>
+          <div className="text-[12px] text-[var(--a-text-3)]">prosječno lajkova</div>
+        </div>
+        <div className="ml-auto inline-flex gap-1 rounded-[11px] bg-[var(--a-surface-2)] p-1">
+          {(["novo", "najbolje"] as const).map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setSort(k)}
+              className={`rounded-[9px] px-3 py-1.5 text-[13px] font-semibold ${sort === k ? "bg-[#0b0b0c] text-[#e8ff3c]" : "text-[var(--a-text-2)]"}`}
+            >
+              {k === "novo" ? "Najnovije" : "Najbolje"}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {list.map((p) => {
+          const v = p.views ?? p.reach;
+          const tone = avgViews && v != null ? (v >= avgViews * 1.3 ? "good" : v <= avgViews * 0.6 ? "warn" : "neutral") : "neutral";
+          const d = draftOf(p);
+          return (
+            <article key={p.id} className="a-card flex gap-3 p-3">
+              {p.thumbnail ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={p.thumbnail} alt="" loading="lazy" className="h-[104px] w-[84px] shrink-0 rounded-[10px] object-cover" />
+              ) : (
+                <div className="h-[104px] w-[84px] shrink-0 rounded-[10px] bg-[var(--a-surface-2)]" />
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Pill>{postKind(p)}</Pill>
+                  {tone === "good" && <Pill tone="good">iznad prosjeka</Pill>}
+                  {tone === "warn" && <Pill tone="warn">ispod prosjeka</Pill>}
+                  <span className="text-[11.5px] text-[var(--a-text-3)]">{p.timestamp ? fmtWhen(p.timestamp) : ""}</span>
+                </div>
+                <div className="mt-1 line-clamp-2 text-[13px] font-semibold text-[var(--a-text)]">{d?.title || p.caption.split("\n")[0] || "Bez opisa"}</div>
+                <div className="mt-1.5 grid grid-cols-3 gap-x-2 gap-y-0.5 text-[12px] text-[var(--a-text-2)]">
+                  <span><b className="tabular-nums text-[var(--a-text)]">{fmtN(p.views)}</b> pregleda</span>
+                  <span><b className="tabular-nums text-[var(--a-text)]">{fmtN(p.likes)}</b> lajkova</span>
+                  <span><b className="tabular-nums text-[var(--a-text)]">{fmtN(p.comments)}</b> kom.</span>
+                  <span><b className="tabular-nums text-[var(--a-text)]">{fmtN(p.reach)}</b> doseg</span>
+                  <span><b className="tabular-nums text-[var(--a-text)]">{fmtN(p.saved)}</b> spremanja</span>
+                  <span><b className="tabular-nums text-[var(--a-text)]">{fmtN(p.shares)}</b> dijeljenja</span>
+                </div>
+                {p.permalink && (
+                  <a href={p.permalink} target="_blank" rel="noreferrer" className="mt-1.5 inline-block text-[12px] font-semibold text-[var(--a-info)]">
+                    Otvori na Instagramu
+                  </a>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }

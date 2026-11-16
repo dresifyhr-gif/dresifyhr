@@ -464,3 +464,95 @@ export async function deleteIgMedia(mediaId: string): Promise<{ ok: boolean; err
     };
   }
 }
+
+// ————————————————————————————————————————————————————————————————
+// Rezultati objava (Media → Rezultati + jutarnja rutina): za svaku objavu iz
+// zadnjih N dana lajkovi/komentari + insights (pregledi, doseg, spremanja,
+// dijeljenja). Uključuje i objave koje je Igor objavio ručno. Ništa se ne
+// sprema u bazu (Neon kvota) — čita se uživo s Instagrama i kešira 1 h.
+// ————————————————————————————————————————————————————————————————
+export type IgPostStat = {
+  id: string;
+  permalink: string | null;
+  timestamp: string | null;
+  mediaType: string | null; // IMAGE | CAROUSEL_ALBUM | VIDEO (Reel)
+  productType: string | null; // FEED | REELS
+  caption: string;
+  thumbnail: string | null;
+  likes: number;
+  comments: number;
+  views: number | null;
+  reach: number | null;
+  saved: number | null;
+  shares: number | null;
+};
+
+async function fetchMediaInsights(id: string, token: string): Promise<Record<string, number>> {
+  // "views" je nova univerzalna metrika (impressions/plays su ukinute). Ako cijeli
+  // skup ne prođe (stara objava, tip medija), probaj metrike jednu po jednu.
+  const all = ["views", "reach", "saved", "shares"];
+  const read = (j: any) => {
+    const out: Record<string, number> = {};
+    for (const m of Array.isArray(j?.data) ? j.data : []) {
+      const v = Number(m?.values?.[0]?.value ?? m?.total_value?.value);
+      if (m?.name && Number.isFinite(v)) out[m.name] = v;
+    }
+    return out;
+  };
+  try {
+    return read(await graphGet(`${id}/insights`, { metric: all.join(",") }, token));
+  } catch {
+    const parts = await Promise.all(all.map((m) => graphGet(`${id}/insights`, { metric: m }, token).then(read).catch(() => ({}))));
+    return Object.assign({}, ...parts);
+  }
+}
+
+async function buildPostStats(days: number): Promise<IgPostStat[]> {
+  const conn = await ensureFreshIgToken();
+  if (!conn || !conn.igBusinessId) return [];
+  const since = Date.now() - days * 86_400_000;
+  let arr: any[] = [];
+  try {
+    const j = await graphGet(`${conn.igBusinessId}/media`, {
+      fields: "id,caption,media_type,media_product_type,thumbnail_url,media_url,permalink,timestamp,like_count,comments_count",
+      limit: "40"
+    }, conn.token);
+    arr = (Array.isArray(j?.data) ? j.data : []).filter((m: any) => !m?.timestamp || new Date(m.timestamp).getTime() >= since);
+  } catch {
+    return [];
+  }
+  const out: IgPostStat[] = [];
+  // Po 6 paralelno da ne udarimo u rate-limit.
+  for (let i = 0; i < arr.length; i += 6) {
+    const chunk = arr.slice(i, i + 6);
+    const ins = await Promise.all(chunk.map((m) => fetchMediaInsights(String(m.id), conn.token)));
+    chunk.forEach((m, k) =>
+      out.push({
+        id: String(m.id),
+        permalink: m.permalink || null,
+        timestamp: m.timestamp || null,
+        mediaType: m.media_type || null,
+        productType: m.media_product_type || null,
+        caption: String(m.caption ?? "").slice(0, 300),
+        thumbnail: m.thumbnail_url || m.media_url || null,
+        likes: Number(m.like_count) || 0,
+        comments: Number(m.comments_count) || 0,
+        views: num(ins[k].views),
+        reach: num(ins[k].reach),
+        saved: num(ins[k].saved),
+        shares: num(ins[k].shares)
+      })
+    );
+  }
+  return out;
+}
+
+const cachedPostStats = unstable_cache(buildPostStats, ["ig-post-stats-v1"], { revalidate: 3600, tags: ["ig-stats"] });
+
+export async function getRecentPostStats(days = 30): Promise<IgPostStat[]> {
+  try {
+    return await cachedPostStats(Math.max(1, Math.min(90, Math.round(days))));
+  } catch {
+    return [];
+  }
+}

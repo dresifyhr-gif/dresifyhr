@@ -156,10 +156,9 @@ export const MEDIA_TEAM: TeamMember[] = [
     role: "Menadžerica rasta",
     initials: "EM",
     color: "#94a3b8",
-    does: "Tjedni izvještaj sa stvarnim Instagram brojkama: što radi, što ne, što promijeniti.",
-    rules: ["Samo stvarni podaci"],
-    output: "none",
-    phase: "uskoro"
+    does: "Svako jutro čita pregleda, doseg, lajkove, komentare, spremanja i dijeljenja zadnjih objava i govori timu što radi, a što ne.",
+    rules: ["Samo stvarni podaci", "Uspoređuje s prosjekom", "Predlaže više onoga što prolazi"],
+    output: "posts"
   }
 ];
 
@@ -170,6 +169,7 @@ export const DEPTS = ["Vodstvo", "Istraživanje", "Produkcija", "Distribucija", 
 // Tko je radio na nacrtu (za avatare na kartici). Čisto po formatu/seriji.
 export function crewFor(item: { format: string | null; series: string | null; kind: string }): string[] {
   if (item.format === "CHANNEL") return ["kanal", "provjera"];
+  if (item.series === "Prodajni plakat") return ["prodaja", "dizajn", "pisac"];
   const c = ["pisac", "dizajn", "provjera"];
   if (item.format === "REEL") c.push("video", "glas");
   if (item.series === "Dres priče") c.unshift("prodaja");

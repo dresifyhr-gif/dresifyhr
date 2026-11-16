@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { getRecentPostStats } from "@/lib/instagram";
 import { verifyIngestKey } from "@/lib/media";
 import { prisma } from "@/lib/prisma";
 
@@ -15,7 +16,7 @@ export async function GET(request: Request) {
   const days = Math.max(1, Math.min(365, Number(new URL(request.url).searchParams.get("days")) || 90));
   const since = new Date(Date.now() - days * 86400_000);
 
-  const rows = await prisma.mediaItem.findMany({
+  const [rows, posts] = await Promise.all([prisma.mediaItem.findMany({
     where: { createdAt: { gte: since }, kind: { in: ["IDEA", "DRAFT"] } },
     orderBy: { createdAt: "desc" },
     select: {
@@ -34,7 +35,9 @@ export async function GET(request: Request) {
       permalink: true
     },
     take: 600
-  });
+  }),
+  // Stvarni rezultati objava s Instagrama (zadnjih 30 dana, i ručne objave) — za Emu.
+  getRecentPostStats(30)]);
 
   const ratings = rows
     .filter((r) => r.rating || r.ratingComment || r.status === "VRACENO" || r.status === "ODBIJENO")
@@ -62,6 +65,11 @@ export async function GET(request: Request) {
       status: r.status,
       published: Boolean(r.publishedAt),
       permalink: r.permalink
-    }))
+    })),
+    // Uz svaku IG objavu: naš nacrt (ako je iz Media), da se vidi serija/format/sat.
+    posts: posts.map((p) => {
+      const d = rows.find((r) => r.permalink && p.permalink && r.permalink.split("?")[0] === p.permalink.split("?")[0]);
+      return { ...p, series: d?.series ?? null, format: d?.format ?? null, title: d?.title ?? null, extKey: d?.extKey ?? null };
+    })
   });
 }
