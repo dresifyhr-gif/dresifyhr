@@ -1,7 +1,7 @@
 // Žongliranje — statična scena (noćni trening na stadionu) i sjenčanje lopte.
 // Sve se crta jednom po veličini u offscreen canvas; petlja ga samo kopira.
 
-export const SCENE_BLEED = 14;
+export const SCENE_BLEED = 36;
 
 /** Deterministički "random" da se scena ne mijenja kod svakog resizea. */
 function prng(seed: number) {
@@ -143,17 +143,28 @@ export function paintScene(w: number, h: number, dpr: number): HTMLCanvasElement
     ctx.fillRect(x - 9, y - 9, 18, 18);
   }
 
-  // LED traka uz rub terena (brend)
+  // LED reklamni panoi uz rub terena (brend): segmenti, svaki treći jači
   const [, ledY] = project(0, 36.5);
-  g = ctx.createLinearGradient(0, ledY - 6, 0, ledY);
+  const ledH = Math.max(5, h * 0.011);
+  g = ctx.createLinearGradient(0, ledY - ledH, 0, ledY);
   g.addColorStop(0, "#0d1108");
   g.addColorStop(1, "#141a0a");
   ctx.fillStyle = g;
-  ctx.fillRect(-B, ledY - 6, W, 6);
-  ctx.fillStyle = "rgba(232,255,60,0.55)";
-  ctx.fillRect(-B, ledY - 5, W, 1);
-  ctx.fillStyle = "rgba(232,255,60,0.12)";
-  ctx.fillRect(-B, ledY - 4, W, 3);
+  ctx.fillRect(-B, ledY - ledH, W, ledH);
+  {
+    const seg = Math.max(26, w / 9);
+    for (let x = -B, i = 0; x < w + B; x += seg, i++) {
+      const strong = i % 3 === 1;
+      ctx.fillStyle = strong ? "rgba(232,255,60,0.42)" : "rgba(232,255,60,0.13)";
+      ctx.fillRect(x + 1, ledY - ledH + 1, seg - 2, ledH - 2);
+      if (strong) {
+        ctx.fillStyle = "rgba(10,10,10,0.55)";
+        for (let k = 0; k < 4; k++) ctx.fillRect(x + seg * (0.22 + k * 0.15), ledY - ledH * 0.7, seg * 0.08, ledH * 0.4);
+      }
+    }
+    ctx.fillStyle = "rgba(232,255,60,0.5)";
+    ctx.fillRect(-B, ledY - ledH, W, 0.8);
+  }
 
   // ── Teren ────────────────────────────────────────────────────────────
   const goalZ = 30;
@@ -176,6 +187,13 @@ export function paintScene(w: number, h: number, dpr: number): HTMLCanvasElement
     ctx.fillStyle = k % 2 ? "#1a552f" : "#216639";
     ctx.fillRect(-B, y0, W, Math.min(h + B, y1) - y0 + 0.6);
   }
+
+  // odsjaj LED panoa na travi ispred njih
+  g = ctx.createLinearGradient(0, ledY, 0, ledY + h * 0.035);
+  g.addColorStop(0, "rgba(232,255,60,0.10)");
+  g.addColorStop(1, "rgba(232,255,60,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(-B, ledY, W, h * 0.035);
 
   // Svjetlo reflektora na travi + hladni rubovi
   ctx.save();
@@ -461,5 +479,149 @@ export function paintGlow(radius: number, dpr: number, rgb: string, alpha = 0.5)
   g.addColorStop(1, `rgba(${rgb},0)`);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, radius * 2, radius * 2);
+  return c;
+}
+
+// ── Dinamični slojevi (crtaju se jednom po veličini, petlja ih samo kopira) ──
+
+export type SceneAnchors = {
+  horizon: number;
+  /** Gornji i donji rub tribine (za bljeskove fotoaparata). */
+  standTop: number;
+  standBottom: number;
+  /** Središta glava reflektora i njihova veličina (za odbljesak). */
+  towers: { x: number; y: number; s: number }[];
+};
+
+export function sceneAnchors(w: number, h: number): SceneAnchors {
+  const { horizon, project } = sceneGeometry(w, h);
+  const [, baseY] = project(0, 40);
+  const standTop = horizon - h * 0.12;
+  const towers = [-24, 24].map((X) => {
+    const Z = 58;
+    const [tx, ty] = project(X, Z, 36);
+    const s = (w * 0.9) / Z;
+    return { x: tx, y: ty - s * 3.1 * 0.35, s: s * 5.2 };
+  });
+  return { horizon, standTop: standTop + h * 0.035, standBottom: baseY - 2, towers };
+}
+
+/** Izmaglica u svjetlu reflektora — širok, ponovljiv pojas (širina 2w). */
+export function paintFog(w: number, h: number, dpr: number): HTMLCanvasElement {
+  const bandH = h * 0.34;
+  const W = w * 2;
+  const c = document.createElement("canvas");
+  const k = Math.min(1, dpr) * 0.5; // pola rezolucije — ionako je mutno
+  c.width = Math.max(1, Math.round(W * k));
+  c.height = Math.max(1, Math.round(bandH * k));
+  const ctx = c.getContext("2d")!;
+  ctx.scale(k, k);
+  const rnd = prng(77);
+  for (let i = 0; i < 22; i++) {
+    const x = rnd() * W;
+    const y = bandH * (0.25 + rnd() * 0.5);
+    const rx = w * (0.18 + rnd() * 0.3);
+    const ry = bandH * (0.16 + rnd() * 0.22);
+    const a = 0.035 + rnd() * 0.05;
+    for (const ox of [-W, 0, W]) {
+      const g = ctx.createRadialGradient(x + ox, y, 0, x + ox, y, rx);
+      g.addColorStop(0, `rgba(190,210,235,${a})`);
+      g.addColorStop(1, "rgba(190,210,235,0)");
+      ctx.save();
+      ctx.translate(x + ox, y);
+      ctx.scale(1, ry / rx);
+      ctx.translate(-(x + ox), -y);
+      ctx.fillStyle = g;
+      ctx.fillRect(x + ox - rx, y - rx, rx * 2, rx * 2);
+      ctx.restore();
+    }
+  }
+  return c;
+}
+
+/** Vlati trave u prvom planu (tamna silueta uz donji rub — dubina). */
+export function paintGrassFront(w: number, stripH: number, dpr: number): HTMLCanvasElement {
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(w * dpr));
+  c.height = Math.max(1, Math.round(stripH * dpr));
+  const ctx = c.getContext("2d")!;
+  ctx.scale(dpr, dpr);
+  const rnd = prng(4242);
+  const g = ctx.createLinearGradient(0, 0, 0, stripH);
+  g.addColorStop(0, "rgba(4,14,8,0)");
+  g.addColorStop(0.55, "rgba(4,14,8,0.55)");
+  g.addColorStop(1, "rgba(3,9,5,0.92)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, stripH * 0.45, w, stripH * 0.55);
+  const n = Math.round(w / 2.2);
+  for (let i = 0; i < n; i++) {
+    const x = rnd() * w;
+    const bh = stripH * (0.3 + rnd() * 0.7);
+    const bw = 1.4 + rnd() * 2.6;
+    const lean = (rnd() - 0.5) * bh * 0.5;
+    const shade = rnd();
+    ctx.fillStyle = shade < 0.7 ? `rgba(6,20,11,${0.7 + rnd() * 0.3})` : `rgba(28,70,38,${0.5 + rnd() * 0.3})`;
+    ctx.beginPath();
+    ctx.moveTo(x - bw, stripH);
+    ctx.quadraticCurveTo(x + lean * 0.3, stripH - bh * 0.6, x + lean, stripH - bh);
+    ctx.quadraticCurveTo(x + lean * 0.3 + bw * 0.4, stripH - bh * 0.55, x + bw, stripH);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // vrhovi vlati na svjetlu
+  for (let i = 0; i < n * 0.25; i++) {
+    const x = rnd() * w;
+    const y = stripH * (0.25 + rnd() * 0.4);
+    ctx.fillStyle = `rgba(160,220,150,${0.05 + rnd() * 0.08})`;
+    ctx.fillRect(x, y, 1, 2 + rnd() * 3);
+  }
+  return c;
+}
+
+/** Anamorfni odbljesak reflektora (jezgra + vodoravna pruga). */
+export function paintFlare(size: number, dpr: number): HTMLCanvasElement {
+  const W = size * 4;
+  const H = size;
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(W * dpr));
+  c.height = Math.max(1, Math.round(H * dpr));
+  const ctx = c.getContext("2d")!;
+  ctx.scale(dpr, dpr);
+  const cx = W / 2;
+  const cy = H / 2;
+  let g = ctx.createRadialGradient(cx, cy, 0, cx, cy, H / 2);
+  g.addColorStop(0, "rgba(255,253,240,0.95)");
+  g.addColorStop(0.25, "rgba(255,248,225,0.4)");
+  g.addColorStop(1, "rgba(255,248,225,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(cx - H / 2, 0, H, H);
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(1, 0.05);
+  g = ctx.createRadialGradient(0, 0, 0, 0, 0, W / 2);
+  g.addColorStop(0, "rgba(220,240,255,0.85)");
+  g.addColorStop(0.4, "rgba(190,220,255,0.22)");
+  g.addColorStop(1, "rgba(190,220,255,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(-W / 2, -W / 2, W, W);
+  ctx.restore();
+  return c;
+}
+
+/** Bijeli bljesak preko lopte u trenutku udarca. */
+export function paintBallFlash(r: number, dpr: number): HTMLCanvasElement {
+  const size = r * 2;
+  const c = document.createElement("canvas");
+  c.width = c.height = Math.max(1, Math.round(size * dpr));
+  const ctx = c.getContext("2d")!;
+  ctx.scale(dpr, dpr);
+  const g = ctx.createRadialGradient(r, r * 1.35, 0, r, r * 1.1, r);
+  g.addColorStop(0, "rgba(255,255,255,0.95)");
+  g.addColorStop(0.55, "rgba(255,255,255,0.35)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.beginPath();
+  ctx.arc(r, r, r * 0.99, 0, Math.PI * 2);
+  ctx.fillStyle = g;
+  ctx.fill();
   return c;
 }

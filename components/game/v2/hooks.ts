@@ -154,19 +154,38 @@ function readNum(key: string): number | null {
   }
 }
 
+export type BestSubmit = {
+  /** Nadmašen raniji rekord (prva igra NIJE "novi rekord"). */
+  record: boolean;
+  /** Prvi rezultat koji se računa (> 0) — upravo je postao prvi rekord. */
+  first: boolean;
+  /** Isti rezultat kao dosadašnji rekord. */
+  tie: boolean;
+  /** Rekord prije ove igre (null = nije ga bilo). */
+  previous: number | null;
+  /** Rekord nakon ove igre (null = još ga nema, npr. prva igra s 0). */
+  best: number | null;
+};
+
 /**
- * Najbolji rezultat u localStorage. submit(score) sprema ako je bolji i vraća
- * { record, previous } — record je true samo ako je postojao raniji rezultat i
- * novi ga je nadmašio (prva igra nije "novi rekord").
+ * Najbolji rezultat u localStorage. submit(score) sprema ako je bolji.
+ * Rezultat 0 (ili manji) se ne pamti kao rekord: "Rekord 0" ne znači ništa.
+ * - record: postojao je raniji rekord i novi ga je nadmašio;
+ * - first: prvi rezultat koji se računa (nije "novi rekord", nema s čim usporediti);
+ * - tie: izjednačen rekord.
  */
 export function useBestScore(key: string, lowerIsBetter = false) {
   const [best, setBest] = useState<number | null>(null);
   useEffect(() => {
-    setBest(readNum(key));
+    const v = readNum(key);
+    setBest(v !== null && v > 0 ? v : null);
   }, [key]);
   const submit = useCallback(
-    (score: number) => {
-      const previous = readNum(key);
+    (score: number): BestSubmit => {
+      const raw = readNum(key);
+      const previous = raw !== null && raw > 0 ? raw : null;
+      const valid = Number.isFinite(score) && score > 0;
+      if (!valid) return { record: false, first: false, tie: false, previous, best: previous };
       const better = previous === null || (lowerIsBetter ? score < previous : score > previous);
       if (better) {
         try {
@@ -174,7 +193,13 @@ export function useBestScore(key: string, lowerIsBetter = false) {
         } catch {}
         setBest(score);
       }
-      return { record: previous !== null && better, previous, best: better ? score : previous };
+      return {
+        record: previous !== null && better,
+        first: previous === null,
+        tie: previous !== null && score === previous,
+        previous,
+        best: better ? score : previous
+      };
     },
     [key, lowerIsBetter]
   );
@@ -227,6 +252,35 @@ export function useDailyStreak(key: string) {
     }
   }, [key]);
   return { ...state, mark, today: dayStr() };
+}
+
+// ── Položaj ekrana ──────────────────────────────────────────────────────
+/**
+ * true = mobitel (dodir) okrenut položeno, s niskim ekranom (<= 540 px).
+ * Tablet i desktop su uvijek false. Osvježava se na resize/orientationchange.
+ */
+export function useLandscapeTouch() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      let coarse = false;
+      try {
+        coarse = window.matchMedia("(pointer: coarse)").matches;
+      } catch {}
+      const touch = coarse || (navigator.maxTouchPoints || 0) > 0;
+      setOn(touch && w > h && h <= 540);
+    };
+    check();
+    window.addEventListener("resize", check);
+    window.addEventListener("orientationchange", check);
+    return () => {
+      window.removeEventListener("resize", check);
+      window.removeEventListener("orientationchange", check);
+    };
+  }, []);
+  return on;
 }
 
 // ── Scroll / dodir ──────────────────────────────────────────────────────

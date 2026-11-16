@@ -30,7 +30,10 @@ export function CookieNotice() {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[60] border-t border-white/10 bg-[#0d0d0d] px-4 py-3 sm:px-6">
+    // data-cookie-notice: dok je na stranici okvir igre (GameStage), obavijest je
+    // skrivena (CSS u components/game/v2/game-shell.tsx) da ne prekrije "Igraj".
+    // Na ostalim stranicama se opet prikaže dok je kupac ne potvrdi.
+    <div data-cookie-notice className="fixed inset-x-0 bottom-0 z-[60] border-t border-white/10 bg-[#0d0d0d] px-4 py-3 sm:px-6">
       <div className="mx-auto flex max-w-5xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[13px] leading-5 text-white/70">
           Koristimo kolačiće za osnovni rad stranice, analitiku i marketing kako bismo poboljšali iskustvo.

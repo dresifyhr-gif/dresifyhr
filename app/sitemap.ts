@@ -35,7 +35,7 @@ async function sitemapProductData(): Promise<{ customSlugs: string[]; lastMod: M
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticRoutes = ["", "/dresovi", "/kompleti", "/slozi-mix", "/streetwear", "/trenirke", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/pravila-privatnosti", "/igre", "/igra", "/kviz", "/zongliranje"];
+  const staticRoutes = ["", "/dresovi", "/kompleti", "/slozi-mix", "/streetwear", "/trenirke", "/kontakt", "/blog", "/o-nama", "/dostava-i-povrat", "/pravila-privatnosti", "/igre", "/igra", "/kviz", "/pehar", "/zongliranje"];
   const categoryRoutes = (await getJerseyCategoryCollections()).map((collection) => collection.path);
   const clubRoutes = (await getJerseyClubCollections()).map((collection) => collection.path);
   const playerRoutes = (await getJerseyPlayerCollections()).map((collection) => collection.path);

@@ -1,42 +1,40 @@
 import type { Metadata } from "next";
 
-import { GAME_REWARDS, GAME_REWARDS_ENABLED } from "@/components/game/v2/config";
-import { PenaltyCup } from "@/components/game/v2/penalty/penalty-cup";
+import { PenaltyKarijera } from "@/components/game/v2/penalty/penalty-cup";
 import { buildMetadata } from "@/lib/seo";
 
-// Tekst se ravna po prekidaču nagrada (components/game/v2/config.ts):
-// dok su nagrade ugašene, nigdje se ne spominju popust ni kodovi.
-const tier = GAME_REWARDS.penalty?.tiers[0];
-const prize = tier?.prizes[0];
-const rewardOn = GAME_REWARDS_ENABLED && !!tier && !!prize;
-const rewardText = rewardOn ? `Zabij ${tier!.min} od 5 i osvoji ${prize!.title.toLowerCase()}.` : "";
+// Nagrade su ugašene (components/game/v2/config.ts): ovdje se ne spominju
+// popust, kodovi ni nagrade. Kovanice u igri vrijede samo u igri.
 
 export const metadata: Metadata = buildMetadata({
-  title: "Penalty Cup — mini igra s penalima",
-  description: rewardOn
-    ? `Odigraj DRESIFY Penalty Cup: pet penala protiv golmana koji je sve bolji. ${rewardText}`
-    : "Odigraj DRESIFY Penalty Cup: pet penala protiv golmana koji je sa svakim udarcem sve bolji. Povuci prstom, zavrni loptu i obori svoj rekord.",
+  title: "Penalty Karijera — nogometna igra s penalima",
+  description:
+    "Odigraj DRESIFY Penalty Karijeru: svaki gol je level više. Zaobiđi živi zid, pogodi mete u kutovima, prevari braniča i vjetar, a svakih pet levela čeka te boss golman.",
   path: "/igra",
-  keywords: ["penali igra", "nogometna igra", "mini igra", "penalty igra online", "DRESIFY"]
+  keywords: ["penali igra", "nogometna igra", "mini igra", "penalty igra online", "penalty karijera", "DRESIFY"]
 });
 
 export default function IgraPage() {
   return (
     <>
-      <PenaltyCup />
+      <PenaltyKarijera />
       <section className="page-shell max-w-2xl pb-16 pt-10 md:pt-4">
-        <span className="section-kicker">Penalty Cup</span>
+        <span className="section-kicker">Penalty Karijera</span>
         <h1 className="mt-2 font-heading text-[clamp(2.1rem,6vw,3.2rem)] uppercase leading-[0.95] tracking-[0.04em] text-white">
-          Penali protiv DRESIFY golmana
+          Od prvog penala do bossa
         </h1>
         <p className="mt-4 text-[15px] leading-7 text-white/65">
-          Pet penala, jedan golman i tvoj prst. Povuci prema golu: kamo pokažeš, tamo lopta ide. Brži potez daje jači udarac, ali
-          prejak udarac lako ode preko prečke. Povuci u luku i lopta će zavrnuti oko golmana.
-          {rewardOn ? ` ${rewardText}` : ""}
+          Povuci prstom prema golu: kamo pokažeš, tamo lopta ide. Brži potez daje jači udarac, a potez u luku zavrne loptu. Svaki gol
+          vodi level više, a imaš tri života. Obrana, blok ili promašaj košta jedan.
         </p>
         <p className="mt-3 text-[15px] leading-7 text-white/65">
-          Golman je sa svakim penalom brži i bolje čita udarac, pa zadnja dva traže najbolje kutove. Prije igre odaberi loptu, a
-          rezultat podijeli kao sliku za story.
+          Prva dva levela služe za zagrijavanje. Od trećeg se pred golom miče živi zid, zatim u kutovima kruže mete, a od desetog
+          levela dolaze dva zida, branič i vjetar. Svaki peti level brani boss kojeg prolaze samo udarci u sam kut. Pobijeđen boss
+          vraća jedan život.
+        </p>
+        <p className="mt-3 text-[15px] leading-7 text-white/65">
+          Golovima skupljaš kovanice koje vrijede samo u igri. U svlačionici ih trošiš na snagu udarca, falš, dulji nišan i nove
+          lopte. Za kratku pauzu tu je i brza partija od pet penala.
         </p>
       </section>
     </>

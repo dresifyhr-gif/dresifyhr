@@ -38,9 +38,9 @@ export function GamesCta() {
             </h2>
             {/* Kratko na mobilnoj, puni popis na desktopu */}
             <p className="mt-1.5 text-[13px] leading-5 text-white/60 sm:mt-2 sm:text-sm sm:leading-6">
-              <span className="sm:hidden">Penalty Cup, Kviz dana i Žongliranje.</span>
+              <span className="sm:hidden">Penalty Karijera, 15 do pehara, Kviz dana i Žongliranje.</span>
               <span className="hidden sm:inline">
-                Penalty Cup, Kviz dana i Žongliranje — kratke nogometne igre za pauzu. Svaki dan novih 10 pitanja.
+                Penalty Karijera, 15 do pehara, Kviz dana i Žongliranje — kratke nogometne igre za pauzu. Svaki dan novih 10 pitanja.
               </span>
             </p>
           </div>

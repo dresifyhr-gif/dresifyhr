@@ -2,22 +2,28 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowRight, Check, Flame, Gift, Play, Share2, Trophy, Smartphone } from "lucide-react";
+import { ArrowRight, Check, Flame, Gift, Heart, Play, Share2, Trophy, Smartphone } from "lucide-react";
 
+import { LJESTVICA, PEHAR_BROJ } from "@/components/game/v2/pehar/config";
 import { GAME_REWARDS_ENABLED, formatPrize, tiersFor } from "@/components/game/v2/rewards";
 
 // ── Hub mini igara (/igre) ───────────────────────────────────────────────
-// Četiri kartice: Penalty Cup, Kviz dana, Žongliranje i (kad je upaljeno)
-// Kolo sreće. Ilustracije su čisti SVG/CSS + slike lopti iz /public/mix.
+// Kartice: Penalty Karijera, 15 do pehara, Kviz dana, Žongliranje i (kad je
+// upaljeno) Kolo sreće. Ilustracije su čisti SVG/CSS + slike lopti iz /public/mix.
 // Animacije su samo transform/opacity i gase se uz prefers-reduced-motion.
 //
-// NAGRADE SU UGAŠENE: na tri igre nema riječi o popustima. Kolo sreće je
+// NAGRADE SU UGAŠENE: na igrama nema riječi o popustima. Kolo sreće je
 // zasebna stvar za kupce (lib/kolo.ts): vrtnje se zarađuju narudžbama.
 
 // Rekordi: v2 igre spremaju broj pod `dresify_v2_best_<igra>` (useBestScore).
 // Čitamo i stare ključeve da igrači ne izgube rekord iz prijašnjih verzija.
 const BEST_KEYS = {
+  /** Karijera: najviši dosegnuti level. */
+  career: ["dresify_v2_best_penalty_karijera"],
+  /** Brza partija: golovi od pet penala. */
   penalty: ["dresify_v2_best_penalty", "dresify_penalty_best"],
+  /** 15 do pehara: pitanje na kojem je igrač pao (15 = pehar). */
+  pehar: ["dresify_v2_best_pehar"],
   quiz: ["dresify_v2_best_quiz", "dresify_v2_best_kviz"],
   juggle: ["dresify_v2_best_zongliranje", "dresify_v2_best_juggle", "dresify_v2_best_zongliraj"]
 } as const;
@@ -96,7 +102,9 @@ const unitQuiz = (n: number) => `${n}/10 točnih`;
 const unitPoints = (n: number) => `${n} ${plural(n, "boda", "boda", "bodova")}`;
 
 type Stats = {
+  career: number | null;
   penalty: number | null;
+  pehar: number | null;
   quiz: number | null;
   juggle: number | null;
   streak: number;
@@ -109,7 +117,9 @@ function useStats(): Stats | null {
     const load = () => {
       const st = readStreak();
       setStats({
+        career: readBest(BEST_KEYS.career),
         penalty: readBest(BEST_KEYS.penalty),
+        pehar: readBest(BEST_KEYS.pehar),
         quiz: readBest(BEST_KEYS.quiz),
         juggle: readBest(BEST_KEYS.juggle),
         streak: st.streak,
@@ -142,7 +152,8 @@ function GameCard({
   meta,
   cta = "Igraj",
   tone = "default",
-  reward = null
+  reward = null,
+  className = ""
 }: {
   href: string;
   index: string;
@@ -155,11 +166,12 @@ function GameCard({
   tone?: "default" | "customer";
   /** Opis nagrade — prikazuje se samo kad su nagrade upaljene (rewardHint). */
   reward?: string | null;
+  className?: string;
 }) {
   return (
     <Link
       href={href}
-      className="ih-card group relative flex flex-col overflow-hidden rounded-[22px] border border-white/[0.08] bg-[#0f0f0f] outline-none transition-[border-color,transform] duration-300 ease-out hover:border-accent/40 focus-visible:border-accent active:scale-[0.985]"
+      className={`${className} ih-card group relative flex flex-col overflow-hidden rounded-[22px] border border-white/[0.08] bg-[#0f0f0f] outline-none transition-[border-color,transform] duration-300 ease-out hover:border-accent/40 focus-visible:border-accent active:scale-[0.985]`}
     >
       <div className="relative h-[178px] overflow-hidden sm:h-[208px]" aria-hidden>
         {art}
@@ -206,7 +218,16 @@ function GameCard({
   );
 }
 
-function BestChip({ value, empty = "Još bez rekorda" }: { value: ReactNode | null | undefined; empty?: string }) {
+function BestChip({
+  value,
+  note,
+  empty = "Još bez rekorda"
+}: {
+  value: ReactNode | null | undefined;
+  /** Sitni dodatak uz rekord (npr. ime stepenice). */
+  note?: ReactNode;
+  empty?: string;
+}) {
   // undefined = još nismo pročitali localStorage (SSR / prije hidracije): ne
   // pokazuj "Još bez rekorda" igraču koji ima rekord — samo rezerviraj mjesto.
   if (value === undefined) return <span className="block h-[36px]" aria-hidden />;
@@ -219,7 +240,10 @@ function BestChip({ value, empty = "Još bez rekorda" }: { value: ReactNode | nu
         <Trophy className="h-3 w-3 text-accent/80" />
         Tvoj rekord
       </span>
-      <span className="mt-0.5 font-heading text-[22px] leading-none tracking-[0.03em] text-white tabular-nums">{value}</span>
+      <span className="mt-0.5 flex min-w-0 items-baseline gap-2">
+        <span className="font-heading text-[22px] leading-none tracking-[0.03em] text-white tabular-nums">{value}</span>
+        {note ? <span className="truncate text-[11.5px] font-semibold leading-none text-white/45">{note}</span> : null}
+      </span>
     </span>
   );
 }
@@ -299,6 +323,85 @@ function PenaltyArt() {
         className="ih-penalty-ball absolute h-[24%] w-auto drop-shadow-[0_6px_10px_rgba(0,0,0,0.55)]"
         style={{ left: "calc(50% + 46px)", top: "19%" }}
       />
+      {/* HUD karijere: level i tri života, kao u igri */}
+      <div className="absolute right-3.5 top-3 flex items-center gap-2">
+        <span className="rounded-full border border-white/[0.14] bg-black/50 px-2.5 py-[3px] font-heading text-[13px] leading-none tracking-[0.16em] text-white/85">
+          Level 7
+        </span>
+        <span className="flex items-center gap-[3px]">
+          {[0, 1, 2].map((i) => (
+            <Heart key={i} className={`h-3 w-3 ${i < 2 ? "fill-accent text-accent" : "text-white/30"}`} strokeWidth={2.2} />
+          ))}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function PeharArt() {
+  // Vrh ljestvice (15 → 9) s peharom: "ti si ovdje" na Ligi prvaka, sigurne
+  // stepenice obrubljene limetom. Svjetlo povremeno klizne prema vrhu.
+  const HERE = 12;
+  const rows = LJESTVICA.filter((st) => st.n >= 9).reverse();
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-[radial-gradient(70%_95%_at_22%_45%,#1f2509_0%,#10110b_52%,#0b0b0b_100%)]">
+      {/* pehar */}
+      <div className="absolute left-[2%] top-[30px] w-[36%] sm:left-[4%] sm:top-[34px] sm:w-[38%]">
+        <span className="absolute left-1/2 top-[42%] h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(232,255,60,0.22),rgba(232,255,60,0))]" />
+        <svg viewBox="0 0 100 116" className="ih-trophy relative mx-auto h-[108px] w-auto min-[380px]:h-[118px] sm:h-[136px]">
+          <defs>
+            <linearGradient id="ih-cup" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#f6ff9e" />
+              <stop offset="0.45" stopColor="#e8ff3c" />
+              <stop offset="1" stopColor="#93a61c" />
+            </linearGradient>
+          </defs>
+          <path d="M23 24 H12 C7 24 5 29 6.5 34 C9 45 16 52 27 55" stroke="#c9dc33" strokeWidth="5" strokeLinecap="round" fill="none" />
+          <path d="M77 24 H88 C93 24 95 29 93.5 34 C91 45 84 52 73 55" stroke="#c9dc33" strokeWidth="5" strokeLinecap="round" fill="none" />
+          <path d="M21 14 H79 V40 C79 62 65 76 50 76 C35 76 21 62 21 40 Z" fill="url(#ih-cup)" />
+          <path d="M31 21 V40 C31 52 37 61 44 65" stroke="#ffffff" strokeOpacity="0.55" strokeWidth="3.2" strokeLinecap="round" fill="none" />
+          <rect x="45" y="75" width="10" height="14" fill="#b9cc2c" />
+          <path d="M35 89 H65 L69 101 H31 Z" fill="url(#ih-cup)" />
+          <rect x="25" y="101" width="50" height="9" rx="2" fill="#151515" stroke="#e8ff3c" strokeOpacity="0.5" />
+          <path d="M50 30 l3.2 6.6 7.2 1 -5.2 5 1.3 7.2 -6.5 -3.4 -6.5 3.4 1.3 -7.2 -5.2 -5 7.2 -1Z" fill="#0b0b0b" fillOpacity="0.28" />
+        </svg>
+      </div>
+
+      {/* ljestvica */}
+      <div className="absolute left-[39%] right-3 top-[14px] overflow-hidden rounded-[10px] min-[380px]:left-[44%] min-[380px]:right-4 sm:left-[46%] sm:top-[18px]">
+        <div className="flex flex-col gap-[3px]">
+          {rows.map((st) => {
+            const here = st.n === HERE;
+            const above = st.n > HERE;
+            return (
+              <div
+                key={st.n}
+                className={`flex h-[20px] items-center gap-1.5 rounded-[7px] px-2 min-[380px]:gap-2 sm:h-[23px] ${
+                  here
+                    ? "ih-here bg-accent text-black"
+                    : st.sigurno
+                      ? "border border-accent/30 bg-accent/[0.06]"
+                      : "border border-white/[0.06] bg-white/[0.025]"
+                }`}
+              >
+                <span className={`w-[18px] font-heading text-[13px] leading-none tabular-nums sm:text-[14px] ${here ? "text-black/70" : above ? "text-white/35" : "text-white/45"}`}>
+                  {st.n}
+                </span>
+                <span
+                  className={`min-w-0 flex-1 truncate text-[10px] font-semibold uppercase leading-none tracking-[0.05em] min-[380px]:text-[10.5px] min-[380px]:tracking-[0.08em] sm:text-[11px] ${
+                    here ? "text-black" : st.sigurno ? "text-white/85" : above ? "text-white/45" : "text-white/55"
+                  }`}
+                >
+                  {st.ime}
+                </span>
+                {st.n === PEHAR_BROJ ? <Trophy className="h-3 w-3 shrink-0 text-accent" strokeWidth={2.4} /> : null}
+              </div>
+            );
+          })}
+        </div>
+        {/* svjetlo koje klizne prema peharu */}
+        <span className="ih-sweep pointer-events-none absolute inset-x-0 top-0 h-[46px] bg-[linear-gradient(to_top,rgba(232,255,60,0),rgba(232,255,60,0.16),rgba(232,255,60,0))]" />
+      </div>
     </div>
   );
 }
@@ -441,12 +544,22 @@ export function GamesHub({ koloActive }: { koloActive: boolean }) {
   const stats = useStats();
 
   const ready = stats !== null;
+  const careerBest = stats?.career ?? null;
   const penaltyBest = stats?.penalty ?? null;
+  const peharBest = stats?.pehar ?? null;
   const quizBest = stats?.quiz ?? null;
   const juggleBest = stats?.juggle ?? null;
   const streak = stats?.streak ?? 0;
   const playedToday = stats?.playedToday ?? false;
   const fmt = (v: number | null, f: (n: number) => string) => (!ready ? undefined : v === null ? null : f(v));
+
+  // Penalty: rekord karijere (level) ima prednost; inače rekord brze partije.
+  const penaltyValue = !ready ? undefined : careerBest !== null ? `Level ${careerBest}` : penaltyBest !== null ? `${Math.min(penaltyBest, 5)}/5` : null;
+  const penaltyNote = ready && careerBest === null && penaltyBest !== null ? "Brza partija" : undefined;
+  // 15 do pehara: pitanje na kojem je igrač pao i ime te stepenice.
+  const peharStep = peharBest !== null ? Math.min(PEHAR_BROJ, Math.max(1, Math.round(peharBest))) : null;
+  const peharValue = fmt(peharStep, (n) => `${n}/${PEHAR_BROJ}`);
+  const peharNote = peharStep !== null ? (peharStep >= PEHAR_BROJ ? "Pehar je tvoj" : LJESTVICA[peharStep - 1]?.ime) : undefined;
 
   // Animacije ilustracija pauziraju dok kartica nije na ekranu (baterija; kolo
   // je SVG pa ga Safari iscrtava na CPU-u).
@@ -463,7 +576,6 @@ export function GamesHub({ koloActive }: { koloActive: boolean }) {
     root.querySelectorAll(".ih-card").forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, [koloActive]);
-  const cardCount = koloActive ? 4 : 3;
 
   return (
     <section className="relative overflow-hidden pb-14 pt-6 sm:pb-20 sm:pt-14">
@@ -482,33 +594,35 @@ export function GamesHub({ koloActive }: { koloActive: boolean }) {
             Igraj.
             <br className="sm:hidden" /> <span className="text-accent">Ruši rekorde.</span>
           </h1>
-          <p className="mt-3 max-w-[36ch] text-[14.5px] leading-snug text-white/60 sm:mx-auto sm:mt-4 sm:text-[15px]">
-            Kratke nogometne igre za pauzu. Svaki rekord ostaje spremljen na tvom mobitelu.
+          <p className="mt-3 max-w-[38ch] text-[14.5px] leading-snug text-white/60 sm:mx-auto sm:mt-4 sm:text-[15px]">
+            Kratke nogometne igre za pauzu. Rekordi i napredak ostaju spremljeni na tvom mobitelu.
           </p>
         </header>
 
-        <div
-          ref={gridRef}
-          className={`mt-6 grid gap-4 sm:mt-12 sm:gap-5 ${
-            // 4 kartice → 2x2; 3 kartice → jedan stupac do lg, pa 3 u redu (bez "siročeta")
-            cardCount === 4 ? "sm:grid-cols-2" : "mx-auto max-w-xl lg:max-w-none lg:grid-cols-3"
-          }`}
-        >
+        {/* 4 igre → 2x2; kolo (kad je upaljeno) ide preko cijele širine ispod */}
+        <div ref={gridRef} className="mt-6 grid gap-4 sm:mt-12 sm:grid-cols-2 sm:gap-5">
           <GameCard
             href="/igra/"
             index="01"
-            tag="Klasik"
-            title="Penalty Cup"
-            pitch="Pet penala, jedan golman. Pogodi kut i zabij što više možeš."
+            tag="Karijera"
+            title="Penalty Karijera"
+            pitch="Svaki gol je level više. Golman je sve bolji, a čekaju te zid, mete, vjetar i boss."
             art={<PenaltyArt />}
-            meta={
-              <BestChip value={fmt(penaltyBest, (n) => `${n} ${plural(n, "gol", "gola", "golova")}`)} />
-            }
+            meta={<BestChip value={penaltyValue} note={penaltyNote} />}
             reward={rewardHint("penalty", unitGoals)}
           />
           <GameCard
-            href="/kviz/"
+            href="/pehar/"
             index="02"
+            tag="Novo"
+            title="15 do pehara"
+            pitch="Petnaest pitanja do vrha, od lakih do ekspertnih. Jedan krivi odgovor i ispadaš."
+            art={<PeharArt />}
+            meta={<BestChip value={peharValue} note={peharNote} />}
+          />
+          <GameCard
+            href="/kviz/"
+            index="03"
             tag={
               <>
                 Novo svaki dan
@@ -521,7 +635,7 @@ export function GamesHub({ koloActive }: { koloActive: boolean }) {
               </>
             }
             title="Kviz dana"
-            pitch={playedToday ? "Današnji kviz je riješen. Novih 10 pitanja stiže sutra." : "Svaki dan novih 10 pitanja. Koliko znaš o nogometu?"}
+            pitch={playedToday ? "Današnji kviz je riješen. Novih 10 pitanja stiže sutra." : "Svaki dan novih 10 pitanja, isti za sve. Koliko znaš o nogometu?"}
             art={<QuizArt playedToday={playedToday} />}
             cta={playedToday ? "Otvori" : "Igraj"}
             meta={<BestChip value={fmt(quizBest, (n) => `${Math.min(n, 10)}/10`)} />}
@@ -529,10 +643,10 @@ export function GamesHub({ koloActive }: { koloActive: boolean }) {
           />
           <GameCard
             href="/zongliranje/"
-            index="03"
+            index="04"
             tag="Vještina"
             title="Žongliranje"
-            pitch="Koliko dugo možeš držati loptu u zraku?"
+            pitch="Odaberi loptu svog kluba i drži je u zraku što dulje možeš."
             art={<JuggleArt />}
             meta={
               // Žongliranje sprema BODOVE (dodiri x množitelj + kape), ne broj dodira.
@@ -543,7 +657,7 @@ export function GamesHub({ koloActive }: { koloActive: boolean }) {
           {koloActive ? (
             <GameCard
               href="/kolo/"
-              index="04"
+              index="05"
               tag="Za kupce"
               tone="customer"
               title="Kolo sreće"
@@ -551,6 +665,7 @@ export function GamesHub({ koloActive }: { koloActive: boolean }) {
               art={<WheelArt />}
               cta="Zavrti"
               meta={<span className="text-[12.5px] leading-tight text-white/40">Vrtnje se vežu uz tvoj broj mobitela</span>}
+              className="sm:col-span-2"
             />
           ) : null}
         </div>
@@ -559,7 +674,7 @@ export function GamesHub({ koloActive }: { koloActive: boolean }) {
         <div className="mt-10 grid gap-3 sm:mt-14 sm:grid-cols-3">
           {[
             { Icon: Trophy, t: "Osobni rekord", d: "Svaka igra pamti tvoj najbolji rezultat. Pobijedi samog sebe." },
-            { Icon: Flame, t: "Niz dana", d: "Riješi kviz svaki dan zaredom i gradi svoj niz." },
+            { Icon: Flame, t: "Niz dana", d: "Riješi Kviz dana svaki dan zaredom i gradi svoj niz." },
             { Icon: Share2, t: "Podijeli rezultat", d: "Nakon partije spremi rezultat kao sliku za story." }
           ].map(({ Icon, t, d }) => (
             <div key={t} className="flex items-start gap-3.5 rounded-[16px] border border-white/[0.06] bg-white/[0.02] p-4">
@@ -597,6 +712,12 @@ const HUB_CSS = `
 @keyframes ih-float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(-14deg)}}
 .ih-spark{animation:ih-spark 3.2s ease-in-out infinite}
 @keyframes ih-spark{0%,100%{opacity:.25}50%{opacity:1}}
+.ih-trophy{animation:ih-trophy 4.2s ease-in-out infinite}
+@keyframes ih-trophy{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.ih-sweep{animation:ih-sweep 3.6s cubic-bezier(.45,0,.2,1) infinite;opacity:0}
+@keyframes ih-sweep{0%{transform:translateY(190px);opacity:0}12%{opacity:1}62%{transform:translateY(-50px);opacity:1}70%,100%{transform:translateY(-50px);opacity:0}}
+.ih-here{position:relative}
+.ih-here::after{content:"";position:absolute;inset:-3px;border-radius:9px;border:2px solid rgba(232,255,60,.45);opacity:0;animation:ih-pop 2.8s ease-out infinite}
 .ih-wheel{animation:ih-spin 38s linear infinite}
 .ih-card:hover .ih-wheel{animation-duration:6s}
 @keyframes ih-spin{to{transform:rotate(360deg)}}
@@ -606,5 +727,5 @@ const HUB_CSS = `
 .ih-correct::after{content:"";position:absolute;inset:-4px;border-radius:12px;border:2px solid rgba(232,255,60,.4);opacity:0;animation:ih-pop 2.8s ease-out infinite}
 @keyframes ih-pop{0%,66%{opacity:0;transform:scale(.94)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.06)}}
 .ih-card[data-off] *,.ih-card[data-off] *::after{animation-play-state:paused!important}
-@media (prefers-reduced-motion: reduce){.ih-ring{animation:none;opacity:0}.ih-ball,.ih-shadow,.ih-plus,.ih-penalty-ball,.ih-spark,.ih-wheel,.ih-correct::after{animation:none}.ih-plus{opacity:1;transform:none}.ih-ball{transform:translate(-50%,0)}}
+@media (prefers-reduced-motion: reduce){.ih-ring{animation:none;opacity:0}.ih-ball,.ih-shadow,.ih-plus,.ih-penalty-ball,.ih-spark,.ih-wheel,.ih-correct::after,.ih-trophy,.ih-here::after{animation:none}.ih-sweep{animation:none;opacity:0}.ih-plus{opacity:1;transform:none}.ih-ball{transform:translate(-50%,0)}}
 `;

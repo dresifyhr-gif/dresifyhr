@@ -2,7 +2,7 @@
 // službenog rezultata + dnevnog niza.
 
 import { KVIZ_BROJ_PITANJA, KVIZ_STORAGE_KEY } from "./config";
-import { PITANJA, type Kategorija, type Pitanje } from "./questions";
+import { PITANJA, type Kategorija, type Pitanje, type Tezina } from "./questions";
 
 // ── Datum (Europe/Zagreb) ────────────────────────────────────────────────
 const TZ = "Europe/Zagreb";
@@ -90,6 +90,14 @@ export function formatDayLong(day: string) {
   return `${d}. ${MJESECI[m - 1]}`;
 }
 
+const DANI = ["N", "P", "U", "S", "Č", "P", "S"];
+
+/** Prvo slovo dana u tjednu ("P" za ponedjeljak...). */
+export function dayLetter(day: string) {
+  const [y, m, d] = day.split("-").map(Number);
+  return DANI[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+}
+
 /** "15. 11." */
 export function formatDayShort(day: string) {
   const [, m, d] = day.split("-").map(Number);
@@ -117,7 +125,7 @@ export function mulberry32(seed: number) {
   };
 }
 
-function shuffle<T>(arr: T[], rnd: () => number): T[] {
+export function shuffle<T>(arr: T[], rnd: () => number): T[] {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(rnd() * (i + 1));
@@ -136,9 +144,10 @@ export type KvizPitanje = Pitanje & {
   tocan: number;
 };
 
-const NUMERIC = /^[\d.,:×\s]+(m|metara|minuta)?\.?$/;
+const NUMERIC = /^[\d.,:×–\s]+(m|cm|metara|minuta)?\.?$/;
 
-function withAnswers(
+/** Ponuđeni odgovori izmiješani (brojevi i godine uzlazno). */
+export function withAnswers(
   p: Pitanje,
   index: number,
   rnd: () => number,
@@ -162,20 +171,29 @@ function withAnswers(
 }
 
 /**
- * Raspored "dan → 10 pitanja": banka se jednom izmiješa po kategorijama (round-robin,
- * pa svaki dan ima mješavinu tema), podijeli na dnevne blokove, a svaki ciklus
- * blokova ima vlastito miješanje. Unutar ciklusa nema ponavljanja.
+ * Koliko pitanja svake težine ima jedan kviz (zbroj = broj pitanja). Fiksna
+ * mješavina da nijedan dan ne ispadne pretežak ili prelagan: 3 laka, 3 srednja,
+ * 2 teška, 1 vrlo težak i 1 ekspertni za kraj.
  */
-function dailyIndexes(day: string, count: number): number[] {
-  const N = PITANJA.length;
-  const perCycle = Math.max(1, Math.floor(N / count));
-  const dn = dayNumber(day);
-  const cycle = Math.floor(dn / perCycle);
-  const slot = dn - cycle * perCycle;
-  const rnd = mulberry32(hashStr(`dresify-kviz-ciklus-${cycle}`));
+function kvote(count: number): Record<Tezina, number> {
+  const base: Record<Tezina, number> = { 1: 3, 2: 3, 3: 2, 4: 1, 5: 1 };
+  if (count === 10) return base;
+  const out: Record<Tezina, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  const order: Tezina[] = [1, 2, 3, 4, 5];
+  let left = count;
+  for (const t of order) {
+    out[t] = Math.floor((base[t] * count) / 10);
+    left -= out[t];
+  }
+  for (let k = 0; left > 0; k = (k + 1) % 5, left--) out[order[k]]++;
+  return out;
+}
 
+/** Indeksi pitanja jedne težine, izmiješani tako da se kategorije izmjenjuju. */
+function interleaved(tezina: Tezina, rnd: () => number): number[] {
   const byCat = new Map<Kategorija, number[]>();
   PITANJA.forEach((p, i) => {
+    if (p.tezina !== tezina) return;
     const list = byCat.get(p.kategorija) ?? [];
     list.push(i);
     byCat.set(p.kategorija, list);
@@ -184,16 +202,16 @@ function dailyIndexes(day: string, count: number): number[] {
     Array.from(byCat.values()).map((l) => shuffle(l, rnd)),
     rnd,
   );
+  const total = pools.reduce((a, l) => a + l.length, 0);
   // Raspodjela proporcionalna veličini kategorije (veće kategorije češće).
   const order: number[] = [];
   const pos = pools.map(() => 0);
-  const prog = pools.map(() => 0);
-  while (order.length < N) {
+  while (order.length < total) {
     let best = -1;
     let bestScore = Infinity;
     for (let k = 0; k < pools.length; k++) {
       if (pos[k] >= pools[k].length) continue;
-      const score = (prog[k] + 1) / pools[k].length + rnd() * 0.02;
+      const score = (pos[k] + 1) / pools[k].length + rnd() * 0.02;
       if (score < bestScore) {
         bestScore = score;
         best = k;
@@ -201,9 +219,40 @@ function dailyIndexes(day: string, count: number): number[] {
     }
     if (best < 0) break;
     order.push(pools[best][pos[best]++]);
-    prog[best]++;
   }
-  return order.slice(slot * count, slot * count + count);
+  return order;
+}
+
+const TEZINE_RED: Tezina[] = [1, 2, 3, 4, 5];
+
+/**
+ * Raspored "dan → 10 pitanja": za svaku težinu banka se jednom izmiješa (kategorije
+ * se izmjenjuju) i podijeli na dnevne blokove po kvoti; svaki ciklus blokova ima
+ * vlastito miješanje. Unutar ciklusa nema ponavljanja.
+ */
+function dailyIndexes(day: string, count: number): number[] {
+  const q = kvote(count);
+  const sizes = TEZINE_RED.map(
+    (t) => PITANJA.filter((p) => p.tezina === t).length,
+  );
+  const perCycle = Math.max(
+    1,
+    Math.min(
+      ...TEZINE_RED.map((t, k) =>
+        q[t] > 0 ? Math.floor(sizes[k] / q[t]) : Infinity,
+      ),
+    ),
+  );
+  const dn = dayNumber(day);
+  const cycle = Math.floor(dn / perCycle);
+  const slot = dn - cycle * perCycle;
+  const rnd = mulberry32(hashStr(`dresify-kviz-ciklus-${cycle}`));
+  const out: number[] = [];
+  for (const t of TEZINE_RED) {
+    const list = interleaved(t, rnd);
+    out.push(...list.slice(slot * q[t], slot * q[t] + q[t]));
+  }
+  return out;
 }
 
 /** Današnjih 10 pitanja — isti za sve (sjeme = datum po Zagrebu). */
@@ -213,32 +262,48 @@ export function dailyQuestions(
 ): KvizPitanje[] {
   const idx = dailyIndexes(day, count);
   const rnd = mulberry32(hashStr(`dresify-kviz-dan-${day}`));
-  const ordered = shuffle(idx, rnd);
+  // Od lakših prema težima (unutar iste težine nasumično) — kviz se zahuktava.
+  const ordered = byDifficulty(shuffle(idx, rnd));
   return ordered.map((i) => withAnswers(PITANJA[i], i, rnd));
 }
 
-/** Vježba: nasumična pitanja (bez današnjih), najviše 2 iz iste kategorije. */
+/** Vježba: nasumična pitanja (bez današnjih), ista mješavina težina, najviše 2 iz iste kategorije. */
 export function practiceQuestions(
   excludeDay: string,
   count = KVIZ_BROJ_PITANJA,
 ): KvizPitanje[] {
   const rnd = Math.random;
+  const q = kvote(count);
   const exclude = new Set(dailyIndexes(excludeDay, count));
-  const pool = shuffle(
-    PITANJA.map((_, i) => i).filter((i) => !exclude.has(i)),
-    rnd,
-  );
   const perCat = new Map<Kategorija, number>();
   const pick: number[] = [];
-  for (const i of pool) {
-    const k = PITANJA[i].kategorija;
-    const n = perCat.get(k) ?? 0;
-    if (n >= 2) continue;
-    perCat.set(k, n + 1);
-    pick.push(i);
-    if (pick.length >= count) break;
+  for (const t of TEZINE_RED) {
+    const pool = shuffle(
+      PITANJA.map((_, i) => i).filter(
+        (i) => PITANJA[i].tezina === t && !exclude.has(i),
+      ),
+      rnd,
+    );
+    let got = 0;
+    for (const i of pool) {
+      if (got >= q[t]) break;
+      const k = PITANJA[i].kategorija;
+      const n = perCat.get(k) ?? 0;
+      if (n >= 2) continue;
+      perCat.set(k, n + 1);
+      pick.push(i);
+      got++;
+    }
   }
-  return pick.map((i) => withAnswers(PITANJA[i], i, rnd));
+  return byDifficulty(pick).map((i) => withAnswers(PITANJA[i], i, rnd));
+}
+
+/** Stabilno poredaj indekse pitanja po težini (1 → 5). */
+function byDifficulty(idx: number[]) {
+  return idx
+    .map((i, k) => ({ i, k }))
+    .sort((a, b) => PITANJA[a.i].tezina - PITANJA[b.i].tezina || a.k - b.k)
+    .map((o) => o.i);
 }
 
 // ── Pamćenje (localStorage) ──────────────────────────────────────────────
@@ -311,6 +376,8 @@ export type DailyStatus = {
   streak: number;
   bestStreak: number;
   todayRecord: DailyRecord | null;
+  /** Zadnjih 7 dana (najstariji prvi, zadnji = danas): službeni rezultat ili null. */
+  week: { day: string; score: number | null }[];
 };
 
 export function dailyStatus(day = zagrebDay()): DailyStatus {
@@ -324,6 +391,11 @@ export function dailyStatus(day = zagrebDay()): DailyStatus {
     streak: alive ? s.streak : 0,
     bestStreak: Math.max(s.bestStreak, alive ? s.streak : 0),
     todayRecord: todayRecord ? { ...todayRecord, done: true } : null,
+    week: Array.from({ length: 7 }, (_, k) => {
+      const d = shiftDay(day, k - 6);
+      const v = s.history[d];
+      return { day: d, score: typeof v === "number" ? v : null };
+    }),
   };
 }
 

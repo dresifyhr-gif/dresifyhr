@@ -72,15 +72,21 @@ export type Shot = {
 
 export type SwipeInfo = { shot: Shot | null; reason?: "short" | "down" };
 
+/** Nadogradnje iz karijere (razine 0..5) — utječu na svaki udarac. */
+export type ShotMods = { power?: number; curve?: number };
+
+/** Što je igrač htio (prije šuma i nadogradnji). */
+export type Intent = { X: number; Y: number; C: number; power: number };
+
 /**
- * Potez → udarac.
+ * Potez → namjera.
  *  - smjer i visina: lopta ide "kamo pokazuješ" — kraj poteza produžen brzinom
  *    (brži potez gura loptu dalje, pa prebrz i predug potez ode preko gola),
  *  - brzina poteza: snaga (kraći let = golman ima manje vremena),
  *  - savijenost poteza: luk lopte.
  */
-export function shotFromSwipe(raw: Sample[], cam: Cam, rnd: Rng = Math.random): SwipeInfo {
-  if (raw.length < 2) return { shot: null, reason: "short" };
+export function intentFromSwipe(raw: Sample[], cam: Cam): { intent: Intent | null; reason?: "short" | "down" } {
+  if (raw.length < 2) return { intent: null, reason: "short" };
   const end = raw[raw.length - 1];
   // Ako je igrač držao prst na mjestu pa tek onda potegnuo, potez počinje nakon zastoja.
   let si = 0;
@@ -98,8 +104,8 @@ export function shotFromSwipe(raw: Sample[], cam: Cam, rnd: Rng = Math.random): 
   const dx = end.x - s.x;
   const dy = end.y - s.y;
   const len = Math.hypot(dx, dy);
-  if (len < 28) return { shot: null, reason: "short" };
-  if (dy > -16) return { shot: null, reason: "down" };
+  if (len < 28) return { intent: null, reason: "short" };
+  if (dy > -16) return { intent: null, reason: "down" };
 
   const dur = Math.max(0.035, (end.t - s.t) / 1000);
   const speed = len / dur / cam.h; // visina ekrana u sekundi
@@ -130,17 +136,47 @@ export function shotFromSwipe(raw: Sample[], cam: Cam, rnd: Rng = Math.random): 
   const sy = cam.hy - (Math.max(Y, BALL_R) - cam.y) * s11;
   const k = (sy - ball.y) / (dy / len);
   const px = ball.x + (dx / len) * Math.max(0, k);
-  let X = ((px - cam.cx) / s11) * 0.9;
-  // Snaga košta preciznosti.
-  X += gauss(rnd) * (0.05 + 0.22 * power * power);
-  Y += gauss(rnd) * (0.04 + 0.14 * power * power);
+  const X = ((px - cam.cx) / s11) * 0.9;
+  return { intent: { X, Y, C, power } };
+}
+
+/** Koliko nadogradnja "Falš" pojača luk (razina 0..5). */
+export const curveMult = (lvl = 0) => 1 + 0.13 * lvl;
+/** Koliko nadogradnja "Snaga udarca" skrati let (razina 0..5). */
+export const speedMult = (lvl = 0) => 1 - 0.034 * lvl;
+
+/** Namjera → udarac: šum (snaga košta preciznosti) i nadogradnje. */
+export function finalizeShot(it: Intent, mods: ShotMods = {}, rnd: Rng = Math.random, noisy = true): Shot {
+  const power = it.power;
+  let X = it.X;
+  let Y = it.Y;
+  if (noisy) {
+    X += gauss(rnd) * (0.05 + 0.22 * power * power);
+    Y += gauss(rnd) * (0.04 + 0.14 * power * power);
+  }
   X = clamp(X, -8, 8);
   Y = clamp(Y, BALL_R, 5);
-
-  const T = lerp(1.0, 0.44, power);
+  const cm = curveMult(mods.curve);
+  const C = clamp(it.C * cm, -1.5 * cm, 1.5 * cm);
+  const T = lerp(1.0, 0.44, power) * speedMult(mods.power);
   const loft = Y <= 0.2 ? 0 : (0.12 + 0.3 * (1 - power)) * Math.min(1, Y / 1.2);
   const kmh = Math.round((GOAL_Z / T) * 3.6 * 1.12);
-  return { shot: { X, Y, T, C, loft, power, kmh } };
+  return { X, Y, T, C, loft, power, kmh };
+}
+
+/** Vjetar: lopta skrene za W metara do linije gola (više što dulje leti). */
+export function applyWind(shot: Shot, wind: number): Shot {
+  if (!wind) return shot;
+  const W = windDrift(wind, shot.T);
+  // x(u) = X0·u + W·u² = (X0 + W)·u − (W/4)·b(u)
+  return { ...shot, X: shot.X + W, C: shot.C - W / 4 };
+}
+export const windDrift = (wind: number, T: number) => 0.62 * wind * T * T;
+
+export function shotFromSwipe(raw: Sample[], cam: Cam, rnd: Rng = Math.random, mods: ShotMods = {}): SwipeInfo {
+  const r = intentFromSwipe(raw, cam);
+  if (!r.intent) return { shot: null, reason: r.reason };
+  return { shot: finalizeShot(r.intent, mods, rnd) };
 }
 
 /** Položaj lopte u letu, u = 0..1 (1 = linija gola). */
@@ -190,7 +226,21 @@ export type KeeperPlan = {
   great: boolean;
 };
 
-export type Difficulty = { read: number; sigma: number; react: number; dur: number; shift: number; great: number; stay: number };
+export type Difficulty = {
+  read: number;
+  sigma: number;
+  react: number;
+  dur: number;
+  shift: number;
+  great: number;
+  stay: number;
+  /** Koliko golman prozre zavrnutu loptu (0 = vjeruje početnom smjeru, 1 = vidi kamo stvarno ide). */
+  curveRead?: number;
+  /** Koliko mu spora lopta pomaže da pročita udarac (default 0.75). */
+  slowRead?: number;
+  /** Greška u visini (m, default 0.32). */
+  ySigma?: number;
+};
 
 /** Težina po penalu: golman sve bolje čita, brže reagira i dalje skače. */
 export const DIFFICULTY: Difficulty[] = [
@@ -357,7 +407,7 @@ export function keeperGap(p: Pose, bx: number, by: number): { gap: number; glove
 }
 
 // ── Ishod ────────────────────────────────────────────────────────────────
-export type Outcome = "goal" | "save" | "post" | "bar" | "wide" | "over";
+export type Outcome = "goal" | "save" | "post" | "bar" | "wide" | "over" | "block";
 
 export type Resolution = {
   outcome: Outcome;
@@ -373,8 +423,11 @@ export type Resolution = {
 
 export const isGoal = (r: Resolution) => r.outcome === "goal" || ((r.outcome === "post" || r.outcome === "bar") && r.in);
 
-export function planKeeper(shot: Shot, idx: number, from: Pose, rnd: Rng = Math.random): KeeperPlan {
-  const D = DIFFICULTY[clamp(idx, 0, DIFFICULTY.length - 1)];
+/** Težina: broj penala (brza partija) ili gotova težina (karijera). */
+export const diffOf = (d: number | Difficulty): Difficulty => (typeof d === "number" ? DIFFICULTY[clamp(d, 0, DIFFICULTY.length - 1)] : d);
+
+export function planKeeper(shot: Shot, idx: number | Difficulty, from: Pose, rnd: Rng = Math.random): KeeperPlan {
+  const D = diffOf(idx);
   const uK = KEEPER_Z / GOAL_Z;
   const b = ballAt(shot, uK);
   let gx: number;
@@ -382,13 +435,13 @@ export function planKeeper(shot: Shot, idx: number, from: Pose, rnd: Rng = Math.
   const roll = rnd();
   // Spora lopta: golman stigne vidjeti kamo ide i ispraviti procjenu.
   const slow = clamp((shot.T - 0.55) / 0.45, 0, 1);
-  const read = D.read + (1 - D.read) * slow * 0.75;
+  const read = D.read + (1 - D.read) * slow * (D.slowRead ?? 0.75);
   const sigma = D.sigma * (1 - slow * 0.5);
   if (roll < read) {
     // Golman čita početni smjer — zavrnuta lopta ga zavara.
-    const heading = (shot.X + shot.C * 0.9) * uK;
+    const heading = lerp((shot.X + shot.C * 0.9) * uK, b.x, D.curveRead ?? 0);
     gx = lerp(heading, b.x, slow) + gauss(rnd) * sigma;
-    gy = clamp(b.y + gauss(rnd) * 0.32, 0.15, 2.35);
+    gy = clamp(b.y + gauss(rnd) * (D.ySigma ?? 0.32), 0.15, 2.35);
   } else if (roll < read + (1 - read) * D.stay) {
     gx = from.x + gauss(rnd) * 0.2;
     gy = 0.9 + rnd() * 0.5;
@@ -404,8 +457,8 @@ export function planKeeper(shot: Shot, idx: number, from: Pose, rnd: Rng = Math.
   return { mode, side, from, to: pose, react, dur: D.dur, great: false };
 }
 
-export function resolveShot(shot: Shot, idx: number, from: Pose, rnd: Rng = Math.random): Resolution {
-  const D = DIFFICULTY[clamp(idx, 0, DIFFICULTY.length - 1)];
+export function resolveShot(shot: Shot, idx: number | Difficulty, from: Pose, rnd: Rng = Math.random): Resolution {
+  const D = diffOf(idx);
   const uK = KEEPER_Z / GOAL_Z;
   const tK = shot.T * uK;
   const b = ballAt(shot, uK);

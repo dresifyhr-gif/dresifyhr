@@ -47,7 +47,7 @@ export default function KvizPage() {
           </p>
           <p className="mt-3 text-[15px] leading-relaxed text-white/65">
             Pitanja pokrivaju povijest nogometa: od prvog Svjetskog prvenstva
-            1930. do bronce Vatrenih u Kataru, od Hajdukova osnivanja u Pragu do
+            1930. do bronce Vatrenih u Kataru, od Hajdukovih početaka u Pragu do
             finala Lige prvaka. Podijeli rezultat na story i izazovi prijatelje
             da riješe isti kviz.
           </p>

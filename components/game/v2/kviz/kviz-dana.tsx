@@ -19,6 +19,7 @@ import {
   type GameState,
 } from "../game-shell";
 import { pickReward } from "../rewards";
+import { zvuk } from "../pehar/zvuk";
 import { haptic, sfx } from "../sfx";
 import {
   KVIZ_BEST_KEY,
@@ -32,6 +33,7 @@ import {
   beginOfficial,
   dailyQuestions,
   dailyStatus,
+  dayLetter,
   formatCountdown,
   formatDayLong,
   formatDayShort,
@@ -45,7 +47,8 @@ import {
 } from "./daily";
 
 type Mode = "official" | "practice";
-type Phase = "ask" | "reveal";
+/** ask = biranje, hold = kratka pauza na odabranom odgovoru, reveal = otkriveno. */
+type Phase = "ask" | "hold" | "reveal";
 
 const RED = "#ff5a5f";
 const AMBER = "#ffb020";
@@ -97,8 +100,22 @@ function useLandscapePhone() {
 // ── Prsten s vremenom ────────────────────────────────────────────────────
 const RING_R = 44;
 const RING_C = 2 * Math.PI * RING_R;
+/** Crtice po sekundama unutar prstena (kao na satu). */
+const RING_TICKS = Array.from({ length: KVIZ_SEKUNDI }, (_, k) => {
+  const a = (k / KVIZ_SEKUNDI) * Math.PI * 2;
+  const r1 = RING_R - 8;
+  const r2 = RING_R - (k % 3 === 0 ? 13 : 11);
+  return {
+    x1: 50 + Math.cos(a) * r1,
+    y1: 50 + Math.sin(a) * r1,
+    x2: 50 + Math.cos(a) * r2,
+    y2: 50 + Math.sin(a) * r2,
+  };
+});
 
 // ── Gumb odgovora ────────────────────────────────────────────────────────
+type AnswerState = "idle" | "locked" | "correct" | "wrong" | "dim" | "missed";
+
 function AnswerButton({
   index,
   text,
@@ -109,7 +126,7 @@ function AnswerButton({
 }: {
   index: number;
   text: string;
-  state: "idle" | "correct" | "wrong" | "dim" | "missed";
+  state: AnswerState;
   onPick: (i: number, el: HTMLElement) => void;
   compact: boolean;
   tiny: boolean;
@@ -129,7 +146,9 @@ function AnswerButton({
           ? "border-[#ff5a5f]/80 bg-[#ff5a5f]/[0.16] text-white"
           : state === "dim"
             ? "border-white/[0.06] bg-white/[0.02] text-white/35"
-            : "border-white/[0.11] bg-white/[0.045] text-white/95 active:bg-white/[0.09]";
+            : state === "locked"
+              ? "border-white bg-white text-black shadow-[0_0_0_1px_rgba(255,255,255,0.7),0_0_30px_rgba(255,255,255,0.25)]"
+              : "border-white/[0.11] bg-white/[0.045] text-white/95 active:bg-white/[0.09]";
   const badge =
     state === "correct"
       ? "bg-black/15 text-black"
@@ -139,7 +158,9 @@ function AnswerButton({
           ? "bg-[#ff5a5f] text-white"
           : state === "dim"
             ? "bg-white/[0.04] text-white/30"
-            : "bg-white/[0.07] text-white/70";
+            : state === "locked"
+              ? "bg-black text-white"
+              : "bg-white/[0.07] text-white/70";
   return (
     <motion.button
       ref={ref}
@@ -160,17 +181,28 @@ function AnswerButton({
             ? {
                 opacity: 1,
                 y: 0,
-                scale: [1, 1.035, 1],
-                transition: { scale: { duration: 0.36, ease: EASE } },
+                scale: [1, 1.045, 1],
+                transition: { scale: { duration: 0.42, ease: EASE } },
               }
-            : { opacity: 1, y: 0 }
+            : state === "locked"
+              ? { opacity: 1, y: 0, scale: 0.985, transition: { duration: 0.18 } }
+              : { opacity: 1, y: 0, scale: 1 }
       }
       transition={{ duration: 0.36, ease: EASE, delay: 0.06 + index * 0.045 }}
       whileTap={state === "idle" ? { scale: 0.975 } : undefined}
       className={`${base} ${look} ${tiny ? "min-h-[42px] py-1.5" : compact ? "min-h-[48px] py-2" : "min-h-[54px] py-2.5"}`}
     >
+      {state === "correct" ? (
+        <motion.span
+          aria-hidden
+          initial={{ x: "-120%" }}
+          animate={{ x: "320%" }}
+          transition={{ duration: 0.75, ease: [0.4, 0, 0.2, 1], delay: 0.05 }}
+          className="pointer-events-none absolute inset-y-0 left-0 w-1/3 -skew-x-[20deg] bg-gradient-to-r from-transparent via-white/60 to-transparent"
+        />
+      ) : null}
       <span
-        className={`grid h-7 w-7 shrink-0 place-items-center rounded-[9px] font-heading text-[17px] leading-none transition-colors ${badge}`}
+        className={`relative grid h-7 w-7 shrink-0 place-items-center rounded-[9px] font-heading text-[17px] leading-none transition-colors ${badge}`}
       >
         {state === "correct" || state === "missed" ? (
           <Check className="h-4 w-4" strokeWidth={3} />
@@ -181,7 +213,7 @@ function AnswerButton({
         )}
       </span>
       <span
-        className={`min-w-0 flex-1 font-semibold leading-[1.2] ${tiny ? "text-[14px]" : compact ? "text-[15px]" : "text-[15.5px]"}`}
+        className={`relative min-w-0 flex-1 font-semibold leading-[1.2] ${tiny ? "text-[14px]" : compact ? "text-[15px]" : "text-[15.5px]"}`}
       >
         {text}
       </span>
@@ -269,42 +301,83 @@ function StartPanel({
   );
 }
 
-// ── Dodatak na rezultatu (samo kad ima mjesta — visoki ekrani/desktop) ────
+// ── Dodatak na rezultatu: točke odgovora, niz i zadnjih 7 dana ───────────
+function WeekStrip({ status, slim }: { status: DailyStatus | null; slim: boolean }) {
+  const week = status?.week ?? [];
+  if (!week.length) return null;
+  return (
+    <div className="flex items-end gap-[5px]" aria-label="Zadnjih 7 dana">
+      {week.map((d, i) => {
+        const today = i === week.length - 1;
+        const played = d.score !== null;
+        const k = played ? Math.max(0.18, (d.score ?? 0) / KVIZ_BROJ_PITANJA) : 0;
+        const h = slim ? 20 : 26;
+        return (
+          <div key={d.day} className="flex flex-col items-center gap-1">
+            <div
+              className={`relative w-[14px] overflow-hidden rounded-[4px] ${played ? "bg-accent/[0.14]" : "bg-white/[0.06]"} ${today ? "ring-1 ring-accent/60" : ""}`}
+              style={{ height: h }}
+            >
+              {played ? (
+                <motion.span
+                  initial={{ scaleY: 0 }}
+                  animate={{ scaleY: 1 }}
+                  transition={{ duration: 0.5, ease: EASE, delay: 0.45 + i * 0.06 }}
+                  className="absolute inset-x-0 bottom-0 origin-bottom rounded-[3px] bg-accent"
+                  style={{ height: `${k * 100}%` }}
+                />
+              ) : null}
+            </div>
+            <span className={`text-[9px] font-semibold leading-none ${today ? "text-accent" : "text-white/35"}`}>
+              {dayLetter(d.day)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function ResultPanel({
   mode,
   status,
   answers,
   countdown,
+  slim = false,
 }: {
   mode: Mode;
   status: DailyStatus | null;
   answers: Ishod[];
   countdown: number | null;
+  slim?: boolean;
 }) {
   const official = status?.todayRecord;
   const streak = status?.streak ?? 1;
+  const best = status?.bestStreak ?? streak;
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: EASE, delay: 0.1 }}
-      className="rounded-[16px] border border-white/10 bg-white/[0.035] px-3.5 pb-3 pt-3"
+      className={`rounded-[16px] border border-white/10 bg-white/[0.035] ${slim ? "px-3 pb-2 pt-2.5" : "px-3.5 pb-3 pt-3"}`}
     >
       <ResultDots answers={answers} />
-      <div className="mt-3 flex items-center justify-between gap-3">
+      <div className={`flex items-center justify-between gap-3 ${slim ? "mt-2" : "mt-3"}`}>
         {mode === "official" ? (
           <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-[11px] bg-accent/[0.12]">
-              <Flame
-                className="h-[18px] w-[18px] text-accent"
-                strokeWidth={2.2}
-              />
-            </span>
+            <motion.span
+              initial={{ scale: 0.4, rotate: -20 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 420, damping: 14, delay: 0.5 }}
+              className={`grid place-items-center rounded-[11px] bg-accent/[0.12] ${slim ? "h-8 w-8" : "h-10 w-10"}`}
+            >
+              <Flame className="h-[18px] w-[18px] text-accent" strokeWidth={2.2} />
+            </motion.span>
             <div>
-              <div className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-white/45">
-                Niz
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">
+                Niz{best > streak ? ` · najdulji ${best}` : ""}
               </div>
-              <div className="font-heading text-[22px] leading-none text-white">
+              <div className={`font-heading leading-none text-white ${slim ? "text-[20px]" : "text-[24px]"}`}>
                 {streak} {streak === 1 ? "dan" : "dana"}
               </div>
             </div>
@@ -323,14 +396,13 @@ function ResultPanel({
             ) : null}
           </p>
         )}
-        <div className="shrink-0 text-right">
-          <div className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-white/45">
-            Novi kviz za
-          </div>
-          <div className="font-heading text-[22px] leading-none tabular-nums text-white">
-            {countdown === null ? "--:--:--" : formatCountdown(countdown)}
-          </div>
-        </div>
+        <WeekStrip status={status} slim={slim} />
+      </div>
+      <div className={`flex items-center justify-between border-t border-white/[0.07] text-[12px] text-white/50 ${slim ? "mt-2 pt-1.5" : "mt-3 pt-2"}`}>
+        <span>Novi kviz za</span>
+        <span className="font-heading text-[18px] leading-none tabular-nums text-white">
+          {countdown === null ? "--:--:--" : formatCountdown(countdown)}
+        </span>
       </div>
     </motion.div>
   );
@@ -556,6 +628,8 @@ export function KvizDana() {
 
   const day = status?.day ?? null;
   const landscape = useLandscapePhone();
+  const landRef = useRef(false);
+  landRef.current = landscape;
   const countdown = useCountdown(state === "start" || state === "result");
 
   // Stanje igre u refovima (petlja i handleri).
@@ -568,6 +642,10 @@ export function KvizDana() {
     /** Odgovori prije ovog trenutka se ignoriraju (iOS "ghost click" nakon dodira "Igraj"/"dalje"). */
     acceptAt: 0,
     nextTimer: 0 as number,
+    /** Odgovor koji čeka otkrivanje (faza "hold"). */
+    holdChoice: null as number | null,
+    /** Udio vremena u trenutku odabira (prsten stoji dok traje "hold"). */
+    frozenFrac: 1,
     qi: 0,
     answers: [] as Ishod[],
     picks: [] as (number | null)[],
@@ -614,7 +692,7 @@ export function KvizDana() {
     if (!el) return;
     const fit = () => {
       setCompact(el.clientHeight < 600);
-      setTiny(el.clientHeight < 520);
+      setTiny(el.clientHeight < 470);
     };
     fit();
     const ro =
@@ -648,6 +726,7 @@ export function KvizDana() {
     setPhase("ask");
     setPicked(null);
     setLow(false);
+    if (i > 0) zvuk.questionIn(i);
   }, []);
 
   const finish = useCallback(() => {
@@ -679,13 +758,14 @@ export function KvizDana() {
     }
   }, [finish, showQuestion]);
 
-  const reveal = useCallback(
+  const doReveal = useCallback(
     (choice: number | null, el: HTMLElement | null) => {
       const s = g.current;
-      if (s.phase !== "ask" || stateRef.current !== "playing") return;
-      if (choice !== null && performance.now() < s.acceptAt) return;
+      if (s.phase === "reveal") return;
       const q = questions[s.qi];
       if (!q) return;
+      clearNext();
+      s.holdChoice = null;
       s.phase = "reveal";
       s.revealAt = performance.now();
       const outcome: Ishod = choice === null ? -1 : choice === q.tocan ? 1 : 0;
@@ -710,8 +790,8 @@ export function KvizDana() {
       if (outcome === 1) {
         s.streak += 1;
         setStreak(s.streak);
-        sfx.success();
-        window.setTimeout(() => sfx.coin(Math.min(8, s.streak - 1)), 70);
+        zvuk.correct(Math.min(12, (s.streak - 1) * 2));
+        if (s.streak >= 3) window.setTimeout(() => sfx.coin(Math.min(8, s.streak - 1)), 90);
         haptic(14);
         flash.current = { v: 1, color: BRAND.accentRgb };
         if (r) {
@@ -752,7 +832,8 @@ export function KvizDana() {
       } else {
         s.streak = 0;
         setStreak(0);
-        sfx.fail();
+        if (outcome === -1) zvuk.timeout();
+        else zvuk.wrong();
         haptic(outcome === -1 ? 20 : 34);
         flash.current = { v: 1, color: "255,90,95" };
         shakeCtl.start({
@@ -760,9 +841,37 @@ export function KvizDana() {
           transition: { duration: 0.38, ease: "easeOut" },
         });
       }
-      s.nextTimer = window.setTimeout(advance, outcome === 1 ? 1150 : 1800);
+      s.nextTimer = window.setTimeout(advance, outcome === 1 ? 1250 : 1900);
     },
     [questions, advance, shakeCtl],
+  );
+
+  /** Odabir: sat stane, odgovor se na tren "zaključa", pa slijedi otkrivanje. */
+  const reveal = useCallback(
+    (choice: number | null, el: HTMLElement | null) => {
+      const s = g.current;
+      if (s.phase !== "ask" || stateRef.current !== "playing") return;
+      if (choice !== null && performance.now() < s.acceptAt) return;
+      if (!questions[s.qi]) return;
+      if (choice === null) {
+        doReveal(null, null);
+        return;
+      }
+      s.frozenFrac = clamp(
+        (s.deadline - performance.now()) / (KVIZ_SEKUNDI * 1000),
+        0,
+        1,
+      );
+      s.phase = "hold";
+      s.holdChoice = choice;
+      setPicked(choice);
+      setPhase("hold");
+      zvuk.select();
+      haptic(8);
+      clearNext();
+      s.nextTimer = window.setTimeout(() => doReveal(choice, el), 380);
+    },
+    [questions, doReveal],
   );
 
   const onPick = useCallback(
@@ -803,12 +912,13 @@ export function KvizDana() {
     showQuestion(0);
     setState("playing");
     sfx.whistle();
+    zvuk.unlock();
   }, [showQuestion]);
 
   const pause = useCallback(() => {
     const s = g.current;
     s.remainingOnPause = Math.max(0, s.deadline - performance.now());
-    if (s.phase === "reveal") clearNext();
+    if (s.phase === "reveal" || s.phase === "hold") clearNext();
     setState("paused");
   }, []);
 
@@ -816,8 +926,12 @@ export function KvizDana() {
     const s = g.current;
     s.deadline = performance.now() + s.remainingOnPause;
     if (s.phase === "reveal") s.nextTimer = window.setTimeout(advance, 500);
+    if (s.phase === "hold") {
+      const c = s.holdChoice;
+      s.nextTimer = window.setTimeout(() => doReveal(c, null), 300);
+    }
     setState("playing");
-  }, [advance]);
+  }, [advance, doReveal]);
 
   // Vježba se sama pauzira kad se mobitel položi (službeni sat namjerno teče, kao i kod skrivene kartice).
   useEffect(() => {
@@ -835,8 +949,15 @@ export function KvizDana() {
       if (whole !== s.lastWhole) {
         s.lastWhole = whole;
         if (whole <= 3 && whole > 0) {
-          sfx.tick(whole === 1);
+          zvuk.tick(whole === 1);
           setLow(true);
+          secRef.current?.animate?.(
+            [
+              { transform: "translateY(2px) scale(1.45)", color: RED },
+              { transform: "translateY(2px) scale(1)", color: "#ffffff" },
+            ],
+            { duration: 420, easing: "cubic-bezier(.22,1,.36,1)" },
+          );
         }
       }
       if (left <= 0) reveal(null, null);
@@ -856,7 +977,9 @@ export function KvizDana() {
           frac =
             s.phase === "reveal"
               ? 1
-              : clamp(left / (KVIZ_SEKUNDI * 1000), 0, 1);
+              : s.phase === "hold"
+                ? s.frozenFrac
+                : clamp(left / (KVIZ_SEKUNDI * 1000), 0, 1);
           if (s.phase === "ask") {
             const sec = String(clamp(Math.ceil(left / 1000), 0, KVIZ_SEKUNDI));
             if (secRef.current.textContent !== sec)
@@ -943,7 +1066,8 @@ export function KvizDana() {
 
         // Lopta i orbita s 10 točaka (samo startni ekran).
         const d = deco.current;
-        d.alpha = damp(d.alpha, st === "start" ? 1 : 0, 7, dt);
+        // Položeno: startni ekran je u dva stupca — lopta bi prekrila karticu.
+        d.alpha = damp(d.alpha, st === "start" && !landRef.current ? 1 : 0, 7, dt);
         d.rot += dt * 0.35;
         if (d.alpha > 0.01) {
           // Lopta stoji u slobodnom prostoru iznad naslova (desno), da ne prekrije tekst.
@@ -960,7 +1084,12 @@ export function KvizDana() {
           const top = 56;
           const free = (d.titleTop > 0 ? d.titleTop : h * 0.4) - top;
           const size = clamp(free * 0.92, 92, 172);
-          const bx = w - Math.max(size * 0.62, w * 0.24) - 8;
+          const rx = size * 0.9;
+          const ry = size * 0.24;
+          const tilt = -0.32;
+          // Cijela orbita mora stati u okvir (prije je desna točka bježala preko ruba).
+          const ext = Math.hypot(rx * Math.cos(tilt), ry * Math.sin(tilt));
+          const bx = w - Math.max(ext, w * 0.24) - 14;
           const by =
             top + Math.max(free, size) * 0.5 + Math.sin(time * 1.4) * 4;
           ctx.save();
@@ -976,9 +1105,6 @@ export function KvizDana() {
             size * 2.6,
           );
 
-          const rx = size * 0.9;
-          const ry = size * 0.24;
-          const tilt = -0.32;
           const dots = KVIZ_BROJ_PITANJA;
           const drawDots = (front: boolean) => {
             for (let i = 0; i < dots; i++) {
@@ -1076,17 +1202,16 @@ export function KvizDana() {
         ? "text-[20px]"
         : "text-[22px]";
 
-  const answerState = (
-    i: number,
-  ): "idle" | "correct" | "wrong" | "dim" | "missed" => {
+  const answerState = (i: number): AnswerState => {
     if (!q || phase === "ask") return "idle";
+    if (phase === "hold") return i === picked ? "locked" : "dim";
     if (i === q.tocan) return picked === i ? "correct" : "missed";
     if (i === picked) return "wrong";
     return "dim";
   };
 
   const lastOutcome = phase === "reveal" ? answers[qi] : undefined;
-  const ringSize = tiny ? 50 : compact ? 64 : 84;
+  const ringSize = tiny ? 58 : compact ? 76 : 92;
 
   // Niski ekran: niz i odbrojavanje stanu u jedan redak ispod rezultata (bez dodatne kartice).
   const liveLine =
@@ -1096,9 +1221,9 @@ export function KvizDana() {
   const shellResult = useMemo(
     () =>
       result
-        ? { ...result, message: compact ? liveLine : result.message }
+        ? { ...result, message: tiny ? liveLine : result.message }
         : null,
-    [result, compact, liveLine],
+    [result, tiny, liveLine],
   );
 
   // Kad je nagrada uključena i osvojena, shell prikazuje karticu nagrade u zbijenom
@@ -1161,12 +1286,13 @@ export function KvizDana() {
           </div>
         }
         resultExtra={
-          compact || rewardShown ? undefined : (
+          tiny || rewardShown ? undefined : (
             <ResultPanel
               mode={mode}
               status={status}
               answers={answers}
               countdown={countdown}
+              slim={compact}
             />
           )
         }
@@ -1244,10 +1370,22 @@ export function KvizDana() {
                         cx="50"
                         cy="50"
                         r={RING_R}
-                        fill="rgba(0,0,0,0.35)"
-                        stroke="rgba(255,255,255,0.09)"
+                        fill="rgba(0,0,0,0.42)"
+                        stroke="rgba(255,255,255,0.07)"
                         strokeWidth="6"
                       />
+                      {RING_TICKS.map((t, k) => (
+                        <line
+                          key={k}
+                          x1={t.x1}
+                          y1={t.y1}
+                          x2={t.x2}
+                          y2={t.y2}
+                          stroke="rgba(255,255,255,0.22)"
+                          strokeWidth={k % 3 === 0 ? 1.6 : 1}
+                          strokeLinecap="round"
+                        />
+                      ))}
                       <circle
                         ref={ringRef}
                         cx="50"
@@ -1346,9 +1484,20 @@ export function KvizDana() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.25, ease: EASE }}
-                          className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/50"
+                          className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.26em] text-white/50"
                         >
                           {q.kategorija}
+                          <span
+                            className="flex items-center gap-[3px]"
+                            aria-label={`Težina ${q.tezina} od 5`}
+                          >
+                            {[1, 2, 3, 4, 5].map((k) => (
+                              <span
+                                key={k}
+                                className={`h-[4px] w-[4px] rounded-full ${k <= q.tezina ? "bg-accent/90" : "bg-white/15"}`}
+                              />
+                            ))}
+                          </span>
                         </motion.span>
                       )}
                     </AnimatePresence>
@@ -1403,7 +1552,7 @@ export function KvizDana() {
         </motion.div>
 
         {landscape && (state === "playing" || state === "paused") ? (
-          <div className="absolute inset-0 z-[45] flex flex-col items-center bg-black/90 px-6 pt-[72px] text-center">
+          <div className="absolute inset-0 z-[45] flex flex-col items-center bg-[#0a0a0a] px-6 pt-[72px] text-center">
             <Smartphone
               className="h-9 w-9 text-accent"
               strokeWidth={1.8}
@@ -1413,7 +1562,9 @@ export function KvizDana() {
               Okreni mobitel uspravno
             </div>
             <p className="mt-1.5 text-[13px] text-white/55">
-              Kviz se igra u uspravnom položaju.
+              {mode === "official"
+                ? "Kviz se igra u uspravnom položaju. Sat i dalje teče."
+                : "Kviz se igra u uspravnom položaju. Igra je pauzirana."}
             </p>
           </div>
         ) : null}

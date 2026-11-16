@@ -1,6 +1,8 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { streamText } from "ai";
 
+import { getSettings } from "@/lib/settings";
+
 export const runtime = "nodejs";
 
 const SYSTEM_PROMPT = `Ti si Dresify asistent — pomoćnik na hrvatskoj online trgovini nogometnih dresova dresifyshop.com.
@@ -27,22 +29,22 @@ Komplet za odrasle: dres + lopta + kapa (bez hlačica)
 Narudžba ide preko web forme na stranici dresa (gumb "Naruči"). Nema registracije. Može i direktno na WhatsApp.
 Zamjena veličine: ako veličina ne odgovara, kupac se javi na WhatsApp i dogovorimo zamjenu za drugu veličinu. Radimo SAMO zamjenu veličine — ne nudi ni ne obećavaj povrat novca.
 
-=== NAGRADE / POPUSTI ===
-Na stranici /igre postoje šest mini igara: Penalty Cup, Flappy Ball, Football Kviz, Spojnica, Zmija i Uhvati dres.
-- Penalty Cup: zabij 4/5 penala → besplatna dostava (na narudžbe od 40€)
-- Flappy Ball: 10 bodova=besplatna dostava (od 40€), 15 bodova=-15% + besplatna dostava (od 80€), 20 bodova=-20% + besplatna dostava (od 100€)
-- Football Kviz: odgovori 5/5 točno → biraš nagradu: besplatna dostava (od 40€) ILI poklon iznenađenja uz narudžbu
-- Spojnica (memory): spoji svih 6 parova u ograničenom broju pokušaja → besplatna dostava (od 40€)
-- Zmija: jedi lopte i rasti — 5 lopti=besplatna dostava (od 40€), 12 lopti=-15% + dostava (od 80€), 20 lopti=-20% + dostava (od 100€)
-- Uhvati dres: hvataj dresove u kutiju kroz 3 razine — razina 1=besplatna dostava (od 40€), razina 2=-15% + dostava (od 80€), razina 3=-20% + dostava (od 100€)
-Klasična besplatna dostava (bez igre) vrijedi SAMO za registrirane/prijavljene kupce na narudžbe od 60€; gosti plaćaju dostavu 7€. Streetwear NEMA besplatnu dostavu.
-Nagrada se automatski primijeni pri narudžbi, kupac ne mora ništa upisivati.
-Slobodno preporuči igrice kad netko pita za popust, nagradu ili kako uštedjeti.
+=== MINI IGRE (/igre) ===
+Mini igre su SAMO ZA ZABAVU. Za njih nema popusta, kodova, nagrada ni besplatne dostave — nikad ne obećavaj nagradu za igru i ne preporučuj igre kao način uštede.
+- Penalty Karijera (/igra): penali level po level protiv sve boljeg golmana; usput zid, mete u kutovima, vjetar i boss svakih 5 levela. Tri života, promašaj košta jedan. Povuci prstom prema golu, a povlačenjem u luku zavrneš loptu. Kovanice iz karijere troše se samo u igri (svlačionica: snaga udarca, falš, nišan i nove lopte). Postoji i Brza partija: klasičnih pet penala.
+- 15 do pehara (/pehar): 15 nogometnih pitanja zaredom, od lakih do ekspertnih. Jedan krivi odgovor i utakmica je gotova. Tri džokera (50:50, tribina, frend) i dvije sigurne razine (Kvart i Prva liga); na vrhu je naslov svjetskog prvaka.
+- Kviz dana (/kviz): 10 nogometnih pitanja, svaki dan novi kviz, isti za sve. 12 sekundi po pitanju, prvi pokušaj dana je službeni, a igranjem iz dana u dan gradiš niz.
+- Žongliranje (/zongliranje): tapkaj loptu da ne padne; udarac po sredini lopte je savršen, a prije igre biraš loptu svog kluba.
+Igrači ruše osobni rekord i mogu podijeliti sliku rezultata (npr. za Instagram story). Bodovi, kovanice i rekordi u igrama vrijede samo u igri.
+Ako netko pita za popust kroz igre, reci iskreno da su igre zasad samo za zabavu.
 
+=== BESPLATNA DOSTAVA ===
+Besplatna dostava vrijedi SAMO za registrirane/prijavljene kupce na narudžbe od 60€ (roba); gosti plaćaju dostavu 7€. Streetwear NEMA besplatnu dostavu.
+{{KOLO}}
 === STRANICE NA SHOPU ===
 /dresovi — cijeli katalog s filterima (liga, klub, igrač, veličina, retro)
 /kompleti — svi kompleti 40€
-/igre — mini igre za popust
+/igre — mini igre, samo za zabavu
 /blog — savjeti o dresovima, vodiči po veličinama
 /dostava-i-povrat — detalji dostave i zamjene veličine
 /o-nama — o Dresify shopu
@@ -80,12 +82,33 @@ KOMPLETI 40€: [Hrvatska Modrić](https://dresifyshop.com/dres/hrvatska-modric-
 - Ako nisi siguran za nešto, reci iskreno i uputi na WhatsApp
 - Ne izmišljaj dresove koji nisu na listi gore`;
 
+// Kolo sreće pali i gasi dućan (Postavke → koloActive). Dok je ugašeno,
+// /kolo vraća 404, pa ga asistent ne smije ni spominjati.
+const KOLO_ON = `
+=== KOLO SREĆE (/kolo) ===
+Pogodnost za kupce koju dućan uključuje kad želi; sada je aktivno. Vrtnje se vežu uz broj mobitela: prva vrtnja je besplatna, a svaka narudžba od 60€ naviše donosi još jednu.
+Na kolu su 5%, 10% ili 20% popusta, besplatna dostava, dodatna vrtnja ili gratis dres, a moguće je i da nema dobitka — ništa nije zajamčeno.
+Osvojena šifra je osobna, jednokratna i vrijedi 48 sati; popust traži minimalan iznos robe (20% od 40€, ostalo od 20€).
+Spomeni kolo samo ako kupac pita za popuste ili pogodnosti.`;
+const KOLO_OFF = `
+Kolo sreće trenutno nije aktivno: ne spominji ga i ne šalji na /kolo.`;
+
+async function systemPrompt() {
+  let kolo = false;
+  try {
+    kolo = (await getSettings()).koloActive;
+  } catch {
+    kolo = false;
+  }
+  return SYSTEM_PROMPT.replace("{{KOLO}}", kolo ? KOLO_ON : KOLO_OFF);
+}
+
 export async function POST(request: Request) {
   const { messages } = await request.json();
 
   const result = streamText({
     model: anthropic("claude-haiku-4-5-20251001"),
-    system: SYSTEM_PROMPT,
+    system: await systemPrompt(),
     messages: (messages as { role: "user" | "assistant"; content: string }[]).slice(-8),
     maxOutputTokens: 400,
   });

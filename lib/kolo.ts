@@ -127,7 +127,7 @@ export async function spin(phone: string | null | undefined): Promise<SpinResult
         kind: prize.kind,
         value: prize.value ?? 0,
         minSubtotal: prize.minSubtotal ?? 0,
-        label: `${prize.label} — Kolo sreće 🎡`,
+        label: `${prize.label} — Kolo sreće`,
         active: true,
         maxUses: 1, // osobna nagrada
         expiresAt: new Date(Date.now() + CODE_HOURS * 3600 * 1000),

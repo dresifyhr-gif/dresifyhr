@@ -382,7 +382,7 @@ export function buildScene(w: number, h: number, dpr: number): Scene {
 
 function paintBoardStrip(w: number, bh: number, dpr: number, goal: boolean) {
   const fs = bh * 0.72;
-  const items = goal ? ["GOL"] : ["DRES|IFY", "PENALTY CUP", "DRES|IFY", "DRESIFYSHOP.COM"];
+  const items = goal ? ["GOL"] : ["DRES|IFY", "PENALTY KARIJERA", "DRES|IFY", "DRESIFYSHOP.COM"];
   const gap = fs * 1.4;
   // Široki canvas; traka se reže točno na kraju cijelog kruga pa se ponavlja bez šava.
   const cap = Math.ceil(w * 3.2);
@@ -622,21 +622,111 @@ export function drawFrame(ctx: CanvasRenderingContext2D, cam: Cam, vib: { left: 
 }
 
 // ── Golman ─────────────────────────────────────────────────────────────────
-const KIT = {
+export type Kit = {
+  shirt: string;
+  shirtDark: string;
+  shirtHi: string;
+  trim: string;
+  /** Broj i natpis na dresu. */
+  print: string;
+  shorts: string;
+  skin: string;
+  skinDark: string;
+  hair: string;
+  glove: string;
+  gloveDark: string;
+  gloveTrim: string;
+  sock: string;
+  boot: string;
+};
+
+const DEFAULT_KIT: Kit = {
   shirt: "#e8ff3c",
   shirtDark: "#a9bb1f",
+  shirtHi: "#f6ffa0",
   trim: "#0b0b0b",
+  print: "#0b0b0b",
   shorts: "#101010",
   skin: "#c58a66",
   skinDark: "#8e5c40",
   hair: "#1f1612",
-  glove: "#f4f5f6",
+  glove: "#ffffff",
   gloveDark: "#9aa1a8",
+  gloveTrim: BRAND.accent,
   sock: "#0f0f0f",
   boot: "#f2f2f2"
 };
 
-export function drawKeeper(ctx: CanvasRenderingContext2D, cam: Cam, pose: Pose) {
+/** Boss: crni dres s limetom, limete rukavice. */
+export const BOSS_KIT: Kit = {
+  shirt: "#1d1f22",
+  shirtDark: "#060707",
+  shirtHi: "#3a3d42",
+  trim: BRAND.accent,
+  print: BRAND.accent,
+  shorts: "#060606",
+  skin: "#b07a58",
+  skinDark: "#734a32",
+  hair: "#0c0907",
+  glove: "#f3ff9a",
+  gloveDark: "#9fb21a",
+  gloveTrim: "#0a0a0a",
+  sock: "#0a0a0a",
+  boot: "#0f0f0f"
+};
+
+/** Limeta sjaj oko bossa: tlo, tijelo i obris (jedan zamućen oblik). */
+export function drawBossAura(ctx: CanvasRenderingContext2D, cam: Cam, pose: Pose, time: number, k = 1) {
+  if (k <= 0.01) return;
+  const s = cam.f / (KEEPER_Z - cam.z);
+  const X = (x: number) => cam.cx + x * s;
+  const Y = (y: number) => cam.hy - (y - cam.y) * s;
+  const j = joints(pose);
+  const pulse = 0.5 + 0.5 * Math.sin(time * 2.6);
+  ctx.save();
+  ctx.globalAlpha = k;
+  // Sjaj na travi ispod nogu
+  const gx = X(pose.x);
+  const gy = Y(0);
+  ctx.save();
+  ctx.translate(gx, gy);
+  ctx.scale(1, 0.2);
+  let g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1.1 * s);
+  g.addColorStop(0, `rgba(${BRAND.accentRgb},${0.26 + pulse * 0.08})`);
+  g.addColorStop(1, `rgba(${BRAND.accentRgb},0)`);
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(0, 0, 1.1 * s, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  // Sjaj iza tijela
+  const cx = X((j.neck.x + j.hip.x) / 2);
+  const cy = Y((j.neck.y + j.hip.y) / 2);
+  const r = 1.15 * s;
+  g = ctx.createRadialGradient(cx, cy, r * 0.05, cx, cy, r);
+  g.addColorStop(0, `rgba(${BRAND.accentRgb},${0.2 + pulse * 0.06})`);
+  g.addColorStop(0.5, `rgba(${BRAND.accentRgb},0.06)`);
+  g.addColorStop(1, `rgba(${BRAND.accentRgb},0)`);
+  ctx.fillStyle = g;
+  ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+  // Obris: trup i glava, zamućeni (golman se crta preko)
+  ctx.shadowColor = `rgba(${BRAND.accentRgb},${0.55 + pulse * 0.2})`;
+  ctx.shadowBlur = Math.max(8, 0.32 * s);
+  ctx.fillStyle = "#0b0b0b";
+  ctx.beginPath();
+  ctx.moveTo(X(j.hip.x - j.r.x * 0.2), Y(j.hip.y - j.r.y * 0.2));
+  ctx.lineTo(X(j.hip.x + j.r.x * 0.2), Y(j.hip.y + j.r.y * 0.2));
+  ctx.lineTo(X(j.shR.x + j.r.x * 0.06), Y(j.shR.y + j.r.y * 0.06));
+  ctx.lineTo(X(j.shL.x - j.r.x * 0.06), Y(j.shL.y - j.r.y * 0.06));
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(X(j.head.x), Y(j.head.y), 0.12 * s, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+export function drawKeeper(ctx: CanvasRenderingContext2D, cam: Cam, pose: Pose, KIT: Kit = DEFAULT_KIT) {
   const s = cam.f / (KEEPER_Z - cam.z);
   const X = (x: number) => cam.cx + x * s;
   const Y = (y: number) => cam.hy - (y - cam.y) * s;
@@ -677,7 +767,7 @@ export function drawKeeper(ctx: CanvasRenderingContext2D, cam: Cam, pose: Pose) 
   for (const [h, k, f] of [[hipL, j.knL, j.ftL], [hipR, j.knR, j.ftR]] as const) {
     limb(h, k, 0.15, KIT.skinDark, KIT.skin);
     limb(mid(k, f, 0.12), f, 0.115, KIT.sock, "#2a2a2a");
-    limb(mid(k, f, 0.12), mid(k, f, 0.3), 0.12, KIT.shirt, "#f6ffa0");
+    limb(mid(k, f, 0.12), mid(k, f, 0.3), 0.12, KIT === DEFAULT_KIT ? KIT.shirt : BRAND.accent, KIT.shirtHi);
     const [fx, fy] = P(f);
     ctx.fillStyle = KIT.boot;
     ctx.beginPath();
@@ -711,7 +801,7 @@ export function drawKeeper(ctx: CanvasRenderingContext2D, cam: Cam, pose: Pose) 
   const t3 = { x: j.shL.x - j.r.x * 0.05, y: j.shL.y - j.r.y * 0.05 };
   const [cx, cy] = P(mid(j.hip, j.neck, 0.55));
   const grad = ctx.createLinearGradient(cx - 0.3 * s, cy - 0.3 * s, cx + 0.3 * s, cy + 0.3 * s);
-  grad.addColorStop(0, "#f4ff8a");
+  grad.addColorStop(0, KIT === DEFAULT_KIT ? "#f4ff8a" : KIT.shirtHi);
   grad.addColorStop(0.45, KIT.shirt);
   grad.addColorStop(1, KIT.shirtDark);
   ctx.fillStyle = grad;
@@ -750,7 +840,7 @@ export function drawKeeper(ctx: CanvasRenderingContext2D, cam: Cam, pose: Pose) 
   ctx.rotate(pose.tilt);
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = KIT.trim;
+  ctx.fillStyle = KIT.print;
   ctx.font = brandFont("heading", Math.max(5, 0.2 * s));
   ctx.fillText("1", 0, 0.07 * s);
   ctx.font = brandFont("heading", Math.max(3.5, 0.075 * s));
@@ -759,9 +849,9 @@ export function drawKeeper(ctx: CanvasRenderingContext2D, cam: Cam, pose: Pose) 
 
   // Ruke: rukav (dres) → podlaktica (crni rukav) → rukavica
   for (const [shd, el, hd] of [[j.shL, j.elL, j.hL], [j.shR, j.elR, j.hR]] as const) {
-    limb(shd, el, 0.12, KIT.shirtDark, KIT.shirt);
-    limb(el, hd, 0.1, KIT.trim, "#2c2c2c");
-    limb(mid(el, hd, 0.6), mid(el, hd, 0.72), 0.105, KIT.shirt, "#f6ffa0");
+    limb(shd, el, 0.12, KIT.shirtDark, KIT.shirt === DEFAULT_KIT.shirt ? KIT.shirt : KIT.shirtHi);
+    limb(el, hd, 0.1, KIT === DEFAULT_KIT ? KIT.trim : "#151515", "#2c2c2c");
+    limb(mid(el, hd, 0.6), mid(el, hd, 0.72), 0.105, KIT === DEFAULT_KIT ? KIT.shirt : BRAND.accent, KIT.shirtHi);
   }
   // Glava
   const [hx, hy] = P(j.head);
@@ -786,13 +876,13 @@ export function drawKeeper(ctx: CanvasRenderingContext2D, cam: Cam, pose: Pose) 
     const [gx, gy] = P(hd);
     const gr = Math.max(2.2, 0.105 * s);
     const gg = ctx.createRadialGradient(gx - gr * 0.3, gy - gr * 0.3, gr * 0.1, gx, gy, gr);
-    gg.addColorStop(0, "#ffffff");
+    gg.addColorStop(0, KIT.glove);
     gg.addColorStop(1, KIT.gloveDark);
     ctx.fillStyle = gg;
     ctx.beginPath();
     ctx.arc(gx, gy, gr, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = BRAND.accent;
+    ctx.strokeStyle = KIT.gloveTrim;
     ctx.lineWidth = Math.max(0.8, gr * 0.3);
     ctx.beginPath();
     ctx.arc(gx, gy, gr * 0.78, Math.PI * 0.2, Math.PI * 0.8);
@@ -817,22 +907,28 @@ export function drawBallShadow(ctx: CanvasRenderingContext2D, cam: Cam, b: BallD
 
 export function drawBall(ctx: CanvasRenderingContext2D, cam: Cam, b: BallDraw, img: HTMLImageElement | null) {
   if (b.alpha <= 0) return;
-  // Trag (motion blur + limeta za jake udarce)
-  const n = b.trail.length;
-  for (let i = 0; i < n; i++) {
-    const t = b.trail[i];
-    const p = proj(cam, t.x, t.y, t.z);
-    const r = BALL_R * p.s * ballScale(t.z);
-    const k = (i + 1) / (n + 1);
-    ctx.globalAlpha = b.alpha * k * 0.18;
-    ctx.fillStyle = b.glow > 0.5 ? BRAND.accent : "#ffffff";
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, r * (0.55 + 0.4 * k), 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = b.alpha;
   const p = proj(cam, b.x, b.y, b.z);
   const r = Math.max(1.5, BALL_R * p.s * ballScale(b.z));
+  // Trag: suženi "rep" (motion blur) od starijih točaka prema lopti; limeta za jake udarce.
+  const n = b.trail.length;
+  if (n > 0) {
+    ctx.lineCap = "round";
+    const col = b.glow > 0.5 ? BRAND.accentRgb : "255,255,255";
+    let prev = proj(cam, b.trail[0].x, b.trail[0].y, b.trail[0].z);
+    for (let i = 1; i <= n; i++) {
+      const q = i < n ? proj(cam, b.trail[i].x, b.trail[i].y, b.trail[i].z) : p;
+      const k = i / n;
+      const rr = i < n ? BALL_R * q.s * ballScale(b.trail[i].z) : r;
+      ctx.strokeStyle = `rgba(${col},${b.alpha * k * k * (b.glow > 0.5 ? 0.42 : 0.26)})`;
+      ctx.lineWidth = Math.max(1, rr * 2 * (0.25 + 0.6 * k));
+      ctx.beginPath();
+      ctx.moveTo(prev.x, prev.y);
+      ctx.lineTo(q.x, q.y);
+      ctx.stroke();
+      prev = q;
+    }
+  }
+  ctx.globalAlpha = b.alpha;
   if (b.glow > 0) {
     const gg = ctx.createRadialGradient(p.x, p.y, r * 0.6, p.x, p.y, r * 2.6);
     gg.addColorStop(0, `rgba(${BRAND.accentRgb},${0.3 * b.glow})`);
@@ -869,4 +965,334 @@ export function drawBall(ctx: CanvasRenderingContext2D, cam: Cam, b: BallDraw, i
   ctx.fillRect(-r, -r, r * 2, r * 2);
   ctx.restore();
   ctx.globalAlpha = 1;
+}
+
+// ── Igrači u zidu i branič (generički DRESIFY dres: crno + limeta) ─────────
+export type PlayerDraw = {
+  x: number;
+  z: number;
+  /** Skok (m). */
+  jy: number;
+  /** Nagib tijela (rad), + = prema +x. */
+  lean: number;
+  /** Faza koraka (rad) i koliko hoda (0..1). */
+  step: number;
+  moving: number;
+  /** Trzaj nakon udarca loptom (0..1). */
+  flinch: number;
+  kind: "wall" | "defender";
+  /** Branič: iskorak -1..1. */
+  lunge: number;
+  /** Varijacija (boja kože, kosa). */
+  look: number;
+  alpha: number;
+  time: number;
+};
+
+const SKINS: [string, string, string][] = [
+  ["#c58a66", "#8e5c40", "#e2a985"],
+  ["#e1b292", "#a8785a", "#f2cdb1"],
+  ["#8a5a3c", "#5a3823", "#a8714d"],
+  ["#d29b74", "#9a6646", "#ebbb98"]
+];
+const HAIRS = ["#1f1612", "#3b2a1c", "#0e0b09", "#6b4a2e", "#151515"];
+
+/** Igrač okrenut prema lopti. Crta se u metrima (y prema gore), pa skalira. */
+export function drawPlayer(ctx: CanvasRenderingContext2D, cam: Cam, p: PlayerDraw) {
+  if (p.alpha <= 0.01) return;
+  const s = cam.f / Math.max(0.3, p.z - cam.z);
+  const g0 = proj(cam, p.x, 0, p.z);
+  const air = clamp(p.jy / 0.35, 0, 1);
+
+  // Sjene: meka ispod stopala + dvije duge prema kameri (reflektori iza gola).
+  ctx.save();
+  ctx.globalAlpha = p.alpha;
+  for (const dir of [-1, 1]) {
+    const a = proj(cam, p.x - 0.16, 0, p.z);
+    const b = proj(cam, p.x + 0.16, 0, p.z);
+    const c = proj(cam, p.x + 0.12 + dir * 0.55, 0, p.z - 1.5);
+    const d = proj(cam, p.x - 0.12 + dir * 0.55, 0, p.z - 1.5);
+    ctx.fillStyle = `rgba(0,0,0,${0.09 * (1 - air * 0.6)})`;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.lineTo(c.x, c.y);
+    ctx.lineTo(d.x, d.y);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+  softShadow(ctx, g0.x, g0.y, (p.kind === "defender" ? 0.42 : 0.32) * s * (1 - air * 0.3), 0.075 * s, 0.5 * p.alpha * (1 - air * 0.55));
+
+  const [skin, skinDark, skinHi] = SKINS[p.look % SKINS.length];
+  const hair = HAIRS[(p.look * 3 + 1) % HAIRS.length];
+  const A = BRAND.accent;
+  const def = p.kind === "defender";
+  const crouch = def ? 0.07 : 0;
+  const HIP = 0.9 - crouch;
+  const SH = 1.44 - crouch;
+  const breathe = Math.sin(p.time * 2.2 + p.look) * 0.008;
+
+  ctx.save();
+  ctx.globalAlpha = p.alpha;
+  ctx.translate(g0.x, g0.y - p.jy * s);
+  ctx.scale(s, -s);
+  ctx.rotate(-p.lean - p.lunge * 0.22);
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  const line = (x0: number, y0: number, x1: number, y1: number, w: number, col: string) => {
+    ctx.strokeStyle = col;
+    ctx.lineWidth = w;
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+  };
+
+  // ── Noge ──
+  for (const side of [-1, 1] as const) {
+    const ph = p.step + (side > 0 ? 0 : Math.PI);
+    const lift = p.moving * Math.max(0, Math.sin(ph)) * 0.07 + air * 0.1;
+    let fx = side * (def ? 0.2 : 0.12) + p.moving * Math.cos(ph) * 0.045;
+    let fy = 0.03 + lift;
+    // Branič: noga prema lopti se ispruži u stranu.
+    if (def && Math.sign(p.lunge) === side) {
+      fx += side * 0.55 * Math.abs(p.lunge);
+      fy = 0.05 + 0.12 * Math.abs(p.lunge);
+    }
+    const hx = side * 0.095;
+    const kx = (hx + fx) / 2 + side * (def ? 0.06 : 0.02);
+    const ky = (HIP + fy) / 2 + 0.02 + air * 0.06;
+    // Bedro (koža), potkoljenica (crna čarapa s tankim limeta rubom), kopačka.
+    line(hx, HIP - 0.06, kx, ky, 0.145, skinDark);
+    line(hx - side * 0.02, HIP - 0.06, kx - side * 0.02, ky, 0.05, skin);
+    const sx0 = kx + (fx - kx) * 0.06;
+    const sy0 = ky + (fy - ky) * 0.06;
+    line(sx0, sy0, fx, fy + 0.04, 0.112, "#0d0d0d");
+    ctx.lineCap = "butt";
+    line(sx0, sy0 + 0.004, sx0 + (fx - sx0) * 0.08, sy0 + (fy - sy0) * 0.08, 0.114, A);
+    ctx.lineCap = "round";
+    // Kopačka: tamna s bijelim potplatom
+    ctx.fillStyle = "#16171a";
+    ctx.beginPath();
+    ctx.ellipse(fx + side * 0.02, fy + 0.012, 0.074, 0.036, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#e9e9e9";
+    ctx.fillRect(fx + side * 0.02 - 0.07, fy - 0.022, 0.14, 0.014);
+  }
+
+  // ── Hlačice ──
+  ctx.fillStyle = "#0b0b0b";
+  ctx.beginPath();
+  ctx.moveTo(-0.17, HIP + 0.08);
+  ctx.lineTo(0.17, HIP + 0.08);
+  ctx.lineTo(0.215, HIP - 0.24);
+  ctx.lineTo(0.025, HIP - 0.22);
+  ctx.lineTo(0, HIP - 0.12);
+  ctx.lineTo(-0.025, HIP - 0.22);
+  ctx.lineTo(-0.215, HIP - 0.24);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = A;
+  ctx.lineWidth = 0.022;
+  ctx.beginPath();
+  ctx.moveTo(-0.185, HIP + 0.04);
+  ctx.lineTo(-0.208, HIP - 0.22);
+  ctx.moveTo(0.185, HIP + 0.04);
+  ctx.lineTo(0.208, HIP - 0.22);
+  ctx.stroke();
+
+  // ── Trup ──
+  const sh = SH + breathe - p.flinch * 0.03;
+  const grad = ctx.createLinearGradient(-0.26, sh, 0.22, HIP);
+  grad.addColorStop(0, "#34373c");
+  grad.addColorStop(0.4, "#16181b");
+  grad.addColorStop(1, "#050505");
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(-0.165, HIP + 0.04);
+  ctx.lineTo(0.165, HIP + 0.04);
+  ctx.lineTo(0.2, sh - 0.12);
+  ctx.quadraticCurveTo(0.235, sh - 0.01, 0.17, sh + 0.02);
+  ctx.lineTo(-0.17, sh + 0.02);
+  ctx.quadraticCurveTo(-0.235, sh - 0.01, -0.2, sh - 0.12);
+  ctx.closePath();
+  ctx.fill();
+  // Bočni paneli i ovratnik (limeta)
+  ctx.strokeStyle = A;
+  ctx.lineWidth = 0.022;
+  ctx.beginPath();
+  ctx.moveTo(-0.19, sh - 0.1);
+  ctx.lineTo(-0.155, HIP + 0.06);
+  ctx.moveTo(0.19, sh - 0.1);
+  ctx.lineTo(0.155, HIP + 0.06);
+  ctx.stroke();
+  ctx.lineWidth = 0.028;
+  ctx.beginPath();
+  ctx.moveTo(-0.065, sh + 0.015);
+  ctx.lineTo(0, sh - 0.075);
+  ctx.lineTo(0.065, sh + 0.015);
+  ctx.stroke();
+  // Mali znak na prsima
+  ctx.fillStyle = A;
+  ctx.fillRect(0.06, sh - 0.17, 0.05, 0.05);
+
+  // ── Ruke ──
+  const shY = sh - 0.03;
+  const arm = (side: -1 | 1) => {
+    const sx = side * 0.205;
+    let ex: number, ey: number, hx: number, hy: number;
+    if (def) {
+      const open = 1 - Math.abs(p.lunge) * 0.3;
+      ex = side * (0.36 + 0.06 * open);
+      ey = shY - 0.2;
+      hx = side * (0.5 + 0.08 * open);
+      hy = shY - 0.36 + Math.sin(p.time * 3 + side) * 0.015;
+    } else {
+      // Zid: ruke prekrižene ispred tijela.
+      ex = side * 0.215;
+      ey = shY - 0.3;
+      hx = -side * 0.035;
+      hy = HIP + 0.01 + p.flinch * 0.06;
+    }
+    line(sx, shY, ex, ey, 0.095, skinDark);
+    line(sx, shY, sx + (ex - sx) * 0.58, shY + (ey - shY) * 0.58, 0.122, "#17191c");
+    ctx.lineCap = "butt";
+    line(sx + (ex - sx) * 0.52, shY + (ey - shY) * 0.52, sx + (ex - sx) * 0.6, shY + (ey - shY) * 0.6, 0.124, A);
+    ctx.lineCap = "round";
+    line(ex, ey, hx, hy, 0.085, skinDark);
+    line(ex - 0.01, ey + 0.01, hx - 0.01, hy + 0.01, 0.035, skin);
+    ctx.fillStyle = skin;
+    ctx.beginPath();
+    ctx.arc(hx, hy, 0.048, 0, Math.PI * 2);
+    ctx.fill();
+  };
+  arm(-1);
+  arm(1);
+
+  // ── Vrat i glava ──
+  const hy = sh + 0.205 - p.flinch * 0.02;
+  const hx = p.flinch * 0.03;
+  line(0, sh - 0.01, hx * 0.5, sh + 0.08, 0.085, skinDark);
+  const hg = ctx.createRadialGradient(hx - 0.04, hy + 0.04, 0.01, hx, hy, 0.12);
+  hg.addColorStop(0, skinHi);
+  hg.addColorStop(1, skinDark);
+  ctx.fillStyle = hg;
+  ctx.beginPath();
+  ctx.arc(hx, hy, 0.112, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = hair;
+  ctx.beginPath();
+  ctx.arc(hx, hy + 0.005, 0.117, 0.12, Math.PI - 0.12);
+  ctx.fill();
+  // Rub svjetla na ramenima (reflektori)
+  ctx.strokeStyle = "rgba(255,255,255,0.14)";
+  ctx.lineWidth = 0.02;
+  ctx.beginPath();
+  ctx.moveTo(-0.2, sh - 0.1);
+  ctx.quadraticCurveTo(-0.22, sh, -0.16, sh + 0.02);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ── Mete ──────────────────────────────────────────────────────────────────
+/** Meta (prsten) u ravnini gola. `hit` 0..1 = bljesak nakon pogotka. */
+export function drawRing(ctx: CanvasRenderingContext2D, cam: Cam, x: number, y: number, r: number, time: number, alpha: number, hit = 0) {
+  if (alpha <= 0.01) return;
+  const p = proj(cam, x, y, GOAL_Z - 0.04);
+  const R = r * p.s;
+  const pulse = 0.5 + 0.5 * Math.sin(time * 3.2 + x);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = `rgba(${BRAND.accentRgb},${0.05 + pulse * 0.03 + hit * 0.25})`;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, R * 0.94, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = `rgba(${BRAND.accentRgb},${0.08 + pulse * 0.05})`;
+  ctx.lineWidth = R * 0.34;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, R, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = `rgba(${BRAND.accentRgb},0.22)`;
+  ctx.lineWidth = R * 0.15;
+  ctx.stroke();
+  ctx.strokeStyle = hit > 0 ? "#ffffff" : BRAND.accent;
+  ctx.lineWidth = Math.max(1.6, R * 0.06);
+  ctx.stroke();
+  // Četiri kratka luka koji kruže
+  ctx.strokeStyle = "rgba(255,255,255,0.55)";
+  ctx.lineWidth = Math.max(1, R * 0.035);
+  const rot = time * 1.4;
+  for (let i = 0; i < 4; i++) {
+    const a = rot + (i * Math.PI) / 2;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, R * 1.2, a, a + 0.42);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ── Vjetar ────────────────────────────────────────────────────────────────
+/** Mala oznaka vjetra iznad gola: strelica + jačina. */
+export function drawWind(ctx: CanvasRenderingContext2D, cx: number, cy: number, wind: number, time: number, alpha: number) {
+  if (alpha <= 0.01 || !wind) return;
+  const dir = Math.sign(wind);
+  const mag = Math.abs(wind);
+  const label = `${mag.toFixed(1).replace(".", ",")} m/s`;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.font = brandFont("body", 11, 700);
+  const tw = ctx.measureText(label).width;
+  const aw = 22 + mag * 7;
+  const w = 16 + 46 + aw + 10 + tw + 14;
+  const h = 26;
+  const x = cx - w / 2;
+  const y = cy - h / 2;
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  ctx.beginPath();
+  ctx.roundRect?.(x, y, w, h, 13);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "left";
+  ctx.font = brandFont("body", 9, 700);
+  ctx.fillStyle = "rgba(255,255,255,0.5)";
+  ctx.fillText("VJETAR", x + 14, cy + 0.5);
+  // Strelica s "chevronima" koji teku u smjeru vjetra
+  const ax0 = x + 16 + 46;
+  const ax1 = ax0 + aw;
+  const l = dir > 0 ? ax0 : ax1;
+  const r = dir > 0 ? ax1 : ax0;
+  ctx.strokeStyle = `rgba(${BRAND.accentRgb},0.35)`;
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(l, cy);
+  ctx.lineTo(r, cy);
+  ctx.stroke();
+  ctx.strokeStyle = BRAND.accent;
+  ctx.beginPath();
+  ctx.moveTo(r - dir * 6, cy - 5);
+  ctx.lineTo(r, cy);
+  ctx.lineTo(r - dir * 6, cy + 5);
+  ctx.stroke();
+  const n = 2;
+  for (let i = 0; i < n; i++) {
+    const t = (time * (0.6 + mag * 0.12) + i / n) % 1;
+    const px = l + (r - l) * t;
+    ctx.globalAlpha = alpha * Math.sin(t * Math.PI) * 0.9;
+    ctx.beginPath();
+    ctx.moveTo(px - dir * 3, cy - 3);
+    ctx.lineTo(px, cy);
+    ctx.lineTo(px - dir * 3, cy + 3);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = alpha;
+  ctx.font = brandFont("body", 11, 700);
+  ctx.fillStyle = "rgba(255,255,255,0.88)";
+  ctx.fillText(label, ax1 + 10, cy + 0.5);
+  ctx.restore();
 }
