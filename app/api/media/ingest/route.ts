@@ -69,13 +69,20 @@ export async function POST(request: Request) {
     const channel = await prisma.mediaItem.count({ where: { runDate, format: "CHANNEL" } });
     const ideas = await prisma.mediaItem.count({ where: { runDate, kind: "IDEA" } });
     const top = await prisma.mediaItem.findFirst({ where: { runDate, kind: "IDEA" }, orderBy: { createdAt: "asc" }, select: { title: true } });
-    await sendPushToOwners({
+    // Utakmice (poluvrijeme/kraj) šalju vlastiti naslov i tekst; inače jutarnji pregled.
+    const customTitle = typeof body.notifyTitle === "string" ? body.notifyTitle.trim().slice(0, 80) : "";
+    const customBody = typeof body.notifyBody === "string" ? body.notifyBody.trim().slice(0, 160) : "";
+    if (customTitle) {
+      await sendPushToOwners({ title: customTitle, body: customBody || "Spremno u Media", url: "/admin/media/?tab=nacrti", tag: `media-${runDate}-${customTitle}`, kind: "media" }).catch(() => null);
+    } else {
+      await sendPushToOwners({
       title: "☀️ Jutarnji pregled",
       body: `${ideas} ${ideas === 1 ? "tema" : "teme"}, ${drafts} ${drafts === 1 ? "nacrt čeka" : "nacrta čekaju"} ocjenu${channel ? `, ${channel} za kanal` : ""}${top ? `. Top: ${top.title.slice(0, 60)}` : ""}`,
       url: "/admin/media/",
       tag: `media-${runDate}`,
       kind: "media"
     }).catch(() => null);
+    }
   }
 
   return NextResponse.json({ ok: errors.length === 0, saved, errors, autopilot });
