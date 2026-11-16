@@ -489,7 +489,7 @@ const clubDefinitions: CollectionDefinition[] = [
     heading: "AC Milan dresovi",
     title: "AC Milan dresovi — od 20€",
     description:
-      "AC Milan dresovi s Modrićem, Maldinijem i Ibrahimovićem — aktualna i retro izdanja.",
+      "AC Milan dresovi s Modrićem i Maldinijem — aktualna i retro izdanja.",
     intro:
       "AC Milan je posebno zanimljiv otkad Modrić nosi crveno-crni dres, pa se traži i kod domaćih navijača. Ovdje su okupljeni svi Milan modeli, od aktualnih do retro komada s jakim karakterom.",
     filter: klubIs("AC Milan")

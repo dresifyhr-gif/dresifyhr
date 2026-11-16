@@ -218,22 +218,16 @@ export async function getTrenirkaProducts(): Promise<Jersey[]> {
   return rows.filter((c) => (c.category ?? "dres") === "trenirka").map(customToJersey);
 }
 
-// Deterministička ocjena 4.5–5.0 + plauzibilan broj recenzija iz sluga.
-function ratingFor(slug: string): { value: number; count: number } {
-  let h = 0;
-  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) | 0;
-  h = Math.abs(h);
-  const steps = [4.5, 4.6, 4.7, 4.8, 4.9, 5.0];
-  return { value: steps[h % steps.length], count: 7 + (h % 48) };
-}
-
 // Slugovi koji su se barem jednom prodali (za prikaz zvjezdica). Best-effort.
+// Više ne treba (ocjene se ne izmišljaju) — bez upita u bazu.
 async function getSoldSlugs(): Promise<Set<string>> {
-  return new Set(await fetchSoldSlugs());
+  return new Set();
 }
 
-function withRating(j: Jersey, sold: Set<string>): Jersey {
-  return sold.has(j.slug) ? { ...j, rating: ratingFor(j.slug) } : j;
+// Ocjene se NE izmišljaju (Google pravila o strukturiranim podacima). Polje `rating`
+// ostaje u tipu za buduće PRAVE ocjene (npr. Google Customer Reviews); dotad se ne puni.
+function withRating(j: Jersey, _sold: Set<string>): Jersey {
+  return j;
 }
 
 // Puni katalog za shop: osnovni (s override-ima) + custom dresovi iz admina, s ocjenama.
@@ -307,9 +301,12 @@ export const getProductBySlug = cache(async (slug: string, base: Jersey | undefi
   let product: Jersey | undefined = c ? customToJersey(c) : await jerseyWithOverride(base);
   if (!product) return product;
 
-  // Ocjena samo ako se dres prodao.
-  const sold = await getSoldSlugs();
-  if (sold.has(slug)) product = { ...product, rating: ratingFor(slug) };
+  // Proizvod sakriven u adminu (override hidden) — stranica radi zbog starih linkova,
+  // ali Google je ne indeksira (noindex u generateMetadata).
+  if (!c && base) {
+    const ov = (await getOverrideMap()).get(base.slug);
+    if (ov?.hidden) product = { ...product, hidden: true };
+  }
   return product;
 });
 

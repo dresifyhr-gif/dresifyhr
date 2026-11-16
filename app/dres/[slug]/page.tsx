@@ -76,6 +76,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     description: `${descName} za ${price}€. Dostava po cijeloj Hrvatskoj za 2-5 dana, plaćanje pouzećem.`,
     image: productMainImage(product), // og:image = prava slika proizvoda (ne generični banner)
     path: `/dres/${product.slug}`,
+    noindex: Boolean(product.hidden),
     keywords: isStreetwear
       ? [`${klub} streetwear`.toLowerCase(), `${igrac} komplet`.toLowerCase(), "streetwear hrvatska"]
       : [`${klub} dres`.toLowerCase(), `${igrac} dres`.toLowerCase(), "nogometni dres"]

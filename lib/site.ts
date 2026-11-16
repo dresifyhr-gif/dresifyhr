@@ -16,8 +16,8 @@ export const CURRENCY_LABEL = "20\u20ac";
 export const DELIVERY_LABEL = "Dostava 2-5 dana po HR";
 // JPEG 1200x630 (~160 KB) umjesto PNG-a od 750 KB — WhatsApp/FB pregledi se brže i
 // pouzdanije učitaju. Nova adresa ujedno zaobilazi FB/CDN keš stare slike.
-// Izvor: public/og-banner-v2.png (zadržan).
-export const DEFAULT_OG_IMAGE = "/og-banner.jpg";
+// Izvor: marketing/og/og.html (1200x630, prave slike proizvoda, bez "svaki dres 20€").
+export const DEFAULT_OG_IMAGE = "/og-dresify-2026.jpg";
 export const DEFAULT_OG_IMAGE_SIZE = { width: 1200, height: 630 } as const;
 export const JERSEY_PRICE_EUR = 20;
 

@@ -25,6 +25,7 @@ export type Jersey = {
   isCustom?: boolean;
   // Ocjena (zvjezdice) — samo za dresove koji su se prodali.
   rating?: { value: number; count: number };
+  hidden?: boolean; // sakriven u adminu → noindex na /dres/<slug>/
   // Kategorija: "dres" (default) ili "streetwear". Streetwear ide na svoju stranicu.
   category?: string;
   // Ručno postavljena količina (stanje) iz admina; prazno = automatska.
