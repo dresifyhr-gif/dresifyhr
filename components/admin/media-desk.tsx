@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { ReklameManager } from "@/components/admin/reklame-manager";
+import { MEDIA_TEAM } from "@/lib/media-team";
 
 // DRESIFY MEDIA — redakcijski stol. Agenti (jutarnja rutina na Igorovom Macu)
 // šalju pregled, ideje i nacrte; ovdje Igor ocjenjuje, uređuje, odobrava i
@@ -56,7 +57,7 @@ type Payload = {
   items: Item[];
 };
 
-type TabId = "danas" | "nacrti" | "kanal" | "kalendar" | "arhiva" | "reklame";
+type TabId = "danas" | "nacrti" | "kanal" | "kalendar" | "arhiva" | "redakcija" | "reklame";
 
 const RATINGS = [
   { v: 4, label: "Odlično", cls: "a-btn-ok" },
@@ -151,6 +152,7 @@ export function MediaDesk({ initialTab = "danas", focusId }: { initialTab?: TabI
     { id: "kanal", label: "Kanal", n: channelNew || undefined },
     { id: "kalendar", label: "Kalendar" },
     { id: "arhiva", label: "Arhiva" },
+    { id: "redakcija", label: "Redakcija" },
     { id: "reklame", label: "Reklame" }
   ];
 
@@ -199,6 +201,8 @@ export function MediaDesk({ initialTab = "danas", focusId }: { initialTab?: TabI
         <DraftList data={data} items={waiting} onChange={replace} onReload={load} empty="Nema nacrta koji čekaju. Novi stižu svako jutro oko 6 h." />
       ) : tab === "kanal" ? (
         <ChannelView data={data} onChange={replace} />
+      ) : tab === "redakcija" ? (
+        <TeamView data={data} runDate={latestRun} />
       ) : tab === "kalendar" ? (
         <CalendarView data={data} onChange={replace} focusId={focusId} />
       ) : (
@@ -1097,6 +1101,87 @@ function AutopilotCard({ data, onSaved }: { data: Payload; onSaved: () => void }
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ————————————————————————————————————————————————————————————————
+// Redakcija: agenti jutarnje rutine kao tim (ime, pozicija, posao, današnji učinak).
+// ————————————————————————————————————————————————————————————————
+function TeamView({ data, runDate }: { data: Payload; runDate: string | null }) {
+  const day = runDate ? data.items.filter((i) => i.runDate === runDate) : [];
+  const brief = day.find((i) => i.kind === "BRIEF");
+  const drafts = day.filter((i) => i.kind === "DRAFT");
+  const count: Record<string, number> = {
+    ideas: day.filter((i) => i.kind === "IDEA").length,
+    verified: day.filter((i) => i.kind !== "BRIEF" && i.verification === "POTVRĐENO").length,
+    autoChecked: drafts.filter((i) => (i as unknown as { autoCheck?: { passed?: boolean } }).autoCheck?.passed).length,
+    drafts: drafts.filter((i) => i.format !== "CHANNEL").length,
+    images: drafts.reduce((n, i) => n + (i.images?.length || 0), 0),
+    reels: drafts.filter((i) => i.format === "REEL").length,
+    channel: drafts.filter((i) => i.format === "CHANNEL").length,
+    sales: drafts.filter((i) => i.series === "Dres priče").length
+  };
+  const unit: Record<string, string> = {
+    ideas: "tema",
+    verified: "potvrđenih",
+    autoChecked: "odobrenih za autopilot",
+    drafts: "nacrta",
+    images: "slika",
+    reels: "Reel",
+    channel: "poruka za kanal",
+    sales: "prodajna objava"
+  };
+  const active = MEDIA_TEAM.filter((m) => m.phase !== "uskoro").length;
+  return (
+    <div className="space-y-4">
+      <div className="a-card flex flex-wrap items-center justify-between gap-3 p-4">
+        <div>
+          <div className="text-[15px] font-semibold text-[var(--a-text)]">Dresify Media redakcija</div>
+          <div className="text-[12.5px] text-[var(--a-text-2)]">
+            {active} aktivnih članova · rade svako jutro u 6:00 na tvom Macu · ti si glavni i odobravaš objave
+          </div>
+        </div>
+        <div className="text-[12.5px] text-[var(--a-text-3)]">
+          {brief ? `Zadnja rutina: ${fmtDay(brief.runDate)}, ${fmtWhen(brief.createdAt).split(" ").at(-1)}` : "Rutina još nije radila"}
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {MEDIA_TEAM.map((m) => {
+          const n = count[m.output];
+          return (
+            <article key={m.id} className={`a-card flex flex-col gap-2.5 p-4 ${m.phase === "uskoro" ? "opacity-60" : ""}`}>
+              <div className="flex items-center gap-3">
+                <div
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-[14px] font-extrabold"
+                  style={{ backgroundColor: m.color, color: "#0b0b0c" }}
+                  aria-hidden
+                >
+                  {m.initials}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[15px] font-bold leading-tight text-[var(--a-text)]">{m.name}</div>
+                  <div className="text-[12.5px] text-[var(--a-text-2)]">{m.role}</div>
+                </div>
+                <span className="ml-auto">{m.phase === "uskoro" ? <Pill>uskoro</Pill> : <Pill tone="good">aktivan</Pill>}</span>
+              </div>
+              <p className="text-[13px] leading-relaxed text-[var(--a-text-2)]">{m.does}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {m.rules.map((r) => (
+                  <span key={r} className="rounded-full bg-[var(--a-surface-2)] px-2 py-0.5 text-[11px] font-semibold text-[var(--a-text-2)]">
+                    {r}
+                  </span>
+                ))}
+              </div>
+              {m.output !== "none" && (
+                <div className="mt-auto border-t border-[var(--a-line)] pt-2 text-[12.5px] text-[var(--a-text-3)]">
+                  Danas: <b className="tabular-nums text-[var(--a-text)]">{n ?? 0}</b> {unit[m.output]}
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
