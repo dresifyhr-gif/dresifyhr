@@ -142,6 +142,8 @@ const httpUrl = (v: unknown): string | undefined => {
   }
 };
 
+const KNOWN_BLOB_HOST = "ugcoxnueuqsdyrd3.public.blob.vercel-storage.com";
+
 // Naš Blob store (iz BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_<storeId>_<tajna>").
 function ownBlobHost(): string | null {
   const m = /^vercel_blob_rw_([a-z0-9]+)_/i.exec(process.env.BLOB_READ_WRITE_TOKEN || "");
@@ -156,8 +158,8 @@ export function isOwnImageUrl(url: string): boolean {
     const host = u.hostname;
     const siteHost = new URL(SITE_URL).hostname;
     if (host === siteHost || host === `www.${siteHost}`) return true;
-    const blob = ownBlobHost();
-    return blob ? host === blob : host.endsWith(".public.blob.vercel-storage.com");
+    // Naš store: iz tokena + poznati host (slike proizvoda već žive tamo).
+    return host === KNOWN_BLOB_HOST || host === ownBlobHost();
   } catch {
     return false;
   }
