@@ -6,7 +6,8 @@ import { useEText } from "../e-i18n";
 
 export type ZiveData = {
   video: ZiveProduct;
-  mix: ZiveProduct;
+  /** Više se ne prikazuje (Igor 18./19.11.) — neobavezno, da se ne šalje u HTML. */
+  mix?: ZiveProduct;
   komplet: ZiveProduct;
   /** img/top/bottom: stari izrezi (više se ne koriste — kadrovi su Blender renderi u /zive/kartice). */
   trenirka: ZiveProduct & { img?: string };

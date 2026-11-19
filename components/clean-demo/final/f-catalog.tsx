@@ -9,7 +9,6 @@ import { DSegmented } from "@/components/clean-demo/d/d-segmented";
 import { hasJerseyGallery } from "@/lib/data/jersey-media";
 import { FLAGSHIP_SLUG, normalizeText, productSupportsSize, type Jersey } from "@/lib/data/jerseys";
 import { hangerThumbSrc } from "@/lib/hanger-thumb";
-import { MIX_ADDON_PRICE_EUR, MIX_PATH, mixImage } from "@/lib/mix";
 import { repairText } from "@/lib/utils";
 
 import { ImeCard, Overline } from "./ime-card";
@@ -24,8 +23,8 @@ import { useEText } from "./e-i18n";
 /*  Filteri su hairline retci (tekst · broj · kvačica kad je odabrano). */
 /*  Kartice: vješalica + vlastita šipka (razmak između kartica), srce,  */
 /*  ime, klub, cijena. Dodir kartice → stranica dresa.                  */
-/*  "Složi svoj mix" je zaseban redak preko cijele širine (ne prekida   */
-/*  šipku u gridu).                                                     */
+/*  Bez retka "Složi svoj mix" (Igor 19.11.: svaka stranica dresa već  */
+/*  nudi loptu i kapu).                                                 */
 /* ------------------------------------------------------------------ */
 
 type Tab = "dresovi" | "trenirka" | "streetwear";
@@ -59,7 +58,6 @@ const CLUB_ORDER = [
 const ADULT_SIZES = ["S", "M", "L", "XL", "XXL"];
 const KID_SIZES = ["116", "128", "140", "152", "164", "176"];
 const PAGE = 24;
-const PROMO_AFTER = 6; // 3 reda na mobitelu, 2 na računalu
 const CLUB_LIMIT = 10;
 
 export function FCatalog({ dresovi, trenirke, streetwear }: { dresovi: Jersey[]; trenirke: Jersey[]; streetwear: Jersey[] }) {
@@ -99,7 +97,7 @@ export function FCatalog({ dresovi, trenirke, streetwear }: { dresovi: Jersey[];
           <DSegmented label={t.catalog} options={options} value={tab} onChange={setTab} />
         </div>
       ) : null}
-      <FBrowser key={tab} products={products} withFilters={tab === "dresovi"} promo={tab === "dresovi"} />
+      <FBrowser key={tab} products={products} withFilters={tab === "dresovi"} />
     </div>
   );
 }
@@ -112,7 +110,7 @@ type Filters = { leagues: string[]; clubs: string[]; sizes: string[] };
 const EMPTY: Filters = { leagues: [], clubs: [], sizes: [] };
 const toggle = (arr: string[], v: string) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
-function FBrowser({ products, withFilters, promo }: { products: Jersey[]; withFilters: boolean; promo: boolean }) {
+function FBrowser({ products, withFilters }: { products: Jersey[]; withFilters: boolean }) {
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<Sort>("recommended");
   const [f, setF] = useState<Filters>(EMPTY);
@@ -199,9 +197,6 @@ function FBrowser({ products, withFilters, promo }: { products: Jersey[]; withFi
   const active = f.leagues.length + f.clubs.length + f.sizes.length;
   const clear = () => setF(EMPTY);
   const visible = list.slice(0, shown);
-  const showPromo = promo && !q && active === 0 && sort === "recommended";
-  const head = showPromo ? visible.slice(0, PROMO_AFTER) : visible;
-  const tail = showPromo ? visible.slice(PROMO_AFTER) : [];
 
   const filterBody = (
     <FilterList
@@ -296,9 +291,7 @@ function FBrowser({ products, withFilters, promo }: { products: Jersey[]; withFi
           ) : (
             <>
               {/* katalog je na naslovnici daleko ispod prvog ekrana → bez priority (ne otima pojas LCP ploči scene) */}
-              <Grid items={head} />
-              {showPromo ? <MixRow /> : null}
-              {tail.length ? <Grid items={tail} /> : null}
+              <Grid items={visible} />
             </>
           )}
         </div>
@@ -534,40 +527,5 @@ function PhotoCard({ product, priority }: { product: Jersey; priority: boolean }
         </div>
       </Link>
     </article>
-  );
-}
-
-/* "Složi svoj mix" — redak preko cijele širine u jeziku kartica "ime": tamna ploha, tanka
-   šipka, obrisana riječ MIX iza, prave fotografije lopte i kape (bez plakata). */
-function MixRow() {
-  const t = useEText();
-  return (
-    <Link href={MIX_PATH} className="group my-9 grid grid-cols-[42%_minmax(0,1fr)] items-center gap-4 border-y border-[#ffffff12] py-4 sm:grid-cols-[300px_minmax(0,1fr)] sm:gap-8 lg:my-12">
-      <div
-        aria-hidden
-        className="relative aspect-[4/3] overflow-hidden bg-[#121212]"
-        style={{ containerType: "size", backgroundImage: "radial-gradient(ellipse 75% 60% at 50% 50%, #1d1d1d 0%, #141414 55%, #0f0f0f 100%)" }}
-      >
-        <span className="ime-outline absolute left-1/2 top-1/2 block -translate-x-1/2 -translate-y-1/2 whitespace-nowrap leading-[0.8]" style={{ fontSize: "62cqh" }}>
-          MIX
-        </span>
-        <span className="absolute inset-x-0 top-[14%] h-[3px] -translate-y-1/2" style={{ background: "linear-gradient(180deg,#f3f3f5 0 25%,#55555a 25% 50%,#d9d9dc 50% 75%,#121216 75% 100%)" }} />
-        <span className="absolute bottom-[10%] left-[10%] block h-[56%] w-[38%] transition-transform duration-500 group-hover:-translate-y-1">
-          <Image src={mixImage("lopta", "hrvatska")} alt="" fill sizes="(max-width: 768px) 20vw, 130px" className="object-contain drop-shadow-[0_14px_16px_rgba(0,0,0,0.55)]" />
-        </span>
-        <span className="absolute bottom-[12%] right-[9%] block h-[50%] w-[40%] transition-transform duration-500 group-hover:-translate-y-1">
-          <Image src={mixImage("kapa", "hrvatska")} alt="" fill sizes="(max-width: 768px) 20vw, 130px" className="object-contain drop-shadow-[0_14px_16px_rgba(0,0,0,0.55)]" />
-        </span>
-      </div>
-      <div className="min-w-0">
-        <p className="ime-display text-[20px] leading-none text-white sm:text-[26px]">
-          {t.mixRow} <span className="text-white/55">+{MIX_ADDON_PRICE_EUR} €.</span>
-        </p>
-        <p className="mt-2 text-[13px] leading-snug text-white/50 sm:text-[14.5px]">{t.mixRowBody}</p>
-        <p className="mt-2.5 text-[13.5px] text-white/85">
-          {t.mixRowCta} <span aria-hidden className="text-white/40">→</span>
-        </p>
-      </div>
-    </Link>
   );
 }

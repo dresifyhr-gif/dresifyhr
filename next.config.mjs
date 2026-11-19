@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 //   components/site/product-card.tsx       → components/novi/product-card.tsx (kartica "ime", vješalica)
 //   components/providers/cart-provider.tsx → components/novi/cart-provider.tsx (let u košaricu, bez starog prozora)
 //   components/site/mix-jersey-chooser.tsx → components/novi/mix-jersey-chooser.tsx (/slozi-mix: vješalica, ne bijela foto)
+//   components/site/catalog-browser.tsx    → components/novi/catalog-browser.tsx (popisi: kartice "ime", kontrole bez kutija, bez mix-promoa)
 const NOVI_DIZAJN = process.env.NEXT_PUBLIC_NOVI_DIZAJN === "1";
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const NOVI_SWAPS = [
@@ -20,6 +21,7 @@ const NOVI_SWAPS = [
   [/[\\/]components[\\/]site[\\/]product-card\.tsx$/, "components/novi/product-card.tsx"],
   [/[\\/]components[\\/]providers[\\/]cart-provider\.tsx$/, "components/novi/cart-provider.tsx"],
   [/[\\/]components[\\/]site[\\/]mix-jersey-chooser\.tsx$/, "components/novi/mix-jersey-chooser.tsx"],
+  [/[\\/]components[\\/]site[\\/]catalog-browser\.tsx$/, "components/novi/catalog-browser.tsx"],
   // stari chrome iz app/layout.tsx (OFF grana) se u novom dizajnu ne iscrtava → prazne zamjene, da njegov JS
   // (framer-motion, stara ladica/prozor/navigacija) ne ide u layout chunk svake stranice
   [/[\\/]components[\\/]site[\\/](navbar|announcement-bar|footer|bottom-nav|cart-drawer|add-to-cart-modal|social-proof|chat-widget)\.tsx$/, "components/novi/legacy-chrome-off.tsx"],

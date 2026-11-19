@@ -19,7 +19,7 @@ const SHOP: L[] = [
   { hr: "Kompleti", en: "Kits", href: "/kompleti/" },
   { hr: "Trenirke", en: "Tracksuits", href: "/trenirke/" },
   { hr: "Streetwear", en: "Streetwear", href: "/streetwear/" },
-  { hr: "Složi svoj mix", en: "Build your mix", href: "/slozi-mix/" },
+  // Igor 19.11.: bez poveznice "Složi svoj mix" — svaka stranica dresa već nudi loptu i kapu (ruta /slozi-mix ostaje).
 ];
 // Isto kao seoFooterLinks u starom podnožju (components/site/footer.tsx).
 const POPULAR: L[] = [

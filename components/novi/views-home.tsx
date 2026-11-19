@@ -71,7 +71,6 @@ export async function NoviHome({ below }: { below?: ReactNode }) {
   const priceOf = (slug: string, fallback: number) => ePrice(all.find((j) => j.slug === slug)?.price ?? fallback);
   const zive: ZiveData = {
     video: { href: dresHref("spanjolska-yamal-nr19-bijeli-2-stars"), price: priceOf("spanjolska-yamal-nr19-bijeli-2-stars", 20), label: "Španjolska · Yamal 19" },
-    mix: { href: "/slozi-mix/", price: "+10 €", label: "Složi svoj mix" },
     komplet: { href: dresHref("barcelona-yamal-komplet"), price: priceOf("barcelona-yamal-komplet", 40), label: "Barcelona · Yamal komplet" },
     trenirka: { href: dresHref("argentina-messi-nr10"), price: priceOf("argentina-messi-nr10", 35), label: "Argentina · Messi 10", img: "/ormar/hanger/argentina-messi-nr10--jakna.webp" },
     street: {
