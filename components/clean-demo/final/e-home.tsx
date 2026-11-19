@@ -113,7 +113,18 @@ export function EHome({ items, children, between, title }: { items: OrmarRailIte
       off = true;
     };
   }, []);
-  const Hero: ComponentType<OvalHeroProps> | null = alt === null ? OvalHero : alt === "wait" ? null : alt;
+  // dijagnoza pada na iPhoneu (19.11.): ?dx=nohero,nocat,nozive — dijelovi naslovnice se ne iscrtavaju
+  const [dx, setDx] = useState<string[]>([]);
+  useLayoutEffect(() => {
+    try {
+      const q = new URLSearchParams(window.location.search).get("dx");
+      if (q) setDx(q.split(","));
+    } catch {
+      /* bez URL-a */
+    }
+  }, []);
+  const HeroBase: ComponentType<OvalHeroProps> | null = alt === null ? OvalHero : alt === "wait" ? null : alt;
+  const Hero = dx.includes("nohero") ? null : HeroBase;
   const [ready, setReady] = useState(false);
   const [revealed, setRevealed] = useState(false);
   // povratak sa stranice dresa: bez 2D zamjene (druga šipka, drugi dres u fokusu) — ostaje
@@ -519,10 +530,10 @@ export function EHome({ items, children, between, title }: { items: OrmarRailIte
 
       {title}
 
-      {between}
+      {dx.includes("nozive") ? null : between}
 
       {/* prijelaz u katalog: oznaka poglavlja na hairline crti */}
-      <section id="dresovi" data-ime-catalog aria-label={tx.catalog} className="scroll-mt-[72px] pb-24 pt-10 lg:pt-8">
+      <section id="dresovi" data-ime-catalog hidden={dx.includes("nocat") || undefined} aria-label={tx.catalog} className="scroll-mt-[72px] pb-24 pt-10 lg:pt-8">
         <div className="mx-auto w-full max-w-[1280px] px-4 sm:px-8">
           <div className="relative flex items-baseline gap-4 border-t border-[#ffffff14] pt-5">
             <span aria-hidden className="absolute -top-px left-0 h-px w-14 bg-[#e8ff3c]" />

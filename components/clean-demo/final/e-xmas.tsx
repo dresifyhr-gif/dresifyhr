@@ -19,12 +19,15 @@ import { daysLeft, deadlineLabel, deadlinePassed } from "@/lib/christmas";
 export const XBAR_H = 30;
 
 export function useXmasOn() {
-  return useShopSettings().christmasOn;
+  // Igor 19.11.: božićna traka u novom dizajnu isključena (smetala je šipki kruga). Vrati: `return on;`
+  const on = useShopSettings().christmasOn;
+  return on && false;
 }
 
 /** Tanka traka iznad navigacije. `hidden`: na skrolu se sklopi (živa traka se odlista s ekrana). */
 export function XmasBar({ hidden = false }: { hidden?: boolean }) {
-  const { christmasOn, christmasDeadline } = useShopSettings();
+  const { christmasDeadline } = useShopSettings();
+  const christmasOn = useXmasOn();
   // Dani do roka računaju se tek u pregledniku (server nema "danas" kupca) — isto kao živa traka:
   // tekst nevidljiv dok se rok ne izračuna, da nakon roka ne bljesne stara poruka.
   const [left, setLeft] = useState<number | null>(null);
@@ -85,12 +88,6 @@ function XmasHat() {
 
 /** Znak zaglavlja; s uključenom temom dobije kapicu na "D". */
 export function XWordmark({ size }: { size: number }) {
-  const on = useXmasOn();
-  if (!on) return <Wordmark size={size} />;
-  return (
-    <span className="relative inline-block font-heading leading-none" style={{ fontSize: size }}>
-      <XmasHat />
-      <Wordmark size={size} />
-    </span>
-  );
+  // Igor 19.11.: kapica maknuta s loga (traka ostaje)
+  return <Wordmark size={size} />;
 }

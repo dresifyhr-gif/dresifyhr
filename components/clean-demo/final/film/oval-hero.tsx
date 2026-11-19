@@ -328,7 +328,18 @@ const newSlot = (): Slot => ({
   c: { t: "", o: "", z: "", rt: "", ro: "", rd: "", rz: "", ct: "", co: "" },
 });
 
-const picStyle = (p: Pic) => ({ width: `${p[1]}px`, height: `${p[2]}px`, transform: `translate(${(-p[3]).toFixed(1)}px,${(-p[4]).toFixed(1)}px)` });
+/* iPhone pad (19.11., potvrđeno zapisnikom: WebContent > 2 GB): dres se slagao u punoj veličini slike (~647×900 CSS px) pa
+   smanjivao transformom — WebKit drži sloj u PUNOJ veličini × DPR² (≈21 MB po sloju, ~60 slojeva). Sad se slaže u
+   veličini prikaza (PK × slika), a transform se dijeli s PK → isti izgled, ~6× manje memorije. */
+let pkCache = 0;
+function PK() {
+  if (!pkCache) pkCache = typeof window === "undefined" ? 1 : deskVariant() ? 0.8 : 0.42;
+  return pkCache;
+}
+const picStyle = (p: Pic) => {
+  const k = PK();
+  return { width: `${(p[1] * k).toFixed(1)}px`, height: `${(p[2] * k).toFixed(1)}px`, transform: `translate(${(-p[3] * k).toFixed(1)}px,${(-p[4] * k).toFixed(1)}px)` };
+};
 
 /** dodijeli fotografiju strani (samo zapis; na <img> ide tek u loadFace, kad je strana potrebna) */
 function setFacePic(f: Face, src: string) {
@@ -349,6 +360,17 @@ function setFacePic(f: Face, src: string) {
 // `/_next/image/` (s kosom crtom): trailingSlash:true bi inače svaki zahtjev 308-preusmjerio (+1 krug po slici)
 const rearUrl = (src: string) => (src.startsWith("/") ? `/_next/image/?url=${encodeURIComponent(src)}&w=384&q=75` : src);
 /** postavi sliku na <img> (pomak kuke kao transform, maska sjene = silueta); ok tek nakon dekodiranja */
+/* iPhone (19.11.): Safari je rušio naslovnicu (WebContent) — na mobitelu "lite": sjena dresa bez CSS maske (filter
+   brightness na samoj slici), ambijent bez maske i bez blend-modea. ?ovx=full vraća staro; ?ovx=off|noamb|nosd za dijagnozu. */
+let ovxCache: Set<string> | null = null;
+function ovx(): Set<string> {
+  if (ovxCache) return ovxCache;
+  if (typeof window === "undefined") return new Set();
+  const q = new URLSearchParams(window.location.search).get("ovx") ?? "";
+  ovxCache = new Set(q.split(",").filter(Boolean));
+  return ovxCache;
+}
+const isLite = () => typeof window !== "undefined" && !ovx().has("full") && !deskVariant();
 function loadFace(f: Face, onReady: () => void, rear = false) {
   if (!f.src || f.set === f.src || !f.img || !f.pic) return;
   const src = f.src;
@@ -357,7 +379,7 @@ function loadFace(f: Face, onReady: () => void, rear = false) {
   f.ok = false;
   f.img.src = url;
   Object.assign(f.pic.style, picStyle(flatOf(src)));
-  if (f.sd) {
+  if (f.sd && !isLite()) {
     const mk = `url("${url}")`;
     f.sd.style.setProperty("-webkit-mask-image", mk);
     f.sd.style.setProperty("mask-image", mk);
@@ -424,6 +446,12 @@ export const OVAL_CSS = `
 .ov[data-moving] .ov-gl{will-change:transform,opacity}
 .ov-cs{position:absolute;left:0;top:0;display:block;opacity:0;z-index:7;pointer-events:none;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.8),rgba(0,0,0,.4) 45%,rgba(0,0,0,0))}
 @media (prefers-reduced-motion:reduce){.ov-amb{transition:none}}
+.ov[data-lite] .ov-amb{mix-blend-mode:normal;-webkit-mask-image:none!important;mask-image:none!important}
+.ov[data-lite] .ov-amb>i{mix-blend-mode:normal}
+.ov[data-lite] .ov-sd{display:none}
+.ov[data-ovx-off] .ov-amb,.ov[data-ovx-off] .ov-j,.ov[data-ovx-off] .ov-r,.ov[data-ovx-off] .ov-occl,.ov[data-ovx-off] .ov-cs,.ov[data-ovx-off] .ov-gl{display:none}
+.ov[data-ovx-noamb] .ov-amb{display:none}
+.ov[data-ovx-nosd] .ov-sd{display:none}
 `;
 
 /* ---------- auto-okret ---------- */
@@ -538,6 +566,15 @@ export const OvalHero = memo(function OvalHero({ list, sceneH, desk, startIndex,
   const kickRef = useRef<() => void>(() => undefined);
   const autoRef = useRef<(ms: number) => void>(() => undefined);
 
+  const liteRef = useRef(false);
+  useLayoutEffect(() => {
+    liteRef.current = isLite();
+    const root = rootRef.current;
+    if (!root) return;
+    const f = ovx();
+    if (liteRef.current) root.setAttribute("data-lite", "");
+    for (const k of ["off", "noamb", "nosd"]) if (f.has(k)) root.setAttribute(`data-ovx-${k}`, "");
+  });
   const phoneRef = useRef(!desk);
   phoneRef.current = !desk;
   const topRef = useRef(top);
@@ -689,7 +726,8 @@ export const OvalHero = memo(function OvalHero({ list, sceneH, desk, startIndex,
       const sx = sc * (TURN_MIN + (1 - TURN_MIN) * Math.sqrt(af));
       const X = F.dx + p.hx * F.s;
       const Y = F.dy + p.hy * F.s;
-      const t = `translate3d(${X.toFixed(2)}px,${Y.toFixed(2)}px,0) scale(${sx.toFixed(4)},${sc.toFixed(4)})`;
+      const pk = PK();
+      const t = `translate3d(${X.toFixed(2)}px,${Y.toFixed(2)}px,0) scale(${(sx / pk).toFixed(4)},${(sc / pk).toFixed(4)})`;
       if (t !== r.c.t) r.el.style.transform = r.c.t = t;
 
       // svjetlina: sprijeda pad od fokusa × osvjetljenje puta; straga stropne ploče (mjereno) × BACK_B; bijeli dresovi izvan fokusa prigušeni
@@ -702,7 +740,9 @@ export const OvalHero = memo(function OvalHero({ list, sceneH, desk, startIndex,
       const ha = Math.max(0.001, 1 - b).toFixed(3);
       if (ha !== face.ha) {
         face.ha = ha;
-        if (face.sd) face.sd.style.opacity = ha;
+        if (liteRef.current) {
+          if (face.img) face.img.style.filter = Number(ha) > 0.004 ? `brightness(${(1 - Number(ha)).toFixed(3)})` : "";
+        } else if (face.sd) face.sd.style.opacity = ha;
       }
 
       // prvi prikaz dekodirane slike: kratko pretapanje (na bočnom kraju, gdje je dres ionako skriven, odmah)
@@ -739,7 +779,7 @@ export const OvalHero = memo(function OvalHero({ list, sceneH, desk, startIndex,
           setReflPic(r, face === r.faces[1] ? rearUrl(face.src) : face.src);
           const rz = rear ? "8" : "9";
           if (rz !== r.c.rz) r.refl.style.zIndex = r.c.rz = rz;
-          const rt = `translate3d(${X.toFixed(2)}px,${(2 * Ya - Y).toFixed(2)}px,0) scale(${sx.toFixed(4)},${(-sc).toFixed(4)})`;
+          const rt = `translate3d(${X.toFixed(2)}px,${(2 * Ya - Y).toFixed(2)}px,0) scale(${(sx / pk).toFixed(4)},${(-sc / pk).toFixed(4)})`;
           if (rt !== r.c.rt) r.refl.style.transform = r.c.rt = rt;
           const ro = Math.min(0.5, (phoneRef.current ? 0.5 : 0.42) * b * (0.3 + 0.7 * ra) * op).toFixed(3);
           if (ro !== r.c.ro) r.refl.style.opacity = r.c.ro = ro;
