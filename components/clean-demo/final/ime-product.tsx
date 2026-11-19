@@ -538,6 +538,20 @@ export function ImeProduct({ product, names, hanger, image, description, similar
           </section>
         ) : null}
 
+        {/* Igor 19.11.: slični dresovi PRIJE opisa i čestih pitanja */}
+        {similar.length ? (
+          <section aria-labelledby="ime-similar" className="mt-16 border-t border-[#ffffff14] pt-10 lg:mt-20 lg:pt-14">
+            <h2 id="ime-similar" className="text-[32px] text-white lg:text-[38px]">
+              <span aria-hidden className="mb-3.5 block h-[2px] w-10 bg-[#e8ff3c]" />
+              {T.similar(isTrenirka ? "trenirka" : product.category === "streetwear" ? "streetwear" : "dres")}
+            </h2>
+            <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-8 lg:grid-cols-4 lg:gap-x-6">
+              {similar.map((c) => (
+                <ImeCard key={c.slug} c={c} />
+              ))}
+            </div>
+          </section>
+        ) : null}
         <div className="mt-14 grid gap-12 border-t border-[#ffffff14] pt-10 lg:mt-16 lg:grid-cols-2 lg:gap-16 lg:pt-14">
           {description.length ? (
             <section aria-labelledby="ime-about">
@@ -587,19 +601,6 @@ export function ImeProduct({ product, names, hanger, image, description, similar
 
         {after}
 
-        {similar.length ? (
-          <section aria-labelledby="ime-similar" className="mt-16 border-t border-[#ffffff14] pt-10 lg:mt-20 lg:pt-14">
-            <h2 id="ime-similar" className="text-[32px] text-white lg:text-[38px]">
-              <span aria-hidden className="mb-3.5 block h-[2px] w-10 bg-[#e8ff3c]" />
-              {T.similar(isTrenirka ? "trenirka" : product.category === "streetwear" ? "streetwear" : "dres")}
-            </h2>
-            <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-8 lg:grid-cols-4 lg:gap-x-6">
-              {similar.map((c) => (
-                <ImeCard key={c.slug} c={c} />
-              ))}
-            </div>
-          </section>
-        ) : null}
       </div>
 
       {/* mobitel: traka za kupnju */}

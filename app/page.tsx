@@ -81,7 +81,7 @@ export default async function HomePage() {
         below={
           <>
             <Ps5HomeBanner followers={followers} />
-            <GiftsByBudget />
+            {/* Igor 19.11.: "Pokloni po budžetu" maknuti s nove naslovnice */}
             <noviHome.CategoryLinks links={CATEGORY_LINKS} locale={locale} />
             {show("faq") && <FaqSection />}
             <HomeSeoText />
