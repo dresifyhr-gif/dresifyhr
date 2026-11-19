@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Heart, Package, Shirt, Truck, Zap, Shield } from "lucide-react";
 
 import { buildMetadata } from "@/lib/seo";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 
 export const metadata: Metadata = buildMetadata({
   title: "O nama — nogometni dresovi iz Hrvatske",
@@ -43,7 +44,7 @@ const values = [
 
 export default function ONamaPage() {
   return (
-    <main>
+    <main data-nv-flat={NOVI_DIZAJN ? "o-nama" : undefined}>
       {/* Hero */}
       <section className="section-pad">
         <div className="page-shell max-w-3xl text-center">

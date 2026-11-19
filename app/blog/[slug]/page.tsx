@@ -10,6 +10,7 @@ import { getProductBySlug } from "@/lib/data/product-overrides";
 import { getCollectionsForBlogPost } from "@/lib/data/seo-collections";
 import { buildArticleSchema, buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { formatCroatianDate, repairText } from "@/lib/utils";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 
 type BlogPostPageProps = {
   params: {
@@ -98,7 +99,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const updated = post.updatedAt && post.updatedAt !== post.publishedAt ? post.updatedAt : null;
 
   return (
-    <section className="section-pad bg-[#0a0a0a]">
+    <section className="section-pad bg-[#0a0a0a]" data-nv-flat={NOVI_DIZAJN ? "blog" : undefined}>
       <div className="page-shell max-w-4xl">
         <script
           type="application/ld+json"

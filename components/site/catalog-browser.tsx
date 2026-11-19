@@ -28,11 +28,16 @@ type CatalogBrowserProps = {
   headingTitle?: string;
   headingDesc?: string;
   showMixPromo?: boolean | MixVariant[]; // kartice "Složi svoj mix" na početku popisa
-  countKind?: "jerseys" | "kits"; // brojač u zaglavlju: "N dresova" ili "N kompleta"
+  countKind?: "jerseys" | "kits" | "items"; // brojač u zaglavlju: "N dresova", "N kompleta" ili "N modela" (trenirke, streetwear)
   soldOutLast?: boolean; // rasprodani modeli na kraj (landing stranice)
   // Ako je zadan, "Prikaži još" je pravi <a href> (npr. na popis svih dresova za
   // crawlere / bez JS-a); s JS-om se klik presretne i samo doda kartice.
   moreHref?: string;
+  // "apparel" (trenirke, streetwear): bez filtera liga/igrač/retro/dugi rukav (popisi su za dresove);
+  // klub samo ako ih je više, veličine = stvarni raspon tih proizvoda (npr. 128/134, XS–L). Zadano "all" = kao prije.
+  filterSet?: "all" | "apparel";
+  // naziv grupe "Klub" (streetwear: "Kolekcija" — Cloud, Corteiz… nisu klubovi); zadano t.catalog.club
+  clubLabel?: string;
 };
 
 // Rasprodano = nijedna veličina nije dostupna (isto pravilo kao ProductCard).
@@ -134,8 +139,26 @@ function FilterSection({
   );
 }
 
-export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc, showMixPromo = false, countKind = "jerseys", soldOutLast = false, moreHref }: CatalogBrowserProps) {
+export function CatalogBrowser({ products, compactHeader = false, headingLabel, headingTitle, headingDesc, showMixPromo = false, countKind = "jerseys", soldOutLast = false, moreHref, filterSet = "all", clubLabel }: CatalogBrowserProps) {
   const { t, locale } = useLanguage();
+  const apparel = filterSet === "apparel";
+  // apparel: veličine iz samih proizvoda (ravni popis, kanonski redoslijed prvog pojavljivanja)
+  const apparelSizes = useMemo(() => {
+    if (!apparel) return [];
+    const out: string[] = [];
+    for (const p of products) {
+      for (const s of getJerseySizeOptions(p).adults) if (!out.includes(s)) out.push(s);
+    }
+    // dječje (brojevi, i spojene 158/164) po visini, zatim slovne XS → XXL
+    const LETTERS = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+    const rank = (s: string) => {
+      const n = parseInt(s, 10);
+      if (!Number.isNaN(n)) return n + (s.includes("/") ? -0.5 : 0);
+      const i = LETTERS.indexOf(s.toUpperCase());
+      return 1000 + (i < 0 ? 99 : i);
+    };
+    return out.sort((a, b) => rank(a) - rank(b));
+  }, [apparel, products]);
   // Klubovi za filter se grade iz STVARNIH proizvoda (uključujući ručno dodane/custom),
   // ne iz statičnog kataloga — inače novi klub/repka (npr. Palestina) nema svoj filter/grupu.
   const availableClubs = useMemo(
@@ -237,7 +260,14 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           selectedPlayers.some((player) => matchesPlayerFilter(product, player));
         const matchesSize =
           !selectedSizes.length ||
-          selectedSizes.some((size) => productSupportsSize(product, size));
+          selectedSizes.some((size) =>
+            apparel
+              ? (() => {
+                  const o = getJerseySizeOptions(product);
+                  return !o.adultsOutOfStock && o.adults.includes(size) && !o.soldOutSizes.includes(size);
+                })()
+              : productSupportsSize(product, size)
+          );
         const matchesRetro = !retroOnly || product.retro;
         const matchesLong = !longSleeveOnly || product.category === "dugi-rukav";
 
@@ -313,7 +343,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
     selectedPlayers,
     selectedSizes,
     sortBy,
-    soldOutLast
+    soldOutLast,
+    apparel
   ]);
 
   const activeTags = [
@@ -384,7 +415,9 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
         <div>
           <p className="text-xs uppercase tracking-[0.32em] text-white/45">{t.catalog.filters}</p>
           <p className="mt-2 text-2xl uppercase leading-none text-white">{t.catalog.filterTitle}</p>
-          <p className="mt-2 text-sm text-white/45">{t.catalog.filterDesc}</p>
+          <p className="mt-2 text-sm text-white/45">{apparel
+            ? `${clubLabel ?? t.catalog.club} ${locale === "en" ? "and size" : "i veličina"}.`
+            : t.catalog.filterDesc}</p>
         </div>
         {hasAnyFilter ? (
           <button
@@ -397,6 +430,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
         ) : null}
       </div>
 
+      {apparel ? null : (
       <FilterSection
         title={t.catalog.league}
         count={selectedLeagues.length}
@@ -417,9 +451,11 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           ))}
         </div>
       </FilterSection>
+      )}
 
+      {apparel && clubOptions.length < 2 ? null : (
       <FilterSection
-        title={t.catalog.club}
+        title={clubLabel ?? t.catalog.club}
         count={selectedClubs.length}
         isOpen={openSections.klub}
         onToggle={() => toggleSection("klub")}
@@ -452,7 +488,9 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           </div>
         </div>
       </FilterSection>
+      )}
 
+      {apparel ? null : (
       <FilterSection
         title={t.catalog.player}
         count={selectedPlayers.length}
@@ -473,6 +511,7 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           ))}
         </div>
       </FilterSection>
+      )}
 
       <FilterSection
         title={t.catalog.size}
@@ -480,6 +519,24 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
         isOpen={openSections.velicina}
         onToggle={() => toggleSection("velicina")}
       >
+        {apparel ? (
+          <div className="flex flex-wrap gap-2">
+            {apparelSizes.map((size) => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => setSelectedSizes((current) => toggleFilterValue(current, size))}
+                className={`rounded-[6px] border px-4 py-2.5 text-sm font-semibold transition duration-200 ease-out ${
+                  selectedSizes.includes(size)
+                    ? "border-accent bg-accent text-black"
+                    : "border-white/10 bg-[#111111] text-white hover:border-accent"
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        ) : (
         <div className="space-y-4">
           <div>
             <p className="mb-3 text-xs uppercase tracking-[0.28em] text-white/45">{t.catalog.adults}</p>
@@ -520,8 +577,11 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
             </div>
           </div>
         </div>
+        )}
       </FilterSection>
 
+      {apparel ? null : (
+      <>
       <FilterSection
         title={t.catalog.retro}
         count={retroOnly ? 1 : 0}
@@ -581,6 +641,8 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
           </span>
         </button>
       </FilterSection>
+      </>
+      )}
     </div>
   );
 
@@ -599,7 +661,13 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
             </p>
           </div>
           <span className="inline-flex w-fit rounded-[4px] bg-accent px-4 py-2 text-sm font-semibold text-black">
-            {countKind === "kits" ? t.catalog.countKits(filteredProducts.length) : t.catalog.count(filteredProducts.length)}
+            {countKind === "kits"
+              ? t.catalog.countKits(filteredProducts.length)
+              : countKind === "items"
+                ? locale === "en"
+                  ? `${filteredProducts.length} ${filteredProducts.length === 1 ? "item" : "items"}`
+                  : `${filteredProducts.length} ${filteredProducts.length % 10 === 1 && filteredProducts.length % 100 !== 11 ? "model" : "modela"}`
+                : t.catalog.count(filteredProducts.length)}
           </span>
         </div>
       )}
@@ -620,7 +688,13 @@ export function CatalogBrowser({ products, compactHeader = false, headingLabel, 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
-                placeholder={t.catalog.searchPlaceholder}
+                placeholder={
+                  apparel
+                    ? locale === "en"
+                      ? `Search model or ${(clubLabel ?? t.catalog.club).toLowerCase()}`
+                      : `Pretraži model ili ${clubLabel ? clubLabel.toLowerCase().replace(/a$/, "u") : "klub"}`
+                    : t.catalog.searchPlaceholder
+                }
                 className="h-[52px] w-full rounded-[8px] border border-white/10 bg-black pl-11 pr-4 text-sm text-white outline-none transition duration-200 ease-out focus:border-accent sm:h-14"
               />
               {/* Suggestions dropdown */}

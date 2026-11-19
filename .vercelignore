@@ -7,3 +7,9 @@ out
 output
 WhatsApp Image *.jpeg
 netlify.toml
+
+.env
+.env.local
+.env.*.local
+.clerk
+.env*.local

@@ -8,6 +8,7 @@ import { Heart } from "lucide-react";
 import { useWishlist } from "@/components/providers/wishlist-provider";
 import { ProductCard } from "@/components/site/product-card";
 import type { Jersey } from "@/lib/data/jerseys";
+import { NOVI_FLAG } from "@/components/novi/flag";
 
 // 1 dres, 2–4 dresa, 5+ dresova (11–14 uvijek "dresova").
 function dresLabel(n: number): string {
@@ -93,8 +94,8 @@ function EmptyState({
   secondary?: { href: string; label: string };
 }) {
   return (
-    <div className="flex flex-col items-center rounded-[16px] border border-white/10 bg-[#111] px-6 py-12 text-center sm:py-16">
-      <span className="flex h-14 w-14 items-center justify-center rounded-full border border-accent/30 bg-accent/10 text-accent">
+    <div className={NOVI_FLAG ? "flex flex-col items-center border-y border-white/10 px-6 py-14 text-center sm:py-20" : "flex flex-col items-center rounded-[16px] border border-white/10 bg-[#111] px-6 py-12 text-center sm:py-16"}>
+      <span className={NOVI_FLAG ? "flex items-center justify-center text-white/40" : "flex h-14 w-14 items-center justify-center rounded-full border border-accent/30 bg-accent/10 text-accent"}>
         <Heart strokeWidth={1.5} className="h-6 w-6" />
       </span>
       <h2 className="mt-5 font-heading text-[1.75rem] uppercase leading-none text-white sm:text-3xl">{title}</h2>

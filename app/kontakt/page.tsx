@@ -5,6 +5,7 @@ import { Mail, Phone, MessageCircle, Instagram, Facebook, Music2 } from "lucide-
 import Link from "next/link";
 
 import { useShopSettings, useWhatsAppUrl, useInstagram } from "@/contexts/shop-settings-context";
+import { NOVI_FLAG } from "@/components/novi/flag";
 import { FACEBOOK_URL } from "@/lib/site";
 
 const TIKTOK_URL = "https://tiktok.com/@dresify.shop";
@@ -89,6 +90,52 @@ export default function KontaktPage() {
   const whatsappUrl = useWhatsAppUrl();
   const ig = useInstagram();
   const channels = buildChannels(whatsappUrl, ig.url, contactEmail, contactPhone);
+
+  // NOVI DIZAJN (build sa zastavicom): isti kanali, linkovi i H1 — čist popis s tankim crtama
+  // umjesto obojenih kutija; ikone bez kvadrata, bez animacija i sjaja u pozadini.
+  if (NOVI_FLAG) {
+    return (
+      <main className="min-h-screen bg-[#0a0a0a]">
+        <div className="mx-auto w-full max-w-3xl px-4 pb-20 pt-10 sm:px-6 sm:pt-16">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">Kontakt</p>
+          <h1 className="mt-2 font-heading text-[clamp(2.8rem,9vw,5rem)] uppercase leading-[0.9] text-white">
+            Tu smo za tebe
+          </h1>
+          <p className="mt-3 max-w-xl text-base leading-7 text-white/55">
+            Odaberi kanal koji ti najviše odgovara — odgovaramo brzo, bez čekanja.
+          </p>
+
+          <ul className="mt-10 border-t border-white/10">
+            {channels.map((ch) => (
+              <li key={ch.label} className="border-b border-white/10">
+                <Link
+                  href={ch.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group grid grid-cols-[24px_minmax(0,1fr)] items-start gap-x-4 py-5 sm:grid-cols-[24px_minmax(0,1fr)_auto] sm:items-center"
+                >
+                  <ch.icon className="mt-1 h-5 w-5 text-white/45 transition-colors group-hover:text-[#e8ff3c] sm:mt-0" aria-hidden />
+                  <span className="min-w-0">
+                    <span className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{ch.label}</span>
+                    <span className="mt-0.5 block break-words text-lg font-semibold leading-tight text-white">{ch.value}</span>
+                    <span className="mt-1 block text-sm leading-6 text-white/50">{ch.desc}</span>
+                  </span>
+                  <span className="col-start-2 mt-2 text-sm font-semibold text-white/70 transition-colors group-hover:text-[#e8ff3c] sm:col-start-3 sm:mt-0">
+                    {ch.cta} →
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-8 text-sm text-white/40">
+            Prosječno vrijeme odgovora: <span className="font-semibold text-white/70">manje od sat vremena</span>
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="bg-[#0a0a0a] min-h-screen">
 

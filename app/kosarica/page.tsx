@@ -3,6 +3,7 @@ import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { SectionHeading } from "@/components/site/section-heading";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
+import { noviCart } from "@/components/novi/cart";
 
 export const metadata = buildMetadata({
   title: "Košarica",
@@ -19,6 +20,20 @@ export default async function CartPage() {
     { name: t.productPage.breadcrumb.home, path: "/" },
     { name: t.cartPage.kicker, path: "/kosarica" }
   ]);
+
+  // NOVI DIZAJN (build sa zastavicom): isti noindex metadata i BreadcrumbList JSON-LD, nov prikaz
+  // (ista košarica iz cart-providera; blagajna šalje isti /api/orders payload kao ContactForm).
+  if (noviCart) {
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
+        <noviCart.Cart />
+      </>
+    );
+  }
 
   return (
     <section className="section-pad bg-[#0a0a0a]">

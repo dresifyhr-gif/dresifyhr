@@ -3,15 +3,26 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { WheelGame } from "@/components/game/wheel-game";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 import { buildMetadata } from "@/lib/seo";
 import { getSettings } from "@/lib/settings";
 
-export const metadata: Metadata = buildMetadata({
-  title: "DRESIFY kolo sreće: zavrti i osvoji nagradu",
-  description:
-    "Zavrti DRESIFY kolo sreće i osvoji popust, besplatnu dostavu ili gratis dres. Jedna vrtnja po broju mobitela, a svaka narudžba od 60 € donosi novu.",
-  path: "/kolo"
-});
+// NOVI DIZAJN: nagrade u igrama su isključene → neutralni naslov/opis bez riječi o nagradi
+// (ruta i dalje 404 dok je koloActive ugašen). Bez zastavice: točno stari metapodaci.
+export const metadata: Metadata = buildMetadata(
+  NOVI_DIZAJN
+    ? {
+        title: "DRESIFY kolo sreće",
+        description: "DRESIFY kolo sreće za kupce: jedna vrtnja po broju mobitela, a svaka narudžba od 60 € donosi novu.",
+        path: "/kolo"
+      }
+    : {
+        title: "DRESIFY kolo sreće: zavrti i osvoji nagradu",
+        description:
+          "Zavrti DRESIFY kolo sreće i osvoji popust, besplatnu dostavu ili gratis dres. Jedna vrtnja po broju mobitela, a svaka narudžba od 60 € donosi novu.",
+        path: "/kolo"
+      }
+);
 
 export const dynamic = "force-dynamic";
 

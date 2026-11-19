@@ -28,6 +28,7 @@ import { Navbar } from "@/components/site/navbar";
 import { SocialProof } from "@/components/site/social-proof";
 import { PromoCapture } from "@/components/site/promo-capture";
 import { SiteChrome } from "@/components/site/site-chrome";
+import { novi } from "@/components/novi";
 import { buildOrganizationSchema, buildWebsiteSchema, defaultMetadata } from "@/lib/seo";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -124,18 +125,17 @@ export default async function RootLayout({
   const rawLocale = cookieStore.get(LOCALE_COOKIE)?.value;
   const locale: Locale = rawLocale === "en" ? "en" : "hr";
 
-  return (
-    <ClerkProvider localization={hrHR} signInUrl="/prijava" signUpUrl="/registracija" signInFallbackRedirectUrl="/racun" signUpFallbackRedirectUrl="/racun">
+  const page = (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${bebas.variable} ${barlow.variable}`}>
         {/* Donja navigacija (mobitel): oznaka na <html> prije prvog iscrtavanja, da plutajući
             gumb i razmak na dnu ne "skoče" nakon učitavanja. Popis mora odgovarati
             HIDDEN_PREFIXES u components/site/bottom-nav.tsx (ona ga dalje drži u skladu). */}
-        <script
+        {novi ? null : <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var p=location.pathname.replace(/\\/$/,"")||"/";var h=["/dres/","/kosarica","/checkout","/zahvala","/admin","/prijava","/registracija"];for(var i=0;i<h.length;i++){var x=h[i];if(x.slice(-1)==="/"?p.indexOf(x)===0:(p===x||p.indexOf(x+"/")===0))return}document.documentElement.setAttribute("data-bnav","1")}catch(e){}})();`
           }}
-        />
+        />}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -148,6 +148,12 @@ export default async function RootLayout({
         <LanguageProvider initialLocale={locale}>
           <SiteProviders>
             <WishlistProvider>
+            {novi ? (
+              /* NOVI DIZAJN (build sa zastavicom): novo zaglavlje/podnožje, kartice "ime" */
+              <SiteChrome header={<novi.Header />} footer={<novi.Footer />}>
+                <novi.Cards>{children}</novi.Cards>
+              </SiteChrome>
+            ) : (
             <SiteChrome
               header={
                 <>
@@ -170,6 +176,7 @@ export default async function RootLayout({
             >
               {children}
             </SiteChrome>
+            )}
             </WishlistProvider>
           </SiteProviders>
         </LanguageProvider>
@@ -182,6 +189,16 @@ export default async function RootLayout({
       </body>
       <SiteGoogleAnalytics gaId="G-NKPLWRWPN9" />
     </html>
+  );
+
+  // NOVI DIZAJN: isti Clerk, ali kao klijentski provider (hrHR ne ide kroz RSC svake stranice).
+  return novi ? (
+    <novi.ClerkProvider signInUrl="/prijava" signUpUrl="/registracija" signInFallbackRedirectUrl="/racun" signUpFallbackRedirectUrl="/racun">
+      {page}
+    </novi.ClerkProvider>
+  ) : (
+    <ClerkProvider localization={hrHR} signInUrl="/prijava" signUpUrl="/registracija" signInFallbackRedirectUrl="/racun" signUpFallbackRedirectUrl="/racun">
+    {page}
     </ClerkProvider>
   );
 }

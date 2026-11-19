@@ -5,6 +5,7 @@ import { ArrowRight, CheckCircle2, Gift, Instagram, Star } from "lucide-react";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { GiveawayEntryForm } from "@/components/site/giveaway-entry-form";
 import { GoogleReviewsOptIn } from "@/components/site/google-reviews-optin";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 import { GOOGLE_REVIEW_URL } from "@/lib/site";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
@@ -45,9 +46,9 @@ export default async function ThankYouPage() {
           ]}
         />
 
-        <div className="panel mt-6 overflow-hidden p-6 text-center sm:p-12">
-          <div className="mx-auto inline-flex h-24 w-24 items-center justify-center rounded-[8px] border border-white/10 bg-accent text-black shadow-[0_0_40px_rgba(232,255,60,0.18)]">
-            <CheckCircle2 className="h-12 w-12" />
+        <div className={NOVI_DIZAJN ? "mt-6 border-b border-white/10 pb-12 pt-6 text-center" : "panel mt-6 overflow-hidden p-6 text-center sm:p-12"}>
+          <div className={NOVI_DIZAJN ? "mx-auto inline-flex items-center justify-center text-accent" : "mx-auto inline-flex h-24 w-24 items-center justify-center rounded-[8px] border border-white/10 bg-accent text-black shadow-[0_0_40px_rgba(232,255,60,0.18)]"}>
+            <CheckCircle2 className={NOVI_DIZAJN ? "h-14 w-14" : "h-12 w-12"} strokeWidth={NOVI_DIZAJN ? 1.5 : undefined} />
           </div>
 
           <h1 className="mt-8 font-heading text-[clamp(3rem,8vw,5rem)] uppercase leading-[0.9] tracking-[0.05em] text-white">
@@ -72,7 +73,7 @@ export default async function ThankYouPage() {
           href={GOOGLE_REVIEW_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-6 flex items-center justify-center gap-3 rounded-[16px] border border-white/10 bg-white/[0.03] px-6 py-5 text-center transition hover:border-accent/40 hover:bg-white/[0.05]"
+          className={NOVI_DIZAJN ? "flex items-center justify-center gap-3 border-b border-white/10 px-2 py-6 text-center transition-colors hover:text-white" : "mt-6 flex items-center justify-center gap-3 rounded-[16px] border border-white/10 bg-white/[0.03] px-6 py-5 text-center transition hover:border-accent/40 hover:bg-white/[0.05]"}
         >
           <Star className="h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} />
           <span className="text-sm text-white/80 sm:text-base">
@@ -82,7 +83,7 @@ export default async function ThankYouPage() {
         </a>
 
         {/* PS5 nagradna igra — zaprati + upiši Instagram da uđeš (kupnja već donosi +5 bodova) */}
-        <div className="mt-6 rounded-[16px] border border-accent/30 bg-accent/[0.05] p-6 text-center sm:p-8">
+        <div className={NOVI_DIZAJN ? "py-10 text-center" : "mt-6 rounded-[16px] border border-accent/30 bg-accent/[0.05] p-6 text-center sm:p-8"}>
           <div className="inline-flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-accent">
             <Gift className="h-4 w-4 shrink-0" strokeWidth={1.75} />
             Osvoji PS5 + EA SPORTS FC 27
@@ -95,7 +96,7 @@ export default async function ThankYouPage() {
               href="https://instagram.com/dresify.hr"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-[12px] bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition hover:brightness-95"
+              className={NOVI_DIZAJN ? "inline-flex items-center justify-center gap-2 rounded-[4px] bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition hover:brightness-95" : "inline-flex items-center justify-center gap-2 rounded-[12px] bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition hover:brightness-95"}
             >
               <Instagram className="h-5 w-5" /> 1. Zaprati @dresify.hr
             </a>

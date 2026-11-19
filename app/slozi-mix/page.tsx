@@ -6,6 +6,7 @@ import { getJerseySizeOptions, jerseys } from "@/lib/data/jerseys";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
 import { getCatalogProducts, getTrenirkaProducts } from "@/lib/data/product-overrides";
 import { MIX_ADDON_PRICE_EUR, MIX_CLUBS, isMixEligible, mixImage } from "@/lib/mix";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 import { buildMetadata } from "@/lib/seo";
 import { repairText } from "@/lib/utils";
 
@@ -61,9 +62,10 @@ export default async function SloziMixPage({ searchParams }: { searchParams: { v
           Odaberi {vrsta === "trenirka" ? "trenirku" : vrsta === "dugi-rukav" ? "dres dugih rukava" : "dres"} → veličinu → loptu i/ili kapu.{" "}
           <span className="text-white/45">+{MIX_ADDON_PRICE_EUR} € svaka · plaćaš pouzećem</span>
         </p>
-        <div className="mb-5 mt-3 flex flex-wrap gap-2 text-xs">
+        {/* NOVI DIZAJN: cijene kao tihi redak teksta, ne pilule */}
+        <div className={NOVI_DIZAJN ? "mb-5 mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[13px]" : "mb-5 mt-3 flex flex-wrap gap-2 text-xs"}>
           {[["Dres", "30–40 €"], ["Dugi rukav", "40–50 €"], ["Trenirka", "45–55 €"]].map(([l, p]) => (
-            <span key={l} className="rounded-full border border-white/10 bg-[#0d0d0d] px-3 py-1.5 text-white/70">
+            <span key={l} className={NOVI_DIZAJN ? "text-white/55" : "rounded-full border border-white/10 bg-[#0d0d0d] px-3 py-1.5 text-white/70"}>
               {l} <b className="text-accent">{p}</b>
             </span>
           ))}
@@ -76,7 +78,7 @@ export default async function SloziMixPage({ searchParams }: { searchParams: { v
             <h2 className="font-heading text-2xl uppercase text-white">Lopte i kape koje možeš birati</h2>
             <div className="mt-4 grid grid-cols-4 gap-2">
               {MIX_CLUBS.map((c) => (
-                <div key={c.key} className="rounded-[10px] border border-white/10 bg-[#0d0d0d] p-2 text-center">
+                <div key={c.key} className={NOVI_DIZAJN ? "p-2 text-center" : "rounded-[10px] border border-white/10 bg-[#0d0d0d] p-2 text-center"}>
                   <Image src={mixImage("lopta", c.key)} alt={`Lopta ${c.label}`} width={80} height={80} className="mx-auto h-14 w-14 object-contain" />
                   <Image src={mixImage("kapa", c.key)} alt={`Kapa ${c.label}`} width={80} height={80} className="mx-auto mt-1 h-12 w-14 object-contain" />
                   <p className="mt-1 text-[11px] font-semibold text-white/70">{c.label}</p>
@@ -84,7 +86,7 @@ export default async function SloziMixPage({ searchParams }: { searchParams: { v
               ))}
             </div>
           </div>
-          <div className="relative mx-auto aspect-square w-full max-w-[420px] overflow-hidden rounded-[14px]">
+          <div className={NOVI_DIZAJN ? "relative mx-auto aspect-square w-full max-w-[420px] overflow-hidden rounded-[4px]" : "relative mx-auto aspect-square w-full max-w-[420px] overflow-hidden rounded-[14px]"}>
             <Image src={vrsta ? `/mix/slozi-mix-${vrsta}.jpg` : "/mix/slozi-mix.jpg"} alt="Složi svoj mix — lopta i kapa kluba po izboru" fill sizes="420px" className="object-cover" />
           </div>
         </div>

@@ -18,6 +18,7 @@ import { buildBreadcrumbSchema, buildMetadata, buildProductSchema, productMainIm
 import { getServerTranslations } from "@/lib/get-server-translations";
 import { productTypeDescription, productTypeWord } from "@/lib/product-type";
 import { repairText } from "@/lib/utils";
+import { noviProduct } from "@/components/novi/product";
 
 type ProductPageProps = {
   params: {
@@ -111,6 +112,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
   ]);
   const playerCollection = await getPlayerCollectionForProduct(product);
   const categoryCollections = (await getCategoryCollectionsForProduct(product)).slice(0, 5);
+
+  // NOVI DIZAJN (build sa zastavicom): ista JSON-LD (Product, BreadcrumbList; FAQPage iz
+  // ProductFaq), iste vidljive mrvice i interni linkovi — mijenja se samo izgled stranice.
+  if (noviProduct) {
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
+        <noviProduct.Product
+          product={product}
+          locale={locale}
+          breadcrumbs={[
+            { label: t.productPage.breadcrumb.home, href: "/" },
+            { label: catLabel, href: catPath },
+            ...(clubCollection ? [{ label: clubCollection.label, href: clubCollection.path }] : []),
+            { label: productName }
+          ]}
+          explore={[
+            { title: locale === "en" ? "More from this club" : "Više iz istog kluba", collections: clubCollection ? [clubCollection] : [] },
+            { title: locale === "en" ? "Same player" : "Modeli istog igrača", collections: playerCollection ? [playerCollection] : [] },
+            { title: locale === "en" ? "Shop by category" : "Kupuj po kategoriji", collections: categoryCollections }
+          ]}
+        />
+      </>
+    );
+  }
 
   return (
     <section className="section-pad bg-[#0a0a0a]">

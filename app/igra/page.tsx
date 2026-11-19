@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { OstaleIgre } from "@/components/game/v2/game-shell";
 import { PenaltyKarijera } from "@/components/game/v2/penalty/penalty-cup";
 import { buildMetadata } from "@/lib/seo";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 
 // Nagrade su ugašene (components/game/v2/config.ts): ovdje se ne spominju
 // popust, kodovi ni nagrade. Kovanice u igri vrijede samo u igri.
@@ -16,7 +17,7 @@ export const metadata: Metadata = buildMetadata({
 });
 
 export default function IgraPage() {
-  return (
+  const page = (
     <>
       <PenaltyKarijera />
       <section className="page-shell max-w-2xl pb-10 pt-10 md:pt-4">
@@ -41,4 +42,6 @@ export default function IgraPage() {
       <OstaleIgre current="igra" />
     </>
   );
+  // NOVI DIZAJN: ravni uvod/tekst/ostale igre (components/novi/css.ts, data-nv-flat); igra netaknuta
+  return NOVI_DIZAJN ? <div data-nv-flat="game">{page}</div> : page;
 }

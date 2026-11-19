@@ -4,6 +4,7 @@ import { OstaleIgre } from "@/components/game/v2/game-shell";
 import { PEHAR_NAZIV, PEHAR_PUTANJA } from "@/components/game/v2/pehar/config";
 import { PeharIgra } from "@/components/game/v2/pehar/pehar-igra";
 import { buildMetadata } from "@/lib/seo";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 
 export const metadata: Metadata = buildMetadata({
   title: `${PEHAR_NAZIV} — nogometni kviz do vrha`,
@@ -28,7 +29,7 @@ const RAZINE: [string, string][] = [
 ];
 
 export default function PeharPage() {
-  return (
+  const page = (
     <>
       <PeharIgra />
       <section className="pb-10 pt-10 sm:pt-14 lg:pt-20">
@@ -67,4 +68,6 @@ export default function PeharPage() {
       <OstaleIgre current="pehar" />
     </>
   );
+  // NOVI DIZAJN: ravni uvod/tekst/ostale igre (components/novi/css.ts, data-nv-flat); igra netaknuta
+  return NOVI_DIZAJN ? <div data-nv-flat="game">{page}</div> : page;
 }

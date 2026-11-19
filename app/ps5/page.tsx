@@ -11,6 +11,7 @@ import { unstable_cache } from "next/cache";
 import { dbQuery, withLastGood } from "@/lib/db-guard";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata } from "@/lib/seo";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 
 export const metadata: Metadata = buildMetadata({
   title: "Osvoji PS5 + EA SPORTS FC 27 — Dresify nagradna igra",
@@ -37,7 +38,7 @@ export default async function Ps5Page() {
   const [followers, buyers] = await Promise.all([getFollowerCount(), getBuyerCount()]);
 
   return (
-    <div className="bg-[#0a0a0a] text-white">
+    <div className="bg-[#0a0a0a] text-white" data-nv-flat={NOVI_DIZAJN ? "ps5" : undefined}>
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-white/5">
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-12 md:grid-cols-2 md:py-16">

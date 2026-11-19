@@ -1,8 +1,11 @@
 import Link from "next/link";
 
+import { Breadcrumbs } from "@/components/site/breadcrumbs";
+import { CatalogBrowser } from "@/components/site/catalog-browser";
 import { ProductCard } from "@/components/site/product-card";
 import { MixPromoCard } from "@/components/site/mix-promo-card";
-import { getTrenirkaProducts } from "@/lib/data/product-overrides";
+import { forCards, getTrenirkaProducts } from "@/lib/data/product-overrides";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -20,6 +23,41 @@ export default async function TrenirkePage() {
     { name: "Početna", path: "/" },
     { name: "Trenirke", path: "/trenirke" }
   ]);
+
+  // NOVI DIZAJN (build sa zastavicom): isti metadata, BreadcrumbList JSON-LD, H1 "Trenirke",
+  // mrvice i SEO tekst s istim linkovima — samo prikaz kao /kompleti i /dresovi (tamno, katalog
+  // s filterima sa strane, kartice na vješalici), bez svijetlog heroja i pilule "Nova linija".
+  if (NOVI_DIZAJN) {
+    return (
+      <section className="bg-[#0a0a0a] py-6 sm:py-8 lg:py-10">
+        <div className="mx-auto w-full max-w-[1620px] px-3 sm:px-6 lg:px-10">
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+          <Breadcrumbs items={[{ label: "Početna", href: "/" }, { label: "Trenirke" }]} />
+          {products.length > 0 ? (
+            <CatalogBrowser
+              filterSet="apparel"
+              showMixPromo={["trenirka"]}
+              countKind="items"
+              products={forCards(products)}
+              headingLabel="Jakna + hlače"
+              headingTitle="Trenirke"
+              headingDesc="Kompletna trenirka — jakna + hlače u klupskom dizajnu. 35 €, ista brza dostava i plaćanje pouzećem kao i za dresove."
+            />
+          ) : (
+            <div className="border-b border-white/10 pb-10">
+              <h1 className="font-heading text-[clamp(2.6rem,9vw,5rem)] uppercase leading-[0.9] text-white">Trenirke</h1>
+              <h2 className="mt-8 font-heading text-2xl uppercase text-white">Uskoro</h2>
+              <p className="mt-2 max-w-md text-sm leading-6 text-white/60">Nova kolekcija trenirki stiže — kompleti jakna + hlače. U međuvremenu pogledaj dresove.</p>
+              <Link href="/dresovi" className="mt-6 inline-flex min-h-[48px] items-center bg-[#e8ff3c] px-7 font-heading text-lg uppercase tracking-[0.1em] text-black">
+                Pogledaj dresove
+              </Link>
+            </div>
+          )}
+          <TrenirkeSeo tone={DARK} />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="bg-white text-slate-900">
@@ -73,47 +111,75 @@ export default async function TrenirkePage() {
           </div>
         )}
 
-        {/* SEO sadržaj — odgovara na stvarna pitanja kupaca o trenirkama. */}
-        <div className="mx-auto mt-14 max-w-3xl border-t border-teal-100 pt-10">
-          <h2 className="font-heading text-2xl uppercase tracking-[0.04em] text-slate-900 sm:text-3xl">
-            Komplet trenirke — jakna i hlače u klupskom stilu
-          </h2>
-          <div className="mt-5 space-y-4 text-sm leading-7 text-slate-600 sm:text-[15px]">
-            <p>
-              Trenirka kod nas dolazi kao <strong>kompletni set — jakna (gornji dio) i hlače (donji dio)</strong> u
-              istom dizajnu tvog kluba ili reprezentacije. Idealna je za trening, školu i svaki dan, a topao materijal
-              dobro dođe kad zahladi. Cijena kompleta je <strong>35 €</strong>, s dostavom po cijeloj Hrvatskoj uz
-              plaćanje pouzećem.
-            </p>
-            <h3 className="pt-2 font-heading text-lg uppercase tracking-[0.04em] text-slate-900">
-              Kako odabrati veličinu
-            </h3>
-            <p>
-              Trenirke dolaze u spojenim veličinama (npr. 128/134, 158/164, 170/176) te XS. Svaka trenirka na svojoj
-              stranici pokazuje točno one veličine koje su na zalihi. Ako si između dvije veličine ili nisi siguran,
-              javi nam visinu i uobičajenu veličinu na WhatsApp i reći ćemo ti što najčešće odgovara. Zamjena za drugu
-              veličinu je moguća unutar 14 dana.
-            </p>
-            <h3 className="pt-2 font-heading text-lg uppercase tracking-[0.04em] text-slate-900">
-              Dostava i plaćanje
-            </h3>
-            <p>
-              Šaljemo GLS kurirskom službom na svaku adresu u Hrvatskoj, rok je 2–5 radnih dana. Plaćaš{" "}
-              <strong>pouzećem</strong> — tek kad ti paket stigne na vrata, ne unaprijed.
-            </p>
-            <h3 className="pt-2 font-heading text-lg uppercase tracking-[0.04em] text-slate-900">
-              Zašto Dresify
-            </h3>
-            <p>
-              Radimo isključivo s komadima koje bismo i sami nosili, a svaku narudžbu pratimo do preuzimanja. Ako nešto
-              ne odgovara ili ti se ne svidi uživo — javi se i riješit ćemo, bez kompliciranja. Osim trenirki nudimo i
-              preko sto{" "}
-              <Link href="/dresovi" className="font-semibold text-teal-600 hover:underline">nogometnih dresova po 20 €</Link>{" "}
-              te <Link href="/kompleti" className="font-semibold text-teal-600 hover:underline">komplete s loptom i kapom</Link>.
-            </p>
-          </div>
-        </div>
+        <TrenirkeSeo tone={LIGHT} />
       </div>
     </section>
+  );
+}
+
+type Tone = { wrap: string; h2: string; body: string; h3: string; link: string; strong?: string };
+
+const LIGHT: Tone = {
+  wrap: "mx-auto mt-14 max-w-3xl border-t border-teal-100 pt-10",
+  h2: "font-heading text-2xl uppercase tracking-[0.04em] text-slate-900 sm:text-3xl",
+  body: "mt-5 space-y-4 text-sm leading-7 text-slate-600 sm:text-[15px]",
+  h3: "pt-2 font-heading text-lg uppercase tracking-[0.04em] text-slate-900",
+  link: "font-semibold text-teal-600 hover:underline"
+};
+
+// NOVI DIZAJN: isti tekst i linkovi, tamna tipografija (kao SEO blok na /kompleti).
+const DARK: Tone = {
+  wrap: "mx-auto mt-14 max-w-3xl border-t border-white/10 pt-10",
+  h2: "font-heading text-2xl uppercase leading-none text-white sm:text-3xl",
+  body: "mt-5 space-y-4 text-sm leading-7 text-white/60 sm:text-[15px]",
+  h3: "pt-2 font-heading text-lg uppercase tracking-[0.04em] text-white",
+  link: "font-semibold text-[#e8ff3c] hover:underline",
+  strong: "text-white"
+};
+
+function TrenirkeSeo({ tone }: { tone: Tone }) {
+  return (
+    <>
+      {/* SEO sadržaj — odgovara na stvarna pitanja kupaca o trenirkama. */}
+      <div className={tone.wrap}>
+        <h2 className={tone.h2}>
+          Komplet trenirke — jakna i hlače u klupskom stilu
+        </h2>
+        <div className={tone.body}>
+          <p>
+            Trenirka kod nas dolazi kao <strong className={tone.strong}>kompletni set — jakna (gornji dio) i hlače (donji dio)</strong> u
+            istom dizajnu tvog kluba ili reprezentacije. Idealna je za trening, školu i svaki dan, a topao materijal
+            dobro dođe kad zahladi. Cijena kompleta je <strong className={tone.strong}>35 €</strong>, s dostavom po cijeloj Hrvatskoj uz
+            plaćanje pouzećem.
+          </p>
+          <h3 className={tone.h3}>
+            Kako odabrati veličinu
+          </h3>
+          <p>
+            Trenirke dolaze u spojenim veličinama (npr. 128/134, 158/164, 170/176) te XS. Svaka trenirka na svojoj
+            stranici pokazuje točno one veličine koje su na zalihi. Ako si između dvije veličine ili nisi siguran,
+            javi nam visinu i uobičajenu veličinu na WhatsApp i reći ćemo ti što najčešće odgovara. Zamjena za drugu
+            veličinu je moguća unutar 14 dana.
+          </p>
+          <h3 className={tone.h3}>
+            Dostava i plaćanje
+          </h3>
+          <p>
+            Šaljemo GLS kurirskom službom na svaku adresu u Hrvatskoj, rok je 2–5 radnih dana. Plaćaš{" "}
+            <strong className={tone.strong}>pouzećem</strong> — tek kad ti paket stigne na vrata, ne unaprijed.
+          </p>
+          <h3 className={tone.h3}>
+            Zašto Dresify
+          </h3>
+          <p>
+            Radimo isključivo s komadima koje bismo i sami nosili, a svaku narudžbu pratimo do preuzimanja. Ako nešto
+            ne odgovara ili ti se ne svidi uživo — javi se i riješit ćemo, bez kompliciranja. Osim trenirki nudimo i
+            preko sto{" "}
+            <Link href="/dresovi" className={tone.link}>nogometnih dresova po 20 €</Link>{" "}
+            te <Link href="/kompleti" className={tone.link}>komplete s loptom i kapom</Link>.
+          </p>
+        </div>
+      </div>
+    </>
   );
 }

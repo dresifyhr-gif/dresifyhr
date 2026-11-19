@@ -22,6 +22,7 @@ import { getFollowerCount } from "@/lib/ig-stats";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import { buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
+import { noviHome } from "@/components/novi/home";
 
 
 export const metadata = buildMetadata({
@@ -70,6 +71,25 @@ export default async function HomePage() {
   // Sekcije se pale/gase u Postavkama (Izgled). Hero i katalog su uvijek tu.
   const { hiddenSections } = await getSettings();
   const show = (key: string) => !hiddenSections.includes(key);
+
+  // NOVI DIZAJN (build sa zastavicom): scena + žive kartice + katalog "ime"; ispod ostaju PS5,
+  // Božić, interni linkovi po kategorijama, FAQ (FAQPage JSON-LD) i SEO tekst. Metadata isti.
+  if (noviHome) {
+    const followers = await getFollowerCount();
+    return (
+      <noviHome.Home
+        below={
+          <>
+            <Ps5HomeBanner followers={followers} />
+            <GiftsByBudget />
+            <noviHome.CategoryLinks links={CATEGORY_LINKS} locale={locale} />
+            {show("faq") && <FaqSection />}
+            <HomeSeoText />
+          </>
+        }
+      />
+    );
+  }
 
   const dresovi = (await getCatalogProducts(jerseys)).filter((j) => j.liga !== "Komplet");
   const streetwear = await getStreetwearProducts();

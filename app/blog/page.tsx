@@ -6,6 +6,7 @@ import { blogPosts, getBlogReadingTime } from "@/lib/data/blog-posts";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
 import { formatCroatianDate, repairText } from "@/lib/utils";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 
 export const metadata = buildMetadata({
   title: "Blog, savjeti i novosti",
@@ -24,7 +25,7 @@ export default async function BlogPage() {
   ]);
 
   return (
-    <section className="section-pad bg-[#0a0a0a]">
+    <section className="section-pad bg-[#0a0a0a]" data-nv-flat={NOVI_DIZAJN ? "blog" : undefined}>
       <div className="page-shell">
         <script
           type="application/ld+json"

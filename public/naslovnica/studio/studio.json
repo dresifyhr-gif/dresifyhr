@@ -1,0 +1,98 @@
+{
+ "version": 1,
+ "glb": "studio.glb",
+ "env": {
+  "file": "env.hdr",
+  "note": "wooden_studio_08 (Poly Haven, CC0), 1024x512"
+ },
+ "lightmaps": {
+  "Wall": {
+   "file": "lm_wall.webp",
+   "uv": 1,
+   "colorSpace": "srgb",
+   "scale": 4.81889,
+   "lightMapIntensity": 15.13899,
+   "size": [
+    2048,
+    640
+   ]
+  },
+  "Floor": {
+   "file": "lm_floor.webp",
+   "uv": 1,
+   "colorSpace": "srgb",
+   "scale": 3.66386,
+   "lightMapIntensity": 11.51036,
+   "size": [
+    1024,
+    552
+   ]
+  }
+ },
+ "decals": {
+  "desktop": {
+   "x0": -1.7000000000000002,
+   "x1": 1.5999999999999996,
+   "y0": 1.02,
+   "y1": 2.8109999999999995,
+   "gx0": -1.586871862411499,
+   "gx1": 1.435736894607544,
+   "gy0": 1.1299999952316284,
+   "gy1": 2.7100000381469727,
+   "mesh": "GraffitiDecal_desktop",
+   "usage": "MeshBasicMaterial({map, transparent:true, depthWrite:false}); colour is already lit (albedo x light baked); replaces the engine graffiti overlay for that layout"
+  },
+  "mobile": {
+   "x0": -1.2000000000000002,
+   "x1": 1.0999999999999996,
+   "y0": 1.2189999999999999,
+   "y1": 2.6119999999999997,
+   "gx0": -1.1010680198669434,
+   "gx1": 0.9962014555931091,
+   "gy0": 1.3672499656677246,
+   "gy1": 2.463550090789795,
+   "mesh": "GraffitiDecal_mobile",
+   "usage": "MeshBasicMaterial({map, transparent:true, depthWrite:false}); colour is already lit (albedo x light baked); replaces the engine graffiti overlay for that layout"
+  }
+ },
+ "units": "metres, three.js axes (+Y up); nodes already in engine space (no transform needed)",
+ "toneMapping": "NeutralToneMapping, exposure 1.0, outputColorSpace SRGB (beauty ref: Blender 'Khronos PBR Neutral')",
+ "lightmapUsage": "tex.colorSpace=SRGBColorSpace; tex.channel=1; tex.flipY=false; mat.lightMap=tex; mat.lightMapIntensity=entry.lightMapIntensity (= scale*PI because three divides diffuse by PI)",
+ "envUsage": "HDRLoader env.hdr -> PMREMGenerator.fromEquirectangular, rotation.y = PI/2; give it to metals/floor as material.envMap (envMapIntensity ~0.55 = Blender world strength; v2 env.hdr is desaturated to 15 % and warmed slightly so chrome reads neutral, not blue). Do NOT use scene.environment for the wall: its diffuse light is fully in the lightmap (Blender world only lit glossy rays)",
+ "layout": {
+  "railY": 1.8,
+  "railR": 0.022,
+  "curveK": 0.07,
+  "wallZ": -2.1,
+  "brackets": "two wall brackets at x = +-1.62 (part of the Rail mesh)",
+  "camera": {
+   "desktop": {
+    "fov": 30,
+    "pos": [
+     0,
+     2.15,
+     5.2
+    ],
+    "look": [
+     0,
+     1.04,
+     0
+    ]
+   },
+   "mobile": {
+    "fov": 36,
+    "pos": [
+     0,
+     2.090983,
+     5.18
+    ],
+    "look": [
+     0,
+     0.920983,
+     0
+    ]
+   }
+  },
+  "lights": "5 baked spots at y 4.3 over the rail (x 0, +-1.0, +-1.82; power 1 / 0.8 / 0.62) aimed at the wall at y 1.1, plus a weak frontal fill"
+ }
+}

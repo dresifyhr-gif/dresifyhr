@@ -3,6 +3,7 @@ import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { SectionHeading } from "@/components/site/section-heading";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { getServerTranslations } from "@/lib/get-server-translations";
+import { noviCheckout } from "@/components/novi/checkout";
 
 export const metadata = buildMetadata({
   title: "Narudžba",
@@ -26,6 +27,30 @@ export default async function CheckoutPage() {
     { name: t.productPage.breadcrumb.home, path: "/" },
     { name: kicker, path: "/checkout" }
   ]);
+
+  // NOVI DIZAJN (build sa zastavicom): isti noindex metadata i BreadcrumbList JSON-LD, nov prikaz
+  // (ista košarica iz cart-providera; blagajna šalje isti /api/orders payload kao ContactForm).
+  if (noviCheckout) {
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
+        <noviCheckout.Checkout
+          emptyFallback={
+            /* prazna košarica: živi obrazac s ručnim upisom narudžbe (isti payload kao živo) */
+            <section className="section-pad bg-[#0a0a0a]">
+              <div className="page-shell">
+                <SectionHeading kicker={kicker} title={t.checkoutPage.title} description={description} />
+                <ContactForm />
+              </div>
+            </section>
+          }
+        />
+      </>
+    );
+  }
 
   return (
     <section className="section-pad bg-[#0a0a0a]">

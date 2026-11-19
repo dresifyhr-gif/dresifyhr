@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { OstaleIgre } from "@/components/game/v2/game-shell";
 import { KvizDana } from "@/components/game/v2/kviz/kviz-dana";
 import { buildMetadata } from "@/lib/seo";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 
 export const metadata: Metadata = buildMetadata({
   title: "Kviz dana — nogometni kviz",
@@ -32,7 +33,7 @@ const TEME = [
 ];
 
 export default function KvizPage() {
-  return (
+  const page = (
     <>
       <KvizDana />
       <section className="pb-10 pt-10 sm:pt-14 lg:pt-20">
@@ -67,4 +68,6 @@ export default function KvizPage() {
       <OstaleIgre current="kviz" />
     </>
   );
+  // NOVI DIZAJN: ravni uvod/tekst/ostale igre (components/novi/css.ts, data-nv-flat); igra netaknuta
+  return NOVI_DIZAJN ? <div data-nv-flat="game">{page}</div> : page;
 }

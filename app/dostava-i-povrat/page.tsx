@@ -5,6 +5,7 @@ import { Truck, Banknote, RotateCcw, MessageCircle, Clock, MapPin, Mail } from "
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { buildBreadcrumbSchema, buildMetadata } from "@/lib/seo";
 import { getSettings } from "@/lib/settings";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 
 export const metadata: Metadata = buildMetadata({
   title: "Dostava i zamjena",
@@ -49,7 +50,7 @@ export default async function DeliveryReturnsPage() {
   ]);
 
   return (
-    <section className="section-pad">
+    <section className="section-pad" data-nv-flat={NOVI_DIZAJN ? "dostava" : undefined}>
       <div className="page-shell max-w-4xl">
         <script
           type="application/ld+json"

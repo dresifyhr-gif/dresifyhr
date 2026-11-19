@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { OstaleIgre } from "@/components/game/v2/game-shell";
 import { ZongliranjeGame } from "@/components/game/v2/zongliranje/zongliranje-game";
 import { buildMetadata } from "@/lib/seo";
+import { NOVI_DIZAJN } from "@/lib/novi-dizajn";
 
 export const metadata: Metadata = buildMetadata({
   title: "Žongliranje loptom — online nogometna mini igra",
@@ -13,7 +14,7 @@ export const metadata: Metadata = buildMetadata({
 });
 
 export default function ZongliranjePage() {
-  return (
+  const page = (
     <>
       <ZongliranjeGame />
 
@@ -44,4 +45,6 @@ export default function ZongliranjePage() {
       <OstaleIgre current="zongliranje" />
     </>
   );
+  // NOVI DIZAJN: ravni uvod/tekst/ostale igre (components/novi/css.ts, data-nv-flat); igra netaknuta
+  return NOVI_DIZAJN ? <div data-nv-flat="game">{page}</div> : page;
 }
