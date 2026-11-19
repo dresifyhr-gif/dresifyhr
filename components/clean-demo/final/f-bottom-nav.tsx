@@ -59,6 +59,8 @@ export function FBottomNav() {
     };
   }, [path]);
 
+  // Igor 19.11.: u igrama donja traka prekriva "Pokreni igru" — igre su preko cijelog ekrana, bez donje trake (hub /igre ostaje s njom)
+  if (/^\/(igra|zongliranje|kviz|pehar|kolo)(\/|$)/.test(path)) return null;
 
   return (
     <nav
