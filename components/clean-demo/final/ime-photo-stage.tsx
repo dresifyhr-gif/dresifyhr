@@ -241,6 +241,8 @@ html.ime-vt .pz-tag,html.ime-vt .pz-refl,html.ime-vt .pz-shadow,html.ime-vt .pz-
 .pz-xc{width:var(--cw);bottom:calc(100% - var(--fl) - .004 * var(--uu));
  left:max(12px,calc(50% - var(--ww) * var(--uu) / 2 - var(--cw) * .4))}
 .pz-xc .pz-xw{height:auto}
+/* Igor 19.11.: Djeca (dres + hlačice) — kapa klizne ispod hlačica, lijevo do lopte (ondje je prazno) */
+.pz-kid .pz-xc{left:calc(min(calc(50% + var(--ww) * var(--uu) / 2 - var(--bd) * .55),calc(100% - var(--bd) - 12px)) - var(--cw) + var(--bd) * .06)}
 .pz-xsw{position:relative;transform-origin:60% 0;will-change:transform}
 .pz-xrod,.pz-xhook{display:none}
 @media (min-width:1024px){
