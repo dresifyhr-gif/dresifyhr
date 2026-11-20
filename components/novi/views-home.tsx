@@ -62,8 +62,9 @@ export async function NoviHome({ below }: { below?: ReactNode }) {
   );
 
   // Igor 18.11.: šipka počinje Maradonom (Boca Juniors 10) — prvi dres na naslovnici.
-  const FIRST = "boca-juniors-maradona-nr10-plavo-zuti";
-  const fi = items.findIndex((it) => it.slug === FIRST);
+  // Igor 20.11.: ako je Maradona rasprodan (nije na šipki), krug počinje sljedećom legendom s popisa.
+  const FIRSTS = ["boca-juniors-maradona-nr10-plavo-zuti", "portugal-ronaldo-nr7-crveni-domaci", "spanjolska-yamal-crveni-sp-2026", "francuska-zidane-sp1998", "barcelona-yamal-nr10-novi-domaci-2026-27"];
+  const fi = FIRSTS.map((slug) => items.findIndex((it) => it.slug === slug)).find((i) => i >= 0) ?? -1;
   if (fi > 0) items.unshift(items.splice(fi, 1)[0]);
 
   // Žive kartice između scene i kataloga: cijene iz podataka proizvoda (ne upisane ručno).

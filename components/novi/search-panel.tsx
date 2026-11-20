@@ -173,6 +173,18 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
     <AnimatePresence>
       {open ? (
         <motion.div
+          key="fl-search-scrim"
+          aria-hidden
+          onClick={close}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { duration: 0.18 } }}
+          exit={{ opacity: 0, transition: { duration: 0.14 } }}
+          style={{ zIndex: 130 }}
+          className="fixed inset-0 bg-[rgba(5,5,5,0.86)]"
+        />
+      ) : null}
+      {open ? (
+        <motion.div
           key="fl-search"
           role="dialog"
           aria-modal="true"
@@ -183,10 +195,10 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
           style={{ zIndex: 131 }}
           className="pointer-events-none fixed inset-x-0 top-0 mx-auto w-full max-w-[680px] px-3 pt-[max(12px,env(safe-area-inset-top))] md:px-4 md:pt-[11vh]"
         >
-          <div ref={panelRef} onKeyDown={onPanelKey} className="fl-glass-2 fl-rim pointer-events-auto overflow-hidden rounded-[24px] shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_30px_80px_-20px_rgba(0,0,0,0.85)]">
+          <div ref={panelRef} onKeyDown={onPanelKey} className="pointer-events-auto overflow-hidden border border-[#ffffff1a] bg-[#0b0b0b] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]">
             {/* Polje za pretragu */}
             <div className="flex items-center gap-2 p-2.5">
-              <label className="relative flex h-[52px] min-w-0 flex-1 items-center rounded-full border border-white/[0.1] bg-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[border-color,box-shadow] duration-150 focus-within:border-[#e8ff3c]/60 focus-within:shadow-[0_0_0_4px_rgba(232,255,60,0.12)]">
+              <label className="relative flex h-[52px] min-w-0 flex-1 items-center border-b border-white/[0.16] transition-[border-color] duration-150 focus-within:border-[#e8ff3c]">
                 <Search aria-hidden strokeWidth={2} className="pointer-events-none absolute left-4 h-[18px] w-[18px] text-[#e8ff3c]" />
                 <span className="sr-only">{placeholder}</span>
                 <input
@@ -227,7 +239,7 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
               </button>
             </div>
 
-            <div className="fl-hairline mx-4" />
+            <div className="mx-4 h-px bg-white/[0.08]" />
 
             <p className="sr-only" role="status" aria-live="polite">
               {status}
@@ -239,7 +251,7 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
                   <p className="px-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55">
                     {en ? "Popular searches" : "Često traženo"}
                   </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 px-1">
                     {SUGGESTIONS.map((s) => (
                       <button
                         key={s}
@@ -248,7 +260,7 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
                           setQuery(s);
                           inputRef.current?.focus();
                         }}
-                        className="fl-chip fl-chip-sm"
+                        className="inline-flex items-center gap-1.5 py-1 text-[15px] text-white/80 transition-colors hover:text-[#e8ff3c]"
                       >
                         <Search aria-hidden strokeWidth={2} className="h-3 w-3 text-white/45" />
                         {s}
@@ -258,9 +270,9 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
                   <p className="mt-6 px-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55">
                     {en ? "Browse" : "Kategorije"}
                   </p>
-                  <div className="fl-group mt-3">
+                  <div className="mt-2 border-t border-white/[0.08]">
                     {CATEGORIES.map((c) => (
-                      <Link key={c.href} href={c.href} onClick={() => setOpen(false)} className="fl-row min-h-[48px] text-[15px] text-white/90">
+                      <Link key={c.href} href={c.href} onClick={() => setOpen(false)} className="flex min-h-[48px] items-center border-b border-white/[0.08] px-1 text-[15px] text-white/90 transition-colors hover:text-[#e8ff3c]">
                         <span className="flex-1">{en ? c.en : c.hr}</span>
                         <ChevronRight aria-hidden strokeWidth={1.75} className="h-4 w-4 text-white/30" />
                       </Link>
