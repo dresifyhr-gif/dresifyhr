@@ -579,7 +579,7 @@ function ItemThumb({ src, klub }: { src: string | null; klub: string }) {
       alt=""
       loading="lazy"
       onError={() => setErr(true)}
-      className="h-10 w-10 shrink-0 rounded-md border border-[var(--a-line)] bg-[var(--a-card)] object-cover"
+      className="h-10 w-10 shrink-0 rounded-md border border-[var(--a-line)] bg-[#141414] object-contain p-0.5"
     />
   );
 }

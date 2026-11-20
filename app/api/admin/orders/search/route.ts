@@ -1,3 +1,4 @@
+import { HANGER_IMAGES } from "@/lib/data/ormar-hanger";
 import { NextResponse } from "next/server";
 
 import { isAdmin } from "@/lib/admin-auth";
@@ -69,8 +70,14 @@ export async function GET(request: Request) {
     if (first) customImg.set(p.slug, first);
   }
   // Glavna slika stavke: custom uploadana → inače katalog dresa → inače null (fallback pločica).
+  // Igor 20.11.: u narudžbi nove slike na vješalici (kao na stranici); stare fotke samo kao rezerva.
+  const hangerImage = (slug: string): string | null => {
+    const h = HANGER_IMAGES[slug];
+    if (!h) return null;
+    return h.kind === "dres" ? h.back : h.jakna ?? h.hlace ?? null;
+  };
   const itemImage = (slug: string | null | undefined): string | null =>
-    slug ? customImg.get(slug) ?? getJerseyGallery(slug)[0]?.src ?? null : null;
+    slug ? hangerImage(slug) ?? customImg.get(slug) ?? getJerseyGallery(slug)[0]?.src ?? null : null;
   const all = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     select: {
