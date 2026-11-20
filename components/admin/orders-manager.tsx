@@ -567,21 +567,38 @@ type ItemSceneData = { kid: boolean; shorts: string | null; lopta: Addon; kapa: 
 
 // Igor 20.11.: "scena" stavke kao na stranici — dres (+ hlačice za dječje) + lopta/kapa ako su naručene.
 function ItemScene({ src, scene, big = false }: { src: string; scene?: ItemSceneData; big?: boolean }) {
-  const h = big ? 420 : 64;
-  const extra = scene ? [scene.lopta?.img, scene.kapa?.img].filter(Boolean) as string[] : [];
+  const extra = scene ? ([scene.lopta?.img, scene.kapa?.img].filter(Boolean) as string[]) : [];
+  // Igor 20.11.: svjetlosiva podloga (vide se i crni i bijeli dresovi); sličica je uvijek iste veličine,
+  // a na klik se slike prikazuju u svojoj punoj veličini.
+  if (big) {
+    return (
+      <span className="flex max-w-[92vw] flex-wrap items-end justify-center gap-3 rounded-[14px] bg-[#ececec] p-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt="" className="max-h-[70vh] w-auto object-contain" />
+        {scene?.shorts ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={scene.shorts} alt="" className="max-h-[50vh] w-auto object-contain" />
+        ) : null}
+        {extra.map((x) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img key={x} src={x} alt="" className="max-h-[28vh] w-auto object-contain" />
+        ))}
+      </span>
+    );
+  }
   return (
-    <span className="flex shrink-0 items-end gap-0.5 rounded-md border border-[var(--a-line)] bg-[#141414] p-1" style={{ height: h }}>
+    <span className="flex h-[72px] w-[96px] shrink-0 items-end justify-center gap-0.5 overflow-hidden rounded-md border border-[var(--a-line)] bg-[#ececec] p-1">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="" loading="lazy" className="h-full w-auto object-contain" />
+      <img src={src} alt="" loading="lazy" className="h-full min-w-0 object-contain" />
       {scene?.shorts ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={scene.shorts} alt="" loading="lazy" className="w-auto object-contain" style={{ height: h * 0.72 }} />
+        <img src={scene.shorts} alt="" loading="lazy" className="h-[72%] min-w-0 object-contain" />
       ) : null}
       {extra.length ? (
-        <span className="flex flex-col justify-end gap-0.5">
+        <span className="flex h-full min-w-0 flex-col justify-end gap-0.5">
           {extra.map((x) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={x} src={x} alt="" loading="lazy" className="w-auto object-contain" style={{ height: h * 0.4 }} />
+            <img key={x} src={x} alt="" loading="lazy" className="h-[44%] w-auto object-contain" />
           ))}
         </span>
       ) : null}
@@ -594,8 +611,8 @@ function ItemThumb({ src, klub }: { src: string | null; klub: string }) {
   const [err, setErr] = useState(false);
   if (!src || err) {
     return (
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--a-line)] bg-[var(--a-card)] text-[13px] font-bold text-[var(--a-text-3)]">
-        {klub?.trim()?.[0]?.toUpperCase() || "👕"}
+      <span className="flex h-[72px] w-[96px] shrink-0 items-center justify-center rounded-md border border-[var(--a-line)] bg-[#ececec] text-[26px] font-bold text-[#111]">
+        {/mystery/i.test(klub || "") ? "?" : klub?.trim()?.[0]?.toUpperCase() || "?"}
       </span>
     );
   }
@@ -606,7 +623,7 @@ function ItemThumb({ src, klub }: { src: string | null; klub: string }) {
       alt=""
       loading="lazy"
       onError={() => setErr(true)}
-      className="h-10 w-10 shrink-0 rounded-md border border-[var(--a-line)] bg-[#141414] object-contain p-0.5"
+      className="h-[72px] w-[96px] shrink-0 rounded-md border border-[var(--a-line)] bg-[#ececec] object-contain p-1"
     />
   );
 }
@@ -1153,7 +1170,7 @@ export function OrdersManager() {
                               title={it.image ? "Klikni za veću sliku" : undefined}
                               className="flex w-full items-center gap-2.5 rounded-md text-left text-[13px] text-[var(--a-text)] transition-colors enabled:hover:bg-[var(--a-card)] disabled:cursor-default"
                             >
-                              {it.image ? <ItemScene src={it.image} scene={it.scene} /> : <ItemThumb src={it.image} klub={it.klub} />}
+                              {it.image && !/mystery/i.test(it.label) ? <ItemScene src={it.image} scene={it.scene} /> : <ItemThumb src={null} klub={it.label} />}
                               <span className="min-w-0 flex-1">
                                 {it.quantity > 1 ? <span className="font-semibold">{it.quantity}× </span> : null}
                                 <span className="font-medium">{it.scene?.base ? [it.klub, it.scene.base].filter(Boolean).join(" — ") : it.label}</span>

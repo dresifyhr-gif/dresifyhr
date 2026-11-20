@@ -185,7 +185,7 @@ function Thumb({ src, alt, klub, size = "h-14 w-14", radius = "rounded-[10px]" }
       alt={alt}
       loading="lazy"
       onError={() => setErr(true)}
-      className={`${size} shrink-0 ${radius} border border-[var(--a-line)] bg-[#141414] object-contain`}
+      className={`${size} shrink-0 ${radius} border border-[var(--a-line)] bg-[#ececec] object-contain`}
     />
   );
 }
@@ -219,7 +219,7 @@ function ImageViewer({ images, title, onClose }: { images: string[]; title: stri
       </div>
       <div className="relative flex w-full max-w-4xl flex-1 items-center justify-center" onClick={(e) => e.stopPropagation()}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={images[i]} alt={title} className="max-h-[78vh] max-w-full rounded-[12px] bg-[#141414] object-contain" />
+        <img src={images[i]} alt={title} className="max-h-[78vh] max-w-full rounded-[12px] bg-[#ececec] object-contain" />
         {n > 1 && (
           <>
             <button type="button" aria-label="Prethodna" onClick={() => setI((x) => (x - 1 + n) % n)} className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-black/60 px-3 py-2 text-xl text-white hover:bg-black/80">‹</button>
@@ -232,7 +232,7 @@ function ImageViewer({ images, title, onClose }: { images: string[]; title: stri
           {images.map((src, k) => (
             <button key={src + k} type="button" onClick={() => setI(k)} className={`shrink-0 overflow-hidden rounded-md border-2 ${k === i ? "border-[var(--a-accent)]" : "border-transparent opacity-60 hover:opacity-100"}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt="" className="h-14 w-14 bg-[#141414] object-contain" />
+              <img src={src} alt="" className="h-14 w-14 bg-[#ececec] object-contain" />
             </button>
           ))}
         </div>
