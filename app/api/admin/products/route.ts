@@ -8,6 +8,7 @@ import { jerseys, adultSizes, kidSizes, streetwearSizes, getJerseyDescription, g
 import { JERSEY_PRICE_EUR } from "@/lib/site";
 import { customToJersey, type CustomRow } from "@/lib/data/product-overrides";
 import { getJerseyGallery } from "@/lib/data/jersey-media";
+import { HANGER_IMAGES } from "@/lib/data/ormar-hanger";
 import { repairText } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -58,6 +59,13 @@ function cleanSizeStock(input: unknown, allowed: Set<string>): string | null {
 }
 
 // Lists the catalog with effective price/stock (base merged with admin override).
+// slike na vješalici (leđa, prednja, hlačice / jakna, hlače) za admin
+function hangerOf(slug: string): string[] {
+  const h = HANGER_IMAGES[slug];
+  if (!h) return [];
+  return (h.kind === "dres" ? [h.back, h.front, h.shorts] : [h.jakna, h.jaknaFront, h.hlace]).filter((x): x is string => !!x);
+}
+
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
 
@@ -120,11 +128,12 @@ export async function GET() {
       liga: ov?.liga || j.liga,
       images: parseImagesArr(ov?.images ?? null),
       // Thumbnail za admin: override slika ako postoji, inače glavna iz kataloga.
-      image: parseImagesArr(ov?.images ?? null)[0] ?? getJerseyGallery(j.slug)[0]?.src ?? null,
+      // Igor 20.11.: u adminu iste slike kao na stranici (vješalica); stare fotke ostaju u galeriji iza njih.
+      image: hangerOf(j.slug)[0] ?? parseImagesArr(ov?.images ?? null)[0] ?? getJerseyGallery(j.slug)[0]?.src ?? null,
       // Sve slike za pregled (klik na sliku u adminu).
       gallery: (() => {
         const own = parseImagesArr(ov?.images ?? null);
-        return own.length ? own : getJerseyGallery(j.slug).map((g) => g.src).filter(Boolean);
+        return [...hangerOf(j.slug), ...(own.length ? own : getJerseyGallery(j.slug).map((g) => g.src).filter(Boolean))];
       })(),
       ...salesFor(j.slug),
       category: j.category ?? "dres",
