@@ -9,6 +9,7 @@ import {
   CONTACT_EMAIL,
   CONTACT_PHONE_DISPLAY,
   DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE_SQUARE,
   DEFAULT_OG_IMAGE_SIZE,
   FACEBOOK_URL,
   INSTAGRAM_URL,
@@ -99,7 +100,8 @@ export function buildMetadata({
           url: imageUrl,
           ...(width && height ? { width, height } : {}),
           alt: title
-        }
+        },
+        ...(isDefaultImage ? [{ url: absoluteUrl(DEFAULT_OG_IMAGE_SQUARE), width: 1200, height: 1200, alt: title }] : [])
       ]
     },
     twitter: {
