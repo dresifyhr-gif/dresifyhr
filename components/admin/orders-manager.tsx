@@ -88,7 +88,7 @@ type Order = {
   cashCollected: boolean;
   risk?: { failed: number; collected: number; priorOrders: number; min?: number };
   mergeWith?: { id: string; reference: string }[]; // druge NEPOSLANE narudžbe istog kupca → "Spoji"
-  items: { id: string; slug: string | null; image: string | null; klub: string; igrac: string; label: string; size: string; quantity: number; unitPrice: number }[];
+  items: { id: string; slug: string | null; image: string | null; scene?: ItemSceneData; klub: string; igrac: string; label: string; size: string; quantity: number; unitPrice: number }[];
 };
 
 type EditItem = { id: string; klub: string; igrac: string; size: string; unitPrice: string };
@@ -562,6 +562,33 @@ function CancelPicker({ onPick, onClose }: { onPick: (reason: string) => void; o
   );
 }
 
+type Addon = { label: string; img: string | null } | null;
+type ItemSceneData = { kid: boolean; shorts: string | null; lopta: Addon; kapa: Addon; base?: string };
+
+// Igor 20.11.: "scena" stavke kao na stranici — dres (+ hlačice za dječje) + lopta/kapa ako su naručene.
+function ItemScene({ src, scene, big = false }: { src: string; scene?: ItemSceneData; big?: boolean }) {
+  const h = big ? 420 : 64;
+  const extra = scene ? [scene.lopta?.img, scene.kapa?.img].filter(Boolean) as string[] : [];
+  return (
+    <span className="flex shrink-0 items-end gap-0.5 rounded-md border border-[var(--a-line)] bg-[#141414] p-1" style={{ height: h }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" loading="lazy" className="h-full w-auto object-contain" />
+      {scene?.shorts ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={scene.shorts} alt="" loading="lazy" className="w-auto object-contain" style={{ height: h * 0.72 }} />
+      ) : null}
+      {extra.length ? (
+        <span className="flex flex-col justify-end gap-0.5">
+          {extra.map((x) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={x} src={x} alt="" loading="lazy" className="w-auto object-contain" style={{ height: h * 0.4 }} />
+          ))}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
 // Mala sličica proizvoda u stavci narudžbe; fallback = pločica s inicijalom.
 function ItemThumb({ src, klub }: { src: string | null; klub: string }) {
   const [err, setErr] = useState(false);
@@ -600,7 +627,7 @@ export function OrdersManager() {
   const [editingContact, setEditingContact] = useState<string | null>(null);
   const [glsOpen, setGlsOpen] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
-  const [lightbox, setLightbox] = useState<{ image: string; label: string } | null>(null); // povećana slika proizvoda
+  const [lightbox, setLightbox] = useState<{ image: string; label: string; scene?: ItemSceneData } | null>(null); // povećana slika proizvoda
   const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cash, setCash] = useState<{ pendingCount: number; pendingTotal: number; pendingDresovi: number; pendingKompleti: number; collectedTotal: number; collectedDresovi: number; collectedKompleti: number; igorCollected: number; ivicaCollected: number; igorPending: number; ivicaPending: number; igorDresovi: number; igorKompleti: number; ivicaDresovi: number; ivicaKompleti: number } | null>(null);
@@ -1121,16 +1148,19 @@ export function OrdersManager() {
                           <li key={idx}>
                             <button
                               type="button"
-                              onClick={() => it.image && setLightbox({ image: it.image, label: it.label })}
+                              onClick={() => it.image && setLightbox({ image: it.image, label: it.label, scene: it.scene })}
                               disabled={!it.image}
                               title={it.image ? "Klikni za veću sliku" : undefined}
                               className="flex w-full items-center gap-2.5 rounded-md text-left text-[13px] text-[var(--a-text)] transition-colors enabled:hover:bg-[var(--a-card)] disabled:cursor-default"
                             >
-                              <ItemThumb src={it.image} klub={it.klub} />
+                              {it.image ? <ItemScene src={it.image} scene={it.scene} /> : <ItemThumb src={it.image} klub={it.klub} />}
                               <span className="min-w-0 flex-1">
                                 {it.quantity > 1 ? <span className="font-semibold">{it.quantity}× </span> : null}
-                                <span className="font-medium">{it.label}</span>
+                                <span className="font-medium">{it.scene?.base ? [it.klub, it.scene.base].filter(Boolean).join(" — ") : it.label}</span>
                                 {it.size ? <span className="text-[var(--a-text-2)]"> · vel. {it.size}</span> : null}
+                                {it.scene?.kid ? <span className="ml-1.5 rounded bg-sky-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-sky-600 dark:text-sky-300">DJEČJI + hlačice</span> : null}
+                                {it.scene?.lopta ? <span className="mt-0.5 block text-[12px] font-semibold text-[var(--a-text)]">⚽ Lopta: {it.scene.lopta.label}</span> : null}
+                                {it.scene?.kapa ? <span className="block text-[12px] font-semibold text-[var(--a-text)]">🧢 Kapa: {it.scene.kapa.label}</span> : null}
                               </span>
                               {it.image ? <span className="shrink-0 text-[12px] text-[var(--a-text-3)]">🔍</span> : null}
                             </button>
@@ -1241,7 +1271,7 @@ export function OrdersManager() {
         >
           <div className="max-w-sm" onClick={(e) => e.stopPropagation()}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={lightbox.image} alt={lightbox.label} className="max-h-[80vh] w-auto rounded-[14px] border border-white/10 object-contain" />
+            <ItemScene src={lightbox.image} scene={lightbox.scene} big />
             <div className="mt-2 text-center text-sm font-semibold text-white">{lightbox.label}</div>
             <button type="button" onClick={() => setLightbox(null)} className="mt-2 block w-full rounded-[10px] bg-white/15 py-2 text-[13px] font-semibold text-white hover:bg-white/25">
               Zatvori

@@ -1,3 +1,4 @@
+import { MIX_CLUBS } from "@/lib/mix";
 import { HANGER_IMAGES } from "@/lib/data/ormar-hanger";
 import { NextResponse } from "next/server";
 
@@ -76,6 +77,32 @@ export async function GET(request: Request) {
     if (!h) return null;
     return h.kind === "dres" ? h.back : h.jakna ?? h.hlace ?? null;
   };
+  // Igor 20.11.: slika stavke kao na stranici — dječji = dres + hlačice; uz loptu/kapu i njihova slika (+ naziv kluba).
+  const clubKey = (label: string) => MIX_CLUBS.find((c) => c.label.toLowerCase() === label.trim().toLowerCase())?.key ?? null;
+  const addonOf = (igrac: string, kind: "lopta" | "kapa") => {
+    const m = igrac.match(new RegExp(`\\+ ${kind} (.+?)(?= \\+ (?:lopta|kapa) |$)`));
+    if (!m) return null;
+    const label = m[1].trim();
+    const key = clubKey(label);
+    if (!key) return null; // npr. naziv kompleta "(dres + hlačice + lopta + kapa)" nije dodatak
+    return { label, img: `/naslovnica/${kind === "lopta" ? "lopte-hd" : "kape-hd"}/${key}.webp` };
+  };
+  const isKidSize = (size: string) => /^\d{2,3}$/.test(size.trim());
+  const itemScene = (it: { slug: string | null; igrac: string | null; size: string | null; segment: string | null }) => {
+    const h = it.slug ? HANGER_IMAGES[it.slug] : undefined;
+    const kid = it.segment === "kid" || isKidSize(it.size || "");
+    const igrac = it.igrac || "";
+    const lopta = addonOf(igrac, "lopta");
+    const kapa = addonOf(igrac, "kapa");
+    return {
+      lopta,
+      kapa,
+      // naziv bez dodataka (dodaci se prikazuju zasebno)
+      base: igrac.replace(lopta ? ` + lopta ${lopta.label}` : "", "").replace(kapa ? ` + kapa ${kapa.label}` : "", ""),
+      kid,
+      shorts: kid && h && h.kind === "dres" ? h.shorts ?? null : null,
+    };
+  };
   const itemImage = (slug: string | null | undefined): string | null =>
     slug ? hangerImage(slug) ?? customImg.get(slug) ?? getJerseyGallery(slug)[0]?.src ?? null : null;
   const all = await prisma.order.findMany({
@@ -104,7 +131,7 @@ export async function GET(request: Request) {
       promoCode: true,
       cashCollected: true,
       userId: true,
-      items: { select: { id: true, slug: true, klub: true, igrac: true, size: true, quantity: true, unitPrice: true } }
+      items: { select: { id: true, slug: true, klub: true, igrac: true, size: true, segment: true, quantity: true, unitPrice: true } }
     }
   });
 
@@ -349,6 +376,7 @@ export async function GET(request: Request) {
         id: it.id,
         slug: it.slug || null,
         image: itemImage(it.slug),
+        scene: itemScene(it),
         klub: repairText(it.klub || ""),
         igrac: repairText(it.igrac || ""),
         label: repairText([it.klub, it.igrac].filter(Boolean).join(" — ")),
