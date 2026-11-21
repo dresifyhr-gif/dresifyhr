@@ -101,6 +101,9 @@ export async function GET(request: Request) {
       base: igrac.replace(lopta ? ` + lopta ${lopta.label}` : "", "").replace(kapa ? ` + kapa ${kapa.label}` : "", ""),
       kid,
       shorts: kid && h && h.kind === "dres" ? h.shorts ?? null : null,
+      // Igor 21.11.: na svakoj slici prednja I stražnja strana (dres, dugi rukav, trenirka); trenirka + hlače.
+      front: h ? (h.kind === "dres" ? h.front ?? null : h.jaknaFront ?? null) : null,
+      pants: h && h.kind === "trenirka" && h.jakna ? h.hlace ?? null : null,
     };
   };
   const itemImage = (slug: string | null | undefined): string | null =>

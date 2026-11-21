@@ -563,39 +563,48 @@ function CancelPicker({ onPick, onClose }: { onPick: (reason: string) => void; o
 }
 
 type Addon = { label: string; img: string | null } | null;
-type ItemSceneData = { kid: boolean; shorts: string | null; lopta: Addon; kapa: Addon; base?: string };
+type ItemSceneData = { kid: boolean; shorts: string | null; lopta: Addon; kapa: Addon; base?: string; front?: string | null; pants?: string | null };
 
 // Igor 20.11.: "scena" stavke kao na stranici — dres (+ hlačice za dječje) + lopta/kapa ako su naručene.
 function ItemScene({ src, scene, big = false }: { src: string; scene?: ItemSceneData; big?: boolean }) {
   const extra = scene ? ([scene.lopta?.img, scene.kapa?.img].filter(Boolean) as string[]) : [];
-  // Igor 20.11.: svjetlosiva podloga (vide se i crni i bijeli dresovi); sličica je uvijek iste veličine,
-  // a na klik se slike prikazuju u svojoj punoj veličini.
+  // Igor 21.11.: uvijek prednja + stražnja strana; dječji još hlačice, trenirka još hlače; uz to lopta/kapa.
+  // Svjetlosiva podloga (vide se i crni i bijeli dresovi); sličica je uvijek iste veličine, na klik puna veličina.
+  const wear = [scene?.front, src].filter(Boolean) as string[];
+  const lower = scene?.shorts ?? scene?.pants ?? null;
   if (big) {
     return (
-      <span className="flex max-w-[92vw] flex-wrap items-end justify-center gap-3 rounded-[14px] bg-[#ececec] p-4">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="" className="max-h-[70vh] w-auto object-contain" />
-        {scene?.shorts ? (
+      <span className="flex max-w-[94vw] flex-wrap items-end justify-center gap-3 rounded-[14px] bg-[#ececec] p-4">
+        {wear.map((w, i) => (
+          <span key={w} className="flex flex-col items-center gap-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={w} alt="" className="max-h-[62vh] max-w-[44vw] object-contain" />
+            {wear.length > 1 ? <span className="text-[11px] font-semibold uppercase tracking-wide text-[#555]">{i === 0 ? "Prednja" : "Stražnja"}</span> : null}
+          </span>
+        ))}
+        {lower ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={scene.shorts} alt="" className="max-h-[50vh] w-auto object-contain" />
+          <img src={lower} alt="" className="max-h-[44vh] max-w-[40vw] object-contain" />
         ) : null}
         {extra.map((x) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={x} src={x} alt="" className="max-h-[28vh] w-auto object-contain" />
+          <img key={x} src={x} alt="" className="max-h-[26vh] w-auto object-contain" />
         ))}
       </span>
     );
   }
   return (
-    <span className="flex h-[72px] w-[96px] shrink-0 items-end justify-center gap-0.5 overflow-hidden rounded-md border border-[var(--a-line)] bg-[#ececec] p-1">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="" loading="lazy" className="h-full min-w-0 object-contain" />
-      {scene?.shorts ? (
+    <span className="flex h-[80px] w-[136px] shrink-0 items-end justify-center gap-0.5 overflow-hidden rounded-md border border-[var(--a-line)] bg-[#ececec] p-1">
+      {wear.map((w) => (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={scene.shorts} alt="" loading="lazy" className="h-[72%] min-w-0 object-contain" />
+        <img key={w} src={w} alt="" loading="lazy" className="h-full min-w-0 flex-1 object-contain" />
+      ))}
+      {lower ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={lower} alt="" loading="lazy" className="h-[66%] min-w-0 flex-[0.7] object-contain" />
       ) : null}
       {extra.length ? (
-        <span className="flex h-full min-w-0 flex-col justify-end gap-0.5">
+        <span className="flex h-full min-w-0 flex-[0.5] flex-col justify-end gap-0.5">
           {extra.map((x) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img key={x} src={x} alt="" loading="lazy" className="h-[44%] w-auto object-contain" />
@@ -611,7 +620,7 @@ function ItemThumb({ src, klub }: { src: string | null; klub: string }) {
   const [err, setErr] = useState(false);
   if (!src || err) {
     return (
-      <span className="flex h-[72px] w-[96px] shrink-0 items-center justify-center rounded-md border border-[var(--a-line)] bg-[#ececec] text-[26px] font-bold text-[#111]">
+      <span className="flex h-[80px] w-[136px] shrink-0 items-center justify-center rounded-md border border-[var(--a-line)] bg-[#ececec] text-[26px] font-bold text-[#111]">
         {/mystery/i.test(klub || "") ? "?" : klub?.trim()?.[0]?.toUpperCase() || "?"}
       </span>
     );
@@ -623,7 +632,7 @@ function ItemThumb({ src, klub }: { src: string | null; klub: string }) {
       alt=""
       loading="lazy"
       onError={() => setErr(true)}
-      className="h-[72px] w-[96px] shrink-0 rounded-md border border-[var(--a-line)] bg-[#ececec] object-contain p-1"
+      className="h-[80px] w-[136px] shrink-0 rounded-md border border-[var(--a-line)] bg-[#ececec] object-contain p-1"
     />
   );
 }
