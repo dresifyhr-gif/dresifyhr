@@ -846,6 +846,7 @@ function DraftCard({
             )}
           </div>
           <div className="flex flex-wrap gap-2">
+            {item.format !== "REEL" && <SaveImagesButton urls={imgs.map((im) => im.url)} base={`dresify-${item.runDate}-${(item.series || "objava").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} />}
             {imgs.map((im, i) => (
               <a key={im.url} href={im.url} target="_blank" rel="noreferrer" className="a-btn-sm px-2.5 py-1 text-[12px]">
                 Otvori sliku {imgs.length > 1 ? i + 1 : ""}
@@ -1273,16 +1274,83 @@ function ChannelView({ data, onChange }: { data: Payload; onChange: (i: Item) =>
   );
 }
 
+// Spremanje slika na mobitel: iPhone dobije sistemski izbornik (Spremi sliku / Spremi N slika),
+// računalo obično preuzimanje. Prvi dodir dohvati slike; ako iOS zbog čekanja odbije izbornik, drugi dodir ga otvori odmah.
+function SaveImagesButton({ urls, base }: { urls: string[]; base: string }) {
+  const [files, setFiles] = useState<File[] | null>(null);
+  const [state, setState] = useState<"" | "busy" | "again" | "ok" | "err">("");
+  const n = urls.length;
+  async function load() {
+    const out = await Promise.all(
+      urls.map(async (u, i) => {
+        const r = await fetch(u, { mode: "cors" });
+        if (!r.ok) throw new Error(String(r.status));
+        const b = await r.blob();
+        const ext = b.type.includes("png") ? "png" : "jpg";
+        return new File([b], `${base}${n > 1 ? `-${String(i + 1).padStart(2, "0")}` : ""}.${ext}`, { type: b.type || "image/jpeg" });
+      }),
+    );
+    setFiles(out);
+    return out;
+  }
+  async function save() {
+    try {
+      let f = files;
+      if (!f) {
+        setState("busy");
+        f = await load();
+      }
+      const nav = navigator as Navigator & { canShare?: (d: { files: File[] }) => boolean };
+      if (nav.canShare?.({ files: f }) && nav.share) {
+        try {
+          await nav.share({ files: f });
+          setState("ok");
+        } catch (e) {
+          const name = (e as Error)?.name;
+          if (name === "NotAllowedError") setState("again");
+          else setState(name === "AbortError" ? "" : "err");
+        }
+        return;
+      }
+      for (const file of f) {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(file);
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      }
+      setState("ok");
+    } catch {
+      setState("err");
+    }
+  }
+  if (n === 0) return null;
+  const label =
+    state === "busy" ? "Pripremam…" : state === "again" ? "Dodirni opet za spremanje" : n > 1 ? `Spremi na mobitel (${n})` : "Spremi na mobitel";
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <button type="button" onClick={save} disabled={state === "busy"} className="a-btn a-btn-primary px-3 py-1 text-[12.5px]">
+        {label}
+      </button>
+      {state === "ok" && <span className="text-[12px] font-semibold text-[var(--a-good)]">Spremljeno.</span>}
+      {state === "err" && <span className="text-[12px] font-semibold text-[var(--a-bad)]">Nije uspjelo — zadrži prst na slici pa „Dodaj u Fotografije“.</span>}
+    </span>
+  );
+}
+
 function ChannelCard({ item, canDecide, onChange }: { item: Item; canDecide: boolean; onChange: (i: Item) => void }) {
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const text = item.caption || "";
   const full = item.manualSteps ? `${text}\n\n${item.manualSteps}` : text;
   const done = item.status === "OBJAVLJENO";
-  async function copy() {
+  const options = (item.manualSteps || "").split("\n").map((x) => x.trim()).filter(Boolean);
+  async function copy(t: string = full, what = "Kopirano.") {
     try {
-      await navigator.clipboard.writeText(full);
-      setMsg("Kopirano.");
+      await navigator.clipboard.writeText(t);
+      setMsg(what);
     } catch {
       setMsg("Kopiranje nije uspjelo, označi tekst ručno.");
     }
@@ -1303,13 +1371,27 @@ function ChannelCard({ item, canDecide, onChange }: { item: Item; canDecide: boo
         {item.verification && item.verification !== "MIŠLJENJE" && <VerificationPill v={item.verification} />}
       </div>
       <div className="whitespace-pre-line text-[14.5px] leading-relaxed text-[var(--a-text)]">{text}</div>
-      {item.manualSteps && (
-        <div className="whitespace-pre-line rounded-[10px] bg-[var(--a-surface-2)] p-2.5 text-[13px] text-[var(--a-text-2)]">{item.manualSteps}</div>
+      {options.length > 0 && (
+        <div className="space-y-1.5 rounded-[10px] bg-[var(--a-surface-2)] p-2.5">
+          <div className="text-[11.5px] font-semibold text-[var(--a-text-3)]">Opcije za anketu u kanalu — dodirni opciju da je kopiraš</div>
+          <div className="flex flex-wrap gap-1.5">
+            {options.map((o, i) => (
+              <button key={i} type="button" onClick={() => copy(o, `Kopirana opcija ${i + 1}: ${o}`)} className="a-btn-sm px-2.5 py-1 text-[13px]">
+                {o}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
       <Sources list={item.sources} />
       <div className="mt-auto flex flex-wrap gap-2 pt-1">
-        <button type="button" className="a-btn a-btn-primary px-3.5 py-1.5 text-[13px]" onClick={copy}>
-          Kopiraj
+        {options.length > 0 && (
+          <button type="button" className="a-btn a-btn-primary px-3.5 py-1.5 text-[13px]" onClick={() => copy(text, "Pitanje kopirano.")}>
+            Kopiraj pitanje
+          </button>
+        )}
+        <button type="button" className={`a-btn ${options.length > 0 ? "a-btn-sm" : "a-btn-primary"} px-3.5 py-1.5 text-[13px]`} onClick={() => copy()}>
+          {options.length > 0 ? "Kopiraj sve" : "Kopiraj"}
         </button>
         {canDecide && !done && (
           <button type="button" className="a-btn-sm px-3 py-1.5 text-[13px]" disabled={busy} onClick={markDone}>
