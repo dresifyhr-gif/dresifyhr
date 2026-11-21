@@ -373,7 +373,7 @@ export function CatalogBrowser({
   const titleRest = dash > 0 ? title.slice(dash) : "";
 
   return (
-    <div className="nv-cat" onClickCapture={rememberList}>
+    <div className="nv-cat" data-lm="katalog" onClickCapture={rememberList}>
       <style dangerouslySetInnerHTML={{ __html: IME_CSS + NV_CAT_CSS }} />
 
       {compactHeader ? null : (

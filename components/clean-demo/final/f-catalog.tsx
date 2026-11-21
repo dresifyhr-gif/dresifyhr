@@ -125,8 +125,9 @@ function FBrowser({ products, withFilters }: { products: Jersey[]; withFilters: 
   }, [q, sort, f]);
 
   // Povratak iz dresa: ista lista, isti broj učitanih, isti položaj.
+  const lmId = `pocetna-${withFilters ? "dresovi" : products.length}`;
   const rememberList = useListMemory(
-    `pocetna-${withFilters ? "dresovi" : products.length}`,
+    lmId,
     () => ({ q, sort, f, shown }),
     (st) => {
       skipReset.current = true;
@@ -228,7 +229,7 @@ function FBrowser({ products, withFilters }: { products: Jersey[]; withFilters: 
   );
 
   return (
-    <div className="mt-6 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-12" onClickCapture={rememberList}>
+    <div className="mt-6 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-12" data-lm={lmId} onClickCapture={rememberList}>
       {/* Računalo: filteri lijevo, prilijepljeni */}
       {withFilters ? (
         <aside aria-label={t.filters} className="hidden lg:block">

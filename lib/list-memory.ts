@@ -12,7 +12,7 @@ if (typeof window !== "undefined") {
   });
 }
 
-type Saved<T> = { state: T; y: number; at: number };
+type Saved<T> = { state: T; y: number; at: number; href?: string; top?: number };
 const keyOf = (id: string) => `nv-list:${id}:${window.location.pathname}${window.location.search}`;
 
 export function useListMemory<T>(id: string, snapshot: () => T, restore: (s: T) => void) {
@@ -33,20 +33,37 @@ export function useListMemory<T>(id: string, snapshot: () => T, restore: (s: T) 
     if (!saved || !isBack || Date.now() - saved.at > 60 * 60 * 1000) return;
     restoreRef.current(saved.state);
     const y = saved.y;
+    const href = saved.href;
+    const top = saved.top ?? 200;
     const timers: number[] = [];
     let done = false;
     const stop = () => {
       done = true;
     };
-    // Ako korisnik sam krene skrolati, ne vučemo ga natrag.
+    // Cilj je kliknuti dres na istom mjestu na ekranu (sadržaj iznad liste zna narasti nakon učitavanja),
+    // a ako ga nema, isti položaj stranice. Ponavljamo ~3 s dok se stranica ne smiri; korisnikov dodir prekida.
+    const target = () => {
+      if (href) {
+        // Isti dres može biti i gore (npr. u vrtuljku) — uzmi pojavu najbližu mjestu gdje je bio kliknut.
+        const want = y + top;
+        let best: number | null = null;
+        const scoped = document.querySelectorAll(`[data-lm="${CSS.escape(id)}"] a[href="${CSS.escape(href)}"]`);
+        (scoped.length ? scoped : document.querySelectorAll(`a[href="${CSS.escape(href)}"]`)).forEach((el) => {
+          const abs = window.scrollY + el.getBoundingClientRect().top;
+          if (best === null || Math.abs(abs - want) < Math.abs(best - want)) best = abs;
+        });
+        if (best !== null) return Math.max(0, best - top);
+      }
+      return y;
+    };
     window.addEventListener("touchstart", stop, { once: true, passive: true });
     window.addEventListener("wheel", stop, { once: true, passive: true });
-    for (const ms of [0, 60, 160, 320, 600, 1000]) {
+    for (const ms of [0, 60, 160, 320, 600, 1000, 1500, 2200, 3000]) {
       timers.push(
         window.setTimeout(() => {
           if (done) return;
-          window.scrollTo({ top: y, left: 0, behavior: "instant" as ScrollBehavior });
-          if (Math.abs(window.scrollY - y) < 4 && ms >= 320) done = true;
+          const t = target();
+          if (Math.abs(window.scrollY - t) > 3) window.scrollTo({ top: t, left: 0, behavior: "instant" as ScrollBehavior });
         }, ms)
       );
     }
@@ -63,7 +80,13 @@ export function useListMemory<T>(id: string, snapshot: () => T, restore: (s: T) 
       const a = (e.target as Element | null)?.closest?.("a[href]");
       if (!a) return;
       try {
-        const data: Saved<T> = { state: snap.current(), y: window.scrollY, at: Date.now() };
+        const data: Saved<T> = {
+          state: snap.current(),
+          y: window.scrollY,
+          at: Date.now(),
+          href: a.getAttribute("href") || undefined,
+          top: Math.round(a.getBoundingClientRect().top)
+        };
         sessionStorage.setItem(keyOf(id), JSON.stringify(data));
       } catch {
         /* privatni način / pun storage — lista se samo neće vratiti */
