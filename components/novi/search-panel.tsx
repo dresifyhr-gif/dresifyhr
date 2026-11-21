@@ -12,6 +12,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { OverlayScrim, SHEET_EASE, useScrollLock } from "@/components/ui/premium";
 
 type Hit = { slug: string; klub: string; igrac: string; liga: string };
+type Coll = { href: string; label: string; count: number };
 
 // Prijedlozi u praznom stanju — samo pojmovi koji stvarno postoje u katalogu.
 const SUGGESTIONS = ["Modrić", "Hrvatska", "Real Madrid", "Barcelona", "Messi", "Ronaldo"];
@@ -65,6 +66,7 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
   const reduce = useReducedMotion();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Hit[]>([]);
+  const [colls, setColls] = useState<Coll[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -96,6 +98,7 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
     const q = query.trim();
     if (!q) {
       setResults([]);
+      setColls([]);
       setLoading(false);
       return;
     }
@@ -106,8 +109,12 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
         const d = await fetch(`/api/search/?q=${encodeURIComponent(q)}`).then((r) => r.json());
         if (my !== reqId.current) return; // stariji odgovor — ignoriraj
         setResults(d?.ok ? d.results : []);
+        setColls(d?.ok && Array.isArray(d.collections) ? d.collections : []);
       } catch {
-        if (my === reqId.current) setResults([]);
+        if (my === reqId.current) {
+          setResults([]);
+          setColls([]);
+        }
       }
       if (my === reqId.current) setLoading(false);
     }, 220);
@@ -132,10 +139,11 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
     if (e.key === "ArrowDown") {
       e.preventDefault();
       focusRow(0);
-    } else if (e.key === "Enter" && results[0] && !loading) {
+    } else if (e.key === "Enter" && (colls[0] || results[0]) && !loading) {
+      // Igor 21.11.: ime igrača/kluba vodi na stranicu sa SVIM njegovim dresovima, ne na prvi dres.
       e.preventDefault();
       setOpen(false);
-      router.push(`/dres/${results[0].slug}`);
+      router.push(colls[0] ? colls[0].href : `/dres/${results[0].slug}`);
     }
   };
   // Fokus ostaje u prozoru (aria-modal): Tab s posljednjeg elementa skoči na prvi i obrnuto.
@@ -291,7 +299,7 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
                     </li>
                   ))}
                 </ul>
-              ) : results.length === 0 ? (
+              ) : results.length === 0 && colls.length === 0 ? (
                 <div className="px-6 py-10 text-center">
                   <p className="text-[15px] font-medium text-white/80">{noResults}</p>
                   <p className="mt-1.5 text-[13px] text-white/55">
@@ -307,7 +315,33 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
                 </div>
               ) : (
                 <ul ref={listRef} className={`p-2 transition-opacity duration-150 ${loading ? "opacity-60" : ""}`}>
-                  {results.map((j, i) => (
+                  {colls.map((c, i) => (
+                    <li key={c.href}>
+                      <Link
+                        data-row
+                        href={c.href}
+                        onClick={() => setOpen(false)}
+                        onKeyDown={(e) => onRowKey(e, i)}
+                        className="group flex items-center gap-3 rounded-[14px] px-2.5 py-2.5 outline-none transition-colors duration-150 hover:bg-white/[0.05] focus-visible:bg-white/[0.06] focus-visible:shadow-[inset_0_0_0_1px_rgba(232,255,60,0.5)] active:bg-white/[0.06]"
+                      >
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-[#e8ff3c] text-[#0b0b0b]">
+                          <Search aria-hidden strokeWidth={2} className="h-5 w-5" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[15px] font-semibold text-white">
+                            {en ? `All: ${c.label}` : `Svi: ${c.label}`}
+                          </span>
+                          <span className="block truncate text-[13px] text-white/55">
+                            {en ? `${c.count} jerseys` : `${c.count} ${c.count % 10 >= 2 && c.count % 10 <= 4 && (c.count % 100 < 12 || c.count % 100 > 14) ? "dresa" : "dresova"}`}
+                          </span>
+                        </span>
+                        <ChevronRight aria-hidden strokeWidth={1.75} className="h-4 w-4 shrink-0 text-[#e8ff3c]" />
+                      </Link>
+                    </li>
+                  ))}
+                  {results.map((j, ri) => {
+                    const i = ri + colls.length;
+                    return (
                     <li key={j.slug}>
                       <Link
                         data-row
@@ -337,7 +371,8 @@ export function SearchPanel({ open, setOpen, close }: { open: boolean; setOpen: 
                         />
                       </Link>
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               )}
             </div>

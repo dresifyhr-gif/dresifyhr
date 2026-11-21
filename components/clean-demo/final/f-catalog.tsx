@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode, useRef } from "react";
+import { useListMemory } from "@/lib/list-memory";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 
 import { DSegmented } from "@/components/clean-demo/d/d-segmented";
@@ -118,7 +119,26 @@ function FBrowser({ products, withFilters }: { products: Jersey[]; withFilters: 
   const [shown, setShown] = useState(PAGE);
   const t = useEText();
 
-  useEffect(() => setShown(PAGE), [q, sort, f]);
+  const skipReset = useRef(false);
+  useEffect(() => {
+    if (!skipReset.current) setShown(PAGE);
+  }, [q, sort, f]);
+
+  // Povratak iz dresa: ista lista, isti broj učitanih, isti položaj.
+  const rememberList = useListMemory(
+    `pocetna-${withFilters ? "dresovi" : products.length}`,
+    () => ({ q, sort, f, shown }),
+    (st) => {
+      skipReset.current = true;
+      setQ(st.q ?? "");
+      setSort(st.sort ?? "recommended");
+      setF(st.f ?? EMPTY);
+      setShown(Math.max(PAGE, Number(st.shown) || PAGE));
+      window.setTimeout(() => {
+        skipReset.current = false;
+      }, 400);
+    }
+  );
 
   // ESC zatvara list; tijelo se ne pomiče dok je list otvoren
   useEffect(() => {
@@ -208,7 +228,7 @@ function FBrowser({ products, withFilters }: { products: Jersey[]; withFilters: 
   );
 
   return (
-    <div className="mt-6 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-12">
+    <div className="mt-6 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-12" onClickCapture={rememberList}>
       {/* Računalo: filteri lijevo, prilijepljeni */}
       {withFilters ? (
         <aside aria-label={t.filters} className="hidden lg:block">

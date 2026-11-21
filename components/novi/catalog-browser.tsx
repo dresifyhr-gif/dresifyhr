@@ -15,7 +15,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { useListMemory } from "@/lib/list-memory";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 
 import { ImeCard, Overline } from "@/components/clean-demo/final/ime-card";
@@ -170,9 +171,32 @@ export function CatalogBrowser({
   const [sheet, setSheet] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+  const skipReset = useRef(false);
   useEffect(() => {
+    if (skipReset.current) return;
     setVisibleCount(PAGE_SIZE);
   }, [search, selectedLeagues, selectedClubs, selectedPlayers, selectedSizes, retroOnly, longSleeveOnly, sortBy]);
+
+  // Povratak iz dresa: ista lista, isti broj učitanih, isti položaj.
+  const rememberList = useListMemory(
+    "katalog",
+    () => ({ search, selectedLeagues, selectedClubs, selectedPlayers, selectedSizes, retroOnly, longSleeveOnly, sortBy, visibleCount }),
+    (st) => {
+      skipReset.current = true;
+      setSearch(st.search ?? "");
+      setSelectedLeagues(st.selectedLeagues ?? []);
+      setSelectedClubs(st.selectedClubs ?? []);
+      setSelectedPlayers(st.selectedPlayers ?? []);
+      setSelectedSizes(st.selectedSizes ?? []);
+      setRetroOnly(!!st.retroOnly);
+      setLongSleeveOnly(!!st.longSleeveOnly);
+      setSortBy(st.sortBy ?? "recommended");
+      setVisibleCount(Math.max(PAGE_SIZE, Number(st.visibleCount) || PAGE_SIZE));
+      window.setTimeout(() => {
+        skipReset.current = false;
+      }, 400);
+    }
+  );
 
   // ESC zatvara list; tijelo se ne pomiče dok je list otvoren
   useEffect(() => {
@@ -349,7 +373,7 @@ export function CatalogBrowser({
   const titleRest = dash > 0 ? title.slice(dash) : "";
 
   return (
-    <div className="nv-cat">
+    <div className="nv-cat" onClickCapture={rememberList}>
       <style dangerouslySetInnerHTML={{ __html: IME_CSS + NV_CAT_CSS }} />
 
       {compactHeader ? null : (
