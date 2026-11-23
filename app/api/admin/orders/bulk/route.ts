@@ -38,9 +38,10 @@ export async function POST(request: Request) {
   // DB izmjena odjednom (instant) — bez čekanja na Google Sheet mirror po narudžbi.
   const now = new Date();
   if (action === "ship") {
-    await prisma.order.updateMany({ where: { id: { in: ids } }, data: { status: "shipped", shippedBy: by, shippedByUser: me?.username ?? null, shippedAt: now, courier: "gls" } });
+    // Osobno predane (novac na ruke) se NE diraju — inače bi postale GLS i novac bi išao krivoj osobi.
+    await prisma.order.updateMany({ where: { id: { in: ids }, OR: [{ courier: null }, { courier: { not: "osobno" } }] }, data: { status: "shipped", shippedBy: by, shippedByUser: me?.username ?? null, shippedAt: now, courier: "gls" } });
   } else if (action === "assign") {
-    await prisma.order.updateMany({ where: { id: { in: ids } }, data: { shippedBy: by } });
+    await prisma.order.updateMany({ where: { id: { in: ids }, OR: [{ courier: null }, { courier: { not: "osobno" } }] }, data: { shippedBy: by } });
   } else if (action === "collect") {
     await prisma.order.updateMany({ where: { id: { in: ids } }, data: { cashCollected: true, cashCollectedAt: now } });
   }

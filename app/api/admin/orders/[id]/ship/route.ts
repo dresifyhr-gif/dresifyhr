@@ -27,7 +27,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const order = await prisma.order.findUnique({
     where: { id },
-    select: { id: true, phone: true, customerName: true, createdAt: true, courier: true, total: true, shipping: true, userId: true, promoCode: true }
+    select: { id: true, phone: true, customerName: true, createdAt: true, courier: true, total: true, shipping: true, subtotal: true, userId: true, shippingBeforeOsobno: true }
   });
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
 
@@ -54,6 +54,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       courier,
       shipping: 0,
       total: goods, // kupac plaća samo robu
+      shippingBeforeOsobno: order.courier === "osobno" ? order.shippingBeforeOsobno : shipping, // za točno poništavanje
       cashCollected: true,
       cashCollectedAt: now,
       deliveryStatus: "delivered",
@@ -63,16 +64,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // shippedBy = NOVAC (ostaje kako je bilo). shippedByUser = AUDIT (tko je stisnuo pošalji).
     data = { status: "shipped", shippedBy: by, shippedByUser: me?.username ?? null, shippedAt: now, courier };
   } else if (order.courier === "osobno") {
-    // Poništi osobnu predaju: vrati dostavu po pravilima checkouta i makni naplatu.
-    const freeShip = !!order.userId && (goods >= FREE_SHIPPING_THRESHOLD_EUR || !!order.promoCode);
-    const restored = freeShip ? 0 : SHIPPING_PRICE_EUR;
+    // Poništi osobnu predaju: vrati TOČNO onu dostavu koja je bila prije (spremljena),
+    // a samo za stare zapise bez nje — pravilo s blagajne (registriran + roba ≥ prag = 0).
+    const restored = order.shippingBeforeOsobno ??
+      (!!order.userId && (order.subtotal || goods) >= FREE_SHIPPING_THRESHOLD_EUR ? 0 : SHIPPING_PRICE_EUR);
     data = {
       status: "new", shippedBy: null, shippedByUser: null, shippedAt: null, courier: null, cancelReason: null,
-      shipping: restored, total: goods + restored,
+      shipping: restored, total: goods + restored, shippingBeforeOsobno: null,
       cashCollected: false, cashCollectedAt: null, deliveryStatus: null, deliveredAt: null
     };
   } else {
-    data = { status: "new", shippedBy: null, shippedByUser: null, shippedAt: null, courier: null, cancelReason: null };
+    // Vraćeno u nove → stara oznaka dostave više ne vrijedi (nova pošiljka = nova provjera).
+    data = { status: "new", shippedBy: null, shippedByUser: null, shippedAt: null, courier: null, cancelReason: null, deliveryStatus: null, deliveredAt: null };
   }
 
   await prisma.order.update({ where: { id }, data });

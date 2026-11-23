@@ -156,7 +156,7 @@ export async function sendNewOrderPush(order: OrderPayload) {
   return sendPushToAll({
     title: "🛒 Nova narudžba!",
     body: `${order.name || "Kupac"}${city} — ${total} € · ${items} ${items === 1 ? "artikl" : "artikla"}`,
-    url: `/admin/?order=${encodeURIComponent(ref)}`,
+    url: `/admin/narudzbe/?q=${encodeURIComponent(ref)}`, // ravno na tu narudžbu
     tag: `order-${ref}`,
     kind: "order"
   });

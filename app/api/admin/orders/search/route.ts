@@ -210,7 +210,9 @@ export async function GET(request: Request) {
       const inName = deaccent(o.customerName).includes(nq);
       const inAddr = deaccent(o.address || "").includes(nq);
       const inPhone = dq.length >= 3 && String(o.phone || "").replace(/\D/g, "").includes(dq);
-      return inName || inAddr || inPhone;
+      // Broj narudžbe (DRS-…) — klik na push obavijest otvara točno tu narudžbu.
+      const inRef = q.length >= 6 && (o.reference || getOrderReference(o.createdAt.toISOString())).toUpperCase().includes(q.toUpperCase());
+      return inName || inAddr || inPhone || inRef;
     });
   }
   // Tko je poslao (Igor / Ivica).

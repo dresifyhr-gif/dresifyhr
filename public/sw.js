@@ -90,8 +90,13 @@ self.addEventListener("notificationclick", (event) => {
       const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
       for (const c of clients) {
         if (c.url.includes("/admin") && "focus" in c) {
-          await c.focus();
-          if ("navigate" in c) c.navigate(url).catch(() => {});
+          await c.focus().catch(() => {});
+          // iOS Safari nema client.navigate → javi stranici da sama ode na URL.
+          let navigated = false;
+          if ("navigate" in c) {
+            try { await c.navigate(url); navigated = true; } catch (e) { navigated = false; }
+          }
+          if (!navigated) c.postMessage({ type: "navigate", url });
           return;
         }
       }

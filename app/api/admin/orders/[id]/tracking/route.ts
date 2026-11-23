@@ -13,10 +13,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const body = await request.json().catch(() => ({}));
   const tracking = typeof body?.tracking === "string" ? body.tracking.trim() : "";
 
-  const order = await prisma.order.findUnique({ where: { id }, select: { id: true } });
+  const order = await prisma.order.findUnique({ where: { id }, select: { id: true, tracking: true } });
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
 
-  await prisma.order.update({ where: { id }, data: { tracking: tracking || null } });
+  // Novi broj pošiljke = druga pošiljka → stara oznaka dostave (npr. "dostavljeno") ne vrijedi.
+  const changed = (order.tracking || "").trim() !== tracking;
+  await prisma.order.update({
+    where: { id },
+    data: { tracking: tracking || null, ...(changed ? { deliveryStatus: null, deliveredAt: null } : {}) }
+  });
 
   return NextResponse.json({ ok: true, tracking: tracking || null });
 }

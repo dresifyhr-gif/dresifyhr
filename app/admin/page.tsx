@@ -83,8 +83,11 @@ function Highlight({ label, value, sub }: { label: string; value: string; sub?: 
   );
 }
 
-export default async function AdminOverview() {
+export default async function AdminOverview({ searchParams }: { searchParams?: { order?: string } }) {
   if (!(await isAdmin())) redirect("/admin/login/");
+  // Stare push obavijesti vode na /admin/?order=DRS-… → preusmjeri na tu narudžbu.
+  const order = searchParams?.order;
+  if (order) redirect(`/admin/narudzbe/?q=${encodeURIComponent(order)}`);
   const me = await getAdminUser();
 
   // Metrike i "stari neposlani" su neovisni → paralelno; CEO insights ovisi o prometu pa ide nakon.

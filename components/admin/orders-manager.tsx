@@ -689,6 +689,13 @@ export function OrdersManager() {
   const [glsOpen, setGlsOpen] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
   const [personalOpen, setPersonalOpen] = useState<string | null>(null); // "Osobno dostavljeno" → tko je preuzeo novac
+  const [canCash, setCanCash] = useState(false); // osobna predaja (novac na ruke) = samo Igor/Ivica (OWNER/PARTNER)
+  useEffect(() => {
+    fetch("/api/admin/me/")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setCanCash(d?.role === "OWNER" || d?.role === "PARTNER"))
+      .catch(() => {});
+  }, []);
   const [lightbox, setLightbox] = useState<{ image: string; label: string; scene?: ItemSceneData } | null>(null); // povećana slika proizvoda
   const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -1252,7 +1259,7 @@ export function OrdersManager() {
 
                 <div className="order-actions mt-auto grid grid-cols-4 gap-1.5 border-t border-[var(--a-line)] pt-3 sm:flex sm:flex-wrap sm:gap-2">
                   {(o.status === "shipped" || o.status === "done") ? (
-                    <button type="button" disabled={isBusy}
+                    <button type="button" disabled={isBusy || (o.courier === "osobno" && !canCash)}
                       onClick={() => {
                         if (o.courier === "osobno" && !confirm("Poništiti osobnu predaju? Narudžba se vraća u nove, makne se naplata i vrati dostava.")) return;
                         act(o.id, "ship", { shipped: false });
@@ -1263,9 +1270,9 @@ export function OrdersManager() {
                     <>
                       <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "ivica" })}
                         className="rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold bg-[var(--a-good)] text-white transition hover:opacity-90 disabled:opacity-50">📦 Pošalji</button>
-                      <button type="button" disabled={isBusy} onClick={() => setPersonalOpen((c) => (c === o.id ? null : o.id))}
+                      {canCash && <button type="button" disabled={isBusy} onClick={() => setPersonalOpen((c) => (c === o.id ? null : o.id))}
                         title="Predali smo osobno i preuzeli gotovinu (kupac plaća samo robu, bez dostave)"
-                        className={`rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold transition disabled:opacity-50 ${personalOpen === o.id ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"}`}>🤝 Osobno</button>
+                        className={`rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold transition disabled:opacity-50 ${personalOpen === o.id ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"}`}>🤝 Osobno</button>}
                     </>
                   ) : null}
                   {(o.status === "shipped" || o.status === "done") && o.courier !== "osobno" && (
@@ -1310,7 +1317,7 @@ export function OrdersManager() {
                   )}
                 </div>
 
-                {personalOpen === o.id && o.status !== "shipped" && o.status !== "done" && (
+                {canCash && personalOpen === o.id && o.status !== "shipped" && o.status !== "done" && (
                   <div className="mt-2 rounded-[12px] border border-emerald-300 bg-emerald-50 p-3 dark:bg-emerald-950/30">
                     <div className="text-[13px] font-semibold text-[var(--a-text)]">🤝 Osobno dostavljeno — tko je preuzeo novac?</div>
                     <div className="mt-0.5 text-[12px] text-[var(--a-text-2)]">

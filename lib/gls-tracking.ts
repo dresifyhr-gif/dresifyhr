@@ -39,7 +39,13 @@ async function glsStatus(tracking: string): Promise<DeliveryStatus> {
   try {
     const res = await fetch(GLS_TT + encodeURIComponent(tracking), { signal: AbortSignal.timeout(12000) });
     if (!res.ok) return null;
-    const t = (await res.text()).replace(/<[^>]*>/g, " ");
+    const raw = await res.text();
+    // Igor 23.11.: dostave su se "same vraćale na nulu" — kad GLS vrati stranicu BEZ
+    // tablice statusa (preopterećen / blokira / greška), sve je ispadalo "prep" i
+    // prepisivalo "dostavljeno". Bez ijednog retka statusa (npr. "05-Dostavljeno",
+    // "51-Zaprimljeni…") odgovor smatramo NEPOZNATIM i ništa ne diramo.
+    if (!/class="?colored_\d/.test(raw)) return null;
+    const t = raw.replace(/<[^>]*>/g, " ");
     // Konačni povrat pošiljatelju je definitivan — čak i ako je poslije "Dostavljeno"
     // (to je dostavljeno NAMA natrag, ne kupcu).
     if (STRONG_RETURN_RE.test(t)) return "returned";
@@ -104,7 +110,13 @@ export async function checkGlsDeliveries(opts: { dryRun?: boolean } = {}) {
       counts[st]++;
       if (st === "delivered" && o.deliveryStatus !== "delivered") newlyDelivered.push({ name: o.customerName, tracking: (o.tracking || "").trim() });
       if (st === "returned" && o.deliveryStatus !== "returned") newlyReturned.push({ name: o.customerName, tracking: (o.tracking || "").trim(), total: o.total || 0 });
-      if (!opts.dryRun && o.deliveryStatus !== st) {
+      // Nikad unatrag (to je bio uzrok "opet na nuli"): "dostavljeno" se ne vraća na
+      // "na dostavi"/"u pripremi", i ništa se ne vraća na "u pripremi". Dopušteno:
+      // dostavljeno → vraćeno (konačni povrat) i vraćeno → na dostavi (22-HUB pa novi pokušaj).
+      const backwards =
+        (o.deliveryStatus === "delivered" && (st === "transit" || st === "prep")) ||
+        (st === "prep" && !!o.deliveryStatus && o.deliveryStatus !== "prep");
+      if (!opts.dryRun && o.deliveryStatus !== st && !backwards) {
         // Samo OZNAKA dostave — status narudžbe NE diramo (Gazda sam klikne "Vraćeno").
         // Povrat čisti eventualni lažni deliveredAt da ne ostane u naplati.
         await prisma.order.update({

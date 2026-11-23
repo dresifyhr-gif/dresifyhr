@@ -116,7 +116,7 @@ export function PwaBoot() {
               fire(
                 "🛒 Nova narudžba!",
                 `${latest.customerName || "Kupac"} — ${eur(latest.total)} · ${latest.itemCount} kom ${ref}`.trim(),
-                latest.reference ? `/admin/?order=${encodeURIComponent(latest.reference)}` : "/admin/",
+                latest.reference ? `/admin/narudzbe/?q=${encodeURIComponent(latest.reference)}` : "/admin/narudzbe/",
                 // isti ključ kao push tag ("order-<ref>") → nema dvostrukog alarma
                 latest.reference ? `order-${latest.reference}` : latest.id
               );
@@ -170,6 +170,12 @@ export function PwaBoot() {
     if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
     const onMsg = (event: MessageEvent) => {
       const data = event.data;
+      // Klik na obavijest dok je admin već otvoren: SW traži da odemo na točnu narudžbu
+      // (iOS ne podržava client.navigate pa ide preko poruke).
+      if (data?.type === "navigate" && typeof data.url === "string" && data.url.startsWith("/admin")) {
+        window.location.href = data.url;
+        return;
+      }
       if (data?.type === "push" && data.data) {
         const p = data.data;
         fire(p.title || "Dresify", p.body || "", p.url || "/admin/", p.tag || p.body || "push");
