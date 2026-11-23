@@ -71,11 +71,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     data = {
       status: "new", shippedBy: null, shippedByUser: null, shippedAt: null, courier: null, cancelReason: null,
       shipping: restored, total: goods + restored, shippingBeforeOsobno: null,
-      cashCollected: false, cashCollectedAt: null, deliveryStatus: null, deliveredAt: null
+      cashCollected: false, cashCollectedAt: null, deliveryStatus: null, deliveredAt: null, deliveryInfo: null
     };
   } else {
     // Vraćeno u nove → stara oznaka dostave više ne vrijedi (nova pošiljka = nova provjera).
-    data = { status: "new", shippedBy: null, shippedByUser: null, shippedAt: null, courier: null, cancelReason: null, deliveryStatus: null, deliveredAt: null };
+    data = { status: "new", shippedBy: null, shippedByUser: null, shippedAt: null, courier: null, cancelReason: null, deliveryStatus: null, deliveredAt: null, deliveryInfo: null };
   }
 
   await prisma.order.update({ where: { id }, data });

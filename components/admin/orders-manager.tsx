@@ -83,6 +83,7 @@ type Order = {
   tracking: string;
   pin: string | null; // GLS paketomat PIN (auto-uvoz iz paket.hr)
   deliveryStatus: "prep" | "transit" | "delivered" | "returned" | null; // GLS status dostave (auto-provjera)
+  deliveryInfo?: string | null; // zadnji GLS događaj, npr. "04-Sken dostavne liste · Donji Stupnik · 23.11. 09:24"
   registered?: boolean; // kupac bio prijavljen (Clerk) pri narudžbi
   promoCode: string | null;
   cashCollected: boolean;
@@ -450,6 +451,84 @@ function GlsCopyPanel({ order }: { order: Order }) {
         ))}
       </div>
       <p className="mt-1.5 text-[10px] text-[var(--a-text-3)]">Država je uvijek Hrvatska. Provjeri ulicu/broj ako adresa nije standardna.</p>
+    </div>
+  );
+}
+
+// Igor 23.11.: točno stanje dostave na kartici — zadnji GLS događaj, a na dodir cijela povijest uživo.
+type TrackEv = { date: string; status: string; depot: string; info: string };
+function DeliveryTimeline({ id, initial }: { id: string; initial: string | null }) {
+  const [open, setOpen] = useState(false);
+  const [latest, setLatest] = useState(initial);
+  const [events, setEvents] = useState<TrackEv[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function toggle() {
+    if (open) { setOpen(false); return; }
+    setOpen(true);
+    setLoading(true);
+    setErr(null);
+    try {
+      const r = await fetch(`/api/admin/orders/${id}/tracking-events/`, { cache: "no-store" });
+      const d = await r.json().catch(() => null);
+      if (d?.ok) {
+        setEvents(d.events || []);
+        if (d.latest) setLatest(d.latest);
+      } else setErr(d?.message || "Ne mogu dohvatiti stanje.");
+    } catch {
+      setErr("Problem s mrežom.");
+    }
+    setLoading(false);
+  }
+
+  const fmt = (d: string) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/.exec(d);
+    return m ? `${Number(m[3])}.${Number(m[2])}. ${m[4]}:${m[5]}` : d;
+  };
+  const tone = (s: string) =>
+    /vrat|povrat|odbi|pogre[sš]n|nije/i.test(s) ? "text-red-600 dark:text-red-400"
+      : /^05-|dostavljen|uru[cč]en/i.test(s) ? "text-emerald-600 dark:text-emerald-400"
+      : "text-[var(--a-text)]";
+
+  return (
+    <div className="mt-2">
+      <button
+        type="button"
+        onClick={toggle}
+        className="flex w-full items-center gap-2 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-surface-2)] px-2.5 py-1.5 text-left text-[12px]"
+        title="Točno stanje pošiljke na GLS-u — dodirni za cijelu povijest"
+      >
+        <span>📍</span>
+        <span className={`min-w-0 flex-1 truncate font-semibold ${latest ? tone(latest) : "text-[var(--a-text-2)]"}`}>
+          {latest || "Gdje je paket? Dodirni za stanje"}
+        </span>
+        <span className="shrink-0 text-[11px] text-[var(--a-text-3)]">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div className="mt-1 rounded-[10px] border border-[var(--a-line)] bg-[var(--a-card)] px-2.5 py-2">
+          {loading ? (
+            <div className="text-[12px] text-[var(--a-text-3)]">Pitam GLS…</div>
+          ) : err ? (
+            <div className="text-[12px] text-[var(--a-bad)]">{err}</div>
+          ) : events && events.length > 0 ? (
+            <ol className="space-y-1.5">
+              {events.map((e, i) => (
+                <li key={i} className="flex gap-2 text-[12px] leading-snug">
+                  <span className="w-[88px] shrink-0 whitespace-nowrap font-mono text-[11px] text-[var(--a-text-3)]">{fmt(e.date)}</span>
+                  <span className="min-w-0">
+                    <span className={`font-semibold ${i === 0 ? tone(e.status) : "text-[var(--a-text-2)]"}`}>{e.status}</span>
+                    {e.depot && !/^0 Croatia$/.test(e.depot) ? <span className="text-[var(--a-text-3)]"> · {e.depot.replace(/^\d+\s+/, "")}</span> : null}
+                    {e.info && !/^MyGLS-/.test(e.info) ? <span className="block text-[11px] text-[var(--a-text-3)]">{e.info}</span> : null}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="text-[12px] text-[var(--a-text-3)]">GLS još nema podataka o ovoj pošiljci.</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -1353,6 +1432,9 @@ export function OrdersManager() {
                   <ContactEditor orderId={o.id} initial={{ customerName: o.customerName, phone: o.phone, address: o.address }} onSaved={() => { setEditingContact(null); fetchPage(q, 1, false); }} />
                 )}
 
+                {o.courier !== "osobno" && o.courier !== "hp" && o.tracking && (o.status === "shipped" || o.status === "done") && !o.cashCollected && (
+                  <DeliveryTimeline key={`${o.id}-${o.tracking}`} id={o.id} initial={o.deliveryInfo ?? null} />
+                )}
                 {o.courier !== "osobno" && <TrackingRow id={o.id} initial={o.tracking} courier={o.courier} />}
               </div>
             );

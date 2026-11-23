@@ -20,7 +20,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const changed = (order.tracking || "").trim() !== tracking;
   await prisma.order.update({
     where: { id },
-    data: { tracking: tracking || null, ...(changed ? { deliveryStatus: null, deliveredAt: null } : {}) }
+    data: { tracking: tracking || null, ...(changed ? { deliveryStatus: null, deliveredAt: null, deliveryInfo: null } : {}) }
   });
 
   return NextResponse.json({ ok: true, tracking: tracking || null });

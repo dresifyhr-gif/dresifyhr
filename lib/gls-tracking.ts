@@ -35,7 +35,58 @@ function firstIdx(text: string, re: RegExp): number {
 // Zato NE smijemo tražiti "vratiti" bilo gdje — paket koji je bio "22-Vratiti u HUB"
 // može kasnije biti ipak dostavljen. Pobjeđuje status koji je NAJBLIŽE VRHU (najmanji
 // indeks = najnoviji događaj). Delivered tipa "05-Dostavljeno", transit "03/04-Depo/Sken".
-async function glsStatus(tracking: string): Promise<DeliveryStatus> {
+// Igor 23.11.: točno stanje na kartici narudžbe — redovi GLS tablice (najnoviji prvi).
+export type TrackEvent = { date: string; status: string; depot: string; info: string };
+const decode = (s: string) =>
+  s.replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+function parseGlsEvents(raw: string): TrackEvent[] {
+  const out: TrackEvent[] = [];
+  const rowRe = /<tr class="?colored_\d"?>([\s\S]*?)<\/tr>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = rowRe.exec(raw))) {
+    const cells = Array.from(m[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)).map((c) => decode(c[1]));
+    if (cells.length >= 2 && /^\d{4}-\d{2}-\d{2}/.test(cells[0])) {
+      out.push({ date: cells[0], status: cells[1] || "", depot: cells[2] || "", info: cells[3] || "" });
+    }
+  }
+  return out;
+}
+// "2026-11-23 09:24:45" → "23.11. 09:24"
+const shortDate = (d: string) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/.exec(d);
+  return m ? `${Number(m[3])}.${Number(m[2])}. ${m[4]}:${m[5]}` : d;
+};
+// Zadnji događaj za prikaz na kartici: "04-Sken dostavne liste · Donji Stupnik · 23.11. 09:24".
+export function eventLabel(e: TrackEvent) {
+  const depot = e.depot.replace(/^\d+\s+/, "").trim();
+  return [e.status, depot && depot !== "Croatia" ? depot : "", shortDate(e.date)].filter(Boolean).join(" · ");
+}
+
+// Oznaka za karticu iz cijele povijesti: ako je pošiljka vraćena pošiljatelju, zadnje
+// "05-Dostavljeno" znači dostavljeno NAMA natrag — to ne smije izgledati kao uspjeh.
+export function latestLabel(events: TrackEvent[]): string | null {
+  const top = events[0];
+  if (!top) return null;
+  const returned = events.some((e) => STRONG_RETURN_RE.test(e.status));
+  if (returned) return /^05-/.test(top.status) ? `↩ Vraćeno nama (povrat) · ${shortDate(top.date)}` : `↩ ${eventLabel(top)}`;
+  return eventLabel(top);
+}
+
+// Cijela povijest pošiljke uživo (gumb na kartici). Samo GLS; HP ima svoj link.
+export async function fetchTrackingEvents(tracking: string): Promise<TrackEvent[] | null> {
+  try {
+    const res = await fetch(GLS_TT + encodeURIComponent(tracking), { signal: AbortSignal.timeout(12000), cache: "no-store" });
+    if (!res.ok) return null;
+    const raw = await res.text();
+    if (!/class="?colored_\d/.test(raw)) return null;
+    return parseGlsEvents(raw);
+  } catch {
+    return null;
+  }
+}
+
+// sink.latest ← zadnji događaj (za karticu), bez globalnog stanja (cron i gumb mogu ići istovremeno).
+async function glsStatus(tracking: string, sink?: { latest?: string }): Promise<DeliveryStatus> {
   try {
     const res = await fetch(GLS_TT + encodeURIComponent(tracking), { signal: AbortSignal.timeout(12000) });
     if (!res.ok) return null;
@@ -45,6 +96,7 @@ async function glsStatus(tracking: string): Promise<DeliveryStatus> {
     // prepisivalo "dostavljeno". Bez ijednog retka statusa (npr. "05-Dostavljeno",
     // "51-Zaprimljeni…") odgovor smatramo NEPOZNATIM i ništa ne diramo.
     if (!/class="?colored_\d/.test(raw)) return null;
+    if (sink) sink.latest = latestLabel(parseGlsEvents(raw)) ?? undefined;
     const t = raw.replace(/<[^>]*>/g, " ");
     // Konačni povrat pošiljatelju je definitivan — čak i ako je poslije "Dostavljeno"
     // (to je dostavljeno NAMA natrag, ne kupcu).
@@ -89,7 +141,7 @@ export async function checkGlsDeliveries(opts: { dryRun?: boolean } = {}) {
   // ne zanima nas više u praćenju dostave (i puno manje upita kuririma).
   const orders = await prisma.order.findMany({
     where: { status: { in: ["shipped", "done"] }, cashCollected: false },
-    select: { id: true, customerName: true, total: true, tracking: true, courier: true, deliveryStatus: true }
+    select: { id: true, customerName: true, total: true, tracking: true, courier: true, deliveryStatus: true, deliveryInfo: true }
   });
   const cand = orders.filter((o) => (o.tracking || "").trim());
   const counts = { delivered: 0, returned: 0, transit: 0, prep: 0, unknown: 0 };
@@ -101,11 +153,12 @@ export async function checkGlsDeliveries(opts: { dryRun?: boolean } = {}) {
     const results = await Promise.all(
       chunk.map(async (o) => {
         const tr = (o.tracking || "").trim();
-        const st = o.courier === "hp" ? await hpStatus(tr) : await glsStatus(tr);
-        return { o, st };
+        const sink: { latest?: string } = {};
+        const st = o.courier === "hp" ? await hpStatus(tr) : await glsStatus(tr, sink);
+        return { o, st, latest: sink.latest ?? null };
       })
     );
-    for (const { o, st } of results) {
+    for (const { o, st, latest } of results) {
       if (!st) { counts.unknown++; continue; }
       counts[st]++;
       if (st === "delivered" && o.deliveryStatus !== "delivered") newlyDelivered.push({ name: o.customerName, tracking: (o.tracking || "").trim() });
@@ -116,6 +169,10 @@ export async function checkGlsDeliveries(opts: { dryRun?: boolean } = {}) {
       const backwards =
         (o.deliveryStatus === "delivered" && (st === "transit" || st === "prep")) ||
         (st === "prep" && !!o.deliveryStatus && o.deliveryStatus !== "prep");
+      // Točno stanje (zadnji GLS događaj) za karticu — osvježi i kad se oznaka ne mijenja.
+      if (!opts.dryRun && !backwards && latest && latest !== o.deliveryInfo && o.deliveryStatus === st) {
+        await prisma.order.update({ where: { id: o.id }, data: { deliveryInfo: latest } });
+      }
       if (!opts.dryRun && o.deliveryStatus !== st && !backwards) {
         // Samo OZNAKA dostave — status narudžbe NE diramo (Gazda sam klikne "Vraćeno").
         // Povrat čisti eventualni lažni deliveredAt da ne ostane u naplati.
@@ -123,6 +180,7 @@ export async function checkGlsDeliveries(opts: { dryRun?: boolean } = {}) {
           where: { id: o.id },
           data: {
             deliveryStatus: st,
+            ...(latest ? { deliveryInfo: latest } : {}),
             ...(st === "delivered" ? { deliveredAt: new Date() } : {}),
             ...(st === "returned" ? { deliveredAt: null } : {})
           }
