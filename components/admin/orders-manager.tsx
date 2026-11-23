@@ -79,7 +79,7 @@ type Order = {
   status: string;
   cancelReason: string | null; // zašto je otkazano
   shippedBy: string | null;
-  courier: string | null; // "gls" | "hp" — preko kojeg kurira je poslano
+  courier: string | null; // "gls" | "hp" | "osobno" — kurir ili osobna predaja (novac na ruke)
   tracking: string;
   pin: string | null; // GLS paketomat PIN (auto-uvoz iz paket.hr)
   deliveryStatus: "prep" | "transit" | "delivered" | "returned" | null; // GLS status dostave (auto-provjera)
@@ -600,28 +600,36 @@ function ItemScene({ src, scene, big = false }: { src: string; scene?: ItemScene
   const wear = [scene?.front, src].filter(Boolean) as string[];
   const lower = scene?.shorts ?? scene?.pants ?? null;
   if (big) {
+    // Igor 23.11.: na mobitelu NE preko cijelog ekrana — prednja + stražnja jedna do druge, hlačice uz njih.
     return (
-      <span className="flex max-w-[94vw] flex-wrap items-end justify-center gap-3 rounded-[14px] bg-[#ececec] p-4">
+      <span className="flex w-full items-end justify-center gap-2 rounded-[14px] bg-[#ececec] p-3 sm:gap-3 sm:p-4">
         {wear.map((w, i) => (
-          <span key={w} className="flex flex-col items-center gap-1">
+          <span key={w} className="flex min-w-0 flex-1 flex-col items-center gap-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={w} alt="" className="max-h-[62vh] max-w-[44vw] object-contain" />
-            {wear.length > 1 ? <span className="text-[11px] font-semibold uppercase tracking-wide text-[#555]">{i === 0 ? "Prednja" : "Stražnja"}</span> : null}
+            <img src={w} alt="" className="max-h-[34dvh] w-full object-contain sm:max-h-[56vh]" />
+            {wear.length > 1 ? <span className="text-[10px] font-semibold uppercase tracking-wide text-[#555]">{i === 0 ? "Prednja" : "Stražnja"}</span> : null}
           </span>
         ))}
         {lower ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={lower} alt="" className="max-h-[44vh] max-w-[40vw] object-contain" />
+          <span className="flex min-w-0 flex-[0.7] flex-col items-center gap-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={lower} alt="" className="max-h-[22dvh] w-full object-contain sm:max-h-[36vh]" />
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-[#555]">{scene?.pants ? "Hlače" : "Hlačice"}</span>
+          </span>
         ) : null}
-        {extra.map((x) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={x} src={x} alt="" className="max-h-[26vh] w-auto object-contain" />
-        ))}
+        {extra.length ? (
+          <span className="flex min-w-0 flex-[0.5] flex-col items-center justify-end gap-1">
+            {extra.map((x) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={x} src={x} alt="" className="max-h-[12dvh] w-full object-contain sm:max-h-[20vh]" />
+            ))}
+          </span>
+        ) : null}
       </span>
     );
   }
   return (
-    <span className="flex h-[80px] w-[136px] shrink-0 items-end justify-center gap-0.5 overflow-hidden rounded-md border border-[var(--a-line)] bg-[#ececec] p-1">
+    <span className="flex h-[60px] w-[100px] shrink-0 items-end justify-center gap-0.5 overflow-hidden rounded-md sm:h-[80px] sm:w-[136px] border border-[var(--a-line)] bg-[#ececec] p-1">
       {wear.map((w) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img key={w} src={w} alt="" loading="lazy" className="h-full min-w-0 flex-1 object-contain" />
@@ -647,7 +655,7 @@ function ItemThumb({ src, klub }: { src: string | null; klub: string }) {
   const [err, setErr] = useState(false);
   if (!src || err) {
     return (
-      <span className="flex h-[80px] w-[136px] shrink-0 items-center justify-center rounded-md border border-[var(--a-line)] bg-[#ececec] text-[26px] font-bold text-[#111]">
+      <span className="flex h-[60px] w-[100px] shrink-0 items-center justify-center rounded-md border border-[var(--a-line)] bg-[#ececec] text-[22px] sm:h-[80px] sm:w-[136px] sm:text-[26px] font-bold text-[#111]">
         {/mystery/i.test(klub || "") ? "?" : klub?.trim()?.[0]?.toUpperCase() || "?"}
       </span>
     );
@@ -659,7 +667,7 @@ function ItemThumb({ src, klub }: { src: string | null; klub: string }) {
       alt=""
       loading="lazy"
       onError={() => setErr(true)}
-      className="h-[80px] w-[136px] shrink-0 rounded-md border border-[var(--a-line)] bg-[#ececec] object-contain p-1"
+      className="h-[60px] w-[100px] shrink-0 rounded-md border border-[var(--a-line)] bg-[#ececec] object-contain p-1 sm:h-[80px] sm:w-[136px]"
     />
   );
 }
@@ -680,6 +688,7 @@ export function OrdersManager() {
   const [editingContact, setEditingContact] = useState<string | null>(null);
   const [glsOpen, setGlsOpen] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [personalOpen, setPersonalOpen] = useState<string | null>(null); // "Osobno dostavljeno" → tko je preuzeo novac
   const [lightbox, setLightbox] = useState<{ image: string; label: string; scene?: ItemSceneData } | null>(null); // povećana slika proizvoda
   const [showNew, setShowNew] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -1009,7 +1018,7 @@ export function OrdersManager() {
           options={[{ v: "", l: "Sve" }, { v: "collected", l: "💰 Prikupljeno" }, { v: "pending", l: "⏳ Nije prikupljeno" }]} />
         <FilterDivider />
         <FilterGroup label="Kurir" value={courierF} onChange={setCourierF}
-          options={[{ v: "", l: "Svi" }, { v: "gls", l: "🚚 GLS" }, { v: "hp", l: "🚚 HP" }]} />
+          options={[{ v: "", l: "Svi" }, { v: "gls", l: "🚚 GLS" }, { v: "hp", l: "🚚 HP" }, { v: "osobno", l: "🤝 Osobno" }]} />
         <FilterDivider />
         <FilterGroup label="Dostava" value={deliveryF} onChange={setDeliveryF}
           options={[{ v: "", l: "Sve" }, { v: "delivered", l: "✅ Dostavljeno" }, { v: "returned", l: "↩ Vraćeno" }, { v: "transit", l: "🚚 Na dostavi" }, { v: "prep", l: "📦 U pripremi" }]} />
@@ -1059,7 +1068,7 @@ export function OrdersManager() {
       {orders.length === 0 ? (
         <div className="py-8 text-center text-sm text-[var(--a-text-3)]">{loading ? "Učitavam…" : "Nema rezultata."}</div>
       ) : (
-        <div className="grid gap-3 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
           {orders.map((o) => {
             const st = STATUS[o.status] || { label: o.status, cls: "bg-[var(--a-surface-2)] text-[var(--a-text-2)]" };
             const isBusy = busy === o.id;
@@ -1069,7 +1078,7 @@ export function OrdersManager() {
               : (o.status === "shipped" || o.status === "done") ? "var(--a-info)"
               : "var(--a-warn)";
             return (
-              <div key={o.id} style={{ borderLeftWidth: "5px", borderLeftColor: stripe }} className={`a-row flex flex-col p-3 ${selected.has(o.id) ? "!border-black/20 !bg-[var(--a-surface-2)]" : ""}`}>
+              <div key={o.id} style={{ borderLeftWidth: "5px", borderLeftColor: stripe }} className={`a-row flex min-w-0 flex-col p-3 ${selected.has(o.id) ? "!border-black/20 !bg-[var(--a-surface-2)]" : ""}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 flex-1 items-start gap-2">
                     <input
@@ -1080,7 +1089,8 @@ export function OrdersManager() {
                       title="Označi za skupnu akciju"
                     />
                     <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <div className="flex items-start gap-2">
+                    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
                       {phoneKey(o.phone) ? (
                         <a href={`/admin/kupci/${phoneKey(o.phone)}`} className="font-semibold text-[var(--a-text)] underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500" title="Otvori profil kupca">{o.customerName}</a>
                       ) : (
@@ -1101,8 +1111,13 @@ export function OrdersManager() {
                           🎁 {o.promoCode} · bespl. dostava
                         </span>
                       )}
-                      {o.shippedBy && <span className="text-[10px] text-[var(--a-text-3)]">({o.shippedBy})</span>}
-                      {(o.status === "shipped" || o.status === "done") && (
+                      {o.shippedBy && o.courier !== "osobno" && <span className="text-[10px] text-[var(--a-text-3)]">({o.shippedBy})</span>}
+                      {o.courier === "osobno" && (o.status === "shipped" || o.status === "done") && (
+                        <span title="Predano osobno — novac preuzet na ruke (bez dostave)" className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+                          🤝 Osobno · {o.shippedBy === "ivica" ? "Ivica" : "Igor"}
+                        </span>
+                      )}
+                      {o.courier !== "osobno" && (o.status === "shipped" || o.status === "done") && (
                         <button
                           type="button"
                           disabled={isBusy}
@@ -1147,6 +1162,11 @@ export function OrdersManager() {
                         </span>
                       )}
                     </div>
+                    <div className="shrink-0 text-right">
+                      <div className="text-[18px] font-extrabold leading-none tracking-tight text-[var(--a-text)] sm:text-[19px]">{eur(o.total)}</div>
+                      <div className="mt-1 text-[11px] text-[var(--a-text-3)]">{o.itemCount} kom</div>
+                    </div>
+                    </div>
                     {o.mergeWith && o.mergeWith.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap items-center gap-1.5 rounded-[10px] bg-amber-50 px-2.5 py-1.5 text-[12px] text-amber-800">
                         <span className="font-semibold">🔗 Isti kupac ima još {o.mergeWith.length === 1 ? "jednu neposlanu narudžbu" : `${o.mergeWith.length} neposlane narudžbe`}:</span>
@@ -1175,12 +1195,12 @@ export function OrdersManager() {
                       ) : null}
                     </div>
                     {o.email ? (
-                      <div className="mt-0.5 break-all text-xs text-[var(--a-text-2)]">
+                      <div className="mt-0.5 truncate text-xs text-[var(--a-text-2)]">
                         ✉️ <a href={`mailto:${o.email}`} className="font-medium text-[var(--a-text-2)] hover:text-[var(--a-text)] hover:underline">{o.email}</a>
                       </div>
                     ) : null}
                     {o.ip ? (
-                      <div className="mt-0.5 text-xs text-[var(--a-text-3)]">
+                      <div className="mt-0.5 hidden text-xs text-[var(--a-text-3)] sm:block">
                         🌐 IP:{" "}
                         <a
                           href={`https://ipinfo.io/${encodeURIComponent(o.ip)}`}
@@ -1228,22 +1248,27 @@ export function OrdersManager() {
                     ) : null}
                     </div>
                   </div>
-                  <div className="shrink-0 text-right">
-                    <div className="text-[19px] font-extrabold leading-none tracking-tight text-[var(--a-text)]">{eur(o.total)}</div>
-                    <div className="mt-1 text-[11px] text-[var(--a-text-3)]">{o.itemCount} kom</div>
-                  </div>
                 </div>
 
                 <div className="order-actions mt-auto grid grid-cols-4 gap-1.5 border-t border-[var(--a-line)] pt-3 sm:flex sm:flex-wrap sm:gap-2">
                   {(o.status === "shipped" || o.status === "done") ? (
-                    <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: false })}
-                      title="Poslano — klikni da vratiš u nove"
-                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">✓ Poslano</button>
+                    <button type="button" disabled={isBusy}
+                      onClick={() => {
+                        if (o.courier === "osobno" && !confirm("Poništiti osobnu predaju? Narudžba se vraća u nove, makne se naplata i vrati dostava.")) return;
+                        act(o.id, "ship", { shipped: false });
+                      }}
+                      title={o.courier === "osobno" ? "Predano osobno — klikni da poništiš" : "Poslano — klikni da vratiš u nove"}
+                      className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">{o.courier === "osobno" ? "✓ Predano" : "✓ Poslano"}</button>
                   ) : (o.status !== "returned" && o.status !== "cancelled") ? (
-                    <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "ivica" })}
-                      className="rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold bg-[var(--a-good)] text-white transition hover:opacity-90 disabled:opacity-50">📦 Pošalji</button>
+                    <>
+                      <button type="button" disabled={isBusy} onClick={() => act(o.id, "ship", { shipped: true, by: "ivica" })}
+                        className="rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold bg-[var(--a-good)] text-white transition hover:opacity-90 disabled:opacity-50">📦 Pošalji</button>
+                      <button type="button" disabled={isBusy} onClick={() => setPersonalOpen((c) => (c === o.id ? null : o.id))}
+                        title="Predali smo osobno i preuzeli gotovinu (kupac plaća samo robu, bez dostave)"
+                        className={`rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold transition disabled:opacity-50 ${personalOpen === o.id ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"}`}>🤝 Osobno</button>
+                    </>
                   ) : null}
-                  {(o.status === "shipped" || o.status === "done") && (
+                  {(o.status === "shipped" || o.status === "done") && o.courier !== "osobno" && (
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "collect", { collected: !o.cashCollected })}
                       title={o.cashCollected ? "Novci prikupljeni — klikni da poništiš" : "Označi da su novci (pouzeće) prikupljeni"}
                       className={`rounded-[10px] px-3 py-2 text-[12px] min-h-[40px] font-semibold transition disabled:opacity-50 ${o.cashCollected ? "bg-[var(--a-good)] text-white hover:opacity-90" : "bg-[var(--a-good-bg)] text-[var(--a-good)] hover:opacity-90"}`}>
@@ -1254,7 +1279,7 @@ export function OrdersManager() {
                     <a href={waLink(o.phone)!} target="_blank" rel="noopener noreferrer"
                       className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px]">💬 WhatsApp</a>
                   )}
-                  {o.status !== "returned" && o.status !== "cancelled" && (
+                  {o.status !== "returned" && o.status !== "cancelled" && o.courier !== "osobno" && (
                     <a href={buildPaketHref(o)} target="_blank" rel="noopener noreferrer"
                       title="Otvori paket.hr s popunjenim podacima (treba Tampermonkey skript)"
                       className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px] font-semibold"
@@ -1285,6 +1310,25 @@ export function OrdersManager() {
                   )}
                 </div>
 
+                {personalOpen === o.id && o.status !== "shipped" && o.status !== "done" && (
+                  <div className="mt-2 rounded-[12px] border border-emerald-300 bg-emerald-50 p-3 dark:bg-emerald-950/30">
+                    <div className="text-[13px] font-semibold text-[var(--a-text)]">🤝 Osobno dostavljeno — tko je preuzeo novac?</div>
+                    <div className="mt-0.5 text-[12px] text-[var(--a-text-2)]">
+                      Kupac plaća samo robu: <b>{eur(o.total)}</b> (bez dostave). Narudžba odmah postaje predana i naplaćena.
+                    </div>
+                    <div className="mt-2 grid grid-cols-3 gap-2">
+                      {(["igor", "ivica"] as const).map((who) => (
+                        <button key={who} type="button" disabled={isBusy}
+                          onClick={() => { setPersonalOpen(null); act(o.id, "ship", { shipped: true, courier: "osobno", by: who }); }}
+                          className="min-h-[44px] rounded-[10px] bg-emerald-600 px-3 text-[14px] font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50">
+                          {who === "igor" ? "Igor" : "Ivica"}
+                        </button>
+                      ))}
+                      <button type="button" onClick={() => setPersonalOpen(null)} className="a-btn-sm min-h-[44px] px-3 text-[13px]">Odustani</button>
+                    </div>
+                  </div>
+                )}
+
                 {glsOpen === o.id && <GlsCopyPanel order={o} />}
 
                 {cancelling === o.id && (
@@ -1302,7 +1346,7 @@ export function OrdersManager() {
                   <ContactEditor orderId={o.id} initial={{ customerName: o.customerName, phone: o.phone, address: o.address }} onSaved={() => { setEditingContact(null); fetchPage(q, 1, false); }} />
                 )}
 
-                <TrackingRow id={o.id} initial={o.tracking} courier={o.courier} />
+                {o.courier !== "osobno" && <TrackingRow id={o.id} initial={o.tracking} courier={o.courier} />}
               </div>
             );
           })}
@@ -1320,15 +1364,15 @@ export function OrdersManager() {
           role="dialog"
           aria-modal="true"
           onClick={() => setLightbox(null)}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 px-3"
         >
-          <div className="max-w-sm" onClick={(e) => e.stopPropagation()}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+          <div className="relative w-full max-w-[720px]">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <div className="min-w-0 text-[13px] font-semibold leading-tight text-white">{lightbox.label}</div>
+              <button type="button" aria-label="Zatvori" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-lg font-bold text-white">✕</button>
+            </div>
             <ItemScene src={lightbox.image} scene={lightbox.scene} big />
-            <div className="mt-2 text-center text-sm font-semibold text-white">{lightbox.label}</div>
-            <button type="button" onClick={() => setLightbox(null)} className="mt-2 block w-full rounded-[10px] bg-white/15 py-2 text-[13px] font-semibold text-white hover:bg-white/25">
-              Zatvori
-            </button>
+            <div className="mt-2 text-center text-[11px] text-white/60">Dodirni bilo gdje za zatvaranje</div>
           </div>
         </div>
       )}

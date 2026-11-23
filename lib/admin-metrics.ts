@@ -53,6 +53,8 @@ const GLS_SHIP_CHARGE = 7; // web/GLS naplata
 // Dobit/gubitak dostave po narudžbi (dodaje se na maržu) = naplaćeno − naš trošak.
 type ShipOrder = { total: number; shipping: number | null; status?: string; courier?: string | null; createdAt?: Date; userId?: string | null; items: ShipItem[] };
 function shipPLFor(o: ShipOrder, threshold: number, _deliveryCost?: number, _returnCost?: number) {
+  // Osobna predaja (Igor 23.11.): nema kurira ni naplaćene dostave → dostava 0 / 0.
+  if (o.courier === "osobno") return 0;
   const goods = o.total - (o.shipping ?? 0);
   const isHP = o.courier === "hp" || (!!o.createdAt && o.createdAt < GLS_LOGIC_SINCE);
   const cost = isHP ? HP_SHIP_COST : GLS_SHIP_UNDER; // 3 € (HP) / 5,50 € (GLS)

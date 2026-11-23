@@ -51,8 +51,8 @@ export async function GET(request: Request) {
   if (cashF === "collected" || cashF === "pending") {
     rows = rows.filter((o) => isSent(o.status) && (cashF === "collected" ? o.cashCollected : !o.cashCollected));
   }
-  if (courierF === "gls" || courierF === "hp") {
-    rows = rows.filter((o) => isSent(o.status) && (courierF === "hp" ? o.courier === "hp" : o.courier !== "hp"));
+  if (courierF === "gls" || courierF === "hp" || courierF === "osobno") {
+    rows = rows.filter((o) => isSent(o.status) && (courierF === "hp" ? o.courier === "hp" : courierF === "osobno" ? o.courier === "osobno" : o.courier !== "hp" && o.courier !== "osobno"));
   }
   if (q) {
     const nq = deaccent(q);
@@ -96,7 +96,7 @@ export async function GET(request: Request) {
       money(cod),
       STATUS_HR[o.status] || o.status,
       o.shippedBy || "",
-      isSent(o.status) ? (o.courier === "hp" ? "HP" : "GLS") : "",
+      isSent(o.status) ? (o.courier === "hp" ? "HP" : o.courier === "osobno" ? "Osobno" : "GLS") : "",
       isSent(o.status) ? (o.cashCollected ? "DA" : "NE") : "",
       o.tracking || "",
       o.promoCode || ""

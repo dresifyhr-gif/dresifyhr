@@ -49,8 +49,8 @@ export async function GET(request: Request) {
   if (cashF === "collected" || cashF === "pending") {
     rows = rows.filter((o) => isSent(o.status) && (cashF === "collected" ? o.cashCollected : !o.cashCollected));
   }
-  if (courierF === "gls" || courierF === "hp") {
-    rows = rows.filter((o) => isSent(o.status) && (courierF === "hp" ? o.courier === "hp" : o.courier !== "hp"));
+  if (courierF === "gls" || courierF === "hp" || courierF === "osobno") {
+    rows = rows.filter((o) => isSent(o.status) && (courierF === "hp" ? o.courier === "hp" : courierF === "osobno" ? o.courier === "osobno" : o.courier !== "hp" && o.courier !== "osobno"));
   }
   if (q) {
     const nq = deaccent(q);
@@ -130,7 +130,7 @@ export async function GET(request: Request) {
       ukupno: o.total,
       status: STATUS_HR[o.status] || o.status,
       poslao: o.shippedBy ? (o.shippedBy === "ivica" ? "Ivica" : "Igor") : "",
-      kurir: sent ? (o.courier === "hp" ? "HP" : "GLS") : "",
+      kurir: sent ? (o.courier === "hp" ? "HP" : o.courier === "osobno" ? "Osobno" : "GLS") : "",
       naplaceno: sent ? (o.cashCollected ? "DA" : "NE") : "",
       tracking: o.tracking || "",
       promo: o.promoCode || ""
@@ -159,8 +159,9 @@ export async function GET(request: Request) {
       // Kurir u boji
       const kc = row.getCell("kurir");
       const hp = o.courier === "hp";
-      kc.fill = { type: "pattern", pattern: "solid", fgColor: { argb: hp ? "FFD6E4FF" : "FFFFE0CC" } };
-      kc.font = { bold: true, size: 12, color: { argb: hp ? "FF1E40AF" : "FF9A3412" } };
+      const os = o.courier === "osobno";
+      kc.fill = { type: "pattern", pattern: "solid", fgColor: { argb: os ? "FFD6F5DD" : hp ? "FFD6E4FF" : "FFFFE0CC" } };
+      kc.font = { bold: true, size: 12, color: { argb: os ? "FF166534" : hp ? "FF1E40AF" : "FF9A3412" } };
       kc.alignment = { horizontal: "center", vertical: "middle" };
     }
   }

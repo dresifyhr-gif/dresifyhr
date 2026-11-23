@@ -18,7 +18,7 @@ export async function GET() {
       cashCollected: false,
       deliveryStatus: "delivered",
       // GLS = sve što nije HP (null = GLS default)
-      OR: [{ courier: null }, { courier: { not: "hp" } }]
+      OR: [{ courier: null }, { courier: { notIn: ["hp", "osobno"] } }] // osobna predaja nije GLS novac
     },
     orderBy: { deliveredAt: "asc" },
     select: {

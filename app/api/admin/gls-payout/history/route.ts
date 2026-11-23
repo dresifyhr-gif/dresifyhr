@@ -28,7 +28,7 @@ export async function GET() {
     where: {
       cashCollected: true,
       cashCollectedAt: { not: null },
-      OR: [{ courier: null }, { courier: { not: "hp" } }]
+      OR: [{ courier: null }, { courier: { notIn: ["hp", "osobno"] } }] // osobna predaja nije GLS novac
     },
     select: { total: true, cashCollectedAt: true }
   });

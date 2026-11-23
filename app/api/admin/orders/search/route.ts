@@ -224,8 +224,8 @@ export async function GET(request: Request) {
   // Kurir — poslane (ili VRAĆENE) preko GLS-a ili HP-a. null tretiramo kao GLS.
   // Vraćene narudžbe su isto bile otpremljene kurirom, pa moraju ući u filter
   // (inače KURIR=GLS + DOSTAVA=Vraćeno ne bi pokazao ništa).
-  if (courierF === "gls" || courierF === "hp") {
-    filtered = filtered.filter((o) => (isSent(o.status) || o.status === "returned") && (courierF === "hp" ? o.courier === "hp" : o.courier !== "hp"));
+  if (courierF === "gls" || courierF === "hp" || courierF === "osobno") {
+    filtered = filtered.filter((o) => (isSent(o.status) || o.status === "returned") && (courierF === "hp" ? o.courier === "hp" : courierF === "osobno" ? o.courier === "osobno" : o.courier !== "hp" && o.courier !== "osobno"));
   }
   // Status dostave (auto-provjera): dostavljeno / na dostavi / u pripremi.
   // Samo NE-prikupljene — prikupljeno = završeno, ne prati se više dostava.
@@ -318,7 +318,7 @@ export async function GET(request: Request) {
   // tako se "za sjesti na račun" poklapa s bankom i s alatom GLS isplata.
   let glsPendingTotal = 0;
   for (const o of all) {
-    const isGlsPending = isSent(o.status) && !o.cashCollected && o.courier !== "hp";
+    const isGlsPending = isSent(o.status) && !o.cashCollected && o.courier !== "hp" && o.courier !== "osobno";
     if (!isGlsPending) continue;
     const cod = o.total; // puni iznos pouzeća (sjeda na račun)
     const netRobe = o.total - (o.shipping ?? 0); // neto roba (za profit; dostava nije prihod)
