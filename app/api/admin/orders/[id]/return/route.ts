@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isActiveAdmin } from "@/lib/admin-auth";
+import { getAdminUser, isActiveAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { adjustCustomerTotals } from "@/lib/order-db";
 import { setOrderStatusInSheet } from "@/lib/sheets";
@@ -12,6 +12,9 @@ export const runtime = "nodejs";
 // dashboard can surface it. Un-returning sends it back to "new".
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isActiveAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
+  // Igor 23.11.: povrat (i poništavanje povrata) smije označiti SAMO vlasnik.
+  const me = await getAdminUser();
+  if (me?.role !== "OWNER") return NextResponse.json({ ok: false, message: "Povrat označava samo Igor." }, { status: 403 });
 
   const { id } = await params;
   const body = await request.json().catch(() => ({}));

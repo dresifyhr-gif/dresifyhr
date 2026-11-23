@@ -768,11 +768,12 @@ export function OrdersManager() {
   const [glsOpen, setGlsOpen] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
   const [personalOpen, setPersonalOpen] = useState<string | null>(null); // "Osobno dostavljeno" → tko je preuzeo novac
+  const [isOwner, setIsOwner] = useState(false); // povrat (↩ Vraćeno) = samo Igor (OWNER)
   const [canCash, setCanCash] = useState(false); // osobna predaja (novac na ruke) = samo Igor/Ivica (OWNER/PARTNER)
   useEffect(() => {
     fetch("/api/admin/me/")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setCanCash(d?.role === "OWNER" || d?.role === "PARTNER"))
+      .then((d) => { setCanCash(d?.role === "OWNER" || d?.role === "PARTNER"); setIsOwner(d?.role === "OWNER"); })
       .catch(() => {});
   }, []);
   const [lightbox, setLightbox] = useState<{ image: string; label: string; scene?: ItemSceneData } | null>(null); // povećana slika proizvoda
@@ -1371,7 +1372,7 @@ export function OrdersManager() {
                       className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px] font-semibold"
                       style={{ background: "var(--a-info-bg)", color: "var(--a-info)" }}>🚚 paket.hr</a>
                   )}
-                  {o.status === "returned" ? (
+                  {o.status === "returned" ? (isOwner &&
                     <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: false })}
                       title="Poništi povrat — vrati narudžbu natrag u aktivne (vraća i kupčevu potrošnju)"
                       className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px] font-semibold">↩️ Vrati u narudžbe</button>
@@ -1381,8 +1382,8 @@ export function OrdersManager() {
                       className="a-btn-sm a-btn-ok px-3 py-2 text-[12px] min-h-[40px] font-semibold">↩️ Vrati u narudžbe</button>
                   ) : (
                     <>
-                      <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
-                        className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">↩ Vraćeno</button>
+                      {isOwner && <button type="button" disabled={isBusy} onClick={() => act(o.id, "return", { returned: true })}
+                        className="a-btn-sm a-btn-danger px-3 py-2 text-[12px] min-h-[40px]">↩ Vraćeno</button>}
                       <button type="button" disabled={isBusy} onClick={() => setCancelling((c) => (c === o.id ? null : o.id))}
                         className="a-btn-sm px-3 py-2 text-[12px] min-h-[40px]">✕ Otkazano</button>
                     </>
