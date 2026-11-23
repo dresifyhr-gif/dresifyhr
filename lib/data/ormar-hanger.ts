@@ -241,6 +241,12 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "front": "/ormar/hanger-front/bayern-luis-diaz.webp",
     "shorts": "/ormar/hlacice/bayern-luis-diaz.webp"
   },
+  "bayern-munchen-kane-nr9-domaci-crveno-zlatni": {
+    "kind": "dres",
+    "back": "/ormar/hanger/bayern-munchen-kane-nr9-domaci-crveno-zlatni.webp",
+    "front": "/ormar/hanger-front/bayern-munchen-kane-nr9-domaci-crveno-zlatni.webp",
+    "shorts": "/ormar/hlacice/bayern-munchen-kane-nr9-domaci-crveno-zlatni.webp"
+  },
   "bayern-munchen-olise-nr17-domaci-2025-26": {
     "kind": "dres",
     "back": "/ormar/hanger/bayern-munchen-olise-nr17-domaci-2025-26.webp",
@@ -636,6 +642,12 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "back": "/ormar/hanger/liverpool-ekitike.webp",
     "front": "/ormar/hanger-front/liverpool-ekitike.webp",
     "shorts": "/ormar/hlacice/liverpool-ekitike.webp"
+  },
+  "manchester-city-haaland-nr9-domaci-plavi": {
+    "kind": "dres",
+    "back": "/ormar/hanger/manchester-city-haaland-nr9-domaci-plavi.webp",
+    "front": "/ormar/hanger-front/manchester-city-haaland-nr9-domaci-plavi.webp",
+    "shorts": "/ormar/hlacice/manchester-city-haaland-nr9-domaci-plavi.webp"
   },
   "manchester-city-haaland-nr9-posebno-izdanje-crno-rozo-plavo": {
     "kind": "dres",
