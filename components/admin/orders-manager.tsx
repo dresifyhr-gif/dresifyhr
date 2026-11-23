@@ -284,6 +284,33 @@ function localPhone(phone: string | null | undefined): string {
   return d;
 }
 
+// Broj telefona na narudžbi: dodir ga odmah kopira (domaći oblik 09x…, bez razmaka).
+// Fallback preko skrivenog textarea za iPhone PWA gdje clipboard API zna odbiti.
+function CopyPhone({ phone }: { phone: string }) {
+  const [ok, setOk] = useState(false);
+  const value = localPhone(phone);
+  if (!value) return null;
+  async function copy(e: React.MouseEvent) {
+    e.stopPropagation();
+    let done = false;
+    try { await navigator.clipboard.writeText(value); done = true; } catch { /* fallback ispod */ }
+    if (!done) {
+      const ta = document.createElement("textarea");
+      ta.value = value; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, value.length);
+      try { done = document.execCommand("copy"); } catch { /* ništa */ }
+      document.body.removeChild(ta);
+    }
+    if (done) { setOk(true); setTimeout(() => setOk(false), 1500); }
+  }
+  return (
+    <button type="button" onClick={copy} title="Kopiraj broj"
+      className={`inline-flex items-center gap-1 rounded-[6px] px-1 -mx-1 font-semibold underline decoration-dotted underline-offset-2 transition-colors ${ok ? "bg-emerald-100 text-emerald-700 no-underline" : "text-[var(--a-text)] hover:bg-[var(--a-hover,rgba(0,0,0,.05))]"}`}>
+      {ok ? "✓ kopirano" : formatCroatianPhone(phone)}
+    </button>
+  );
+}
+
 // Ime/prezime za GLS formu: zadnja riječ = prezime, ostalo = ime.
 function splitName(full: string): { ime: string; prezime: string } {
   const parts = (full || "").trim().split(/\s+/).filter(Boolean);
@@ -1132,7 +1159,7 @@ export function OrdersManager() {
                       </div>
                     )}
                     <div className="mt-0.5 text-xs text-[var(--a-text-2)]">
-                      {o.date} · {formatCroatianPhone(o.phone)}
+                      {o.date} · <CopyPhone phone={o.phone} />
                       {o.address ? (
                         <>
                           {" · "}{o.address}{" "}
