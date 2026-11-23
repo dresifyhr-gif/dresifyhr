@@ -64,6 +64,10 @@ export async function GET(request: Request) {
   const streetwearSlugs = new Set(
     customRows.filter((p) => p.category === "streetwear").map((p) => p.slug).filter((s): s is string => !!s)
   );
+  // Igor 23.11.: dugi rukav i trenirka NEMAJU hlačice uz sebe → bez oznake "DJEČJI + hlačice".
+  const noShortsSlugs = new Set(
+    customRows.filter((p) => p.category === "dugi-rukav" || p.category === "trenirka" || p.category === "streetwear").map((p) => p.slug).filter((s): s is string => !!s)
+  );
   const customImg = new Map<string, string>();
   for (const p of customRows) {
     if (!p.slug) continue;
@@ -90,8 +94,10 @@ export async function GET(request: Request) {
   const isKidSize = (size: string) => /^\d{2,3}$/.test(size.trim());
   const itemScene = (it: { slug: string | null; igrac: string | null; size: string | null; segment: string | null }) => {
     const h = it.slug ? HANGER_IMAGES[it.slug] : undefined;
-    const kid = it.segment === "kid" || isKidSize(it.size || "");
     const igrac = it.igrac || "";
+    const noShorts =
+      (!!it.slug && noShortsSlugs.has(it.slug)) || h?.kind === "trenirka" || /dugi\s*rukav|trenirk/i.test(`${it.slug || ""} ${igrac}`);
+    const kid = !noShorts && (it.segment === "kid" || isKidSize(it.size || ""));
     const lopta = addonOf(igrac, "lopta");
     const kapa = addonOf(igrac, "kapa");
     return {
