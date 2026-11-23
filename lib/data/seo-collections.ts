@@ -175,9 +175,9 @@ const categoryDefinitions: CollectionDefinition[] = [
     slug: "retro-dresovi",
     label: "Retro dresovi",
     heading: "Retro nogometni dresovi",
-    title: "Retro nogometni dresovi — od 20€",
+    title: "Retro nogometni dresovi od 20 € — Messi, Ronaldo",
     description:
-      "Retro nogometni dresovi — Messi, Ronaldo, Ronaldinho, Zidane i finala Lige prvaka. Klasici od 20 €, plaćanje pouzećem, dostava 2–5 dana.",
+      "Retro nogometni dres od 20 € — Messi, Ronaldo, Ronaldinho, Zidane i finala Lige prvaka. Dječje i odrasle veličine, plaćaš pouzećem, dostava 2–5 dana.",
     intro:
       "Retro modeli imaju najjači karakter i često su prvi izbor kad netko želi dres koji izgleda dobro i na tribini i u gradu. Ovdje su okupljeni svi komadi koji nose stariju sezonu, finala Lige prvaka i kultna reprezentacijska izdanja.",
     body: [
@@ -245,9 +245,9 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "fc-barcelona",
     label: "FC Barcelona",
     heading: "FC Barcelona dresovi",
-    title: "FC Barcelona dresovi — od 20€",
+    title: "Barcelona dres od 20 € — Yamal, Messi i dječji",
     description:
-      "FC Barcelona dresovi s Yamalom, Raphinhom, Messijem i Ronaldinhom — novi i retro modeli za djecu i odrasle, od 20 €, uz plaćanje pouzećem.",
+      "FC Barcelona dres od 20 € — Yamal, Raphinha, Messi i Ronaldinho, novi i retro. Dječje i odrasle veličine, plaćaš pouzećem, dostava 2–5 dana.",
     intro:
       "Barcelona je jedan od najtraženijih klubova kod nas, pa su ovdje svi aktualni i retro modeli na jednom mjestu. Najčešće se biraju Yamal, Messi i Ronaldinho te posebne boje koje se odmah primijete.",
     body: [
@@ -285,9 +285,9 @@ const clubDefinitions: CollectionDefinition[] = [
     slug: "real-madrid",
     label: "Real Madrid",
     heading: "Real Madrid dresovi",
-    title: "Real Madrid dresovi — od 20€",
+    title: "Real Madrid dres od 20 € — Mbappé, dječji i retro",
     description:
-      "Real Madrid dresovi s Mbappéom, Bellinghamom, Ronaldom, Ramosom i Gülerom za djecu i odrasle — od 20 €, plaćanje pouzećem, dostava 2–5 dana.",
+      "Real Madrid dres od 20 € — Mbappé, Bellingham, Ronaldo, Güler i retro klasici. Dječje i odrasle veličine, plaćaš pouzećem, dostava 2–5 dana.",
     intro:
       "Svi bijeli, posebni i finalni Real Madrid modeli na jednom mjestu: aktualne zvijezde, velike europske noći i nekoliko retro komada koje navijači najčešće traže.",
     body: [
@@ -539,8 +539,8 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "mbappe",
     label: "Mbappé dresovi",
     heading: "Mbappé dresovi",
-    title: "Mbappé dresovi — od 20€",
-    description: "Mbappé dresovi za Real Madrid i Francusku — novi domaći, posebna izdanja i SP 2026. Dječje i odrasle veličine, od 20 €, plaćanje pouzećem.",
+    title: "Mbappé dres od 20 € — Real Madrid i Francuska",
+    description: "Mbappé dres od 20 € — Real Madrid i Francuska, novi domaći, posebna izdanja i SP 2026. Dječje i odrasle veličine, plaćaš pouzećem, dostava 2–5 dana.",
     intro:
       "Otkako je prešao u Real Madrid, Mbappé je jedan od najtraženijih igrača kod nas. Ova stranica skuplja i njegove madridske i reprezentativne varijante na jedno mjesto, pa ne moraš prelistavati cijeli katalog da usporediš boje i sezone.",
     relatedPosts: ["real-madrid-dresovi-vodic"],
@@ -674,9 +674,9 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "ronaldo",
     label: "Ronaldo dresovi",
     heading: "Ronaldo dresovi",
-    title: "Ronaldo dresovi — Al-Nassr, Real, United, Portugal",
+    title: "Ronaldo dres od 20 € — Al-Nassr, Real, Portugal",
     description:
-      "Ronaldo dres iz Al-Nassra, Reala, Manchester Uniteda i Portugala — dječje i odrasle veličine, od 20 €, dostava pouzećem 2–5 dana.",
+      "Cristiano Ronaldo dres od 20 € — Al-Nassr, Real Madrid, Manchester United i Portugal. Dječje i odrasle veličine, plaćaš pouzećem, dostava 2–5 dana.",
     intro:
       "Kad biraš Ronaldov dres, obično želiš usporediti klubove i reprezentaciju. Zato su ovdje sve njegove najpoznatije varijante na jednom mjestu.",
     relatedPosts: ["ronaldo-dres-koji-odabrati", "real-madrid-dresovi-vodic"],
@@ -697,9 +697,9 @@ const playerDefinitions: CollectionDefinition[] = [
     slug: "yamal",
     label: "Yamal dresovi",
     heading: "Yamal dresovi",
-    title: "Yamal dresovi — FC Barcelona i Španjolska",
+    title: "Lamine Yamal dres od 20 € — Barcelona, Španjolska",
     description:
-      "Lamine Yamal dres — FC Barcelona i Španjolska, domaće, šarene i posebne varijante. Dječje i odrasle veličine, od 20 €, dostava 2–5 dana.",
+      "Lamine Yamal dres od 20 € — FC Barcelona i Španjolska, domaći i posebna izdanja. Dječje i odrasle veličine, plaćaš pouzećem, dostava 2–5 dana.",
     intro:
       "Yamal je jedan od najtraženijih novih igrača, posebno kod djece i mlađih navijača. Ovdje su svi njegovi modeli, od domaćeg do posebnih boja.",
     relatedPosts: ["barcelona-dresovi-koji-model-odabrati", "sp-2026-spanjolska-prvak-dresovi"],

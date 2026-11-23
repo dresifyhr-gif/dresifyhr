@@ -174,6 +174,16 @@ export function buildProductSchema(product: Jersey, _stock?: number) {
       availability: isPurchasable(product) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       url: absoluteUrl(`/dres/${product.slug}`),
       itemCondition: "https://schema.org/NewCondition",
+      // Samo zamjena veličine (bez povrata novca), 14 dana od primitka — kao /dostava-i-povrat/.
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "HR",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 14,
+        returnMethod: "https://schema.org/ReturnByMail",
+        refundType: "https://schema.org/ExchangeRefund",
+        merchantReturnLink: absoluteUrl("/dostava-i-povrat/")
+      },
       // GLS po cijeloj HR (/dostava-i-povrat/): slanje sljedeći radni dan, stiže 2–5
       // radnih dana od potvrde. Prag besplatne dostave (60 €) vrijedi samo za
       // registrirane, pa nije ovdje.
