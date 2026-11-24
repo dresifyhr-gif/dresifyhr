@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { can, getAdminUser, isAdmin } from "@/lib/admin-auth";
 import { issueKlubRewardIfEarned } from "@/lib/klub";
+import { osobnoFixedBy } from "@/lib/osobno";
 import { prisma } from "@/lib/prisma";
 import { markCashCollectedInSheet, markOrderShippedInSheet } from "@/lib/sheets";
 import { FREE_SHIPPING_THRESHOLD_EUR, SHIPPING_PRICE_EUR } from "@/lib/site";
@@ -21,20 +22,31 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
   const body = await request.json().catch(() => ({}));
   const shipped = body?.shipped !== false; // default: mark shipped
-  const by = body?.by === "ivica" ? "ivica" : body?.by === "igor" ? "igor" : null;
+  let by: "igor" | "ivica" | null = body?.by === "ivica" ? "ivica" : body?.by === "igor" ? "igor" : null;
   // Kurir: GLS je čest slučaj pa je zadan; HP se bilježi kad se izričito pošalje.
   const courier = body?.courier === "hp" ? "hp" : body?.courier === "osobno" ? "osobno" : "gls";
 
   const order = await prisma.order.findUnique({
     where: { id },
-    select: { id: true, phone: true, customerName: true, createdAt: true, courier: true, total: true, shipping: true, subtotal: true, userId: true, shippingBeforeOsobno: true }
+    select: { id: true, phone: true, customerName: true, createdAt: true, courier: true, total: true, shipping: true, subtotal: true, userId: true, shippingBeforeOsobno: true, status: true, shippedBy: true, cashCollected: true }
   });
   if (!order) return NextResponse.json({ ok: false, message: "Narudžba ne postoji" }, { status: 404 });
 
-  // Osobna predaja = novac na ruke → samo vlasnik ili partner (oni vode novac).
+  // Osobna predaja = novac na ruke → vlasnik ili partner biraju tko je preuzeo novac;
+  // Ana/Nina smiju, ali novac ide pod FIKSNO ime (Nina → Ivica, Ana → Igor).
   const touchesCash = (shipped && courier === "osobno") || (!shipped && order.courier === "osobno");
   if (touchesCash && !can(me?.role, "settlement")) {
-    return NextResponse.json({ ok: false, message: "Osobnu predaju s novcem označava Igor ili Ivica." }, { status: 403 });
+    const fixed = osobnoFixedBy(me?.username);
+    if (!fixed) return NextResponse.json({ ok: false, message: "Osobnu predaju s novcem označava Igor ili Ivica." }, { status: 403 });
+    if (shipped) {
+      // Samo iz "nove" narudžbe (ne prepisuj tuđi novac na već poslanim/naplaćenim/vraćenim).
+      if (order.status !== "new" || order.cashCollected) {
+        return NextResponse.json({ ok: false, message: "Osobno se može označiti samo na novoj narudžbi." }, { status: 409 });
+      }
+      by = fixed; // ne vjeruj klijentu
+    } else if (order.shippedBy !== fixed) {
+      return NextResponse.json({ ok: false, message: "Ovu osobnu predaju može poništiti Igor ili Ivica." }, { status: 403 });
+    }
   }
   if (shipped && courier === "osobno" && !by) {
     return NextResponse.json({ ok: false, message: "Odaberi tko je preuzeo novac." }, { status: 400 });

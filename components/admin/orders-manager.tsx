@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { formatCroatianPhone, phoneKey } from "@/lib/utils";
 import { waLink } from "@/components/admin/ui";
 import { adminPost } from "@/lib/admin-fetch";
+import { osobnoFixedBy } from "@/lib/osobno";
 
 const eur = (n: number) =>
   `${(n ?? 0).toLocaleString("hr-HR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
@@ -769,11 +770,18 @@ export function OrdersManager() {
   const [cancelling, setCancelling] = useState<string | null>(null);
   const [personalOpen, setPersonalOpen] = useState<string | null>(null); // "Osobno dostavljeno" → tko je preuzeo novac
   const [isOwner, setIsOwner] = useState(false); // povrat (↩ Vraćeno) = samo Igor (OWNER)
-  const [canCash, setCanCash] = useState(false); // osobna predaja (novac na ruke) = samo Igor/Ivica (OWNER/PARTNER)
+  const [canCash, setCanCash] = useState(false); // osobna predaja (novac na ruke): Igor/Ivica biraju, Ana/Nina pod fiksnim imenom
+  const [osobnoBy, setOsobnoBy] = useState<"igor" | "ivica" | null>(null); // Nina → ivica, Ana → igor (bez biranja)
   useEffect(() => {
     fetch("/api/admin/me/")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { setCanCash(d?.role === "OWNER" || d?.role === "PARTNER"); setIsOwner(d?.role === "OWNER"); })
+      .then((d) => {
+        const boss = d?.role === "OWNER" || d?.role === "PARTNER";
+        const fixed = boss ? null : osobnoFixedBy(d?.username);
+        setOsobnoBy(fixed);
+        setCanCash(boss || !!fixed);
+        setIsOwner(d?.role === "OWNER");
+      })
       .catch(() => {});
   }, []);
   const [lightbox, setLightbox] = useState<{ image: string; label: string; scene?: ItemSceneData } | null>(null); // povećana slika proizvoda
@@ -1399,16 +1407,16 @@ export function OrdersManager() {
 
                 {canCash && personalOpen === o.id && o.status !== "shipped" && o.status !== "done" && (
                   <div className="mt-2 rounded-[12px] border border-emerald-300 bg-emerald-50 p-3 dark:bg-emerald-950/30">
-                    <div className="text-[13px] font-semibold text-[var(--a-text)]">🤝 Osobno dostavljeno — tko je preuzeo novac?</div>
+                    <div className="text-[13px] font-semibold text-[var(--a-text)]">{osobnoBy ? `🤝 Osobno dostavljeno — novac ide pod ${osobnoBy === "igor" ? "Igora" : "Ivicu"}` : "🤝 Osobno dostavljeno — tko je preuzeo novac?"}</div>
                     <div className="mt-0.5 text-[12px] text-[var(--a-text-2)]">
                       Kupac plaća samo robu: <b>{eur(o.total)}</b> (bez dostave). Narudžba odmah postaje predana i naplaćena.
                     </div>
                     <div className="mt-2 grid grid-cols-3 gap-2">
-                      {(["igor", "ivica"] as const).map((who) => (
+                      {(osobnoBy ? [osobnoBy] : (["igor", "ivica"] as const)).map((who) => (
                         <button key={who} type="button" disabled={isBusy}
                           onClick={() => { setPersonalOpen(null); act(o.id, "ship", { shipped: true, courier: "osobno", by: who }); }}
                           className="min-h-[44px] rounded-[10px] bg-emerald-600 px-3 text-[14px] font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50">
-                          {who === "igor" ? "Igor" : "Ivica"}
+                          {osobnoBy ? "✓ Potvrdi" : who === "igor" ? "Igor" : "Ivica"}
                         </button>
                       ))}
                       <button type="button" onClick={() => setPersonalOpen(null)} className="a-btn-sm min-h-[44px] px-3 text-[13px]">Odustani</button>
