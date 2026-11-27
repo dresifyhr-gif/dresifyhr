@@ -381,7 +381,7 @@ export async function getDashboardMetrics() {
     profitFor({ status: { in: ["shipped", "done"] }, ...sinceFilter }),
     prisma.adSpend.groupBy({ by: ["paidBy"], _sum: { amount: true }, where: lastSettlement ? { date: { gt: lastSettlement.settledAt } } : undefined })
   ]);
-  const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, sentStreet: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, collectedStreet: 0, collectedLong: 0, collectedTren: 0, pending: 0, pendingDresovi: 0, pendingKompleti: 0, pendingStreet: 0, pendingLong: 0, pendingTren: 0, pendingMix: 0, collectedMix: 0, pendingMargin: 0 });
+  const mkCash = () => ({ sentCount: 0, sentDresovi: 0, sentKompleti: 0, sentStreet: 0, collected: 0, collectedDresovi: 0, collectedKompleti: 0, collectedStreet: 0, collectedLong: 0, collectedTren: 0, pending: 0, pendingDresovi: 0, pendingKompleti: 0, pendingStreet: 0, pendingLong: 0, pendingTren: 0, pendingMix: 0, collectedMix: 0, pendingMargin: 0, collectedOsobno: 0, collectedOsobnoCount: 0 });
   const cashSplit: Record<"igor" | "ivica", ReturnType<typeof mkCash>> = { igor: mkCash(), ivica: mkCash() };
   let freeDeliveries = 0; // prikupljene narudžbe s besplatnom dostavom (mi platili dostavu ~5€)
   for (const o of cashOrders) {
@@ -415,6 +415,8 @@ export async function getDashboardMetrics() {
     const b = cashSplit[who];
     b.collected += amt; b.collectedDresovi += d; b.collectedKompleti += k; b.collectedStreet += s;
     b.collectedLong += l; b.collectedTren += tr; b.collectedMix += mx;
+    // Osobna predaja: novac na ruke (ulazi u Prikupio), posebno izdvojeno za prikaz.
+    if (o.courier === "osobno") { b.collectedOsobno += amt; b.collectedOsobnoCount++; }
     // Besplatna dostava = isto pravilo kao shipPLFor (jedna definicija): pl < 0 znači da je
     // dostava stvarno bila besplatna (shipping=0, roba ≥ prag, registriran ili prije 3.8.2026)
     // pa smo je mi platili. Promo kod sam po sebi NIJE besplatna dostava (npr. -10%).

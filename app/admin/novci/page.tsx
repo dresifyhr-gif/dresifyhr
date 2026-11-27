@@ -104,6 +104,9 @@ export default async function MoneyPage() {
                 <div className="mt-3 space-y-1.5 text-sm">
                   <div className="flex justify-between gap-2 text-[var(--a-text-2)]"><span>Poslano</span><span className="text-right font-semibold text-[var(--a-text)]">{komLabel(p.c.sentDresovi, p.c.sentKompleti)}</span></div>
                   <div className="flex justify-between gap-2 text-[var(--a-text-2)]"><span>Prikupio</span><span className="text-right font-semibold text-emerald-600">{eur(p.c.collected)} <span className="font-normal text-[var(--a-text-3)]">({komLabel(p.c.collectedDresovi, p.c.collectedKompleti)})</span></span></div>
+                  {p.c.collectedOsobnoCount > 0 && (
+                    <div className="flex justify-between gap-2 text-[12px] text-[var(--a-text-3)]"><span className="pl-3">↳ od toga osobno 🤝</span><span className="text-right font-semibold text-emerald-700">{eur(p.c.collectedOsobno)} ({p.c.collectedOsobnoCount})</span></div>
+                  )}
                   {p.c.pending > 0 && (
                     <div className="flex justify-between gap-2 text-[var(--a-text-2)]">
                       <span>Za prikupit (fali)</span>
