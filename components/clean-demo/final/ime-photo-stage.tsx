@@ -23,18 +23,21 @@ import { useImeText, type ImeText } from "./ime-i18n";
 
 export type PhotoTag = { price: number; sizes?: string };
 
-/* "Složi svoj mix": lopta/kapa ulaze u scenu (lopta na pod, kapa na kuku šipke). */
-export type StageMixKind = "lopta" | "kapa";
-export type StageMix = { lopta?: string; kapa?: string };
+/* "Složi svoj mix": lopta/kapa/figura ulaze u scenu (lopta i figura na pod, kapa na kuku šipke). */
+export type StageMixKind = "lopta" | "kapa" | "figura";
+export type StageMix = { lopta?: string; kapa?: string; figura?: string };
 /** Odakle je dodatak odabran (pločica u biraču) — za let u scenu. */
 export type MixFlyFrom = { kind: StageMixKind; rect: DOMRect; t: number } | null;
 // stvarne mjere HD slika (700 px široke) → okvir je na mjestu i prije nego se slika učita (let mjeri cilj odmah)
 const MIX_H: Record<StageMixKind, Record<string, number>> = {
   lopta: { barcelona: 700, bayern: 694, hrvatska: 677, "inter-miami": 681, milan: 682, njemacka: 683, portugal: 692, "real-madrid": 694 },
   kapa: { barcelona: 546, bayern: 544, hrvatska: 614, "inter-miami": 603, milan: 532, njemacka: 557, portugal: 623, "real-madrid": 631 },
+  // figure u kutiji (Igor 28.11.) — prozirni izrezi 700 px široki, /mix/figura-hd/
+  figura: { "doue-psg": 1584, "mbappe-francuska": 1016, "mbappe-real": 1592, "messi-argentina": 1055, "modric-milan": 1521, "pehar-sp-2026": 959, "yamal-barca-crni": 884, "yamal-barca": 1575, "yamal-spanjolska": 1057 },
 };
-const mixRatio = (kind: StageMixKind, key: string) => `700 / ${MIX_H[kind][key] ?? (kind === "lopta" ? 690 : 580)}`;
-export const stageMixImage = (kind: StageMixKind, key: string) => `/naslovnica/${kind === "lopta" ? "lopte-hd" : "kape-hd"}/${key}.webp`;
+const mixRatio = (kind: StageMixKind, key: string) => `700 / ${MIX_H[kind][key] ?? (kind === "lopta" ? 690 : kind === "figura" ? 1300 : 580)}`;
+export const stageMixImage = (kind: StageMixKind, key: string) =>
+  kind === "figura" ? `/mix/figura-hd/${key}.webp` : `/naslovnica/${kind === "lopta" ? "lopte-hd" : "kape-hd"}/${key}.webp`;
 
 type Props = {
   images: HangerImages;
@@ -219,7 +222,7 @@ html.ime-vt .pz-tag,html.ime-vt .pz-refl,html.ime-vt .pz-shadow,html.ime-vt .pz-
 @media (min-width:1024px){.pz-ctl{right:auto;left:0;right:0;top:calc(var(--top) + var(--uu) + 44px);display:flex;justify-content:center;transition:top .9s var(--ease)}}
 /* ---- mix: lopta na podu, kapa na kuki šipke (raspored u u-jedinicama, kao vješalice) ---- */
 .pz{--fl:var(--fa);--ww:var(--wa);
- --bd:calc(.19 * var(--ms) * var(--uu));--cw:calc(.22 * var(--ms) * var(--uu));--rod:0px}
+ --bd:calc(.19 * var(--ms) * var(--uu));--cw:calc(.22 * var(--ms) * var(--uu));--fw:calc(.17 * var(--ms) * var(--uu));--rod:0px}
 .pz.pz-kid{--fl:var(--fk);--ww:var(--wk)}
 .pz-x{position:absolute;pointer-events:none;transition:left .9s var(--ease),top .9s var(--ease),bottom .9s var(--ease),width .9s var(--ease)}
 .pz-x-out{opacity:0;transition:opacity .3s ease,transform .38s cubic-bezier(.4,0,1,1)}
@@ -243,11 +246,21 @@ html.ime-vt .pz-tag,html.ime-vt .pz-refl,html.ime-vt .pz-shadow,html.ime-vt .pz-
 .pz-xc .pz-xw{height:auto}
 /* Igor 19.11.: Djeca (dres + hlačice) — kapa klizne ispod hlačica, lijevo do lopte (ondje je prazno) */
 .pz-kid .pz-xc{left:calc(min(calc(50% + var(--ww) * var(--uu) / 2 - var(--bd) * .55),calc(100% - var(--bd) - 12px)) - var(--cw) + var(--bd) * .06)}
+/* figura u kutiji (Igor 28.11.): na podu, lijevo uz loptu (mobitel) / desno od lopte (računalo) */
+.pz-xf{width:var(--fw);bottom:calc(100% - var(--fl) - .004 * var(--uu));
+ left:max(12px,calc(min(calc(50% + var(--ww) * var(--uu) / 2 - var(--bd) * .55),calc(100% - var(--bd) - 12px)) - var(--fw) * .92))}
+.pz-xf .pz-xw{height:auto}
+.pz-xf.pz-x-out{transform:translateY(6%) scale(.92)}
+@media (max-width:1023px){
+ /* Djeca: kapa je uz loptu → figura ide lijevo od kape */
+ .pz-kid .pz-xf{left:max(12px,calc(min(calc(50% + var(--ww) * var(--uu) / 2 - var(--bd) * .55),calc(100% - var(--bd) - 12px)) - var(--cw) + var(--bd) * .06 - var(--fw) * .92))}
+}
 .pz-xsw{position:relative;transform-origin:60% 0;will-change:transform}
 .pz-xrod,.pz-xhook{display:none}
 @media (min-width:1024px){
- .pz{--bd:calc(.235 * var(--ms) * var(--uu));--cw:calc(.27 * var(--ms) * var(--uu));--rod:calc(.17 * var(--ms) * var(--uu))}
+ .pz{--bd:calc(.235 * var(--ms) * var(--uu));--cw:calc(.27 * var(--ms) * var(--uu));--fw:calc(.24 * var(--ms) * var(--uu));--rod:calc(.17 * var(--ms) * var(--uu))}
  .pz-xb{left:min(calc(50% + (var(--ww) / 2 + .035) * var(--uu)),calc(100% - var(--bd) - 16px))}
+ .pz-xf{left:min(calc(50% + (var(--ww) / 2 + .055) * var(--uu) + var(--bd)),calc(100% - var(--fw) - 16px))}
  /* Igor 17.11.: kapa na podu, zrcalno lopti (lijevo od reda) */
  .pz-xc{left:max(16px,calc(50% - (var(--ww) / 2 + .035) * var(--uu) - var(--cw)))}
  .pz-xc .pz-xsw{transform:none!important}
@@ -528,10 +541,11 @@ export function ImePhotoStage({ images, slug, alt, surname, tag, overline, mix, 
   const cleanups = useRef(new Set<() => void>());
   const wantL = mix?.lopta;
   const wantK = mix?.kapa;
+  const wantF = mix?.figura;
 
   useEffect(() => {
-    const want: StageMix = { lopta: wantL, kapa: wantK };
-    const changed = (["lopta", "kapa"] as const).filter((k) => want[k] !== shownRef.current[k]);
+    const want: StageMix = { lopta: wantL, kapa: wantK, figura: wantF };
+    const changed = (["lopta", "kapa", "figura"] as const).filter((k) => want[k] !== shownRef.current[k]);
     if (!changed.length) return;
     shownRef.current = want;
     setLive((list) => {
@@ -544,7 +558,7 @@ export function ImePhotoStage({ images, slug, alt, surname, tag, overline, mix, 
     });
     const t = window.setTimeout(() => setLive((list) => list.filter((it) => !it.out)), reduced.current ? 0 : 420);
     return () => window.clearTimeout(t);
-  }, [wantL, wantK]);
+  }, [wantL, wantK, wantF]);
 
   useEffect(() => {
     const set = cleanups.current;
@@ -560,6 +574,18 @@ export function ImePhotoStage({ images, slug, alt, surname, tag, overline, mix, 
         w.querySelector<HTMLElement>(".pz-xbody")?.animate(bounceFrames(1), o);
         w.querySelector<HTMLElement>(".pz-xr")?.animate(bounceFrames(-1), o);
         w.querySelector<HTMLElement>(".pz-xsh")?.animate(SHADOW_FRAMES, o);
+        return;
+      }
+      if (kind === "figura") {
+        // kutija sjedne na pod: kratko spuštanje i lagani "dosjed"
+        w.querySelector<HTMLElement>(".pz-xbody")?.animate(
+          [
+            { transform: "translateY(-6%)", easing: DOWN },
+            { transform: "translateY(0) scale(1.015,.985)", offset: 0.55, easing: UP },
+            { transform: "none" },
+          ],
+          { duration: 480 },
+        );
         return;
       }
       if (window.matchMedia("(min-width: 1024px)").matches) {
@@ -625,7 +651,7 @@ export function ImePhotoStage({ images, slug, alt, surname, tag, overline, mix, 
       const u = 1 - e;
       const x = u * u * x0 + 2 * u * e * cx + e * e * x2;
       const y = u * u * y0 + 2 * u * e * cy + e * e * y2;
-      const rot = kind === "lopta" ? -380 * u : -14 * Math.sin(Math.PI * e);
+      const rot = kind === "lopta" ? -380 * u : kind === "figura" ? -6 * Math.sin(Math.PI * e) : -14 * Math.sin(Math.PI * e);
       place(x, y, s0 + (1 - s0) * e, rot);
       if (t < 1) id = requestAnimationFrame(tick);
       else {
@@ -929,6 +955,16 @@ export function ImePhotoStage({ images, slug, alt, surname, tag, overline, mix, 
             <img src={src} alt="" draggable={false} decoding="async" className="pz-xi" />
           </div>
         );
+        if (it.kind === "figura") {
+          return (
+            <div key={it.id} aria-hidden className={`pz-x pz-xf ${it.out ? "pz-x-out" : ""}`}>
+              <div ref={ref} className="pz-xw">
+                {floorBits}
+                {body}
+              </div>
+            </div>
+          );
+        }
         return it.kind === "lopta" ? (
           <div key={it.id} aria-hidden className={`pz-x pz-xb ${it.out ? "pz-x-out" : ""}`}>
             <div ref={ref} className="pz-xw">

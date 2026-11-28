@@ -205,7 +205,7 @@ export function ImeProduct({ product, names, hanger, image, description, similar
   const [addons, setAddons] = useState<MixAddons>({});
   // odabir u biraču → dodatak odleti iz pločice u scenu (pozornica čita i potroši)
   const flyFrom = useRef<MixFlyFrom>(null);
-  const pick = (kind: Exclude<MixKind, "figura">) => (k?: string, from?: HTMLElement) => {
+  const pick = (kind: MixKind) => (k?: string, from?: HTMLElement) => {
     flyFrom.current = k && from ? { kind, rect: from.getBoundingClientRect(), t: performance.now() } : null;
     setAddons((a) => ({ ...a, [kind]: k }));
   };
@@ -533,8 +533,8 @@ export function ImeProduct({ product, names, hanger, image, description, similar
             <div className="mt-7 space-y-8 lg:mt-1">
               <MixRow kind="lopta" title={T.ball} value={addons.lopta} clubs={clubs} onPick={pick("lopta")} />
               <MixRow kind="kapa" title={T.cap} value={addons.kapa} clubs={clubs} onPick={pick("kapa")} />
-              {/* Figura igrača (Igor 28.11.) — bez animacije leta u scenu, samo izbor */}
-              <MixRow kind="figura" title={T.figure} value={addons.figura} clubs={[...MIX_FIGURES]} onPick={(k) => setAddons((a) => ({ ...a, figura: k }))} />
+              {/* Figura igrača (Igor 28.11.) — kao lopta: odleti iz pločice u scenu, stane na pod */}
+              <MixRow kind="figura" title={T.figure} value={addons.figura} clubs={[...MIX_FIGURES]} onPick={pick("figura")} />
               {n > 0 ? <p className="text-[13px] text-white/50 lg:hidden">{T.totalWithAddons} <span className="text-white">{imePrice(total)}</span></p> : null}
             </div>
           </section>
