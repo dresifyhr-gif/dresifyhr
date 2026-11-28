@@ -6,6 +6,7 @@ import { useLeagues } from "@/components/admin/use-leagues";
 
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { adminPost } from "@/lib/admin-fetch";
+import { StockExcelBar } from "@/components/admin/stock-excel-bar";
 import { SITE_URL } from "@/lib/site";
 
 
@@ -767,7 +768,7 @@ export function ProductsManager() {
     if (urlQ) setQ(urlQ);
   }, []);
 
-  useEffect(() => {
+  const loadProducts = () =>
     fetch("/api/admin/products/")
       .then((r) => r.json())
       .then((d) => {
@@ -778,6 +779,8 @@ export function ProductsManager() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+  useEffect(() => {
+    void loadProducts();
   }, []);
 
   // Pretraga (tekst) → zatim filter (čip) → zatim poredak.
@@ -845,6 +848,7 @@ export function ProductsManager() {
 
   return (
     <div>
+      <StockExcelBar onApplied={() => void loadProducts()} />
       <div className="mb-4 flex items-center gap-3">
         <div className="relative flex-1">
           <input
