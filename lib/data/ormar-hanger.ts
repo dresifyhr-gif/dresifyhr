@@ -69,6 +69,12 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "front": "/ormar/hanger-front/arsenal-gyokeres-nr71-domaci-crveno-bijeli.webp",
     "shorts": "/ormar/hlacice/arsenal-gyokeres-nr71-domaci-crveno-bijeli.webp"
   },
+  "as-roma-totti-nr10-retro-2001-02": {
+    "kind": "dres",
+    "back": "/ormar/hanger/as-roma-totti-nr10-retro-2001-02.webp",
+    "front": "/ormar/hanger-front/as-roma-totti-nr10-retro-2001-02.webp",
+    "shorts": "/ormar/hlacice/as-roma-totti-nr10-retro-2001-02.webp"
+  },
   "atletico-griezmann": {
     "kind": "dres",
     "back": "/ormar/hanger/atletico-griezmann.webp",
@@ -102,6 +108,12 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "back": "/ormar/hanger/barcelona-messi-cl-berlin.webp",
     "front": "/ormar/hanger-front/barcelona-messi-cl-berlin.webp",
     "shorts": "/ormar/hlacice/barcelona-messi-cl-berlin.webp"
+  },
+  "barcelona-messi-nr10-fluo-zuti-retro": {
+    "kind": "dres",
+    "back": "/ormar/hanger/barcelona-messi-nr10-fluo-zuti-retro.webp",
+    "front": "/ormar/hanger-front/barcelona-messi-nr10-fluo-zuti-retro.webp",
+    "shorts": "/ormar/hlacice/barcelona-messi-nr10-fluo-zuti-retro.webp"
   },
   "barcelona-messi-nr10-retro-2011-12-dugi-rukavi": {
     "kind": "dres",
@@ -189,11 +201,53 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "back": "/ormar/hanger/barcelona-yamal-nr10-dugi-rukavi-domaci-plavo-bordo.webp",
     "front": "/ormar/hanger-front/barcelona-yamal-nr10-dugi-rukavi-domaci-plavo-bordo.webp"
   },
+  "barcelona-yamal-nr10-limeta-zeleni": {
+    "kind": "dres",
+    "back": "/ormar/hanger/barcelona-yamal-nr10-limeta-zeleni.webp",
+    "front": "/ormar/hanger-front/barcelona-yamal-nr10-limeta-zeleni.webp",
+    "shorts": "/ormar/hlacice/barcelona-yamal-nr10-limeta-zeleni.webp"
+  },
+  "barcelona-yamal-nr10-losos-rozi": {
+    "kind": "dres",
+    "back": "/ormar/hanger/barcelona-yamal-nr10-losos-rozi.webp",
+    "front": "/ormar/hanger-front/barcelona-yamal-nr10-losos-rozi.webp",
+    "shorts": "/ormar/hlacice/barcelona-yamal-nr10-losos-rozi.webp"
+  },
+  "barcelona-yamal-nr10-neon-zuti-crne-mrlje": {
+    "kind": "dres",
+    "back": "/ormar/hanger/barcelona-yamal-nr10-neon-zuti-crne-mrlje.webp",
+    "front": "/ormar/hanger-front/barcelona-yamal-nr10-neon-zuti-crne-mrlje.webp",
+    "shorts": "/ormar/hlacice/barcelona-yamal-nr10-neon-zuti-crne-mrlje.webp"
+  },
   "barcelona-yamal-nr10-novi-domaci-2026-27": {
     "kind": "dres",
     "back": "/ormar/hanger/barcelona-yamal-nr10-novi-domaci-2026-27.webp",
     "front": "/ormar/hanger-front/barcelona-yamal-nr10-novi-domaci-2026-27.webp",
     "shorts": "/ormar/hlacice/barcelona-yamal-nr10-novi-domaci-2026-27.webp"
+  },
+  "barcelona-yamal-nr10-svijetlo-rozi-valovi": {
+    "kind": "dres",
+    "back": "/ormar/hanger/barcelona-yamal-nr10-svijetlo-rozi-valovi.webp",
+    "front": "/ormar/hanger-front/barcelona-yamal-nr10-svijetlo-rozi-valovi.webp",
+    "shorts": "/ormar/hlacice/barcelona-yamal-nr10-svijetlo-rozi-valovi.webp"
+  },
+  "barcelona-yamal-nr10-tirkizni-potezi-kista": {
+    "kind": "dres",
+    "back": "/ormar/hanger/barcelona-yamal-nr10-tirkizni-potezi-kista.webp",
+    "front": "/ormar/hanger-front/barcelona-yamal-nr10-tirkizni-potezi-kista.webp",
+    "shorts": "/ormar/hlacice/barcelona-yamal-nr10-tirkizni-potezi-kista.webp"
+  },
+  "barcelona-yamal-nr10-tirkizni-tamne-manzete": {
+    "kind": "dres",
+    "back": "/ormar/hanger/barcelona-yamal-nr10-tirkizni-tamne-manzete.webp",
+    "front": "/ormar/hanger-front/barcelona-yamal-nr10-tirkizni-tamne-manzete.webp",
+    "shorts": "/ormar/hlacice/barcelona-yamal-nr10-tirkizni-tamne-manzete.webp"
+  },
+  "barcelona-yamal-nr10-zarko-rozi-svijetloplavi-valovi": {
+    "kind": "dres",
+    "back": "/ormar/hanger/barcelona-yamal-nr10-zarko-rozi-svijetloplavi-valovi.webp",
+    "front": "/ormar/hanger-front/barcelona-yamal-nr10-zarko-rozi-svijetloplavi-valovi.webp",
+    "shorts": "/ormar/hlacice/barcelona-yamal-nr10-zarko-rozi-svijetloplavi-valovi.webp"
   },
   "barcelona-yamal-nr10-zuto-roza-plavi-2025-26": {
     "kind": "dres",
@@ -406,6 +460,12 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "front": "/ormar/hanger-front/brazil-vinitjr.webp",
     "shorts": "/ormar/hlacice/brazil-vinitjr.webp"
   },
+  "chelsea-palmer-nr20-plavi-camo": {
+    "kind": "dres",
+    "back": "/ormar/hanger/chelsea-palmer-nr20-plavi-camo.webp",
+    "front": "/ormar/hanger-front/chelsea-palmer-nr20-plavi-camo.webp",
+    "shorts": "/ormar/hlacice/chelsea-palmer-nr20-plavi-camo.webp"
+  },
   "chelsea-palmer": {
     "kind": "dres",
     "back": "/ormar/hanger/chelsea-palmer.webp",
@@ -502,6 +562,12 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "back": "/ormar/hanger/engleska-kane-nr9-ljubicasti-alternativni.webp",
     "front": "/ormar/hanger-front/engleska-kane-nr9-ljubicasti-alternativni.webp"
   },
+  "francuska-doue-nr20-mint-zeleni": {
+    "kind": "dres",
+    "back": "/ormar/hanger/francuska-doue-nr20-mint-zeleni.webp",
+    "front": "/ormar/hanger-front/francuska-doue-nr20-mint-zeleni.webp",
+    "shorts": "/ormar/hlacice/francuska-doue-nr20-mint-zeleni.webp"
+  },
   "francuska-mbappe-nr10-mint-zeleni": {
     "kind": "dres",
     "back": "/ormar/hanger/francuska-mbappe-nr10-mint-zeleni.webp",
@@ -580,6 +646,12 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "back": "/ormar/hanger/hrvatska-modric-nr10-crveni-rukav-2026.webp",
     "front": "/ormar/hanger-front/hrvatska-modric-nr10-crveni-rukav-2026.webp"
   },
+  "hrvatska-modric-nr10-kockasti-bijela-ledja": {
+    "kind": "dres",
+    "back": "/ormar/hanger/hrvatska-modric-nr10-kockasti-bijela-ledja.webp",
+    "front": "/ormar/hanger-front/hrvatska-modric-nr10-kockasti-bijela-ledja.webp",
+    "shorts": "/ormar/hlacice/hrvatska-modric-nr10-kockasti-bijela-ledja.webp"
+  },
   "hrvatska-perisic": {
     "kind": "dres",
     "back": "/ormar/hanger/hrvatska-perisic.webp",
@@ -643,11 +715,23 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "front": "/ormar/hanger-front/liverpool-ekitike.webp",
     "shorts": "/ormar/hlacice/liverpool-ekitike.webp"
   },
+  "manchester-city-de-bruyne-nr17-plavi-valovi": {
+    "kind": "dres",
+    "back": "/ormar/hanger/manchester-city-de-bruyne-nr17-plavi-valovi.webp",
+    "front": "/ormar/hanger-front/manchester-city-de-bruyne-nr17-plavi-valovi.webp",
+    "shorts": "/ormar/hlacice/manchester-city-de-bruyne-nr17-plavi-valovi.webp"
+  },
   "manchester-city-haaland-nr9-domaci-plavi": {
     "kind": "dres",
     "back": "/ormar/hanger/manchester-city-haaland-nr9-domaci-plavi.webp",
     "front": "/ormar/hanger-front/manchester-city-haaland-nr9-domaci-plavi.webp",
     "shorts": "/ormar/hlacice/manchester-city-haaland-nr9-domaci-plavi.webp"
+  },
+  "manchester-city-haaland-nr9-plavi-tamne-manzete": {
+    "kind": "dres",
+    "back": "/ormar/hanger/manchester-city-haaland-nr9-plavi-tamne-manzete.webp",
+    "front": "/ormar/hanger-front/manchester-city-haaland-nr9-plavi-tamne-manzete.webp",
+    "shorts": "/ormar/hlacice/manchester-city-haaland-nr9-plavi-tamne-manzete.webp"
   },
   "manchester-city-haaland-nr9-posebno-izdanje-crno-rozo-plavo": {
     "kind": "dres",
@@ -667,11 +751,23 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "front": "/ormar/hanger-front/manchester-united-rashford-nr10-domaci-crveni-2024-25.webp",
     "shorts": "/ormar/hlacice/manchester-united-rashford-nr10-domaci-crveni-2024-25.webp"
   },
+  "manchester-united-ronaldo-nr7-crni-retro": {
+    "kind": "dres",
+    "back": "/ormar/hanger/manchester-united-ronaldo-nr7-crni-retro.webp",
+    "front": "/ormar/hanger-front/manchester-united-ronaldo-nr7-crni-retro.webp",
+    "shorts": "/ormar/hlacice/manchester-united-ronaldo-nr7-crni-retro.webp"
+  },
   "manchester-united-ronaldo-nr7-final-moscow-2008-retro": {
     "kind": "dres",
     "back": "/ormar/hanger/manchester-united-ronaldo-nr7-final-moscow-2008-retro.webp",
     "front": "/ormar/hanger-front/manchester-united-ronaldo-nr7-final-moscow-2008-retro.webp",
     "shorts": "/ormar/hlacice/manchester-united-ronaldo-nr7-final-moscow-2008-retro.webp"
+  },
+  "manchester-united-ronaldo-nr7-plavi-retro": {
+    "kind": "dres",
+    "back": "/ormar/hanger/manchester-united-ronaldo-nr7-plavi-retro.webp",
+    "front": "/ormar/hanger-front/manchester-united-ronaldo-nr7-plavi-retro.webp",
+    "shorts": "/ormar/hlacice/manchester-united-ronaldo-nr7-plavi-retro.webp"
   },
   "manchester-united-ronaldo-nr7-retro-2008-final-moscow": {
     "kind": "dres",
@@ -784,6 +880,12 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "back": "/ormar/hanger/portugal-ronaldo-crveni.webp",
     "front": "/ormar/hanger-front/portugal-ronaldo-crveni.webp"
   },
+  "portugal-ronaldo-nr17-retro-euro-2004": {
+    "kind": "dres",
+    "back": "/ormar/hanger/portugal-ronaldo-nr17-retro-euro-2004.webp",
+    "front": "/ormar/hanger-front/portugal-ronaldo-nr17-retro-euro-2004.webp",
+    "shorts": "/ormar/hlacice/portugal-ronaldo-nr17-retro-euro-2004.webp"
+  },
   "portugal-ronaldo-nr7": {
     "kind": "trenirka",
     "hlace": "/ormar/hanger/portugal-ronaldo-nr7--hlace.webp",
@@ -832,6 +934,12 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "front": "/ormar/hanger-front/psg-hakimi.webp",
     "shorts": "/ormar/hlacice/psg-hakimi.webp"
   },
+  "psg-kvaratskhelia-nr7-tamnoplavi-jordan": {
+    "kind": "dres",
+    "back": "/ormar/hanger/psg-kvaratskhelia-nr7-tamnoplavi-jordan.webp",
+    "front": "/ormar/hanger-front/psg-kvaratskhelia-nr7-tamnoplavi-jordan.webp",
+    "shorts": "/ormar/hlacice/psg-kvaratskhelia-nr7-tamnoplavi-jordan.webp"
+  },
   "psg-kvaratskhelia": {
     "kind": "dres",
     "back": "/ormar/hanger/psg-kvaratskhelia.webp",
@@ -860,10 +968,52 @@ export const HANGER_IMAGES: Record<string, HangerImages> = {
     "back": "/ormar/hanger/real-bellingham.webp",
     "front": "/ormar/hanger-front/real-bellingham.webp"
   },
+  "real-madrid-bellingham-nr5-bijeli-crne-pruge-djecji": {
+    "kind": "dres",
+    "back": "/ormar/hanger/real-madrid-bellingham-nr5-bijeli-crne-pruge-djecji.webp",
+    "front": "/ormar/hanger-front/real-madrid-bellingham-nr5-bijeli-crne-pruge-djecji.webp",
+    "shorts": "/ormar/hlacice/real-madrid-bellingham-nr5-bijeli-crne-pruge-djecji.webp"
+  },
+  "real-madrid-bellingham-nr5-bijeli-zlatni-zmaj": {
+    "kind": "dres",
+    "back": "/ormar/hanger/real-madrid-bellingham-nr5-bijeli-zlatni-zmaj.webp",
+    "front": "/ormar/hanger-front/real-madrid-bellingham-nr5-bijeli-zlatni-zmaj.webp",
+    "shorts": "/ormar/hlacice/real-madrid-bellingham-nr5-bijeli-zlatni-zmaj.webp"
+  },
+  "real-madrid-bellingham-nr5-crni-rozi-mramor": {
+    "kind": "dres",
+    "back": "/ormar/hanger/real-madrid-bellingham-nr5-crni-rozi-mramor.webp",
+    "front": "/ormar/hanger-front/real-madrid-bellingham-nr5-crni-rozi-mramor.webp",
+    "shorts": "/ormar/hlacice/real-madrid-bellingham-nr5-crni-rozi-mramor.webp"
+  },
   "real-madrid-bellingham-nr5-domaci-bijeli-2024-25": {
     "kind": "dres",
     "back": "/ormar/hanger/real-madrid-bellingham-nr5-domaci-bijeli-2024-25.webp",
     "front": "/ormar/hanger-front/real-madrid-bellingham-nr5-domaci-bijeli-2024-25.webp"
+  },
+  "real-madrid-bellingham-nr5-galaxy-plavo-ljubicasti": {
+    "kind": "dres",
+    "back": "/ormar/hanger/real-madrid-bellingham-nr5-galaxy-plavo-ljubicasti.webp",
+    "front": "/ormar/hanger-front/real-madrid-bellingham-nr5-galaxy-plavo-ljubicasti.webp",
+    "shorts": "/ormar/hlacice/real-madrid-bellingham-nr5-galaxy-plavo-ljubicasti.webp"
+  },
+  "real-madrid-bellingham-nr5-ljubicasti-y3": {
+    "kind": "dres",
+    "back": "/ormar/hanger/real-madrid-bellingham-nr5-ljubicasti-y3.webp",
+    "front": "/ormar/hanger-front/real-madrid-bellingham-nr5-ljubicasti-y3.webp",
+    "shorts": "/ormar/hlacice/real-madrid-bellingham-nr5-ljubicasti-y3.webp"
+  },
+  "real-madrid-bellingham-nr5-narancasti-crne-mrlje": {
+    "kind": "dres",
+    "back": "/ormar/hanger/real-madrid-bellingham-nr5-narancasti-crne-mrlje.webp",
+    "front": "/ormar/hanger-front/real-madrid-bellingham-nr5-narancasti-crne-mrlje.webp",
+    "shorts": "/ormar/hlacice/real-madrid-bellingham-nr5-narancasti-crne-mrlje.webp"
+  },
+  "real-madrid-bellingham-nr5-narancasti-zmajevi": {
+    "kind": "dres",
+    "back": "/ormar/hanger/real-madrid-bellingham-nr5-narancasti-zmajevi.webp",
+    "front": "/ormar/hanger-front/real-madrid-bellingham-nr5-narancasti-zmajevi.webp",
+    "shorts": "/ormar/hlacice/real-madrid-bellingham-nr5-narancasti-zmajevi.webp"
   },
   "real-madrid-bellingham-nr5-tamnoplavi-gostujuci-2024-25": {
     "kind": "dres",
