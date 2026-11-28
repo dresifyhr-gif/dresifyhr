@@ -14,7 +14,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { fbTrack } from "@/lib/fbpixel";
 import { getJerseySizeOptions, getJerseyStock, getStockTone, type Jersey } from "@/lib/data/jerseys";
 import type { HangerImages } from "@/lib/data/ormar-hanger";
-import { MIX_ADDON_PRICE_EUR, MIX_CLUBS, addonCount, addonsText, isMixEligible, mixImage, type MixAddons, type MixKind } from "@/lib/mix";
+import { MIX_ADDON_PRICE_EUR, MIX_CLUBS, MIX_FIGURES, addonCount, addonsText, isMixEligible, mixImage, type MixAddons, type MixKind } from "@/lib/mix";
 import { SHIPPING_PRICE_LABEL } from "@/lib/site";
 import { createWhatsAppUrl, repairText } from "@/lib/utils";
 import { productTypeWord } from "@/lib/product-type";
@@ -125,7 +125,7 @@ function SizeSheet({ open, onClose, kids, current }: { open: boolean; onClose: (
   );
 }
 
-/* ---------------- složi svoj mix (lopta / kapa, +10 €) ---------------- */
+/* ---------------- složi svoj mix (lopta / kapa / figura, +10 €) ---------------- */
 
 function MixRow({ kind, title, value, clubs, onPick }: { kind: MixKind; title: string; value?: string; clubs: { key: string; label: string }[]; onPick: (k?: string, from?: HTMLElement) => void }) {
   const T = useImeText();
@@ -139,7 +139,7 @@ function MixRow({ kind, title, value, clubs, onPick }: { kind: MixKind; title: s
         </p>
         <p className="text-[13px] tabular-nums text-white/45">+{MIX_ADDON_PRICE_EUR} €</p>
       </div>
-      <div role="group" aria-label={T.pickClub(title)} className="ime-noscroll -mx-5 mt-3 flex gap-1 overflow-x-auto px-5 lg:mx-0 lg:grid lg:grid-cols-8 lg:gap-2 lg:overflow-visible lg:px-0">
+      <div role="group" aria-label={T.pickClub(title)} className={`ime-noscroll -mx-5 mt-3 flex gap-1 overflow-x-auto px-5 lg:mx-0 lg:grid ${kind === "figura" ? "lg:grid-cols-9" : "lg:grid-cols-8"} lg:gap-2 lg:overflow-visible lg:px-0`}>
         {clubs.map((c) => {
           const on = value === c.key;
           return (
@@ -150,10 +150,10 @@ function MixRow({ kind, title, value, clubs, onPick }: { kind: MixKind; title: s
               onClick={(e) => onPick(on ? undefined : c.key, (e.currentTarget.firstElementChild as HTMLElement | null) ?? undefined)}
               className="group flex w-[84px] shrink-0 flex-col items-center pb-2 pt-1 lg:w-auto"
             >
-              <span className={`relative block h-[72px] w-[72px] transition-transform duration-300 ${on ? "scale-105" : "group-hover:scale-[1.03]"}`}>
+              <span className={`relative block ${kind === "figura" ? "h-[96px] w-[72px]" : "h-[72px] w-[72px]"} transition-transform duration-300 ${on ? "scale-105" : "group-hover:scale-[1.03]"}`}>
                 <Image src={mixImage(kind, c.key)} alt="" fill sizes="72px" className="object-contain" />
               </span>
-              <span className={`relative mt-2 whitespace-nowrap text-[12px] ${on ? "text-white" : "text-white/50"}`}>
+              <span className={`relative mt-2 ${kind === "figura" ? "max-w-[84px] text-center text-[11px] leading-tight" : "whitespace-nowrap text-[12px]"} ${on ? "text-white" : "text-white/50"}`}>
                 {T.club(c.label)}
                 <span aria-hidden className={`absolute inset-x-0 -bottom-1.5 h-px bg-[#e8ff3c] transition-transform duration-300 ${on ? "scale-x-100" : "scale-x-0"}`} />
               </span>
@@ -205,7 +205,7 @@ export function ImeProduct({ product, names, hanger, image, description, similar
   const [addons, setAddons] = useState<MixAddons>({});
   // odabir u biraču → dodatak odleti iz pločice u scenu (pozornica čita i potroši)
   const flyFrom = useRef<MixFlyFrom>(null);
-  const pick = (kind: MixKind) => (k?: string, from?: HTMLElement) => {
+  const pick = (kind: Exclude<MixKind, "figura">) => (k?: string, from?: HTMLElement) => {
     flyFrom.current = k && from ? { kind, rect: from.getBoundingClientRect(), t: performance.now() } : null;
     setAddons((a) => ({ ...a, [kind]: k }));
   };
@@ -533,6 +533,8 @@ export function ImeProduct({ product, names, hanger, image, description, similar
             <div className="mt-7 space-y-8 lg:mt-1">
               <MixRow kind="lopta" title={T.ball} value={addons.lopta} clubs={clubs} onPick={pick("lopta")} />
               <MixRow kind="kapa" title={T.cap} value={addons.kapa} clubs={clubs} onPick={pick("kapa")} />
+              {/* Figura igrača (Igor 28.11.) — bez animacije leta u scenu, samo izbor */}
+              <MixRow kind="figura" title={T.figure} value={addons.figura} clubs={[...MIX_FIGURES]} onPick={(k) => setAddons((a) => ({ ...a, figura: k }))} />
               {n > 0 ? <p className="text-[13px] text-white/50 lg:hidden">{T.totalWithAddons} <span className="text-white">{imePrice(total)}</span></p> : null}
             </div>
           </section>

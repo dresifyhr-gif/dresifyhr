@@ -1,4 +1,4 @@
-import { MIX_CLUBS } from "@/lib/mix";
+import { MIX_CLUBS, MIX_FIGURES } from "@/lib/mix";
 import { HANGER_IMAGES } from "@/lib/data/ormar-hanger";
 import { NextResponse } from "next/server";
 
@@ -83,10 +83,14 @@ export async function GET(request: Request) {
   };
   // Igor 20.11.: slika stavke kao na stranici — dječji = dres + hlačice; uz loptu/kapu i njihova slika (+ naziv kluba).
   const clubKey = (label: string) => MIX_CLUBS.find((c) => c.label.toLowerCase() === label.trim().toLowerCase())?.key ?? null;
-  const addonOf = (igrac: string, kind: "lopta" | "kapa") => {
-    const m = igrac.match(new RegExp(`\\+ ${kind} (.+?)(?= \\+ (?:lopta|kapa) |$)`));
+  const addonOf = (igrac: string, kind: "lopta" | "kapa" | "figura") => {
+    const m = igrac.match(new RegExp(`\\+ ${kind} (.+?)(?= \\+ (?:lopta|kapa|figura) |$)`));
     if (!m) return null;
     const label = m[1].trim();
+    if (kind === "figura") {
+      const fk = MIX_FIGURES.find((f) => f.label.toLowerCase() === label.toLowerCase())?.key;
+      return fk ? { label, img: `/mix/figura-${fk}.webp` } : null;
+    }
     const key = clubKey(label);
     if (!key) return null; // npr. naziv kompleta "(dres + hlačice + lopta + kapa)" nije dodatak
     return { label, img: `/naslovnica/${kind === "lopta" ? "lopte-hd" : "kape-hd"}/${key}.webp` };
@@ -100,11 +104,13 @@ export async function GET(request: Request) {
     const kid = !noShorts && (it.segment === "kid" || isKidSize(it.size || ""));
     const lopta = addonOf(igrac, "lopta");
     const kapa = addonOf(igrac, "kapa");
+    const figura = addonOf(igrac, "figura");
     return {
       lopta,
       kapa,
+      figura,
       // naziv bez dodataka (dodaci se prikazuju zasebno)
-      base: igrac.replace(lopta ? ` + lopta ${lopta.label}` : "", "").replace(kapa ? ` + kapa ${kapa.label}` : "", ""),
+      base: igrac.replace(lopta ? ` + lopta ${lopta.label}` : "", "").replace(kapa ? ` + kapa ${kapa.label}` : "", "").replace(figura ? ` + figura ${figura.label}` : "", ""),
       kid,
       shorts: kid && h && h.kind === "dres" ? h.shorts ?? null : null,
       // Igor 21.11.: na svakoj slici prednja I stražnja strana (dres, dugi rukav, trenirka); trenirka + hlače.

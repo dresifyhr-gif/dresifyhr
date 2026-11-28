@@ -670,11 +670,11 @@ function CancelPicker({ onPick, onClose }: { onPick: (reason: string) => void; o
 }
 
 type Addon = { label: string; img: string | null } | null;
-type ItemSceneData = { kid: boolean; shorts: string | null; lopta: Addon; kapa: Addon; base?: string; front?: string | null; pants?: string | null };
+type ItemSceneData = { kid: boolean; shorts: string | null; lopta: Addon; kapa: Addon; figura?: Addon; base?: string; front?: string | null; pants?: string | null };
 
 // Igor 20.11.: "scena" stavke kao na stranici — dres (+ hlačice za dječje) + lopta/kapa ako su naručene.
 function ItemScene({ src, scene, big = false }: { src: string; scene?: ItemSceneData; big?: boolean }) {
-  const extra = scene ? ([scene.lopta?.img, scene.kapa?.img].filter(Boolean) as string[]) : [];
+  const extra = scene ? ([scene.lopta?.img, scene.kapa?.img, scene.figura?.img].filter(Boolean) as string[]) : [];
   // Igor 21.11.: uvijek prednja + stražnja strana; dječji još hlačice, trenirka još hlače; uz to lopta/kapa.
   // Svjetlosiva podloga (vide se i crni i bijeli dresovi); sličica je uvijek iste veličine, na klik puna veličina.
   const wear = [scene?.front, src].filter(Boolean) as string[];
@@ -1329,6 +1329,7 @@ export function OrdersManager() {
                                 {it.scene?.kid ? <span className="ml-1.5 rounded bg-sky-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-sky-600 dark:text-sky-300">DJEČJI + hlačice</span> : null}
                                 {it.scene?.lopta ? <span className="mt-0.5 block text-[12px] font-semibold text-[var(--a-text)]">⚽ Lopta: {it.scene.lopta.label}</span> : null}
                                 {it.scene?.kapa ? <span className="block text-[12px] font-semibold text-[var(--a-text)]">🧢 Kapa: {it.scene.kapa.label}</span> : null}
+                                {it.scene?.figura ? <span className="block text-[12px] font-semibold text-[var(--a-text)]">🎁 Figura: {it.scene.figura.label}</span> : null}
                               </span>
                               {it.image ? <span className="shrink-0 text-[12px] text-[var(--a-text-3)]">🔍</span> : null}
                             </button>

@@ -21,7 +21,7 @@ function variantLabel(item: CartItem) {
     const s = cartItemTypeLabel(item);
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
-  const hasAddonText = /\+ (lopta|kapa)/i.test(item.segmentLabel);
+  const hasAddonText = /\+ (lopta|kapa|figura)/i.test(item.segmentLabel);
   return repairText(`${item.segmentLabel}${hasAddonText ? "" : addonsText(item.addons)}`);
 }
 

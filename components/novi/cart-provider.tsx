@@ -97,7 +97,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = (item: CartInput) => {
     const nextItem = {
       ...item,
-      id: `${item.slug}-${item.segment}-${item.size}${item.addons?.lopta ? `-l${item.addons.lopta}` : ""}${item.addons?.kapa ? `-k${item.addons.kapa}` : ""}-${Date.now()}`,
+      id: `${item.slug}-${item.segment}-${item.size}${item.addons?.lopta ? `-l${item.addons.lopta}` : ""}${item.addons?.kapa ? `-k${item.addons.kapa}` : ""}${item.addons?.figura ? `-f${item.addons.figura}` : ""}-${Date.now()}`,
       price: item.price ?? JERSEY_PRICE_EUR
     };
 

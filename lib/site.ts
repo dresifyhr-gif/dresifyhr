@@ -35,6 +35,8 @@ export const COST_TRENIRKA_EUR = 16;
 // "Složi svoj mix" dodaci (prodaja +10 € svaki) — nabava 5 € lopta, 5 € kapa.
 export const COST_LOPTA_EUR = 5;
 export const COST_KAPA_EUR = 5;
+// Figura igrača u kutiji / pehar (prodaja +10 € kao dodatak) — nabava: POTVRDITI s Igorom.
+export const COST_FIGURA_EUR = 5;
 
 export const META_PIXEL_ID = "1621563625577336";
 export const HOME_DELIVERY_PRICE_EUR = 6;

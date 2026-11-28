@@ -6,7 +6,7 @@ import { Banknote, Minus, Plus, Trash2 } from "lucide-react";
 
 import { useCart, type CartItem } from "@/components/providers/cart-provider";
 import { CartThumb, eurNb, groupCartLines, type CartLine } from "@/components/site/cart-ui";
-import { MIX_CLUBS, mixImage, stripAddonText, type MixKind } from "@/lib/mix";
+import { MIX_KINDS, mixImage, mixLabel, stripAddonText, type MixKind } from "@/lib/mix";
 import { cn, repairText } from "@/lib/utils";
 
 import { CART_BASE } from "./cart-css";
@@ -19,7 +19,7 @@ import { useCartText, type CartText } from "./cart-i18n";
 /* ------------------------------------------------------------------ */
 
 const MAX_QTY = 10;
-const clubLabel = (key?: string) => MIX_CLUBS.find((c) => c.key === key)?.label ?? key ?? "";
+const addonLabel = (kind: MixKind, key?: string) => mixLabel(kind, key) ?? key ?? "";
 
 export { eurNb };
 
@@ -81,7 +81,7 @@ export function DemoQty({ line, size = "md" }: { line: CartLine; size?: "sm" | "
 /** Mix dodaci (lopta/kapa) kao male tamne sličice ispod dresa. */
 function MixUnder({ item, width }: { item: CartItem; width: number }) {
   const T = useCartText();
-  const kinds = (["lopta", "kapa"] as MixKind[]).filter((k) => item.addons?.[k]);
+  const kinds = MIX_KINDS.filter((k) => item.addons?.[k]);
   if (!kinds.length) return null;
   const s = Math.floor((width - (kinds.length - 1) * 4) / kinds.length);
   return (
@@ -89,11 +89,11 @@ function MixUnder({ item, width }: { item: CartItem; width: number }) {
       {kinds.map((k) => (
         <span
           key={k}
-          title={`${k === "lopta" ? T.ball : T.cap} ${clubLabel(item.addons?.[k])}`}
+          title={`${k === "lopta" ? T.ball : k === "kapa" ? T.cap : T.figure} ${addonLabel(k, item.addons?.[k])}`}
           className="relative block overflow-hidden rounded-[8px] border border-white/[0.08] bg-[#141414]"
           style={{ width: s, height: Math.min(s, 40) }}
         >
-          <Image src={mixImage(k, item.addons![k]!)} alt={`${k === "lopta" ? T.ball : T.cap} ${clubLabel(item.addons?.[k])}`} fill sizes="40px" className="object-contain p-1" />
+          <Image src={mixImage(k, item.addons![k]!)} alt={`${k === "lopta" ? T.ball : k === "kapa" ? T.cap : T.figure} ${addonLabel(k, item.addons?.[k])}`} fill sizes="40px" className="object-contain p-1" />
         </span>
       ))}
     </div>
@@ -118,7 +118,7 @@ export function CartLineRow({
   const tw = readOnly ? 56 : dense ? 76 : 96;
   const thumb = readOnly ? "h-[68px] w-[56px]" : dense ? "h-[93px] w-[76px]" : "h-[117px] w-[96px]";
   const print = printOf(item.igrac);
-  const addons = (["lopta", "kapa"] as MixKind[]).filter((k) => item.addons?.[k]);
+  const addons = MIX_KINDS.filter((k) => item.addons?.[k]);
   const href = `${CART_BASE}/dres/${item.slug}/`;
   const title = `${repairText(item.klub)} ${repairText(item.igrac)}`;
   // isti naziv kao na stranici dresa: "Baturina #16" + "Domaći 2026" (ne sirovi "Baturina nr16 — domaci 2026")
@@ -163,7 +163,7 @@ export function CartLineRow({
           {addons.length ? (
             <div className="flex gap-1.5">
               <dt className="text-white/40">Mix</dt>
-              <dd className="truncate text-white/85">{addons.map((k) => `${k} ${clubLabel(item.addons?.[k])}`).join(" · ")}</dd>
+              <dd className="truncate text-white/85">{addons.map((k) => `${k} ${addonLabel(k, item.addons?.[k])}`).join(" · ")}</dd>
             </div>
           ) : null}
         </dl>

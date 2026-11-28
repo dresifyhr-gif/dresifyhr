@@ -44,7 +44,7 @@ export function StickyAddToCart({ product, selectedSize, hasSizePicker, needsSiz
     return () => root.style.setProperty("--fab-lift", "0px");
   }, [visible]);
 
-  const extras = `${addons.lopta ? " + lopta" : ""}${addons.kapa ? " + kapa" : ""}`;
+  const extras = `${addons.lopta ? " + lopta" : ""}${addons.kapa ? " + kapa" : ""}${addons.figura ? " + figura" : ""}`;
   const summary = needsSize
     ? t.stickyCart.selectSize
     : `${hasSizePicker && selectedSize ? `Vel. ${selectedSize}` : "Jedna vel."}${extras} · ${total} €`;

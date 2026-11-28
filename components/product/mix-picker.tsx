@@ -6,7 +6,7 @@ import { Minus, Plus } from "lucide-react";
 
 import { useCart } from "@/components/providers/cart-provider";
 import type { Jersey } from "@/lib/data/jerseys";
-import { MIX_ADDON_PRICE_EUR, MIX_CLUBS, addonCount, addonsText, isMixEligible, mixImage, type MixAddons, type MixKind } from "@/lib/mix";
+import { MIX_ADDON_PRICE_EUR, addonCount, addonsText, isMixEligible, mixImage, mixLabel, mixOptions, type MixAddons, type MixKind } from "@/lib/mix";
 import { repairText } from "@/lib/utils";
 
 type Props = {
@@ -24,7 +24,7 @@ type Props = {
   onAdded?: () => void;
 };
 
-// "Složi svoj mix" — uz dres kupac doda loptu i/ili kapu kluba po izboru.
+// "Složi svoj mix" — uz dres kupac doda loptu i/ili kapu kluba, i/ili figuru igrača.
 export function MixPicker({
   product,
   selectedSize = "",
@@ -84,10 +84,10 @@ export function MixPicker({
   const row = (kind: MixKind, title: string) => (
     <div className="mt-5">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
-        {title} <span className="text-white/35">· +{MIX_ADDON_PRICE_EUR} € · odaberi klub</span>
+        {title} <span className="text-white/35">· +{MIX_ADDON_PRICE_EUR} € · {kind === "figura" ? "odaberi figuru" : "odaberi klub"}</span>
       </p>
       <div className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-2">
-        {MIX_CLUBS.map((c) => {
+        {mixOptions(kind).map((c) => {
           const on = addons[kind] === c.key;
           return (
             <button
@@ -122,7 +122,7 @@ export function MixPicker({
           <span className="min-w-0">
             <span className="block text-sm font-bold uppercase tracking-wide text-accent">Složi svoj mix</span>
             <span className="block truncate text-xs text-white/55">
-              {n ? `Odabrano: ${chosen}` : `Dodaj loptu i/ili kapu kluba po želji — +${MIX_ADDON_PRICE_EUR} € svaka`}
+              {n ? `Odabrano: ${chosen}` : `Dodaj loptu, kapu ili figuru igrača — +${MIX_ADDON_PRICE_EUR} € svaka`}
             </span>
           </span>
           {open ? (
@@ -137,11 +137,13 @@ export function MixPicker({
         <div className={bare ? "" : "border-t border-accent/20 px-4 pb-4"}>
           {row("lopta", "Lopta")}
           {row("kapa", "Kapa")}
+          {row("figura", "Figura u kutiji")}
 
           <div className="mt-4 space-y-1 text-sm text-white/70">
             <div className="flex justify-between"><span>{product.category === "trenirka" ? "Trenirka" : "Dres"}</span><span>{base} €</span></div>
-            {addons.lopta && <div className="flex justify-between"><span>Lopta {MIX_CLUBS.find((c) => c.key === addons.lopta)?.label}</span><span>+{MIX_ADDON_PRICE_EUR} €</span></div>}
-            {addons.kapa && <div className="flex justify-between"><span>Kapa {MIX_CLUBS.find((c) => c.key === addons.kapa)?.label}</span><span>+{MIX_ADDON_PRICE_EUR} €</span></div>}
+            {addons.lopta && <div className="flex justify-between"><span>Lopta {mixLabel("lopta", addons.lopta)}</span><span>+{MIX_ADDON_PRICE_EUR} €</span></div>}
+            {addons.kapa && <div className="flex justify-between"><span>Kapa {mixLabel("kapa", addons.kapa)}</span><span>+{MIX_ADDON_PRICE_EUR} €</span></div>}
+            {addons.figura && <div className="flex justify-between"><span>Figura {mixLabel("figura", addons.figura)}</span><span>+{MIX_ADDON_PRICE_EUR} €</span></div>}
             <div className="flex justify-between border-t border-white/10 pt-2 text-base font-bold text-white"><span>Ukupno</span><span>{total} €</span></div>
           </div>
 
@@ -153,7 +155,7 @@ export function MixPicker({
                 onClick={add}
                 className="button-primary mt-4 w-full disabled:cursor-not-allowed disabled:border disabled:border-[#333] disabled:bg-[#1a1a1a] disabled:text-[#737373]"
               >
-                {n ? `Dodaj mix u košaricu — ${total} €` : "Odaberi loptu ili kapu"}
+                {n ? `Dodaj mix u košaricu — ${total} €` : "Odaberi loptu, kapu ili figuru"}
               </button>
               {needsSize && n > 0 && <p className="mt-2 text-center text-xs text-white/55">Prvo gore odaberi veličinu dresa.</p>}
             </>

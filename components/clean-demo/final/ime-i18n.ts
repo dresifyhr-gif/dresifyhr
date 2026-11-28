@@ -45,9 +45,10 @@ const HR = {
   // mix
   mixTitle: "Složi svoj mix",
   mixBody: (tr: boolean, price: number) =>
-    `Uz ${tr ? "trenirku" : "dres"} dodaj loptu ili kapu kluba po izboru. Svaki dodatak +${price} €, ide u košaricu zajedno s ${tr ? "trenirkom" : "dresom"}.`,
+    `Uz ${tr ? "trenirku" : "dres"} dodaj loptu ili kapu kluba po izboru, ili figuru igrača. Svaki dodatak +${price} €, ide u košaricu zajedno s ${tr ? "trenirkom" : "dresom"}.`,
   ball: "Lopta",
   cap: "Kapa",
+  figure: "Figura u kutiji",
   none: "bez",
   pickClub: (title: string) => `${title} — odaberi klub`,
   addons: (n: number) => `Dodaci (${n})`,
@@ -79,7 +80,14 @@ const HR = {
 
 export type ImeText = typeof HR;
 
-const CLUB_EN: Record<string, string> = { Hrvatska: "Croatia", "Njemačka": "Germany" };
+const CLUB_EN: Record<string, string> = {
+  Hrvatska: "Croatia",
+  "Njemačka": "Germany",
+  "Mbappé (Francuska)": "Mbappé (France)",
+  "Yamal (Španjolska)": "Yamal (Spain)",
+  "Yamal (Barcelona, crni)": "Yamal (Barcelona, black)",
+  "Pehar SP 2026": "World Cup 2026 trophy"
+};
 
 const EN: ImeText = {
   adults: "Adults",
@@ -116,9 +124,10 @@ const EN: ImeText = {
   guideHint: "Between two sizes? Go for the larger one. Wrong size? We'll exchange it within 14 days.",
   mixTitle: "Build your mix",
   mixBody: (tr: boolean, price: number) =>
-    `Add a ball or a cap from the club of your choice to your ${tr ? "tracksuit" : "jersey"}. Each add-on is +${price} € and goes into the cart together with the ${tr ? "tracksuit" : "jersey"}.`,
+    `Add a ball or a cap from the club of your choice, or a player figure, to your ${tr ? "tracksuit" : "jersey"}. Each add-on is +${price} € and goes into the cart together with the ${tr ? "tracksuit" : "jersey"}.`,
   ball: "Ball",
   cap: "Cap",
+  figure: "Boxed figure",
   none: "none",
   pickClub: (title: string) => `${title} — choose a club`,
   addons: (n: number) => `Add-ons (${n})`,

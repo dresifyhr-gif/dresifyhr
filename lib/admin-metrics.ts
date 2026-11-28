@@ -5,7 +5,7 @@ import { jerseys } from "@/lib/data/jerseys";
 import { getSettingsFresh } from "@/lib/settings";
 import { phoneKey } from "@/lib/utils";
 import { mixAddonPhrases, mixAddonsInText } from "@/lib/mix";
-import { COST_KAPA_EUR, COST_LOPTA_EUR } from "@/lib/site";
+import { COST_FIGURA_EUR, COST_KAPA_EUR, COST_LOPTA_EUR } from "@/lib/site";
 
 const DAY = 86_400_000;
 // Nabavne cijene (dres/komplet) dolaze iz Postavki — svježe iz baze (getSettingsFresh).
@@ -14,7 +14,7 @@ const DAY = 86_400_000;
 // Nabava dodataka iz "Složi svoj mix" za jednu stavku (lopta/kapa u igrac tekstu).
 const mixCost = (it: { igrac?: string | null }) => {
   const m = mixAddonsInText(it.igrac);
-  return m.lopta * COST_LOPTA_EUR + m.kapa * COST_KAPA_EUR;
+  return m.lopta * COST_LOPTA_EUR + m.kapa * COST_KAPA_EUR + m.figura * COST_FIGURA_EUR;
 };
 
 const kompletItemWhere = {
@@ -111,7 +111,7 @@ export async function getDashboardMetrics() {
     const sw = [...streetwearSlugs];
     const ls = [...longSleeveSlugs];
     const ts = [...trenirkaSlugs];
-    const [all, komplet, street, longSleeve, trenirka, disc, mixLopta, mixKapa] = await Promise.all([
+    const [all, komplet, street, longSleeve, trenirka, disc, mixLopta, mixKapa, mixFigura] = await Promise.all([
       prisma.orderItem.aggregate({ _sum: { unitPrice: true }, _count: true, where: { order: orderWhere } }),
       // Komplet BEZ streetweara (streetwear ima svoju nabavu, da se ne broji dvaput).
       // NULL-sigurno: `slug NOT IN (...)` je u SQL-u NULL za retke bez sluga, pa bi
@@ -134,7 +134,8 @@ export async function getDashboardMetrics() {
       prisma.order.aggregate({ _sum: { discount: true }, where: orderWhere }),
       // "Složi svoj mix": lopta/kapa zapisane u igrac stavke ("+ lopta X", "+ kapa Y").
       prisma.orderItem.count({ where: { order: orderWhere, OR: mixAddonPhrases("lopta").map((ph) => ({ igrac: { contains: ph, mode: "insensitive" as const } })) } }),
-      prisma.orderItem.count({ where: { order: orderWhere, OR: mixAddonPhrases("kapa").map((ph) => ({ igrac: { contains: ph, mode: "insensitive" as const } })) } })
+      prisma.orderItem.count({ where: { order: orderWhere, OR: mixAddonPhrases("kapa").map((ph) => ({ igrac: { contains: ph, mode: "insensitive" as const } })) } }),
+      prisma.orderItem.count({ where: { order: orderWhere, OR: mixAddonPhrases("figura").map((ph) => ({ igrac: { contains: ph, mode: "insensitive" as const } })) } })
     ]);
     const count = all._count;
     const revenue = all._sum.unitPrice ?? 0;
@@ -148,7 +149,7 @@ export async function getDashboardMetrics() {
       (count - street - komplet) * costDres +
       longSleeve * (costLongSleeve - costDres) +
       trenirka * (costTrenirka - costDres) +
-      mixLopta * COST_LOPTA_EUR + mixKapa * COST_KAPA_EUR;
+      mixLopta * COST_LOPTA_EUR + mixKapa * COST_KAPA_EUR + mixFigura * COST_FIGURA_EUR;
     return revenue - discount - cost;
   };
 
